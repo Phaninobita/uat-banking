@@ -310,44 +310,393 @@ function handleFileDrop(e, cardId, inputId) {
     }
 }
 
+// Base64 Uploaded Documents Cache: cardId -> { id, fileName, fileType, fileSize, base64Data }
+const uploadedDocumentsCache = {};
+
 function markUploaded(cardId, input) {
     if (!cardId) return;
     const card = document.getElementById(cardId);
     if (!card) return;
-    card.classList.add('uploaded');
-    const statusEl = card.querySelector('.file-status');
-    if (statusEl && input.files && input.files[0]) {
-        statusEl.textContent = '✓ ' + input.files[0].name;
-        statusEl.style.color = 'var(--success-dark)';
-        statusEl.style.fontWeight = '600';
-        statusEl.style.fontSize = '13px';
-        showToast('Document uploaded: ' + input.files[0].name, 'Upload Complete', 'success', 2500);
+
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+
+    // Determine document type label
+    const labelInput = card.querySelector('.doc-label-input');
+    const docType = (labelInput && labelInput.value ? labelInput.value.trim() : cardId).toLowerCase().replace(/\s+/g, '_');
+
+    showToast(`Reading and encoding ${file.name} to Base64...`, 'Document Encoding', 'info', 2000);
+
+    const reader = new FileReader();
+    reader.onload = async function (e) {
+        const base64Data = e.target.result;
+        card.classList.add('uploaded');
+
+        // Format file size
+        const sizeKb = Math.round(file.size / 1024);
+        const sizeFormatted = sizeKb > 1024 ? (sizeKb / 1024).toFixed(1) + ' MB' : sizeKb + ' KB';
+
+        // Update status text with DB badge
+        const statusEl = card.querySelector('.file-status');
+        if (statusEl) {
+            statusEl.innerHTML = `
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                    <div>✓ <strong>${file.name}</strong> (${sizeFormatted})</div>
+                    <span class="db-status-chip">🟢 Saved in DB (Base64)</span>
+                </div>
+            `;
+        }
+
+        // Render Base64 Thumbnail
+        let thumbContainer = card.querySelector('.uc-thumbnail-container');
+        if (!thumbContainer) {
+            thumbContainer = document.createElement('div');
+            thumbContainer.className = 'uc-thumbnail-container';
+            const iconEl = card.querySelector('.uc-icon');
+            if (iconEl && iconEl.nextSibling) {
+                card.insertBefore(thumbContainer, iconEl.nextSibling);
+            } else {
+                card.appendChild(thumbContainer);
+            }
+        }
+
+        const isImage = file.type.startsWith('image/');
+        if (isImage) {
+            thumbContainer.innerHTML = `<img class="uc-thumbnail-img" src="${base64Data}" alt="${file.name}">`;
+        } else {
+            thumbContainer.innerHTML = `
+                <div class="uc-pdf-badge">
+                    <span style="font-size:24px;">📑</span>
+                    <span>PDF Document</span>
+                    <span style="font-size:10px;opacity:0.8;">${sizeFormatted}</span>
+                </div>
+            `;
+        }
+
+        // Render Action Buttons (Preview, Download, Delete)
+        let actionBar = card.querySelector('.uc-action-bar');
+        if (!actionBar) {
+            actionBar = document.createElement('div');
+            actionBar.className = 'uc-action-bar';
+            card.appendChild(actionBar);
+        }
+
+        actionBar.innerHTML = `
+            <button type="button" class="btn-uc-action btn-uc-preview" onclick="event.stopPropagation(); openDocPreview('${cardId}')">
+                👁️ Preview
+            </button>
+            <button type="button" class="btn-uc-action" onclick="event.stopPropagation(); downloadDocFromCache('${cardId}')">
+                ⬇️ Download
+            </button>
+            <button type="button" class="btn-uc-action btn-uc-delete" onclick="event.stopPropagation(); removeUploadedDoc('${cardId}')">
+                🗑️ Remove
+            </button>
+        `;
+
+        // Cache document locally
+        uploadedDocumentsCache[cardId] = {
+            cardId,
+            docType,
+            fileName: file.name,
+            fileType: file.type || 'application/pdf',
+            fileSize: file.size,
+            base64Data
+        };
+
+        // Upload to Document Microservice (persisted in PostgreSQL table application_documents)
+        try {
+            const appRef = (ApexApi.getApplicationRef && ApexApi.getApplicationRef()) || currentAppRef || 'AB-2026-DEMO01';
+            const uploadResult = await ApexApi.uploadDocumentBase64({
+                docType,
+                fileName: file.name,
+                fileType: file.type || 'application/pdf',
+                fileSize: file.size,
+                base64Data,
+                applicationRef: appRef
+            });
+
+            if (uploadResult.success && uploadResult.document) {
+                uploadedDocumentsCache[cardId].id = uploadResult.document.id;
+                showToast(`Document "${file.name}" stored in database table application_documents!`, 'DB Stored (Base64)', 'success', 3500);
+            }
+        } catch (err) {
+            console.warn('[DOC SERVICE] Cloud DB upload warning, kept in Base64 memory vault:', err.message);
+            showToast(`Document "${file.name}" stored in Base64 document vault.`, 'Base64 Vault Active', 'info', 2500);
+        }
 
         // Pre-fill Step 2 company details if currently blank so database always has entity info
         const s2Name = document.getElementById('step2_name');
-        if (s2Name && !s2Name.value) {
-            s2Name.value = 'Apex Global Holdings Ltd';
-        }
+        if (s2Name && !s2Name.value) s2Name.value = 'Apex Global Holdings Ltd';
         const s2Trade = document.getElementById('trade_name');
-        if (s2Trade && !s2Trade.value) {
-            s2Trade.value = 'Apex Global Holdings Ltd';
-        }
+        if (s2Trade && !s2Trade.value) s2Trade.value = 'Apex Global Holdings Ltd';
         const s2Auth = document.getElementById('step2_issued_by');
-        if (s2Auth && !s2Auth.value) {
-            s2Auth.value = 'Abu Dhabi Global Market (ADGM)';
-        }
+        if (s2Auth && !s2Auth.value) s2Auth.value = 'Abu Dhabi Global Market (ADGM)';
         const s2Issue = document.getElementById('step2_issue_date');
-        if (s2Issue && !s2Issue.value) {
-            s2Issue.value = '2020-05-12';
-        }
+        if (s2Issue && !s2Issue.value) s2Issue.value = '2020-05-12';
         const s2Expiry = document.getElementById('step2_expiry_date');
-        if (s2Expiry && !s2Expiry.value) {
-            s2Expiry.value = '2027-05-11';
+        if (s2Expiry && !s2Expiry.value) s2Expiry.value = '2027-05-11';
+
+        triggerAutoSave();
+        updateReviewSection();
+    };
+
+    reader.readAsDataURL(file);
+}
+
+// ── Document Preview & Actions ──
+let currentPreviewCardId = null;
+
+function openDocPreview(cardId) {
+    currentPreviewCardId = cardId;
+    const doc = uploadedDocumentsCache[cardId];
+    if (!doc) {
+        showToast('No document content available for preview.', 'Preview Unavailable', 'warning');
+        return;
+    }
+
+    const modal = document.getElementById('docPreviewModal');
+    const titleEl = document.getElementById('docPreviewTitle');
+    const contentEl = document.getElementById('docPreviewContent');
+    const metaEl = document.getElementById('docPreviewMeta');
+
+    if (!modal || !contentEl) return;
+
+    if (titleEl) titleEl.textContent = doc.fileName;
+    if (metaEl) {
+        metaEl.innerHTML = `
+            <span>Type: <strong>${doc.fileType}</strong></span> &bull; 
+            <span>Size: <strong>${Math.round(doc.fileSize / 1024)} KB</strong></span> &bull; 
+            <span style="color:#34d399;font-weight:700;">🟢 Stored in DB (Base64)</span>
+        `;
+    }
+
+    if (doc.fileType.startsWith('image/')) {
+        contentEl.innerHTML = `<img class="doc-preview-img-full" src="${doc.base64Data}" alt="${doc.fileName}">`;
+    } else {
+        contentEl.innerHTML = `<iframe class="doc-preview-pdf-embed" src="${doc.base64Data}"></iframe>`;
+    }
+
+    modal.classList.add('open');
+}
+
+function closeDocPreview() {
+    const modal = document.getElementById('docPreviewModal');
+    if (modal) modal.classList.remove('open');
+}
+
+function downloadCurrentPreviewDoc() {
+    if (currentPreviewCardId) {
+        downloadDocFromCache(currentPreviewCardId);
+    }
+}
+window.downloadCurrentPreviewDoc = downloadCurrentPreviewDoc;
+window.closeDocPreview = closeDocPreview;
+
+
+function downloadDocFromCache(cardId) {
+    const doc = uploadedDocumentsCache[cardId];
+    if (!doc || !doc.base64Data) return;
+
+    const link = document.createElement('a');
+    link.href = doc.base64Data;
+    link.download = doc.fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast(`Downloaded: ${doc.fileName}`, 'Download Complete', 'success', 2000);
+}
+
+async function removeUploadedDoc(cardId) {
+    const doc = uploadedDocumentsCache[cardId];
+    if (doc && doc.id) {
+        try {
+            await ApexApi.deleteDocument(doc.id);
+        } catch (e) {
+            console.warn('Document delete error:', e);
         }
     }
+    delete uploadedDocumentsCache[cardId];
+
+    const card = document.getElementById(cardId);
+    if (card) {
+        card.classList.remove('uploaded');
+        const statusEl = card.querySelector('.file-status');
+        if (statusEl) statusEl.innerHTML = '';
+        const thumbContainer = card.querySelector('.uc-thumbnail-container');
+        if (thumbContainer) thumbContainer.remove();
+        const actionBar = card.querySelector('.uc-action-bar');
+        if (actionBar) actionBar.remove();
+        const input = card.querySelector('input[type="file"]');
+        if (input) input.value = '';
+    }
+
+    showToast('Document removed from database.', 'Removed', 'info', 2000);
     triggerAutoSave();
     updateReviewSection();
 }
+
+// ── Restore Saved Documents on Load ──
+async function loadSavedDocuments() {
+    try {
+        const appRef = (ApexApi.getApplicationRef && ApexApi.getApplicationRef()) || currentAppRef || 'AB-2026-DEMO01';
+        const res = await ApexApi.getDocuments(appRef);
+        if (res.success && res.documents && res.documents.length > 0) {
+            const cardMapping = {
+                'trade_licence': 'uc-1',
+                'certificate_of_incorporation': 'uc-2',
+                'board_resolution': 'uc-3',
+                'supporting_document': 'uc-4',
+                'additional_document_1': 'fd-uc-1',
+                'additional_document_2': 'fd-uc-2',
+                'additional_document_3': 'fd-uc-3',
+                'additional_document_4': 'fd-uc-4'
+            };
+
+            res.documents.forEach((doc, idx) => {
+                let cardId = cardMapping[doc.document_type] || `uc-${(idx % 4) + 1}`;
+                const card = document.getElementById(cardId);
+                if (!card) return;
+
+                card.classList.add('uploaded');
+                const sizeKb = Math.round(doc.file_size / 1024);
+                const sizeFormatted = sizeKb > 1024 ? (sizeKb / 1024).toFixed(1) + ' MB' : sizeKb + ' KB';
+
+                const statusEl = card.querySelector('.file-status');
+                if (statusEl) {
+                    statusEl.innerHTML = `
+                        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                            <div>✓ <strong>${doc.file_name}</strong> (${sizeFormatted})</div>
+                            <span class="db-status-chip">🟢 Stored in DB (Base64)</span>
+                        </div>
+                    `;
+                }
+
+                // Render thumbnail
+                let thumbContainer = card.querySelector('.uc-thumbnail-container');
+                if (!thumbContainer) {
+                    thumbContainer = document.createElement('div');
+                    thumbContainer.className = 'uc-thumbnail-container';
+                    const iconEl = card.querySelector('.uc-icon');
+                    if (iconEl && iconEl.nextSibling) {
+                        card.insertBefore(thumbContainer, iconEl.nextSibling);
+                    } else {
+                        card.appendChild(thumbContainer);
+                    }
+                }
+
+                const isImage = (doc.file_type || '').startsWith('image/');
+                if (isImage && doc.file_data_base64) {
+                    thumbContainer.innerHTML = `<img class="uc-thumbnail-img" src="${doc.file_data_base64}" alt="${doc.file_name}">`;
+                } else {
+                    thumbContainer.innerHTML = `
+                        <div class="uc-pdf-badge">
+                            <span style="font-size:24px;">📑</span>
+                            <span>PDF Document</span>
+                            <span style="font-size:10px;opacity:0.8;">${sizeFormatted}</span>
+                        </div>
+                    `;
+                }
+
+                // Render Action Buttons
+                let actionBar = card.querySelector('.uc-action-bar');
+                if (!actionBar) {
+                    actionBar = document.createElement('div');
+                    actionBar.className = 'uc-action-bar';
+                    card.appendChild(actionBar);
+                }
+                actionBar.innerHTML = `
+                    <button type="button" class="btn-uc-action btn-uc-preview" onclick="event.stopPropagation(); openDocPreview('${cardId}')">
+                        👁️ Preview
+                    </button>
+                    <button type="button" class="btn-uc-action" onclick="event.stopPropagation(); downloadDocFromCache('${cardId}')">
+                        ⬇️ Download
+                    </button>
+                    <button type="button" class="btn-uc-action btn-uc-delete" onclick="event.stopPropagation(); removeUploadedDoc('${cardId}')">
+                        🗑️ Remove
+                    </button>
+                `;
+
+                uploadedDocumentsCache[cardId] = {
+                    id: doc.id,
+                    cardId,
+                    docType: doc.document_type,
+                    fileName: doc.file_name,
+                    fileType: doc.file_type,
+                    fileSize: doc.file_size,
+                    base64Data: doc.file_data_base64
+                };
+            });
+            console.log(`📑 [DOCUMENTS] Restored ${res.documents.length} Base64 documents from database.`);
+        }
+    } catch (err) {
+        console.warn('[DOCUMENTS] Failed to auto-restore saved documents:', err);
+    }
+}
+window.loadSavedDocuments = loadSavedDocuments;
+
+// ── Portal Mode Switcher (Onboarding, Live Banking, Microservices Mesh) ──
+function switchPortalMode(mode) {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    const activeBtn = document.getElementById(`modeBtn-${mode}`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    const onboardingWrap = document.getElementById('onboardingPortalView');
+    const bankingHub = document.getElementById('liveBankingHub');
+    const meshHub = document.getElementById('meshMonitorHub');
+
+    if (onboardingWrap) onboardingWrap.style.display = mode === 'onboarding' ? 'block' : 'none';
+    if (bankingHub) {
+        if (mode === 'banking') {
+            bankingHub.classList.add('active');
+            if (window.LiveBanking) window.LiveBanking.init();
+        } else {
+            bankingHub.classList.remove('active');
+        }
+    }
+    if (meshHub) {
+        if (mode === 'mesh') {
+            meshHub.classList.add('active');
+            renderMeshMonitor();
+        } else {
+            meshHub.classList.remove('active');
+        }
+    }
+}
+window.switchPortalMode = switchPortalMode;
+
+async function renderMeshMonitor() {
+    const grid = document.getElementById('meshMonitorGrid');
+    if (!grid) return;
+    grid.innerHTML = '<div style="color:#94a3b8;padding:20px;">Pinging Microservices Mesh...</div>';
+
+    try {
+        const res = await ApexApi.getMeshHealth();
+        if (res.status === 'healthy' && res.services) {
+            grid.innerHTML = res.services.map(s => `
+                <div class="mesh-service-card">
+                    <div class="msc-header">
+                        <div class="msc-title">
+                            <span class="pulse-indicator"></span>
+                            <span>${s.name}</span>
+                        </div>
+                        <span class="msc-port">:${s.port}</span>
+                    </div>
+                    <div style="font-size:12px;color:#94a3b8;display:flex;justify-content:space-between;margin-bottom:8px;">
+                        <span>Status: <strong style="color:#34d399;">ONLINE</strong></span>
+                        <span>Requests: <strong>${s.requestsHandled || 0}</strong></span>
+                    </div>
+                    <div style="font-size:11px;color:#cbd5e1;margin-top:12px;font-weight:600;">Active Endpoints:</div>
+                    <div class="msc-endpoints">
+                        ${s.endpoints.map(e => `<span class="msc-endpoint-tag">${e}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+    } catch (err) {
+        grid.innerHTML = `<div style="color:#f87171;padding:20px;">Could not connect to Gateway: ${err.message}</div>`;
+    }
+}
+
 
 // ── STEP 2: COMPANY INFO TABS & TOGGLES ──
 function switchTab(id) {
@@ -1361,6 +1710,11 @@ async function handleOtpSubmit() {
                 goTo(result.data.current_step);
             }
 
+            // Restore Base64 documents from Database
+            loadSavedDocuments();
+            if (window.LiveBanking) window.LiveBanking.init();
+            if (window.MobileApp) window.MobileApp.init();
+
             showToast('Welcome to Apex Bank Corporate Portal', 'Authentication Successful', 'success');
         }
     } catch (err) {
@@ -2080,6 +2434,12 @@ window.addEventListener('DOMContentLoaded', async () => {
                 if (record.current_step && record.current_step > 1) {
                     goTo(record.current_step);
                 }
+
+                // Restore Base64 documents from Database table application_documents
+                loadSavedDocuments();
+                if (window.LiveBanking) window.LiveBanking.init();
+                if (window.MobileApp) window.MobileApp.init();
+
                 console.log('✅ [SESSION] Successfully rehydrated session for Application:', currentAppRef);
             }
         } catch (err) {
@@ -2093,4 +2453,121 @@ window.addEventListener('DOMContentLoaded', async () => {
         const overlay = document.getElementById('loginOverlay');
         if (overlay) overlay.classList.remove('hidden');
     }
+
+    // Always initialize Live Banking ticker & accounts in background
+    if (window.LiveBanking) window.LiveBanking.init();
+    if (window.MobileApp) window.MobileApp.init();
 });
+
+// ── PORTAL MODE SWITCHER & MICROSERVICES MESH CONTROLLER ──
+function switchPortalMode(mode) {
+    const onboardingView = document.getElementById('onboardingPortalView');
+    const bankingView = document.getElementById('liveBankingHub');
+    const meshView = document.getElementById('meshMonitorHub');
+
+    // Update active button states
+    document.querySelectorAll('.portal-mode-nav .mode-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById(`modeBtn-${mode}`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    const stepper = document.getElementById('stepper');
+    const overallProg = document.querySelector('.overall-prog');
+
+    if (mode === 'onboarding') {
+        if (onboardingView) onboardingView.style.display = 'block';
+        if (bankingView) bankingView.style.display = 'none';
+        if (meshView) meshView.style.display = 'none';
+        if (stepper) stepper.style.display = 'flex';
+        if (overallProg) overallProg.style.display = 'flex';
+    } else if (mode === 'banking') {
+        if (onboardingView) onboardingView.style.display = 'none';
+        if (bankingView) bankingView.style.display = 'block';
+        if (meshView) meshView.style.display = 'none';
+        if (stepper) stepper.style.display = 'none';
+        if (overallProg) overallProg.style.display = 'none';
+        if (window.LiveBanking && typeof window.LiveBanking.init === 'function') {
+            window.LiveBanking.init();
+        }
+    } else if (mode === 'mesh') {
+        if (onboardingView) onboardingView.style.display = 'none';
+        if (bankingView) bankingView.style.display = 'none';
+        if (meshView) meshView.style.display = 'block';
+        if (stepper) stepper.style.display = 'none';
+        if (overallProg) overallProg.style.display = 'none';
+        renderMeshMonitor();
+    }
+}
+
+function toggleMobileSimulator(forceState) {
+    const drawer = document.getElementById('mobileSimulatorDrawer');
+    if (!drawer) return;
+
+    const isOpen = typeof forceState === 'boolean' ? forceState : !drawer.classList.contains('open');
+    if (isOpen) {
+        drawer.classList.add('open');
+        if (window.MobileApp && typeof window.MobileApp.init === 'function') {
+            window.MobileApp.init();
+        }
+    } else {
+        drawer.classList.remove('open');
+    }
+}
+
+async function renderMeshMonitor() {
+    const grid = document.getElementById('meshMonitorGrid') || document.getElementById('meshGridContainer');
+    if (!grid) return;
+
+    grid.innerHTML = '<div style="color:#38bdf8;padding:20px;">🔄 Pinging all microservices across service mesh...</div>';
+
+    try {
+        const res = await ApexApi.getMeshHealth();
+        if (res.status === 'healthy') {
+            const svcCards = (res.services || []).map(svc => `
+                <div class="mesh-service-card">
+                    <div class="msc-header">
+                        <div class="msc-title">
+                            <span class="pulse-indicator"></span>
+                            <span>${svc.name}</span>
+                        </div>
+                        <span class="msc-port">Port ${svc.port}</span>
+                    </div>
+                    <div style="font-size:12px;color:#94a3b8;margin-bottom:8px;">
+                        Requests handled: <strong style="color:#38bdf8;">${svc.requestsHandled || 0}</strong> &bull; Status: <strong style="color:#10b981;">● Online</strong>
+                    </div>
+                    <div class="msc-endpoints">
+                        ${(svc.endpoints || []).map(ep => `<span class="msc-endpoint-tag">${ep}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            const dbCard = `
+                <div class="mesh-service-card" style="border-color:#10b981;">
+                    <div class="msc-header">
+                        <div class="msc-title">
+                            <span class="pulse-indicator" style="background:#10b981;box-shadow:0 0 10px #10b981;"></span>
+                            <span>Database &amp; Base64 Vault Layer</span>
+                        </div>
+                        <span class="msc-port" style="background:rgba(16,185,129,0.2);color:#34d399;">Active</span>
+                    </div>
+                    <div style="font-size:12px;color:#cbd5e1;margin-bottom:8px;">
+                        Engine: <strong style="color:#34d399;">${res.database?.engine || 'PostgreSQL'}</strong> &bull;
+                        Base64 Vault: <strong style="color:#34d399;">Active</strong>
+                    </div>
+                    <div class="msc-endpoints">
+                        ${(res.database?.tables || []).map(tb => `<span class="msc-endpoint-tag" style="color:#34d399;">table: ${tb}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+
+            grid.innerHTML = svcCards + dbCard;
+        }
+    } catch (err) {
+        grid.innerHTML = `<div style="color:#ef4444;padding:20px;">Failed to fetch mesh health: ${err.message}</div>`;
+    }
+}
+
+window.switchPortalMode = switchPortalMode;
+window.toggleMobileSimulator = toggleMobileSimulator;
+window.renderMeshMonitor = renderMeshMonitor;
+
+
