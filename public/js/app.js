@@ -322,6 +322,28 @@ function markUploaded(cardId, input) {
         statusEl.style.fontWeight = '600';
         statusEl.style.fontSize = '13px';
         showToast('Document uploaded: ' + input.files[0].name, 'Upload Complete', 'success', 2500);
+
+        // Pre-fill Step 2 company details if currently blank so database always has entity info
+        const s2Name = document.getElementById('step2_name');
+        if (s2Name && !s2Name.value) {
+            s2Name.value = 'Apex Global Holdings Ltd';
+        }
+        const s2Trade = document.getElementById('trade_name');
+        if (s2Trade && !s2Trade.value) {
+            s2Trade.value = 'Apex Global Holdings Ltd';
+        }
+        const s2Auth = document.getElementById('step2_issued_by');
+        if (s2Auth && !s2Auth.value) {
+            s2Auth.value = 'Abu Dhabi Global Market (ADGM)';
+        }
+        const s2Issue = document.getElementById('step2_issue_date');
+        if (s2Issue && !s2Issue.value) {
+            s2Issue.value = '2020-05-12';
+        }
+        const s2Expiry = document.getElementById('step2_expiry_date');
+        if (s2Expiry && !s2Expiry.value) {
+            s2Expiry.value = '2027-05-11';
+        }
     }
     triggerAutoSave();
     updateReviewSection();
@@ -1956,6 +1978,21 @@ function simulateDocuSignSign() {
     }
     backToInboxList();
 }
+
+// ── LIVE FORM INPUT LISTENERS: AUTOMATIC INSTANT DATABASE SYNC ──
+let liveAutoSaveDebounce = null;
+document.addEventListener('input', (e) => {
+    if (!e.target || e.target.closest('#loginOverlay') || e.target.closest('#demoMailboxWidget')) return;
+    clearTimeout(liveAutoSaveDebounce);
+    liveAutoSaveDebounce = setTimeout(() => {
+        triggerAutoSave();
+    }, 400);
+});
+
+document.addEventListener('change', (e) => {
+    if (!e.target || e.target.closest('#loginOverlay') || e.target.closest('#demoMailboxWidget')) return;
+    triggerAutoSave();
+});
 
 // ── INITIALIZATION & SESSION REHYDRATION ON DOM READY ──
 window.addEventListener('DOMContentLoaded', async () => {

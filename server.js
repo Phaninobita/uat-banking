@@ -386,14 +386,21 @@ app.post("/api/auth/verify-otp", authLimiter, async (req, res) => {
         applicationRecord = existing.rows[0];
       } else {
         const appRef = "AB-" + new Date().getFullYear() + "-" + crypto.randomBytes(3).toString("hex").toUpperCase();
+        const defaultCompany = "Apex Global Holdings Ltd";
         const initialFormData = {
-          step2: { crn: cleanCrn, company_name: "", trade_name: "", legal_type: "Limited Liability Company (LLC)" }
+          step2: {
+            crn: cleanCrn,
+            company_name: defaultCompany,
+            trade_name: defaultCompany,
+            legal_type: "Limited Liability Company (LLC)",
+            issued_by: "Abu Dhabi Global Market (ADGM)"
+          }
         };
         const newRecord = await pool.query(
           `INSERT INTO corporate_onboarding_applications (
-             application_ref, crn, registered_email, current_step, status, form_data, legal_type
-           ) VALUES ($1, $2, $3, 1, 'draft', $4::jsonb, $5) RETURNING *`,
-          [appRef, cleanCrn, cleanEmail, JSON.stringify(initialFormData), "Limited Liability Company (LLC)"]
+             application_ref, crn, registered_email, current_step, status, form_data, legal_type, company_name, trade_name
+           ) VALUES ($1, $2, $3, 1, 'draft', $4::jsonb, $5, $6, $7) RETURNING *`,
+          [appRef, cleanCrn, cleanEmail, JSON.stringify(initialFormData), "Limited Liability Company (LLC)", defaultCompany, defaultCompany]
         );
         applicationRecord = newRecord.rows[0];
         isNew = true;
@@ -405,6 +412,7 @@ app.post("/api/auth/verify-otp", authLimiter, async (req, res) => {
         applicationRecord = memStore.applications.get(existingRef);
       } else {
         const appRef = "AB-" + new Date().getFullYear() + "-" + crypto.randomBytes(3).toString("hex").toUpperCase();
+        const defaultCompany = "Apex Global Holdings Ltd";
         applicationRecord = {
           id: Date.now(),
           application_ref: appRef,
@@ -412,8 +420,17 @@ app.post("/api/auth/verify-otp", authLimiter, async (req, res) => {
           registered_email: cleanEmail,
           current_step: 1,
           status: "draft",
+          company_name: defaultCompany,
+          trade_name: defaultCompany,
+          legal_type: "Limited Liability Company (LLC)",
           form_data: {
-            step2: { crn: cleanCrn, company_name: "", trade_name: "", legal_type: "Limited Liability Company (LLC)" }
+            step2: {
+              crn: cleanCrn,
+              company_name: defaultCompany,
+              trade_name: defaultCompany,
+              legal_type: "Limited Liability Company (LLC)",
+              issued_by: "Abu Dhabi Global Market (ADGM)"
+            }
           },
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
