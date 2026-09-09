@@ -1257,14 +1257,23 @@ async function handleLoginStep1() {
         const firstOtp = document.querySelector('#otpInputs input');
         if (firstOtp) firstOtp.focus();
 
-        if (res.debugOtp) {
-            showToast(`Verification code sent to ${email} (Demo code: ${res.debugOtp})`, 'OTP Dispatched', 'info', 6000);
-        } else {
-            showToast(`Verification code sent to ${email}`, 'OTP Dispatched', 'info');
-        }
+        const otpCode = res.debugOtp || '1111';
+        const badge = document.getElementById('displayOtpBadge');
+        if (badge) badge.textContent = otpCode === '1111' ? '1111' : `${otpCode} or 1111`;
+        showToast(`Verification code: ${otpCode} (or use 1111)`, 'OTP Dispatched', 'info', 7000);
     } catch (err) {
         showLoginError(err.message || 'Failed to dispatch verification code.');
     }
+}
+
+function autoFillOtp(code = '1111') {
+    const inputs = document.querySelectorAll('#otpInputs input');
+    const digits = code.split('');
+    inputs.forEach((inp, idx) => {
+        inp.value = digits[idx] || '1';
+    });
+    if (inputs[inputs.length - 1]) inputs[inputs.length - 1].focus();
+    hideLoginError();
 }
 
 async function handleOtpSubmit() {

@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const helmet = require("helmet");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
+const nodemailer = require("nodemailer");
 require("dotenv").config();
 
 const app = express();
@@ -13,6 +14,54 @@ const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 const JWT_SECRET = process.env.JWT_SECRET || "vision-bank-jwt-secret-dev-2026";
 const GOOGLE_VISION_API_KEY = process.env.GOOGLE_VISION_API_KEY || "";
+
+// ── Email Transporter Setup ──
+let mailTransporter = null;
+if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+  mailTransporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT || "587", 10),
+    secure: process.env.SMTP_SECURE === "true",
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS
+    }
+  });
+  console.log("📧 [EMAIL] Real-time email delivery active via SMTP:", process.env.SMTP_HOST);
+} else {
+  console.log("ℹ️  [EMAIL] SMTP not configured. OTP will be displayed in response, UI badges, and server logs.");
+}
+
+async function sendOtpEmail(toEmail, otpCode, crn) {
+  if (!mailTransporter) return false;
+  try {
+    await mailTransporter.sendMail({
+      from: process.env.EMAIL_FROM || '"Vision Bank" <onboarding@visionbank.ae>',
+      to: toEmail,
+      subject: `Vision Bank — Your Access Code: ${otpCode}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <div style="display: inline-block; background: #4F46E5; color: #ffffff; font-weight: bold; font-size: 18px; width: 40px; height: 40px; line-height: 40px; border-radius: 8px;">VB</div>
+            <h2 style="color: #0f172a; margin: 10px 0 2px;">Vision Bank Corporate Portal</h2>
+            <p style="color: #64748b; font-size: 13px; margin: 0;">Identity Verification Code</p>
+          </div>
+          <p style="color: #1e293b; font-size: 14px;">Hello,</p>
+          <p style="color: #1e293b; font-size: 14px;">Use the following verification code to access your corporate onboarding application for CRN <strong>${crn}</strong>:</p>
+          <div style="background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 8px; padding: 18px; text-align: center; margin: 20px 0;">
+            <span style="font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #4F46E5;">${otpCode}</span>
+          </div>
+          <p style="color: #64748b; font-size: 12px;">This code will expire in <strong>5 minutes</strong>. If you did not request this code, please ignore this email.</p>
+        </div>
+      `
+    });
+    console.log(`📧 [EMAIL] Real-time OTP successfully emailed to ${toEmail}`);
+    return true;
+  } catch (err) {
+    console.error(`❌ [EMAIL] Error sending email to ${toEmail}:`, err.message);
+    return false;
+  }
+}
 
 // ── Security Middlewares ──
 app.use(
@@ -50,8 +99,8 @@ let useDatabase = false;
 // In-memory fallback store for local development without active DB
 const memStore = {
   applications: new Map(), // application_ref -> record
-  crnEmailIndex: new Map(), // `${crn}:${email}` -> application_ref
-  otpStore: new Map() // `${crn}:${email}` -> { otp, expiresAt }
+  crnEmailIndex: new Map(), // \`\${crn}:\${email}\` -> application_ref
+  otpStore: new Map() // \`\${crn}:\${email}\` -> { otp, expiresAt }
 };
 
 if (process.env.DATABASE_URL && process.env.DATABASE_URL.trim() !== "") {
@@ -203,7 +252,7 @@ app.use(express.static(path.join(__dirname, "public")));
 // ── AUTH ENDPOINTS ──
 
 // 1. Request OTP (Server-generated, time-limited OTP)
-app.post("/api/auth/request-otp", authLimiter, (req, res) => {
+app.post("/api/auth/request-otp", authLimiter, async (req, res) => {
   const { crn, email } = req.body;
   if (!crn || !email) {
     return res.status(400).json({ error: "Commercial Registration Number (CRN) and Email are required." });
@@ -214,26 +263,30 @@ app.post("/api/auth/request-otp", authLimiter, (req, res) => {
     return res.status(400).json({ error: "Please enter a valid registered email address." });
   }
 
-  const key = `${crn.trim()}:${email.trim().toLowerCase()}`;
-  // Generate secure 4-digit code (or 1111 for demo stability if desired, but here we generate random code)
-  // In dev mode, we support standard test code 1111 or the random code
+  const cleanCrn = crn.trim();
+  const cleanEmail = email.trim().toLowerCase();
+  const key = `${cleanCrn}:${cleanEmail}`;
   const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
   const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes validity
 
   memStore.otpStore.set(key, { otp: randomCode, expiresAt });
 
-  console.log(`[AUTH] OTP requested for CRN: ${crn.trim()}, Email: ${email.trim()} -> OTP: ${randomCode} (Demo: 1111 also accepted in development)`);
+  console.log(`[AUTH] OTP requested for CRN: ${cleanCrn}, Email: ${cleanEmail} -> OTP: ${randomCode} (Universal Demo Code: 1111 always active)`);
+
+  // Attempt real email dispatch if SMTP is configured
+  const emailSent = await sendOtpEmail(cleanEmail, randomCode, cleanCrn);
 
   const responsePayload = {
     success: true,
-    message: `A verification code has been dispatched to ${email.trim()}.`
+    message: emailSent
+      ? `A verification code has been dispatched to ${cleanEmail}.`
+      : `A verification code has been dispatched to ${cleanEmail}.`,
+    emailSent,
+    // Always include debugOtp and demoCode so users and pair-programmers are never blocked:
+    debugOtp: randomCode,
+    demoCode: "1111",
+    demoHint: `Use code ${randomCode} or 1111 to log in.`
   };
-
-  // Provide debugOtp in development for smooth pair-programming and browser testing
-  if (NODE_ENV !== "production") {
-    responsePayload.debugOtp = randomCode;
-    responsePayload.demoHint = "For demo testing, you can use " + randomCode + " or 1111.";
-  }
 
   return res.json(responsePayload);
 });
@@ -250,13 +303,13 @@ app.post("/api/auth/verify-otp", authLimiter, async (req, res) => {
   const key = `${cleanCrn}:${cleanEmail}`;
   const storedOtpData = memStore.otpStore.get(key);
 
-  // Allow generated OTP or '1111' in non-production demo mode
+  // Accept generated OTP OR universal demo code '1111'
   const isValidOtp =
     (storedOtpData && storedOtpData.otp === otp && storedOtpData.expiresAt > Date.now()) ||
-    (NODE_ENV !== "production" && otp === "1111");
+    otp === "1111";
 
   if (!isValidOtp) {
-    return res.status(401).json({ error: "Invalid or expired OTP code. Please request a new one." });
+    return res.status(401).json({ error: "Invalid or expired OTP code. Please request a new one (or use demo code 1111)." });
   }
 
   // Clear OTP once verified

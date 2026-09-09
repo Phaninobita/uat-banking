@@ -51,7 +51,13 @@
                 <button class="btn-login" onclick="handleLoginStep1()">Request OTP</button>
             </div>
             <div id="lStep2" class="form-step hidden">
-                <div class="info-badge">We sent a 4-digit code to <strong id="displayEmail">your email</strong>.</div>
+                <div class="info-badge">
+                    We sent a 4-digit code to <strong id="displayEmail">your email</strong>.
+                    <div style="margin-top: 8px; font-size: 13px; color: var(--primary); font-weight: 600; display: flex; align-items: center; justify-content: space-between;">
+                        <span>💡 Access Code: <strong id="displayOtpBadge">1111</strong></span>
+                        <button type="button" onclick="autoFillOtp()" style="font-size: 11px; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--primary); background: var(--primary-bg); color: var(--primary); cursor: pointer; font-weight: 600;">⚡ Auto-fill</button>
+                    </div>
+                </div>
                 <div class="otp-row" id="otpInputs" role="group" aria-label="One-time password input">
                     <input type="text" maxlength="1" autofocus oninput="moveToNext(this, 1)" aria-label="OTP digit 1">
                     <input type="text" maxlength="1" oninput="moveToNext(this, 2)" aria-label="OTP digit 2">
