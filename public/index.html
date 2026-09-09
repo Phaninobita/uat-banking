@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -5527,5 +5527,141 @@
         console.log('✅ Enhanced Vision Bank Portal ready.');
         console.log('🎯 All fields are optional — Auto-demo plays on Step 4 load.');
     </script>
+<script>
+let currentAppRef = null;
+
+function collectFullFormData() {
+    return {
+        step2: {
+            crn: document.getElementById('step2_crn')?.value || '',
+            company_name: document.getElementById('step2_name')?.value || '',
+            trade_name: document.getElementById('trade_name')?.value || '',
+            legal_type: document.getElementById('step2_legal_type')?.value || '',
+            issue_date: document.getElementById('step2_issue_date')?.value || '',
+            expiry_date: document.getElementById('step2_expiry_date')?.value || '',
+            issued_by: document.getElementById('step2_issued_by')?.value || '',
+            vat_trn: document.querySelector('#tab-vat input')?.value || ''
+        },
+        entities: typeof extractedEntities !== 'undefined' ? extractedEntities : [],
+        declarations: {
+            d1: document.getElementById('d1')?.checked || false,
+            d2: document.getElementById('d2')?.checked || false,
+            d3: document.getElementById('d3')?.checked || false
+        }
+    };
+}
+
+function populateFormData(formData) {
+    if (!formData) return;
+    if (formData.step2) {
+        const s2 = formData.step2;
+        if (s2.crn && document.getElementById('step2_crn')) document.getElementById('step2_crn').value = s2.crn;
+        if (s2.company_name && document.getElementById('step2_name')) document.getElementById('step2_name').value = s2.company_name;
+        if (s2.trade_name && document.getElementById('trade_name')) document.getElementById('trade_name').value = s2.trade_name;
+        if (s2.legal_type && document.getElementById('step2_legal_type')) document.getElementById('step2_legal_type').value = s2.legal_type;
+        if (s2.issue_date && document.getElementById('step2_issue_date')) document.getElementById('step2_issue_date').value = s2.issue_date;
+        if (s2.expiry_date && document.getElementById('step2_expiry_date')) document.getElementById('step2_expiry_date').value = s2.expiry_date;
+        if (s2.issued_by && document.getElementById('step2_issued_by')) document.getElementById('step2_issued_by').value = s2.issued_by;
+        if (s2.vat_trn && document.querySelector('#tab-vat input')) document.querySelector('#tab-vat input').value = s2.vat_trn;
+    }
+    if (formData.entities && Array.isArray(formData.entities)) {
+        if (typeof extractedEntities !== 'undefined') extractedEntities = formData.entities;
+        if (typeof uboCount !== 'undefined') uboCount = formData.entities.length;
+        if (typeof updateUboCountText === 'function') updateUboCountText();
+    }
+    if (formData.declarations) {
+        if (document.getElementById('d1')) document.getElementById('d1').checked = formData.declarations.d1;
+        if (document.getElementById('d2')) document.getElementById('d2').checked = formData.declarations.d2;
+        if (document.getElementById('d3')) document.getElementById('d3').checked = formData.declarations.d3;
+    }
+}
+
+if (typeof handleOtpSubmit === 'function') {
+    const prevOtpSubmit = handleOtpSubmit;
+    handleOtpSubmit = async function() {
+        const inputs = document.querySelectorAll('#otpInputs input');
+        let enteredOtp = '';
+        inputs.forEach(inp => enteredOtp += inp.value);
+
+        if (enteredOtp === (typeof mockOTP !== 'undefined' ? mockOTP : '1111')) {
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        crn: document.getElementById('crnInput')?.value?.trim() || '',
+                        email: document.getElementById('emailInput')?.value?.trim() || ''
+                    })
+                });
+
+                const result = await res.json();
+                if (result.success && result.data) {
+                    currentAppRef = result.data.application_ref;
+                    document.querySelectorAll('.app-ref').forEach(el => {
+                        el.textContent = 'Application Reference: ' + currentAppRef;
+                    });
+
+                    if (!result.isNew && result.data.form_data) {
+                        populateFormData(result.data.form_data);
+                        if (result.data.current_step && result.data.current_step > 1 && typeof goTo === 'function') {
+                            goTo(result.data.current_step);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error('Login sync error:', err);
+            }
+        }
+        prevOtpSubmit();
+    };
+}
+
+if (typeof triggerAutoSave === 'function') {
+    const prevAutoSave = triggerAutoSave;
+    triggerAutoSave = async function() {
+        prevAutoSave();
+        if (!currentAppRef) return;
+
+        try {
+            await fetch('/api/application/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    application_ref: currentAppRef,
+                    current_step: typeof currentStep !== 'undefined' ? currentStep : 1,
+                    status: 'draft',
+                    form_data: collectFullFormData()
+                })
+            });
+        } catch (err) {
+            console.warn('Background auto-save failed:', err);
+        }
+    };
+}
+
+if (typeof finalizeApp === 'function') {
+    const prevFinalizeApp = finalizeApp;
+    finalizeApp = async function() {
+        if (currentAppRef) {
+            try {
+                await fetch('/api/application/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        application_ref: currentAppRef,
+                        current_step: 7,
+                        status: 'submitted',
+                        form_data: collectFullFormData()
+                    })
+                });
+            } catch (err) {
+                console.error('Final submission error:', err);
+            }
+        }
+        prevFinalizeApp();
+    };
+}
+</script>
 </body>
 </html>
+
