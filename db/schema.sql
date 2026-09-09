@@ -1,4 +1,4 @@
--- Vision Bank Corporate Account Portal
+-- Apex Bank Corporate Account Portal
 -- Database Schema for PostgreSQL / Supabase
 
 CREATE TABLE IF NOT EXISTS corporate_onboarding_applications (

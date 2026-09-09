@@ -12,8 +12,32 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || "development";
-const JWT_SECRET = process.env.JWT_SECRET || "vision-bank-jwt-secret-dev-2026";
+const JWT_SECRET = process.env.JWT_SECRET || "apex-bank-jwt-secret-dev-2026";
 const GOOGLE_VISION_API_KEY = process.env.GOOGLE_VISION_API_KEY || "";
+
+// ── Real-Time Simulated Email Buffer ──
+const simulatedEmails = [];
+
+function recordSimulatedEmail({ to, from, subject, html, text, code, type, metadata }) {
+  const emailItem = {
+    id: "eml_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7),
+    to: to || "applicant@corporate.ae",
+    from: from || '"Apex Bank" <onboarding@apexbank.ae>',
+    subject: subject || "Apex Bank Notification",
+    html: html || "",
+    text: text || "",
+    code: code || null,
+    type: type || "general",
+    metadata: metadata || {},
+    timestamp: new Date().toISOString()
+  };
+
+  simulatedEmails.unshift(emailItem);
+  if (simulatedEmails.length > 50) {
+    simulatedEmails.pop();
+  }
+  return emailItem;
+}
 
 // ── Email Transporter Setup ──
 let mailTransporter = null;
@@ -29,37 +53,60 @@ if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
   });
   console.log("📧 [EMAIL] Real-time email delivery active via SMTP:", process.env.SMTP_HOST);
 } else {
-  console.log("ℹ️  [EMAIL] SMTP not configured. OTP will be displayed in response, UI badges, and server logs.");
+  console.log("ℹ️  [EMAIL] SMTP not configured. Real-time emails will be delivered to in-browser Simulated Mailbox.");
 }
 
 async function sendOtpEmail(toEmail, otpCode, crn) {
-  if (!mailTransporter) return false;
+  const fromAddress = process.env.EMAIL_FROM || '"Apex Bank" <onboarding@apexbank.ae>';
+  const subjectLine = `Apex Bank — Your Access Code: ${otpCode}`;
+  const htmlContent = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; color: #0f172a;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; box-shadow: 0 4px 12px rgba(2,132,199,0.25);">AB</div>
+        <h2 style="color: #0f172a; margin: 12px 0 2px; font-size: 20px; font-weight: 700;">Apex Bank Corporate Portal</h2>
+        <p style="color: #64748b; font-size: 13px; margin: 0;">Identity Verification Code</p>
+      </div>
+      <p style="color: #334155; font-size: 14px; line-height: 1.5;">Hello,</p>
+      <p style="color: #334155; font-size: 14px; line-height: 1.5;">Use the following verification code to access your corporate onboarding application for CRN <strong>${crn}</strong>:</p>
+      <div style="background: #f8fafc; border: 2px dashed #0284c7; border-radius: 10px; padding: 18px; text-align: center; margin: 20px 0;">
+        <span style="font-size: 34px; font-weight: 800; letter-spacing: 8px; color: #0284c7; display: inline-block; font-family: monospace;">${otpCode}</span>
+      </div>
+      <p style="color: #64748b; font-size: 12px; line-height: 1.4;">This code will expire in <strong>5 minutes</strong>. If you did not request this verification code, please disregard this email.</p>
+      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #f1f5f9; text-align: center; color: #94a3b8; font-size: 11px;">
+        Apex Bank Corporate Banking Group &bull; Al Maryah Island, Abu Dhabi, UAE
+      </div>
+    </div>
+  `;
+
+  // Always record into simulated email stream for in-browser real-time display
+  const simulated = recordSimulatedEmail({
+    to: toEmail,
+    from: fromAddress,
+    subject: subjectLine,
+    html: htmlContent,
+    text: `Apex Bank — Your Access Code for CRN ${crn} is: ${otpCode}`,
+    code: otpCode,
+    type: "otp",
+    metadata: { crn, otp: otpCode }
+  });
+
+  if (!mailTransporter) {
+    console.log(`📧 [SIMULATED EMAIL] Generated OTP email for ${toEmail} -> Code: ${otpCode}`);
+    return { emailSent: false, simulatedEmail: simulated };
+  }
+
   try {
     await mailTransporter.sendMail({
-      from: process.env.EMAIL_FROM || '"Vision Bank" <onboarding@visionbank.ae>',
+      from: fromAddress,
       to: toEmail,
-      subject: `Vision Bank — Your Access Code: ${otpCode}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
-          <div style="text-align: center; margin-bottom: 20px;">
-            <div style="display: inline-block; background: #4F46E5; color: #ffffff; font-weight: bold; font-size: 18px; width: 40px; height: 40px; line-height: 40px; border-radius: 8px;">VB</div>
-            <h2 style="color: #0f172a; margin: 10px 0 2px;">Vision Bank Corporate Portal</h2>
-            <p style="color: #64748b; font-size: 13px; margin: 0;">Identity Verification Code</p>
-          </div>
-          <p style="color: #1e293b; font-size: 14px;">Hello,</p>
-          <p style="color: #1e293b; font-size: 14px;">Use the following verification code to access your corporate onboarding application for CRN <strong>${crn}</strong>:</p>
-          <div style="background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 8px; padding: 18px; text-align: center; margin: 20px 0;">
-            <span style="font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #4F46E5;">${otpCode}</span>
-          </div>
-          <p style="color: #64748b; font-size: 12px;">This code will expire in <strong>5 minutes</strong>. If you did not request this code, please ignore this email.</p>
-        </div>
-      `
+      subject: subjectLine,
+      html: htmlContent
     });
     console.log(`📧 [EMAIL] Real-time OTP successfully emailed to ${toEmail}`);
-    return true;
+    return { emailSent: true, simulatedEmail: simulated };
   } catch (err) {
     console.error(`❌ [EMAIL] Error sending email to ${toEmail}:`, err.message);
-    return false;
+    return { emailSent: false, simulatedEmail: simulated };
   }
 }
 
@@ -284,15 +331,14 @@ app.post("/api/auth/request-otp", authLimiter, async (req, res) => {
 
   console.log(`[AUTH] OTP requested for CRN: ${cleanCrn}, Email: ${cleanEmail} -> OTP: ${randomCode} (Universal Demo Code: 1111 always active)`);
 
-  // Attempt real email dispatch if SMTP is configured
-  const emailSent = await sendOtpEmail(cleanEmail, randomCode, cleanCrn);
+  // Attempt real email dispatch if SMTP is configured, and buffer in simulated inbox
+  const emailResult = await sendOtpEmail(cleanEmail, randomCode, cleanCrn);
 
   const responsePayload = {
     success: true,
-    message: emailSent
-      ? `A verification code has been dispatched to ${cleanEmail}.`
-      : `A verification code has been dispatched to ${cleanEmail}.`,
-    emailSent,
+    message: `A verification code has been dispatched to ${cleanEmail}.`,
+    emailSent: emailResult.emailSent,
+    simulatedEmail: emailResult.simulatedEmail,
     // Always include debugOtp and demoCode so users and pair-programmers are never blocked:
     debugOtp: randomCode,
     demoCode: "1111",
@@ -339,7 +385,7 @@ app.post("/api/auth/verify-otp", authLimiter, async (req, res) => {
       if (existing.rows.length > 0) {
         applicationRecord = existing.rows[0];
       } else {
-        const appRef = "VB-" + new Date().getFullYear() + "-" + crypto.randomBytes(3).toString("hex").toUpperCase();
+        const appRef = "AB-" + new Date().getFullYear() + "-" + crypto.randomBytes(3).toString("hex").toUpperCase();
         const initialFormData = {
           step2: { crn: cleanCrn, company_name: "", trade_name: "", legal_type: "Limited Liability Company (LLC)" }
         };
@@ -358,7 +404,7 @@ app.post("/api/auth/verify-otp", authLimiter, async (req, res) => {
       if (existingRef && memStore.applications.has(existingRef)) {
         applicationRecord = memStore.applications.get(existingRef);
       } else {
-        const appRef = "VB-" + new Date().getFullYear() + "-" + crypto.randomBytes(3).toString("hex").toUpperCase();
+        const appRef = "AB-" + new Date().getFullYear() + "-" + crypto.randomBytes(3).toString("hex").toUpperCase();
         applicationRecord = {
           id: Date.now(),
           application_ref: appRef,
@@ -511,11 +557,76 @@ app.post("/api/application/save", requireAuth, async (req, res) => {
       memStore.applications.set(application_ref, existingRecord);
     }
 
+    if (resolvedStatus === "submitted") {
+      const recipientEmail = (existingRecord && existingRecord.registered_email) || (req.user && req.user.email) || "admin@apexholdings.ae";
+      recordSimulatedEmail({
+        to: recipientEmail,
+        from: '"Apex Bank Corporate Onboarding" <onboarding@apexbank.ae>',
+        subject: `Apex Bank — Corporate Application Received (${application_ref})`,
+        type: "application_submitted",
+        metadata: { application_ref },
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; color: #0f172a;">
+            <div style="text-align: center; margin-bottom: 20px;">
+              <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; box-shadow: 0 4px 12px rgba(2,132,199,0.25);">AB</div>
+              <h2 style="color: #0f172a; margin: 12px 0 2px; font-size: 20px; font-weight: 700;">Apex Bank Corporate Portal</h2>
+              <p style="color: #64748b; font-size: 13px; margin: 0;">Application Submission Confirmation</p>
+            </div>
+            <p style="color: #334155; font-size: 14px; line-height: 1.5;">Dear Corporate Customer,</p>
+            <p style="color: #334155; font-size: 14px; line-height: 1.5;">Your corporate account application has been received and logged into our compliance verification queue.</p>
+            <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; padding: 16px; margin: 18px 0; text-align: center;">
+              <span style="font-size: 11px; color: #166534; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;">Application Reference</span><br>
+              <span style="font-size: 24px; font-weight: 800; color: #15803d; letter-spacing: 1px; font-family: monospace;">${application_ref}</span>
+            </div>
+            <p style="color: #475569; font-size: 13px; line-height: 1.5;">Our compliance and onboarding desk will complete the verification within 1–2 business days. Your assigned Relationship Manager is <strong>Sarah Al-Qassimi</strong> (s.alqassimi@apexbank.ae &bull; +971 2 555 1234).</p>
+            <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #f1f5f9; text-align: center; color: #94a3b8; font-size: 11px;">
+              Apex Bank Corporate Banking Group &bull; Al Maryah Island, Abu Dhabi, UAE
+            </div>
+          </div>
+        `,
+        text: `Apex Bank: Application ${application_ref} received successfully.`
+      });
+    }
+
     return res.json({ success: true, data: updatedRecord });
   } catch (err) {
     console.error("[APPLICATION] Save error:", err);
     return res.status(500).json({ error: "Failed to persist application progress." });
   }
+});
+
+// ── SIMULATED EMAILS ENDPOINTS ──
+
+// Retrieve all recent simulated emails
+app.get("/api/emails", (req, res) => {
+  const filterEmail = req.query.email ? req.query.email.trim().toLowerCase() : null;
+  const results = filterEmail
+    ? simulatedEmails.filter(e => e.to.toLowerCase() === filterEmail || e.type === "otp")
+    : simulatedEmails;
+  res.json({ success: true, count: results.length, emails: results });
+});
+
+// Clear simulated email inbox
+app.delete("/api/emails", (req, res) => {
+  simulatedEmails.length = 0;
+  res.json({ success: true, message: "Simulated inbox cleared." });
+});
+
+// Manually dispatch a simulated email (DocuSign, Resume link, custom notification)
+app.post("/api/emails/simulate", (req, res) => {
+  const { to, subject, html, text, type, metadata, code } = req.body;
+  const emailItem = recordSimulatedEmail({
+    to: to || "admin@apexholdings.ae",
+    from: '"Apex Bank" <onboarding@apexbank.ae>',
+    subject: subject || "Apex Bank Corporate Update",
+    html: html || "<p>Notification from Apex Bank</p>",
+    text: text || "Notification from Apex Bank",
+    code: code || null,
+    type: type || "system",
+    metadata: metadata || {}
+  });
+  console.log(`📧 [SIMULATED EMAIL DISPATCHED] "${emailItem.subject}" -> ${emailItem.to}`);
+  res.json({ success: true, email: emailItem });
 });
 
 // 5. Server-Side Document OCR (Protects Google Vision API Key & Customer Documents)
@@ -559,7 +670,7 @@ app.post("/api/documents/ocr", requireAuth, async (req, res) => {
     // Fallback: If OCR returns minimal data (or API key not configured), generate contextual demo entity
     if (!parsedData.fullName) {
       if (docType === "corporate") {
-        parsedData.fullName = "Emirates Apex Logistics LLC";
+        parsedData.fullName = "Apex Global Holdings Ltd";
         parsedData.registrationNumber = "CRN-8849201";
         parsedData.issuingAuthority = "Dubai Economy & Tourism (DET)";
         parsedData.expiry = "2028-11-30";
@@ -586,7 +697,7 @@ app.post("/api/documents/ocr", requireAuth, async (req, res) => {
 
 // ── Start Server ──
 const server = app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Vision Bank Corporate Portal server running on port ${PORT}`);
+  console.log(`🚀 Apex Bank Corporate Portal server running on port ${PORT}`);
   console.log(`🌐 Local URL: http://localhost:${PORT}`);
 });
 

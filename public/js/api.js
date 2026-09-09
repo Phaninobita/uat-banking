@@ -1,15 +1,21 @@
 /**
- * Vision Bank Portal — API Client Module
- * Secure communication layer handling JWT session tokens, OTP auth, and data persistence.
+ * Apex Bank Portal — API Client Module
+ * Secure communication layer handling JWT session tokens, OTP auth, data persistence, and simulated mailbox.
  */
 
 (function () {
-    const TOKEN_KEY = 'vb_session_token';
-    const REF_KEY = 'vb_application_ref';
+    const TOKEN_KEY = 'apex_session_token';
+    const REF_KEY = 'apex_application_ref';
+    const LEGACY_TOKEN_KEY = 'vb_session_token';
+    const LEGACY_REF_KEY = 'vb_application_ref';
 
-    const VBApi = {
+    const ApexApi = {
         getToken() {
-            return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY) || null;
+            return sessionStorage.getItem(TOKEN_KEY) ||
+                   localStorage.getItem(TOKEN_KEY) ||
+                   sessionStorage.getItem(LEGACY_TOKEN_KEY) ||
+                   localStorage.getItem(LEGACY_TOKEN_KEY) ||
+                   null;
         },
 
         setToken(token, appRef) {
@@ -28,10 +34,18 @@
             sessionStorage.removeItem(REF_KEY);
             localStorage.removeItem(TOKEN_KEY);
             localStorage.removeItem(REF_KEY);
+            sessionStorage.removeItem(LEGACY_TOKEN_KEY);
+            sessionStorage.removeItem(LEGACY_REF_KEY);
+            localStorage.removeItem(LEGACY_TOKEN_KEY);
+            localStorage.removeItem(LEGACY_REF_KEY);
         },
 
         getApplicationRef() {
-            return sessionStorage.getItem(REF_KEY) || localStorage.getItem(REF_KEY) || null;
+            return sessionStorage.getItem(REF_KEY) ||
+                   localStorage.getItem(REF_KEY) ||
+                   sessionStorage.getItem(LEGACY_REF_KEY) ||
+                   localStorage.getItem(LEGACY_REF_KEY) ||
+                   null;
         },
 
         isAuthenticated() {
@@ -112,8 +126,29 @@
                     docType
                 })
             });
+        },
+
+        async getSimulatedEmails(email) {
+            const query = email ? `?email=${encodeURIComponent(email)}` : '';
+            return this._fetch(`/api/emails${query}`, {
+                method: 'GET'
+            });
+        },
+
+        async clearSimulatedEmails() {
+            return this._fetch('/api/emails', {
+                method: 'DELETE'
+            });
+        },
+
+        async simulateEmail(payload) {
+            return this._fetch('/api/emails/simulate', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
         }
     };
 
-    window.VBApi = VBApi;
+    window.ApexApi = ApexApi;
+    window.VBApi = ApexApi; // Aliased for complete backward compatibility
 })();

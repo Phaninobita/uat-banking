@@ -1,5 +1,5 @@
 /**
- * Vision Bank Corporate Account Portal — Main Application Logic
+ * Apex Bank Corporate Account Portal — Main Application Logic
  * Comprehensive state management, non-destructive navigation, OCR extraction, and multi-step persistence.
  */
 
@@ -1261,6 +1261,35 @@ async function handleLoginStep1() {
         const badge = document.getElementById('displayOtpBadge');
         if (badge) badge.textContent = otpCode === '1111' ? '1111' : `${otpCode} or 1111`;
         showToast(`Verification code: ${otpCode} (or use 1111)`, 'OTP Dispatched', 'info', 7000);
+
+        // Deliver simulated email in real time into floating inbox
+        if (res.simulatedEmail) {
+            receiveSimulatedEmail(res.simulatedEmail);
+        } else {
+            receiveSimulatedEmail({
+                id: 'otp_' + Date.now(),
+                from: '"Apex Bank" <onboarding@apexbank.ae>',
+                to: email,
+                subject: `Apex Bank — Your Access Code: ${otpCode}`,
+                code: otpCode,
+                type: 'otp',
+                timestamp: new Date().toISOString(),
+                html: `
+                    <div style="font-family: -apple-system, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff;">
+                        <div style="text-align: center; margin-bottom: 16px;">
+                            <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 16px; width: 40px; height: 40px; line-height: 40px; border-radius: 8px;">AB</div>
+                            <h2 style="margin: 8px 0 2px; color: #0f172a; font-size: 18px;">Apex Bank Corporate Portal</h2>
+                            <p style="color: #64748b; font-size: 12px; margin: 0;">Identity Verification Code</p>
+                        </div>
+                        <p style="color: #334155; font-size: 14px;">Use the following verification code to access your corporate onboarding application for CRN <strong>${crn}</strong>:</p>
+                        <div style="background: #f8fafc; border: 2px dashed #0284c7; border-radius: 8px; padding: 16px; text-align: center; margin: 16px 0;">
+                            <span style="font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #0284c7; font-family: monospace;">${otpCode}</span>
+                        </div>
+                        <p style="color: #64748b; font-size: 11px;">This code will expire in 5 minutes.</p>
+                    </div>
+                `
+            });
+        }
     } catch (err) {
         showLoginError(err.message || 'Failed to dispatch verification code.');
     }
@@ -1310,7 +1339,7 @@ async function handleOtpSubmit() {
                 goTo(result.data.current_step);
             }
 
-            showToast('Welcome to Vision Bank Corporate Portal', 'Authentication Successful', 'success');
+            showToast('Welcome to Apex Bank Corporate Portal', 'Authentication Successful', 'success');
         }
     } catch (err) {
         showLoginError(err.message || 'Incorrect verification code. Please try again.');
@@ -1331,6 +1360,9 @@ async function resendOtp() {
     try {
         const res = await window.VBApi.requestOtp(currentLoginCrn, currentLoginEmail);
         showToast(`A new verification code has been dispatched.`, 'Code Resent', 'info');
+        if (res && res.simulatedEmail) {
+            receiveSimulatedEmail(res.simulatedEmail);
+        }
     } catch (err) {
         showToast(err.message, 'Resend Failed', 'error');
     }
@@ -1356,6 +1388,8 @@ async function finalizeApp() {
         toggleReworkMode();
     }
 
+    const appRef = currentAppRef || 'AB-2026-001245';
+
     if (window.VBApi && window.VBApi.isAuthenticated()) {
         try {
             await window.VBApi.saveApplication(7, 'submitted', collectFullFormData());
@@ -1363,6 +1397,32 @@ async function finalizeApp() {
             console.error('Final submission error:', err);
         }
     }
+
+    // Deliver simulated application confirmation email in real time
+    receiveSimulatedEmail({
+        id: 'app_' + Date.now(),
+        from: '"Apex Bank Corporate Onboarding" <onboarding@apexbank.ae>',
+        to: currentLoginEmail || 'admin@apexholdings.ae',
+        subject: `Apex Bank — Corporate Application Received (${appRef})`,
+        type: 'application_submitted',
+        timestamp: new Date().toISOString(),
+        html: `
+            <div style="font-family: -apple-system, sans-serif; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px;">AB</div>
+                    <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Apex Bank Corporate Portal</h2>
+                    <p style="color: #64748b; font-size: 13px; margin: 0;">Application Submission Confirmation</p>
+                </div>
+                <p style="color: #334155; font-size: 14px;">Dear Corporate Customer,</p>
+                <p style="color: #334155; font-size: 14px;">Your corporate account application has been received and logged into our compliance verification queue.</p>
+                <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; padding: 16px; margin: 16px 0; text-align: center;">
+                    <span style="font-size: 11px; color: #166534; font-weight: 700; text-transform: uppercase;">Application Reference</span><br>
+                    <span style="font-size: 24px; font-weight: 800; color: #15803d; font-family: monospace;">${appRef}</span>
+                </div>
+                <p style="color: #475569; font-size: 13px;">Our onboarding desk will complete the verification within 1–2 business days. Your assigned Relationship Manager is <strong>Sarah Al-Qassimi</strong> (s.alqassimi@apexbank.ae &bull; +971 2 555 1234).</p>
+            </div>
+        `
+    });
 
     updateReviewSection();
     const reviewBody = document.getElementById('reviewBody');
@@ -1384,6 +1444,32 @@ function showSaveModal() {
     triggerAutoSave();
     const modal = document.getElementById('saveModal');
     if (modal) modal.classList.add('open');
+
+    // Deliver simulated progress saved email with resume link
+    const appRef = currentAppRef || 'AB-DRAFT-2026-001245';
+    receiveSimulatedEmail({
+        id: 'save_' + Date.now(),
+        from: '"Apex Bank Onboarding" <onboarding@apexbank.ae>',
+        to: currentLoginEmail || 'admin@apexholdings.ae',
+        subject: `Apex Bank — Resume Your Application (${appRef})`,
+        type: 'resume',
+        timestamp: new Date().toISOString(),
+        html: `
+            <div style="font-family: -apple-system, sans-serif; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px;">AB</div>
+                    <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Apex Bank Corporate Portal</h2>
+                    <p style="color: #64748b; font-size: 13px; margin: 0;">Application Progress Saved</p>
+                </div>
+                <p style="color: #334155; font-size: 14px;">Your onboarding progress has been saved securely.</p>
+                <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; margin: 16px 0; word-break: break-all;">
+                    <span style="font-size: 11px; color: #64748b; font-weight: 600;">Secure Resume Link:</span><br>
+                    <code style="color: #0284c7; font-size: 13px; font-weight: bold;">https://onboarding.apexbank.ae/resume/${appRef}</code>
+                </div>
+                <p style="color: #64748b; font-size: 12px;">You can return at any time with this link or by signing in with CRN <strong>${currentLoginCrn || '509077205'}</strong>.</p>
+            </div>
+        `
+    });
 }
 
 function showInviteModal(name) {
@@ -1408,6 +1494,29 @@ function sendInvite() {
     const sentModal = document.getElementById('inviteSentModal');
     if (sentModal) sentModal.classList.add('open');
     showToast(`Invite dispatched to ${email}`, 'Invite Sent', 'success');
+
+    // Deliver simulated invite email
+    receiveSimulatedEmail({
+        id: 'inv_' + Date.now(),
+        from: '"Apex Bank Compliance" <compliance@apexbank.ae>',
+        to: email,
+        subject: `Apex Bank: Invitation to Complete UBO Verification`,
+        type: 'invite',
+        timestamp: new Date().toISOString(),
+        html: `
+            <div style="font-family: -apple-system, sans-serif; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px;">AB</div>
+                    <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Apex Bank Corporate Portal</h2>
+                    <p style="color: #64748b; font-size: 13px; margin: 0;">Beneficial Ownership Identity Verification</p>
+                </div>
+                <p style="color: #334155; font-size: 14px;">You have been nominated as an Ultimate Beneficial Owner (UBO) for an Apex Bank corporate account application.</p>
+                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; margin: 16px 0; text-align: center;">
+                    <button type="button" style="background: #0284c7; color: #ffffff; border: none; font-weight: 700; font-size: 13px; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Upload Identity Documents →</button>
+                </div>
+            </div>
+        `
+    });
 }
 
 function triggerDocuSign() {
@@ -1433,19 +1542,44 @@ function triggerDocuSign() {
         if (alertBox) alertBox.style.display = 'block';
         triggerAutoSave();
         showToast('DocuSign invites sent to all signatories.', 'Invites Sent', 'success');
+
+        // Deliver simulated DocuSign email in real time
+        receiveSimulatedEmail({
+            id: 'docu_' + Date.now(),
+            from: '"DocuSign via Apex Bank" <documents@docusign.net>',
+            to: currentLoginEmail || 'admin@apexholdings.ae',
+            subject: 'DocuSign: Please Sign Your Apex Bank Corporate Account Client Agreement',
+            type: 'docusign',
+            timestamp: new Date().toISOString(),
+            html: `
+                <div style="font-family: -apple-system, sans-serif; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <div style="display: inline-block; background: #ffbe00; color: #0f172a; font-weight: 800; font-size: 16px; width: 44px; height: 44px; line-height: 44px; border-radius: 8px;">DS</div>
+                        <h2 style="margin: 10px 0 2px; color: #0f172a; font-size: 20px;">DocuSign Electronic Signature</h2>
+                        <p style="color: #64748b; font-size: 12px; margin: 0;">Apex Bank Corporate Account Opening Package</p>
+                    </div>
+                    <p style="color: #1e293b; font-size: 14px;">Hello Authorized Signatory,</p>
+                    <p style="color: #334155; font-size: 14px; line-height: 1.5;">Apex Bank has prepared your Corporate Banking Master Agreement and Authorized Signatory Mandate for digital signature.</p>
+                    <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 18px; margin: 18px 0; text-align: center;">
+                        <button type="button" onclick="simulateDocuSignSign()" style="background: #ffbe00; color: #111827; border: none; font-weight: 800; font-size: 14px; padding: 12px 26px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(255,190,0,0.3);">✍️ Review & Sign Document</button>
+                    </div>
+                    <p style="color: #64748b; font-size: 12px;">This envelope is secured with 256-bit AES encryption compliant with UAE Federal Law No. 1 of 2006 on Electronic Commerce and Transactions.</p>
+                </div>
+            `
+        });
     }, 1200);
 }
 
 function downloadReceipt() {
-    const appRef = currentAppRef || 'VB-2026-DEMO';
-    const company = document.getElementById('step2_name')?.value || 'Vision Holding PLC';
+    const appRef = currentAppRef || 'AB-2026-DEMO';
+    const company = document.getElementById('step2_name')?.value || 'Apex Global Holdings Ltd';
     const crn = document.getElementById('step2_crn')?.value || currentLoginCrn || '509077205';
 
-    const txt = `VISION BANK CORPORATE ONBOARDING RECEIPT\n==========================================\nApplication Ref: ${appRef}\nSubmitted: ${new Date().toLocaleDateString('en-AE', { day: '2-digit', month: 'long', year: 'numeric' })}\nCompany: ${company}\nCRN: ${crn}\n\nNEXT STEPS:\n1. Download Vision Bank Mobile App\n2. Sign in with your registered email\n3. Complete biometric identity verification\n4. Sign digital documents via DocuSign\n5. Final onboarding review: 2-3 business days\n\nRELATIONSHIP MANAGER:\nSarah Al-Qassimi | Corporate Banking\nEmail: s.alqassimi@visionbank.ae | Support: support@visionbank.ae\n`;
+    const txt = `APEX BANK CORPORATE ONBOARDING RECEIPT\n==========================================\nApplication Ref: ${appRef}\nSubmitted: ${new Date().toLocaleDateString('en-AE', { day: '2-digit', month: 'long', year: 'numeric' })}\nCompany: ${company}\nCRN: ${crn}\n\nNEXT STEPS:\n1. Download Apex Bank Mobile App\n2. Sign in with your registered email\n3. Complete biometric identity verification\n4. Sign digital documents via DocuSign\n5. Final onboarding review: 2-3 business days\n\nRELATIONSHIP MANAGER:\nSarah Al-Qassimi | Corporate Banking\nEmail: s.alqassimi@apexbank.ae | Support: support@apexbank.ae\n`;
 
     const a = Object.assign(document.createElement('a'), {
         href: URL.createObjectURL(new Blob([txt], { type: 'text/plain' })),
-        download: `VisionBank_Application_${appRef}.txt`
+        download: `ApexBank_Application_${appRef}.txt`
     });
     a.click();
     showToast('Onboarding receipt downloaded.', 'Download Complete', 'success');
@@ -1506,11 +1640,340 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
     m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
 });
 
+// ══════════════════════════════════════════════════════════════════════
+// ── REAL-TIME EMAIL SIMULATOR (IN-BROWSER VIRTUAL INBOX) ──────────────
+// ══════════════════════════════════════════════════════════════════════
+window.liveSimulatedEmails = [];
+let unreadEmailCount = 0;
+let selectedEmailId = null;
+let emailAudioCtx = null;
+
+function playEmailChime() {
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        if (!emailAudioCtx) emailAudioCtx = new AudioContext();
+        if (emailAudioCtx.state === 'suspended') {
+            emailAudioCtx.resume();
+        }
+
+        const now = emailAudioCtx.currentTime;
+        const osc1 = emailAudioCtx.createOscillator();
+        const osc2 = emailAudioCtx.createOscillator();
+        const gain = emailAudioCtx.createGain();
+
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(587.33, now); // D5
+        osc1.frequency.exponentialRampToValueAtTime(880, now + 0.12); // A5
+
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(880, now + 0.12);
+        osc2.frequency.exponentialRampToValueAtTime(1174.66, now + 0.3); // D6
+
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.18, now + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(emailAudioCtx.destination);
+
+        osc1.start(now);
+        osc2.start(now + 0.12);
+        osc1.stop(now + 0.45);
+        osc2.stop(now + 0.45);
+    } catch (e) {
+        // Audio synthesis optional / user gesture dependent
+    }
+}
+
+function receiveSimulatedEmail(emailItem, suppressAlert = false) {
+    if (!emailItem || !emailItem.subject) return;
+
+    // Deduplicate if already present
+    if (emailItem.id && window.liveSimulatedEmails.some(e => e.id === emailItem.id)) {
+        return;
+    }
+
+    const item = {
+        id: emailItem.id || 'eml_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+        from: emailItem.from || '"Apex Bank" <onboarding@apexbank.ae>',
+        to: emailItem.to || currentLoginEmail || 'applicant@corporate.ae',
+        subject: emailItem.subject || 'Apex Bank Notification',
+        html: emailItem.html || '<p>Notification from Apex Bank</p>',
+        text: emailItem.text || '',
+        code: emailItem.code || null,
+        type: emailItem.type || 'general',
+        timestamp: emailItem.timestamp || new Date().toISOString(),
+        read: false
+    };
+
+    window.liveSimulatedEmails.unshift(item);
+    unreadEmailCount++;
+    updateMailboxBadge();
+    renderMailboxList();
+
+    if (!suppressAlert) {
+        playEmailChime();
+        showIncomingEmailAlert(item);
+    }
+}
+
+function updateMailboxBadge() {
+    const badge = document.getElementById('mailboxUnreadBadge');
+    if (badge) {
+        if (unreadEmailCount > 0) {
+            badge.textContent = unreadEmailCount;
+            badge.style.display = 'inline-block';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+}
+
+function showIncomingEmailAlert(email) {
+    const alertBox = document.getElementById('incomingEmailAlert');
+    const subj = document.getElementById('alertSubject');
+    const sender = document.getElementById('alertSender');
+    const snippet = document.getElementById('alertSnippet');
+
+    if (alertBox && subj && sender) {
+        subj.textContent = email.subject;
+        sender.textContent = `From: ${email.from.replace(/<.*>/, '').replace(/"/g, '')}`;
+        if (snippet) {
+            snippet.innerHTML = email.code
+                ? `🔑 Access Code: <strong>${email.code}</strong> &bull; Click to view &amp; auto-fill`
+                : 'Click to open and read incoming email';
+        }
+        alertBox.style.display = 'flex';
+
+        if (window._alertTimer) clearTimeout(window._alertTimer);
+        window._alertTimer = setTimeout(() => {
+            dismissEmailAlert();
+        }, 8000);
+    }
+}
+
+function dismissEmailAlert() {
+    const alertBox = document.getElementById('incomingEmailAlert');
+    if (alertBox) alertBox.style.display = 'none';
+}
+
+function toggleMailboxPanel(forceState) {
+    const panel = document.getElementById('demoMailboxPanel');
+    if (!panel) return;
+
+    const isVisible = panel.style.display !== 'none';
+    const newState = typeof forceState === 'boolean' ? forceState : !isVisible;
+
+    if (newState) {
+        panel.style.display = 'flex';
+        dismissEmailAlert();
+        unreadEmailCount = 0;
+        updateMailboxBadge();
+        window.liveSimulatedEmails.forEach(e => e.read = true);
+        renderMailboxList();
+    } else {
+        panel.style.display = 'none';
+    }
+}
+
+function openMailboxAndSelectLatest() {
+    dismissEmailAlert();
+    toggleMailboxPanel(true);
+    if (window.liveSimulatedEmails.length > 0) {
+        openEmailInReader(window.liveSimulatedEmails[0].id);
+    }
+}
+
+function renderMailboxList() {
+    const listContainer = document.getElementById('mbEmailList');
+    const countEl = document.getElementById('mbCount');
+    if (!listContainer) return;
+
+    if (countEl) countEl.textContent = window.liveSimulatedEmails.length;
+
+    if (window.liveSimulatedEmails.length === 0) {
+        listContainer.innerHTML = `
+            <div class="mb-empty-state">
+                <div class="empty-icon" aria-hidden="true">📭</div>
+                <div class="empty-title">Simulated Inbox Ready</div>
+                <div class="empty-desc">Request an OTP code, trigger DocuSign, or submit an application to see emails arrive here instantly.</div>
+            </div>
+        `;
+        return;
+    }
+
+    listContainer.innerHTML = window.liveSimulatedEmails.map(email => {
+        const timeStr = formatEmailTime(email.timestamp);
+        const unreadClass = email.read ? '' : 'unread';
+        const codePill = email.code ? `<span style="background:#0284c7;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:6px;">OTP: ${email.code}</span>` : '';
+        const senderClean = email.from.replace(/<.*>/, '').replace(/"/g, '').trim();
+        return `
+            <div class="mb-item ${unreadClass}" onclick="openEmailInReader('${email.id}')" role="button" tabindex="0">
+                <div class="mb-item-top">
+                    <span class="mb-item-from">${escapeHtml(senderClean)}</span>
+                    <span class="mb-item-time">${timeStr}</span>
+                </div>
+                <div class="mb-item-subject">${escapeHtml(email.subject)} ${codePill}</div>
+                <div class="mb-item-preview">${escapeHtml(email.text || 'Click to view full message...')}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function formatEmailTime(isoString) {
+    try {
+        const d = new Date(isoString);
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch {
+        return 'Just now';
+    }
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function openEmailInReader(id) {
+    const email = window.liveSimulatedEmails.find(e => e.id === id);
+    if (!email) return;
+
+    email.read = true;
+    selectedEmailId = id;
+
+    const listView = document.getElementById('mbListView');
+    const readerView = document.getElementById('mbReaderView');
+    if (listView) listView.style.display = 'none';
+    if (readerView) readerView.style.display = 'flex';
+
+    const fromEl = document.getElementById('mbReaderFrom');
+    const toEl = document.getElementById('mbReaderTo');
+    const subjectEl = document.getElementById('mbReaderSubject');
+    const timeEl = document.getElementById('mbReaderTimestamp');
+    const actionBanner = document.getElementById('mbReaderActionBanner');
+    const contentEl = document.getElementById('mbReaderContent');
+
+    if (fromEl) fromEl.textContent = email.from;
+    if (toEl) toEl.textContent = email.to;
+    if (subjectEl) subjectEl.textContent = email.subject;
+    if (timeEl) timeEl.textContent = formatEmailTime(email.timestamp);
+
+    // Dynamic Action Banner for interactive demo
+    if (actionBanner) {
+        if (email.code) {
+            actionBanner.style.display = 'flex';
+            actionBanner.innerHTML = `
+                <div style="font-size:12px; color:#166534; font-weight:600;">
+                    💡 Access Code: <strong style="font-size:16px; font-family:monospace; color:#0284c7;">${email.code}</strong>
+                </div>
+                <button type="button" class="btn-autofill-email-code" onclick="autoFillOtpFromEmail('${email.code}')">
+                    ⚡ Auto-Fill Code into Login
+                </button>
+            `;
+        } else if (email.type === 'docusign') {
+            actionBanner.style.display = 'flex';
+            actionBanner.innerHTML = `
+                <div style="font-size:12px; color:#92400e; font-weight:600;">
+                    ✍️ E-Signature Required on Client Agreement
+                </div>
+                <button type="button" class="btn-autofill-email-code" style="background:#ffbe00; color:#111827;" onclick="simulateDocuSignSign()">
+                    Sign Documents Now
+                </button>
+            `;
+        } else if (email.type === 'resume') {
+            actionBanner.style.display = 'flex';
+            actionBanner.innerHTML = `
+                <div style="font-size:12px; color:#1e40af; font-weight:600;">
+                    💾 Direct Application Resume Link
+                </div>
+                <button type="button" class="btn-autofill-email-code" onclick="showToast('Resume link copied!', 'Resume', 'info'); closeModal('saveModal');">
+                    Continue Application
+                </button>
+            `;
+        } else {
+            actionBanner.style.display = 'none';
+        }
+    }
+
+    if (contentEl) {
+        contentEl.innerHTML = email.html || `<p>${escapeHtml(email.text)}</p>`;
+    }
+}
+
+function backToInboxList() {
+    const listView = document.getElementById('mbListView');
+    const readerView = document.getElementById('mbReaderView');
+    if (listView) listView.style.display = 'flex';
+    if (readerView) readerView.style.display = 'none';
+    selectedEmailId = null;
+    renderMailboxList();
+}
+
+function clearLiveMailbox() {
+    window.liveSimulatedEmails = [];
+    unreadEmailCount = 0;
+    updateMailboxBadge();
+    backToInboxList();
+    renderMailboxList();
+    if (window.ApexApi && window.ApexApi.clearSimulatedEmails) {
+        window.ApexApi.clearSimulatedEmails().catch(() => {});
+    }
+    showToast('Simulated mailbox cleared.', 'Inbox Reset', 'info');
+}
+
+function autoFillOtpFromEmail(code) {
+    autoFillOtp(code);
+    showToast(`Code ${code} auto-filled into login!`, 'Auto-Filled', 'success');
+    const overlay = document.getElementById('loginOverlay');
+    if (overlay && !overlay.classList.contains('hidden')) {
+        const firstOtp = document.querySelector('#otpInputs input');
+        if (firstOtp) firstOtp.focus();
+    }
+}
+
+function simulateDocuSignSign() {
+    showToast('Client Agreement digitally signed via DocuSign!', 'E-Signed', 'success');
+    const statusItems = document.getElementById('docusign-status-items');
+    if (statusItems) {
+        statusItems.innerHTML = `
+            <div class="timeline-item"><span style="font-weight:600;color:var(--success);">✓</span><span>DocuSign invitations dispatched</span></div>
+            <div class="timeline-item"><span style="font-weight:600;color:var(--success);">✓</span><span>All signatories digitally executed agreements</span></div>
+            <div class="timeline-item"><span style="font-weight:600;color:var(--success);">✓</span><span>Compliance audit trail verified</span></div>
+        `;
+    }
+    const alertBox = document.getElementById('docusign-alert');
+    if (alertBox) {
+        alertBox.innerHTML = `<strong>✅ Complete:</strong> All authorized signatories have signed. Ready for final review.`;
+        alertBox.style.background = '#f0fdf4';
+        alertBox.style.borderColor = '#86efac';
+        alertBox.style.color = '#166534';
+    }
+    backToInboxList();
+}
+
 // ── INITIALIZATION & SESSION REHYDRATION ON DOM READY ──
 window.addEventListener('DOMContentLoaded', async () => {
     initTheme();
     initParticles();
     updateNetworkStatus();
+
+    // Initial sync of simulated emails from server
+    if (window.ApexApi && window.ApexApi.getSimulatedEmails) {
+        try {
+            const emailRes = await window.ApexApi.getSimulatedEmails();
+            if (emailRes && emailRes.emails && emailRes.emails.length > 0) {
+                emailRes.emails.forEach(em => receiveSimulatedEmail(em, true));
+            }
+        } catch (e) {
+            // Server offline or first launch
+        }
+    }
 
     // Session Rehydration: Check if user has an active JWT session
     if (window.VBApi && window.VBApi.isAuthenticated()) {
