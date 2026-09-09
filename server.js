@@ -10,6 +10,7 @@ const nodemailer = require("nodemailer");
 require("dotenv").config();
 
 const app = express();
+app.set("trust proxy", 1); // Enable reverse-proxy support for Railway, Heroku, AWS
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 const JWT_SECRET = process.env.JWT_SECRET || "apex-bank-jwt-secret-dev-2026";
@@ -121,12 +122,13 @@ app.use(cors());
 app.use(express.json({ limit: "15mb" }));
 app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 
-// Rate limiters
+// Rate limiters (with trust proxy support enabled)
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 500,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false, default: false },
   message: { error: "Too many requests, please try again later." }
 });
 app.use(generalLimiter);
@@ -136,6 +138,7 @@ const authLimiter = rateLimit({
   max: 50,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false, default: false },
   message: { error: "Too many authentication attempts. Please try again in 15 minutes." }
 });
 
@@ -146,16 +149,17 @@ let useDatabase = false;
 // In-memory fallback store for local development without active DB
 const memStore = {
   applications: new Map(), // application_ref -> record
-  crnEmailIndex: new Map(), // \`\${crn}:\${email}\` -> application_ref
-  otpStore: new Map() // \`\${crn}:\${email}\` -> { otp, expiresAt }
+  crnEmailIndex: new Map(), // `${crn}:${email}` -> application_ref
+  otpStore: new Map() // `${crn}:${email}` -> { otp, expiresAt }
 };
 
 if (process.env.DATABASE_URL && process.env.DATABASE_URL.trim() !== "") {
   try {
     const isLocalhost = process.env.DATABASE_URL.includes("localhost") || process.env.DATABASE_URL.includes("127.0.0.1");
+    // Remote PostgreSQL (Supabase poolers, Railway, Neon) requires SSL without rejecting self-signed pooler certificates
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
-      ssl: NODE_ENV === "production" ? { rejectUnauthorized: true } : (isLocalhost ? false : { rejectUnauthorized: false })
+      ssl: isLocalhost ? false : { rejectUnauthorized: false }
     });
 
     pool.on("error", (err) => {
