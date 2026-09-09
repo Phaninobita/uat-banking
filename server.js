@@ -382,7 +382,7 @@ app.post("/api/auth/verify-otp", authLimiter, async (req, res) => {
 
     if (useDatabase) {
       const existing = await pool.query(
-        "SELECT * FROM corporate_onboarding_applications WHERE crn = $1 AND registered_email = $2 LIMIT 1",
+        "SELECT * FROM corporate_onboarding_applications WHERE crn = $1 AND LOWER(registered_email) = LOWER($2) LIMIT 1",
         [cleanCrn, cleanEmail]
       );
 

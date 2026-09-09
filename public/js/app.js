@@ -1465,14 +1465,32 @@ async function finalizeApp() {
 function showSaveModal() {
     triggerAutoSave();
     const modal = document.getElementById('saveModal');
-    if (modal) modal.classList.add('open');
+    const appRef = currentAppRef || 'AB-2026-001245';
+    const email = currentLoginEmail || 'admin@apexholdings.ae';
+    const crn = currentLoginCrn || '509077205';
+
+    if (modal) {
+        const bodyEl = modal.querySelector('.modal-body');
+        if (bodyEl) {
+            bodyEl.innerHTML = `
+                Your application progress has been saved securely to the database.<br><br>
+                You can return anytime with the link below or by signing in with CRN <strong>${crn}</strong> and email <strong>${email}</strong>.<br><br>
+                <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:12px;margin:8px 0;word-break:break-all;">
+                    <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;">Application Reference</span><br>
+                    <strong style="color:var(--primary);font-size:16px;font-family:monospace;">${appRef}</strong><br><br>
+                    <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;">Resume Link</span><br>
+                    <code style="color:var(--primary);font-size:12px;">https://onboarding.apexbank.ae/resume/${appRef}</code>
+                </div>
+            `;
+        }
+        modal.classList.add('open');
+    }
 
     // Deliver simulated progress saved email with resume link
-    const appRef = currentAppRef || 'AB-DRAFT-2026-001245';
     receiveSimulatedEmail({
         id: 'save_' + Date.now(),
         from: '"Apex Bank Onboarding" <onboarding@apexbank.ae>',
-        to: currentLoginEmail || 'admin@apexholdings.ae',
+        to: email,
         subject: `Apex Bank — Resume Your Application (${appRef})`,
         type: 'resume',
         timestamp: new Date().toISOString(),
@@ -1488,10 +1506,32 @@ function showSaveModal() {
                     <span style="font-size: 11px; color: #64748b; font-weight: 600;">Secure Resume Link:</span><br>
                     <code style="color: #0284c7; font-size: 13px; font-weight: bold;">https://onboarding.apexbank.ae/resume/${appRef}</code>
                 </div>
-                <p style="color: #64748b; font-size: 12px;">You can return at any time with this link or by signing in with CRN <strong>${currentLoginCrn || '509077205'}</strong>.</p>
+                <p style="color: #64748b; font-size: 12px;">You can return at any time with this link or by signing in with CRN <strong>${crn}</strong>.</p>
             </div>
         `
     });
+}
+
+function handleSignOut() {
+    if (window.VBApi) {
+        window.VBApi.clearToken();
+    }
+    showToast('Signed out. Enter your CRN and Email to resume your application.', 'Signed Out', 'info', 4000);
+    const overlay = document.getElementById('loginOverlay');
+    if (overlay) {
+        overlay.classList.remove('hidden');
+        const s1 = document.getElementById('lStep1');
+        const s2 = document.getElementById('lStep2');
+        if (s1) s1.classList.remove('hidden');
+        if (s2) s2.classList.add('hidden');
+        if (currentLoginCrn && document.getElementById('crnInput')) {
+            document.getElementById('crnInput').value = currentLoginCrn;
+        }
+        if (currentLoginEmail && document.getElementById('emailInput')) {
+            document.getElementById('emailInput').value = currentLoginEmail;
+        }
+        hideLoginError();
+    }
 }
 
 function showInviteModal(name) {
