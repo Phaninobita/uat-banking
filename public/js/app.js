@@ -92,27 +92,44 @@ function initParticles() {
 }
 
 // ── THEME INITIALIZATION ──
+const stepTitles = [
+    "",
+    "Documents & Verification",
+    "Company Information",
+    "UBO Identification",
+    "Ownership Structure",
+    "Corporate Governance",
+    "FATCA & CRS Compliance",
+    "Review & Final Submission"
+];
+
 function initTheme() {
-    const stored = localStorage.getItem('vb-theme');
+    const stored = localStorage.getItem('vb-theme') || 'dark';
     const themeBtn = document.getElementById('themeToggle');
-    if (stored === 'dark') {
-        document.body.classList.add('dark');
-        if (themeBtn) themeBtn.textContent = '☀️ Light';
-    } else {
+    if (stored === 'light') {
         document.body.classList.remove('dark');
-        if (themeBtn) themeBtn.textContent = '🌙 Dark';
+        document.body.classList.add('light');
+        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">🌙</span><span class="tt-label">Dark</span>';
+    } else {
+        document.body.classList.add('dark');
+        document.body.classList.remove('light');
+        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">☀️</span><span class="tt-label">Light</span>';
     }
 }
 
 function toggleTheme() {
-    const isDark = document.body.classList.toggle('dark');
+    const isLight = document.body.classList.contains('light');
     const themeBtn = document.getElementById('themeToggle');
-    if (isDark) {
+    if (isLight) {
+        document.body.classList.remove('light');
+        document.body.classList.add('dark');
         localStorage.setItem('vb-theme', 'dark');
-        if (themeBtn) themeBtn.textContent = '☀️ Light';
+        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">☀️</span><span class="tt-label">Light</span>';
     } else {
+        document.body.classList.add('light');
+        document.body.classList.remove('dark');
         localStorage.setItem('vb-theme', 'light');
-        if (themeBtn) themeBtn.textContent = '🌙 Dark';
+        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">🌙</span><span class="tt-label">Dark</span>';
     }
 }
 
@@ -210,6 +227,8 @@ function goTo(step) {
         currentStep = step;
         const hdrLabel = document.getElementById('hdr-step-label');
         if (hdrLabel) hdrLabel.textContent = `Step ${step} of ${totalSteps}`;
+        const hdrTitle = document.getElementById('hdrStepTitle');
+        if (hdrTitle && stepTitles[step]) hdrTitle.textContent = stepTitles[step];
 
         const progFill = document.getElementById('progFill');
         const progPct = document.getElementById('progPct');
@@ -633,70 +652,6 @@ async function loadSavedDocuments() {
     }
 }
 window.loadSavedDocuments = loadSavedDocuments;
-
-// ── Portal Mode Switcher (Onboarding, Live Banking, Microservices Mesh) ──
-function switchPortalMode(mode) {
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-    const activeBtn = document.getElementById(`modeBtn-${mode}`);
-    if (activeBtn) activeBtn.classList.add('active');
-
-    const onboardingWrap = document.getElementById('onboardingPortalView');
-    const bankingHub = document.getElementById('liveBankingHub');
-    const meshHub = document.getElementById('meshMonitorHub');
-
-    if (onboardingWrap) onboardingWrap.style.display = mode === 'onboarding' ? 'block' : 'none';
-    if (bankingHub) {
-        if (mode === 'banking') {
-            bankingHub.classList.add('active');
-            if (window.LiveBanking) window.LiveBanking.init();
-        } else {
-            bankingHub.classList.remove('active');
-        }
-    }
-    if (meshHub) {
-        if (mode === 'mesh') {
-            meshHub.classList.add('active');
-            renderMeshMonitor();
-        } else {
-            meshHub.classList.remove('active');
-        }
-    }
-}
-window.switchPortalMode = switchPortalMode;
-
-async function renderMeshMonitor() {
-    const grid = document.getElementById('meshMonitorGrid');
-    if (!grid) return;
-    grid.innerHTML = '<div style="color:#94a3b8;padding:20px;">Pinging Microservices Mesh...</div>';
-
-    try {
-        const res = await ApexApi.getMeshHealth();
-        if (res.status === 'healthy' && res.services) {
-            grid.innerHTML = res.services.map(s => `
-                <div class="mesh-service-card">
-                    <div class="msc-header">
-                        <div class="msc-title">
-                            <span class="pulse-indicator"></span>
-                            <span>${s.name}</span>
-                        </div>
-                        <span class="msc-port">:${s.port}</span>
-                    </div>
-                    <div style="font-size:12px;color:#94a3b8;display:flex;justify-content:space-between;margin-bottom:8px;">
-                        <span>Status: <strong style="color:#34d399;">ONLINE</strong></span>
-                        <span>Requests: <strong>${s.requestsHandled || 0}</strong></span>
-                    </div>
-                    <div style="font-size:11px;color:#cbd5e1;margin-top:12px;font-weight:600;">Active Endpoints:</div>
-                    <div class="msc-endpoints">
-                        ${s.endpoints.map(e => `<span class="msc-endpoint-tag">${e}</span>`).join('')}
-                    </div>
-                </div>
-            `).join('');
-        }
-    } catch (err) {
-        grid.innerHTML = `<div style="color:#f87171;padding:20px;">Could not connect to Gateway: ${err.message}</div>`;
-    }
-}
-
 
 // ── STEP 2: COMPANY INFO TABS & TOGGLES ──
 function switchTab(id) {
@@ -2459,115 +2414,18 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (window.MobileApp) window.MobileApp.init();
 });
 
-// ── PORTAL MODE SWITCHER & MICROSERVICES MESH CONTROLLER ──
+// ── ONBOARDING CONTROLLER HELPERS ──
 function switchPortalMode(mode) {
     const onboardingView = document.getElementById('onboardingPortalView');
-    const bankingView = document.getElementById('liveBankingHub');
-    const meshView = document.getElementById('meshMonitorHub');
-
-    // Update active button states
-    document.querySelectorAll('.portal-mode-nav .mode-btn').forEach(btn => btn.classList.remove('active'));
-    const activeBtn = document.getElementById(`modeBtn-${mode}`);
-    if (activeBtn) activeBtn.classList.add('active');
-
-    const stepper = document.getElementById('stepper');
-    const overallProg = document.querySelector('.overall-prog');
-
-    if (mode === 'onboarding') {
-        if (onboardingView) onboardingView.style.display = 'block';
-        if (bankingView) bankingView.style.display = 'none';
-        if (meshView) meshView.style.display = 'none';
-        if (stepper) stepper.style.display = 'flex';
-        if (overallProg) overallProg.style.display = 'flex';
-    } else if (mode === 'banking') {
-        if (onboardingView) onboardingView.style.display = 'none';
-        if (bankingView) bankingView.style.display = 'block';
-        if (meshView) meshView.style.display = 'none';
-        if (stepper) stepper.style.display = 'none';
-        if (overallProg) overallProg.style.display = 'none';
-        if (window.LiveBanking && typeof window.LiveBanking.init === 'function') {
-            window.LiveBanking.init();
-        }
-    } else if (mode === 'mesh') {
-        if (onboardingView) onboardingView.style.display = 'none';
-        if (bankingView) bankingView.style.display = 'none';
-        if (meshView) meshView.style.display = 'block';
-        if (stepper) stepper.style.display = 'none';
-        if (overallProg) overallProg.style.display = 'none';
-        renderMeshMonitor();
-    }
+    if (onboardingView) onboardingView.style.display = 'block';
 }
 
 function toggleMobileSimulator(forceState) {
-    const drawer = document.getElementById('mobileSimulatorDrawer');
-    if (!drawer) return;
-
-    const isOpen = typeof forceState === 'boolean' ? forceState : !drawer.classList.contains('open');
-    if (isOpen) {
-        drawer.classList.add('open');
-        if (window.MobileApp && typeof window.MobileApp.init === 'function') {
-            window.MobileApp.init();
-        }
-    } else {
-        drawer.classList.remove('open');
-    }
-}
-
-async function renderMeshMonitor() {
-    const grid = document.getElementById('meshMonitorGrid') || document.getElementById('meshGridContainer');
-    if (!grid) return;
-
-    grid.innerHTML = '<div style="color:#38bdf8;padding:20px;">🔄 Pinging all microservices across service mesh...</div>';
-
-    try {
-        const res = await ApexApi.getMeshHealth();
-        if (res.status === 'healthy') {
-            const svcCards = (res.services || []).map(svc => `
-                <div class="mesh-service-card">
-                    <div class="msc-header">
-                        <div class="msc-title">
-                            <span class="pulse-indicator"></span>
-                            <span>${svc.name}</span>
-                        </div>
-                        <span class="msc-port">Port ${svc.port}</span>
-                    </div>
-                    <div style="font-size:12px;color:#94a3b8;margin-bottom:8px;">
-                        Requests handled: <strong style="color:#38bdf8;">${svc.requestsHandled || 0}</strong> &bull; Status: <strong style="color:#10b981;">● Online</strong>
-                    </div>
-                    <div class="msc-endpoints">
-                        ${(svc.endpoints || []).map(ep => `<span class="msc-endpoint-tag">${ep}</span>`).join('')}
-                    </div>
-                </div>
-            `).join('');
-
-            const dbCard = `
-                <div class="mesh-service-card" style="border-color:#10b981;">
-                    <div class="msc-header">
-                        <div class="msc-title">
-                            <span class="pulse-indicator" style="background:#10b981;box-shadow:0 0 10px #10b981;"></span>
-                            <span>Database &amp; Base64 Vault Layer</span>
-                        </div>
-                        <span class="msc-port" style="background:rgba(16,185,129,0.2);color:#34d399;">Active</span>
-                    </div>
-                    <div style="font-size:12px;color:#cbd5e1;margin-bottom:8px;">
-                        Engine: <strong style="color:#34d399;">${res.database?.engine || 'PostgreSQL'}</strong> &bull;
-                        Base64 Vault: <strong style="color:#34d399;">Active</strong>
-                    </div>
-                    <div class="msc-endpoints">
-                        ${(res.database?.tables || []).map(tb => `<span class="msc-endpoint-tag" style="color:#34d399;">table: ${tb}</span>`).join('')}
-                    </div>
-                </div>
-            `;
-
-            grid.innerHTML = svcCards + dbCard;
-        }
-    } catch (err) {
-        grid.innerHTML = `<div style="color:#ef4444;padding:20px;">Failed to fetch mesh health: ${err.message}</div>`;
-    }
+    // Mobile simulator drawer removed in favor of native mobile app development
+    console.log('Mobile App will connect to API Gateway and Database.');
 }
 
 window.switchPortalMode = switchPortalMode;
 window.toggleMobileSimulator = toggleMobileSimulator;
-window.renderMeshMonitor = renderMeshMonitor;
 
 

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apex Bank — Corporate Account Portal</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/style.css?v=20260910_02">
 </head>
 <body>
 
@@ -84,62 +84,30 @@
             </div>
         </div>
 
-        <!-- ── LIVE BANKING TELEMETRY & FX TICKER ── -->
-        <div class="banking-ticker-bar" id="bankingTickerBar">
-            <div class="ticker-left">
-                <span class="ticker-pill ticker-pill-live">
-                    <span class="pulse-indicator"></span>
-                    <span>CBUAE Instant Payment Platform (IPP) &bull; Online</span>
-                </span>
-                <span class="ticker-pill ticker-pill-mesh" onclick="switchPortalMode('mesh')" title="Click to view Microservices Mesh status">
-                    <span>⚡ 5 Microservices Mesh: Healthy</span>
-                </span>
-                <span style="color:#64748b;font-size:10px;">|</span>
-                <span style="font-size:11px;color:#cbd5e1;font-weight:600;">Central Bank RTGS: Settled</span>
-            </div>
-            <div class="ticker-right">
-                <span style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;font-weight:700;">LIVE FX:</span>
-                <div class="fx-stream-wrap" id="fxStreamTicker">
-                    <span class="fx-pair-item"><span class="fx-pair-symbol">USD/AED</span> <span class="fx-pair-rate">3.6725</span> <span class="fx-up">▲ +0.01%</span></span>
-                    <span class="fx-pair-item"><span class="fx-pair-symbol">EUR/AED</span> <span class="fx-pair-rate">4.0210</span> <span class="fx-up">▲ +0.18%</span></span>
-                    <span class="fx-pair-item"><span class="fx-pair-symbol">GBP/AED</span> <span class="fx-pair-rate">4.7180</span> <span class="fx-down">▼ -0.04%</span></span>
-                </div>
-            </div>
-        </div>
-
-        <div class="hdr">
+        <header class="hdr" role="banner">
             <div class="hdr-brand">
                 <div class="logo-mark" aria-hidden="true">AB</div>
                 <div>
-                    <span>Apex Bank</span>
-                    <small>Corporate Live Banking</small>
+                    <span class="brand-name">Apex Bank</span>
+                    <small class="brand-sub">Corporate Onboarding Portal</small>
                 </div>
             </div>
 
-            <!-- Portal Mode Switcher Navigation -->
-            <div class="portal-mode-nav">
-                <button type="button" id="modeBtn-onboarding" class="mode-btn active" onclick="switchPortalMode('onboarding')">
-                    📝 Onboarding Portal
-                </button>
-                <button type="button" id="modeBtn-banking" class="mode-btn" onclick="switchPortalMode('banking')">
-                    ⚡ Live Core Banking Hub
-                </button>
-                <button type="button" id="modeBtn-mobile" class="mode-btn mode-btn-mobile" onclick="toggleMobileSimulator()">
-                    📱 Mobile App (Preview)
-                </button>
-                <button type="button" id="modeBtn-mesh" class="mode-btn" onclick="switchPortalMode('mesh')">
-                    🌐 Microservices Mesh
-                </button>
+            <!-- Central Step Indicator Capsule -->
+            <div class="hdr-step-capsule" id="hdrStepCapsule">
+                <span class="capsule-dot"></span>
+                <span class="capsule-step" id="hdr-step-label">Step 1 of 7</span>
+                <span class="capsule-sep">•</span>
+                <span class="capsule-title" id="hdrStepTitle">Documents &amp; Verification</span>
             </div>
 
             <div class="hdr-right">
-                <span style="font-size:13px;color:#cbd5e1;font-weight:500;" id="hdr-step-label" aria-live="polite">Step 1 of 7</span>
-                <button class="btn-rework" id="reworkToggle" onclick="toggleReworkMode()" aria-label="Toggle rework simulation mode">🔁 <span class="tt-label">Simulate Rework</span></button>
-                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode"><span id="themeIcon" aria-hidden="true">🌙</span><span class="tt-label">Dark</span></button>
-                <button class="btn btn-ghost btn-sm" onclick="showSaveModal()" style="color:#94a3b8;border-color:#1e3a5f;background:#0f2d50;font-size:12px;" aria-label="Save progress">💾 Save Progress</button>
-                <button class="btn btn-ghost btn-sm" id="btnSignOut" onclick="handleSignOut()" style="color:#f87171;border-color:rgba(239,68,68,0.4);background:rgba(239,68,68,0.1);font-size:12px;" aria-label="Sign out or switch application">🚪 Sign Out</button>
+                <button class="btn-rework" id="reworkToggle" onclick="toggleReworkMode()" aria-label="Toggle rework simulation mode" title="Simulate compliance return for correction">🔁 <span class="tt-label">Simulate Rework</span></button>
+                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode"><span id="themeIcon" aria-hidden="true">🌙</span><span class="tt-label">Dark</span></button>
+                <button class="btn btn-ghost btn-sm btn-hdr-save" onclick="showSaveModal()" aria-label="Save progress">💾 Save Draft</button>
+                <button class="btn btn-ghost btn-sm btn-hdr-signout" id="btnSignOut" onclick="handleSignOut()" aria-label="Sign out">🚪 Sign Out</button>
             </div>
-        </div>
+        </header>
 
         <!-- ── ONBOARDING PORTAL CONTAINER (MODE: ONBOARDING) ── -->
         <div id="onboardingPortalView">
@@ -976,115 +944,6 @@
         </div>
         </div> <!-- /#onboardingPortalView -->
 
-        <!-- ── LIVE CORE BANKING HUB (MODE: BANKING) ── -->
-        <div id="liveBankingHub" class="live-banking-view">
-            <div class="banking-hero-header">
-                <div class="banking-greeting">
-                    <h2>Live Treasury &amp; Accounts Management</h2>
-                    <p>Real-time corporate balances, Central Bank FTS settlement, and multi-currency liquidity</p>
-                </div>
-                <div class="total-liquidity-card">
-                    <div style="font-size:32px;">🏦</div>
-                    <div>
-                        <div style="font-size:11px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Consolidated Liquidity (AED)</div>
-                        <div class="liquidity-val" id="totalLiquidityDisplay">AED 5,042,890.50</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Corporate Accounts Grid -->
-            <div class="section-title" style="margin-bottom:16px;">
-                <span>💳 Corporate Accounts Portfolio</span>
-                <span style="font-size:12px;padding:3px 10px;border-radius:12px;background:rgba(16,185,129,0.15);color:#34d399;font-weight:700;">● Active Clearing</span>
-            </div>
-            <div class="accounts-grid" id="corpAccountsGrid">
-                <!-- Populated dynamically by live-banking.js -->
-                <div style="color:#94a3b8;padding:20px;">Loading live accounts from Banking Microservice...</div>
-            </div>
-
-            <!-- Wire Transfer & Real-Time Ledger Grid -->
-            <div class="banking-ops-grid">
-                <!-- Instant Wire Transfer Panel -->
-                <div class="transfer-panel">
-                    <h3><span>⚡ Instant Corporate Wire Transfer</span></h3>
-                    <p style="font-size:12px;color:#94a3b8;margin:0 0 16px;">Direct FTS settlement through CBUAE Instant Payment Platform &amp; SWIFT GPI.</p>
-                    <form onsubmit="LiveBanking.handleWireTransferSubmit(event)">
-                        <div class="field" style="margin-bottom:12px;">
-                            <label for="transferFromAccount">Debit From Account</label>
-                            <select id="transferFromAccount">
-                                <option value="7029841001">AED — Operating Account (7029841001)</option>
-                                <option value="7029841002">USD — Global Escrow (7029841002)</option>
-                                <option value="7029841003">EUR — Trade Settlement (7029841003)</option>
-                            </select>
-                        </div>
-                        <div class="field" style="margin-bottom:12px;">
-                            <label for="wireRecipientName">Beneficiary Name</label>
-                            <input type="text" id="wireRecipientName" placeholder="e.g. Al Futtaim Capital LLC" required>
-                        </div>
-                        <div class="field" style="margin-bottom:12px;">
-                            <label for="wireRecipientIban">Beneficiary IBAN / SWIFT BIC</label>
-                            <input type="text" id="wireRecipientIban" placeholder="AE08033000001234567890" required>
-                        </div>
-                        <div class="field" style="margin-bottom:12px;">
-                            <label for="wireAmount">Transfer Amount</label>
-                            <input type="number" step="0.01" id="wireAmount" placeholder="e.g. 50000" required>
-                        </div>
-                        <div class="field" style="margin-bottom:18px;">
-                            <label for="wireMemo">Payment Purpose / Reference</label>
-                            <input type="text" id="wireMemo" placeholder="e.g. Commercial Invoice Settlement">
-                        </div>
-                        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;background:linear-gradient(135deg,#059669,#10b981);">
-                            ⚡ Authorize &amp; Execute Wire
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Live Transaction Ledger Panel -->
-                <div class="tx-ledger-panel">
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-                        <h3 style="margin:0;font-size:16px;color:#f8fafc;display:flex;align-items:center;gap:8px;">
-                            <span>📑 Real-Time Transaction Ledger</span>
-                        </h3>
-                        <button type="button" class="btn btn-ghost btn-sm" onclick="LiveBanking.loadTransactions()" style="font-size:11px;">
-                            🔄 Refresh Ledger
-                        </button>
-                    </div>
-                    <div style="overflow-x:auto;">
-                        <table class="ledger-table">
-                            <thead>
-                                <tr>
-                                    <th>Counterparty / Ref</th>
-                                    <th>Category</th>
-                                    <th>Channel</th>
-                                    <th>Amount</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="liveTxTableBody">
-                                <!-- Populated dynamically by live-banking.js -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ── MICROSERVICES MESH MONITOR (MODE: MESH) ── -->
-        <div id="meshMonitorHub" class="mesh-monitor-view">
-            <div class="banking-hero-header">
-                <div class="banking-greeting">
-                    <h2>Microservices Mesh Status &amp; Topology</h2>
-                    <p>Real-time telemetry from decoupled banking microservices &amp; API Gateway orchestrator</p>
-                </div>
-                <button type="button" class="btn btn-primary btn-sm" onclick="renderMeshMonitor()">
-                    🔄 Ping All Microservices
-                </button>
-            </div>
-            <div class="mesh-grid" id="meshMonitorGrid">
-                <!-- Populated dynamically by renderMeshMonitor() -->
-            </div>
-        </div>
-
     </div>
 
 
@@ -1221,37 +1080,7 @@
         </div>
     </div>
 
-    <!-- ── INTERACTIVE MOBILE BANKING APP SIMULATOR (IPHONE 16 PRO) ── -->
-    <div class="mobile-simulator-overlay" id="mobileSimulatorDrawer" role="dialog" aria-label="Apex Bank Mobile Banking Simulator">
-        <div class="mobile-sim-header">
-            <h3><span>📱 Apex Mobile Bank Simulator</span></h3>
-            <button type="button" class="btn btn-ghost btn-sm" onclick="toggleMobileSimulator(false)" style="font-size:16px;">✕</button>
-        </div>
-        <div class="iphone-frame">
-            <!-- Dynamic Island -->
-            <div class="iphone-dynamic-island">
-                <div class="di-camera"></div>
-                <span style="font-size:8px;color:#34d399;font-weight:700;">● LIVE</span>
-            </div>
-            <!-- Status Bar -->
-            <div class="iphone-status-bar">
-                <span>9:41</span>
-                <span>5G 📶 100% 🔋</span>
-            </div>
-            <!-- Mobile App Screen Content -->
-            <div class="iphone-screen" id="mobileScreenContent">
-                <!-- Populated dynamically by mobile-app.js -->
-                <div style="text-align:center;padding:60px 20px;color:#94a3b8;">
-                    <div style="font-size:36px;margin-bottom:12px;">📲</div>
-                    <p>Loading Apex Mobile Banking Suite...</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script src="/js/api.js"></script>
-    <script src="/js/live-banking.js"></script>
-    <script src="/js/mobile-app.js"></script>
     <script src="/js/app.js"></script>
 </body>
 </html>
