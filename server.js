@@ -116,10 +116,21 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL.trim() !== "") {
     });
 
     pool
-      .query("SELECT NOW()")
+      .query(`
+        SELECT NOW();
+        ALTER TABLE corporate_onboarding_applications ADD COLUMN IF NOT EXISTS form_data JSONB DEFAULT '{}'::jsonb;
+        ALTER TABLE corporate_onboarding_applications ADD COLUMN IF NOT EXISTS current_step INT DEFAULT 1;
+        ALTER TABLE corporate_onboarding_applications ADD COLUMN IF NOT EXISTS company_name TEXT;
+        ALTER TABLE corporate_onboarding_applications ADD COLUMN IF NOT EXISTS trade_name TEXT;
+        ALTER TABLE corporate_onboarding_applications ADD COLUMN IF NOT EXISTS legal_type TEXT;
+        ALTER TABLE corporate_onboarding_applications ADD COLUMN IF NOT EXISTS licence_issue_date TEXT;
+        ALTER TABLE corporate_onboarding_applications ADD COLUMN IF NOT EXISTS licence_expiry_date TEXT;
+        ALTER TABLE corporate_onboarding_applications ADD COLUMN IF NOT EXISTS licence_issued_by TEXT;
+        ALTER TABLE corporate_onboarding_applications ADD COLUMN IF NOT EXISTS vat_trn TEXT;
+      `)
       .then(() => {
         useDatabase = true;
-        console.log("✅ [DATABASE] Successfully connected to PostgreSQL / Supabase");
+        console.log("✅ [DATABASE] Successfully connected and synced schema with PostgreSQL / Supabase");
       })
       .catch((err) => {
         console.warn("⚠️  [DATABASE] Could not connect to PostgreSQL:", err.message);
@@ -333,8 +344,10 @@ app.post("/api/auth/verify-otp", authLimiter, async (req, res) => {
           step2: { crn: cleanCrn, company_name: "", trade_name: "", legal_type: "Limited Liability Company (LLC)" }
         };
         const newRecord = await pool.query(
-          "INSERT INTO corporate_onboarding_applications (application_ref, crn, registered_email, current_step, status, form_data) VALUES ($1, $2, $3, 1, 'draft', $4::jsonb) RETURNING *",
-          [appRef, cleanCrn, cleanEmail, JSON.stringify(initialFormData)]
+          `INSERT INTO corporate_onboarding_applications (
+             application_ref, crn, registered_email, current_step, status, form_data, legal_type
+           ) VALUES ($1, $2, $3, 1, 'draft', $4::jsonb, $5) RETURNING *`,
+          [appRef, cleanCrn, cleanEmail, JSON.stringify(initialFormData), "Limited Liability Company (LLC)"]
         );
         applicationRecord = newRecord.rows[0];
         isNew = true;
@@ -461,12 +474,32 @@ app.post("/api/application/save", requireAuth, async (req, res) => {
 
     let updatedRecord = null;
     if (useDatabase) {
+      const s2 = mergedFormData.step2 || {};
+      const companyName = s2.company_name || null;
+      const tradeName = s2.trade_name || null;
+      const legalType = s2.legal_type || null;
+      const issueDate = s2.issue_date || null;
+      const expiryDate = s2.expiry_date || null;
+      const issuedBy = s2.issued_by || null;
+      const vatTrn = s2.vat_trn || null;
+
       const result = await pool.query(
         `UPDATE corporate_onboarding_applications
-         SET current_step = $2, status = $3, form_data = $4::jsonb, updated_at = NOW()
+         SET current_step = $2, status = $3, form_data = $4::jsonb,
+             company_name = COALESCE($5, company_name),
+             trade_name = COALESCE($6, trade_name),
+             legal_type = COALESCE($7, legal_type),
+             licence_issue_date = COALESCE($8, licence_issue_date),
+             licence_expiry_date = COALESCE($9, licence_expiry_date),
+             licence_issued_by = COALESCE($10, licence_issued_by),
+             vat_trn = COALESCE($11, vat_trn),
+             updated_at = NOW()
          WHERE application_ref = $1
          RETURNING *`,
-        [application_ref, resolvedStep, resolvedStatus, JSON.stringify(mergedFormData)]
+        [
+          application_ref, resolvedStep, resolvedStatus, JSON.stringify(mergedFormData),
+          companyName, tradeName, legalType, issueDate, expiryDate, issuedBy, vatTrn
+        ]
       );
       updatedRecord = result.rows[0];
     } else {
