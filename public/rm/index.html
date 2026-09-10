@@ -33,21 +33,17 @@
 
             <form id="rmLoginForm" onsubmit="handleRmLoginSubmit(event)">
                 <div class="rm-form-group">
-                    <label for="rmStaffId">Relationship Manager Staff ID / Email</label>
-                    <input type="text" id="rmStaffId" class="rm-input" value="RM-ADGM-9042" placeholder="e.g. RM-ADGM-9042 or s.alqassimi@apexbank.ae" required autofocus>
+                    <label for="rmStaffId">Relationship Manager Staff ID / Username</label>
+                    <input type="text" id="rmStaffId" class="rm-input" value="" placeholder="Enter staff username (e.g. phanee)" required autofocus>
                 </div>
 
                 <div class="rm-form-group">
                     <label for="rmPassword">Executive Security Passkey</label>
-                    <input type="password" id="rmPassword" class="rm-input" value="••••••••••••" placeholder="Enter secure bank keypass" required>
+                    <input type="password" id="rmPassword" class="rm-input" value="" placeholder="Enter secure passkey" required>
                 </div>
 
                 <button type="submit" class="rm-btn rm-btn-primary rm-btn-block">
                     🔐 Access Relationship Manager Suite
-                </button>
-
-                <button type="button" class="rm-btn rm-btn-demo rm-btn-block" onclick="quickDemoRmLogin()">
-                    ⚡ Instant 1-Click Executive Demo Access
                 </button>
             </form>
 
@@ -75,8 +71,8 @@
                 <div class="rm-user-badge">
                     <div class="rm-avatar">👔</div>
                     <div class="rm-user-info">
-                        <span class="rm-user-name" id="rmTopName">Sarah Al-Qassimi</span>
-                        <span class="rm-user-title" id="rmTopRole">Senior VP · Institutional Banking</span>
+                        <span class="rm-user-name" id="rmTopName">Phanee</span>
+                        <span class="rm-user-title" id="rmTopRole">Senior Relationship Manager · Corporate Banking</span>
                     </div>
                 </div>
                 <div class="rm-branch-badge">

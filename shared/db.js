@@ -117,41 +117,47 @@ async function initDb() {
           PRIMARY KEY (crn, email)
       );
 
-      CREATE INDEX IF NOT EXISTS idx_rm_invites_status ON rm_customer_invitations (status);
-      CREATE INDEX IF NOT EXISTS idx_rm_invites_token ON rm_customer_invitations (invite_token);
+      CREATE TABLE IF NOT EXISTS rm_users (
+          id SERIAL PRIMARY KEY,
+          username VARCHAR(64) UNIQUE NOT NULL,
+          password_hash VARCHAR(255) NOT NULL,
+          full_name VARCHAR(128) NOT NULL,
+          email VARCHAR(255) UNIQUE NOT NULL,
+          role VARCHAR(128) NOT NULL DEFAULT 'Senior Relationship Manager · Corporate Banking',
+          branch VARCHAR(128) DEFAULT 'ADGM Financial Center',
+          status VARCHAR(32) NOT NULL DEFAULT 'active',
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
 
-      INSERT INTO rm_customer_invitations (
-          crn, email, company_name, contact_person, phone, rm_name, rm_id, invite_token, status, invite_link, notes, created_at, updated_at
-      ) VALUES 
-      ('999', '99@yopmail.com', 'test99', 'test', '0509077205', 'Sarah Al-Qassimi (VP Corporate Banking)', 'RM-ADGM-9042', 'inv_tok_user_999', 'invited', 'http://localhost:3000/?crn=999&email=99%40yopmail.com', 'vvip', NOW(), NOW()),
-      ('509077205', 'sarah.director@innovateholding.ae', 'Innovate Holding Global PJSC', 'Sarah Jenkins', '+971 50 123 4567', 'Sarah Al-Qassimi (VP Corporate Banking)', 'RM-ADGM-9042', 'inv_tok_demo_509077205', 'in_progress', 'http://localhost:3000/?crn=509077205&email=sarah.director%40innovateholding.ae', 'Strategic ADGM multinational corporate client. Accelerated VIP onboarding.', NOW(), NOW()),
-      ('10029481', 'client@apex.ae', 'Al-Futtaim Global Holdings LLC', 'Tariq Al-Mansoor', '+971 4 800 9000', 'Sarah Al-Qassimi (VP Corporate Banking)', 'RM-ADGM-9042', 'inv_tok_demo_10029481', 'invited', 'http://localhost:3000/?crn=10029481&email=client%40apex.ae', 'Tier 1 Conglomerate. Multi-currency treasury and trade finance facilities required.', NOW(), NOW())
-      ON CONFLICT (crn, email) DO UPDATE SET
-        company_name = EXCLUDED.company_name,
-        contact_person = EXCLUDED.contact_person,
-        phone = EXCLUDED.phone;
+      CREATE INDEX IF NOT EXISTS idx_rm_users_username ON rm_users (LOWER(username));
+
+      -- Seed primary RM Executive (Phanee / Visionbank@324)
+      INSERT INTO rm_users (username, password_hash, full_name, email, role, branch, status)
+      VALUES (
+          'phanee',
+          'Visionbank@324',
+          'Phanee',
+          'phanee@apexbank.ae',
+          'Senior Relationship Manager · Corporate Banking',
+          'ADGM Financial Center',
+          'active'
+      )
+      ON CONFLICT (username) DO UPDATE SET
+          password_hash = EXCLUDED.password_hash,
+          full_name = EXCLUDED.full_name,
+          email = EXCLUDED.email;
+
+      -- Ensure fresh start: clear mock / demo customer records
+      TRUNCATE TABLE rm_customer_invitations CASCADE;
+      TRUNCATE TABLE application_documents CASCADE;
+      TRUNCATE TABLE corporate_onboarding_applications CASCADE;
+      TRUNCATE TABLE account_transactions CASCADE;
+      TRUNCATE TABLE corporate_accounts CASCADE;
     `);
 
     useDatabase = true;
-    console.log("✅ [DATABASE] Successfully connected & synchronized schema (Base64 vault active) with PostgreSQL / Supabase");
-
-    // Check if corporate_accounts is empty and auto-seed initial demo data
-    try {
-      const accCountRes = await pool.query("SELECT COUNT(*) FROM corporate_accounts");
-      if (parseInt(accCountRes.rows[0].count, 10) === 0) {
-        console.log("🌱 [DATABASE] Empty tables detected. Auto-seeding initial banking records...");
-        const fs = require("fs");
-        const path = require("path");
-        const seedSqlPath = path.join(__dirname, "../db/seed.sql");
-        if (fs.existsSync(seedSqlPath)) {
-          const seedSql = fs.readFileSync(seedSqlPath, "utf8");
-          await pool.query(seedSql);
-          console.log("✅ [DATABASE] Initial banking data seeded successfully.");
-        }
-      }
-    } catch (seedErr) {
-      console.warn("⚠️  [DATABASE] Auto-seeding check notice:", seedErr.message);
-    }
+    console.log("✅ [DATABASE] Successfully connected & synchronized schema (rm_users active, data clean & fresh) with PostgreSQL / Supabase");
   } catch (err) {
     console.warn("⚠️  [DATABASE] PostgreSQL connection inactive (" + err.message + ").");
     console.log("ℹ️  [DATABASE] Active fallback: High-speed in-memory repository with full Base64 document persistence enabled.");

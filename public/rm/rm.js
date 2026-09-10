@@ -11,6 +11,16 @@ let pipelineData = [];
 // Initialize on DOM Ready
 document.addEventListener("DOMContentLoaded", () => {
     checkRmAuthSession();
+
+    // Auto-dismiss login alerts on input
+    const idInput = document.getElementById("rmStaffId");
+    const pwdInput = document.getElementById("rmPassword");
+    const hideAlert = () => {
+        const alertBox = document.getElementById("rmLoginAlert");
+        if (alertBox) alertBox.style.display = "none";
+    };
+    if (idInput) idInput.addEventListener("input", hideAlert);
+    if (pwdInput) pwdInput.addEventListener("input", hideAlert);
 });
 
 // ── TOAST NOTIFICATIONS ──
@@ -63,8 +73,8 @@ function showDashboardView() {
     if (currentRmProfile) {
         const nameEl = document.getElementById("rmTopName");
         const roleEl = document.getElementById("rmTopRole");
-        if (nameEl) nameEl.textContent = currentRmProfile.name || "Sarah Al-Qassimi";
-        if (roleEl) roleEl.textContent = currentRmProfile.role || "Senior VP · Corporate Banking";
+        if (nameEl) nameEl.textContent = currentRmProfile.name || "Phanee";
+        if (roleEl) roleEl.textContent = currentRmProfile.role || "Senior Relationship Manager · Corporate Banking";
     }
 
     fetchInvitations();
@@ -93,22 +103,23 @@ async function handleRmLoginSubmit(ev) {
         localStorage.setItem("apex_rm_token", currentRmToken);
         localStorage.setItem("apex_rm_profile", JSON.stringify(currentRmProfile));
 
-        showRmToast("Executive authentication verified. Welcome back.", "success");
+        showRmToast(`Executive session authenticated. Welcome back, ${currentRmProfile.name || 'Phanee'}.`, "success");
         showDashboardView();
     } catch (err) {
         if (alertBox) {
             alertBox.className = "rm-alert-box error";
-            alertBox.textContent = err.message;
+            alertBox.innerHTML = `
+                <div style="display:flex;align-items:flex-start;gap:8px;justify-content:space-between;">
+                    <div>
+                        <strong style="color:#fca5a5;display:block;margin-bottom:2px;font-size:13px;">⚠️ Authentication Notice</strong>
+                        <span style="color:#e2e8f0;font-size:12px;line-height:1.4;">${err.message}</span>
+                    </div>
+                    <button type="button" onclick="document.getElementById('rmLoginAlert').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;line-height:1;">&times;</button>
+                </div>
+            `;
             alertBox.style.display = "block";
         }
     }
-}
-
-function quickDemoRmLogin() {
-    document.getElementById("rmStaffId").value = "RM-ADGM-9042";
-    document.getElementById("rmPassword").value = "ApexRM2026!";
-    const form = document.getElementById("rmLoginForm");
-    if (form) form.requestSubmit();
 }
 
 function handleRmSignOut() {

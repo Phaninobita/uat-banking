@@ -80,7 +80,13 @@
                     this.clearToken();
                 }
                 const errorMsg = data.error || `Request failed with status ${response.status}`;
-                throw new Error(errorMsg);
+                const err = new Error(errorMsg);
+                err.status = response.status;
+                err.data = data;
+                err.code = data.code;
+                err.title = data.title;
+                err.detail = data.detail;
+                throw err;
             }
 
             return data;

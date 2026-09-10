@@ -21,27 +21,66 @@ router.use((req, res, next) => {
 
 /**
  * POST /api/v1/rm/login
- * RM Executive Authentication
+ * RM Executive Authentication against rm_users table / memStore
  */
-router.post("/login", (req, res) => {
+router.post("/login", async (req, res) => {
   const { staffId, password } = req.body;
+  if (!staffId || !password) {
+    return res.status(400).json({ error: "Staff ID / Username and Security Passkey are required." });
+  }
 
-  // For demonstration and bank staff testing:
-  // Accept default RM staff or any valid email
-  const isDemo = !staffId || staffId === "RM-ADGM-9042" || staffId.includes("@apexbank.ae");
+  const cleanUser = staffId.trim().toLowerCase();
+  let userRecord = null;
 
-  const rmProfile = {
-    rm_id: "RM-ADGM-9042",
-    name: "Sarah Al-Qassimi",
-    role: "Senior Vice President — Corporate Banking",
-    department: "ADGM Institutional Clients Group",
-    branch: "Abu Dhabi Global Market (ADGM) Financial Center",
-    email: "s.alqassimi@apexbank.ae",
-    clearanceLevel: "Level 4 Senior Executive Banker",
-    activeSince: "2019"
-  };
+  // 1. Check PostgreSQL rm_users table if connected
+  if (db.isConnected()) {
+    try {
+      const dbRes = await db.query(
+        "SELECT * FROM rm_users WHERE LOWER(TRIM(username)) = $1 OR LOWER(TRIM(email)) = $1 LIMIT 1",
+        [cleanUser]
+      );
+      if (dbRes.rows && dbRes.rows.length > 0) {
+        userRecord = dbRes.rows[0];
+      }
+    } catch (e) {
+      console.warn("[RM-SERVICE] DB user lookup notice:", e.message);
+    }
+  }
+
+  // 2. Fallback to in-memory store
+  if (!userRecord) {
+    userRecord = memStore.getRmUser(cleanUser);
+  }
+
+  if (!userRecord || userRecord.status !== "active") {
+    return res.status(401).json({
+      error: `Authentication failed: Username "${staffId.trim()}" not found. Please verify your credentials or contact administrator.`,
+      code: "INVALID_RM_USER"
+    });
+  }
+
+  // 3. Password check
+  const isMatch = (userRecord.password_hash === password.trim()) || 
+                  (userRecord.password_hash === "Visionbank@324" && password.trim() === "Visionbank@324");
+  if (!isMatch) {
+    return res.status(401).json({
+      error: "Authentication failed: Incorrect Executive Security Passkey. Please try again.",
+      code: "INVALID_RM_PASSWORD"
+    });
+  }
 
   const sessionToken = "rm_sess_" + crypto.randomBytes(16).toString("hex");
+
+  const rmProfile = {
+    rm_id: "RM-" + userRecord.username.toUpperCase(),
+    username: userRecord.username,
+    name: userRecord.full_name || "Phanee",
+    role: userRecord.role || "Senior Relationship Manager · Corporate Banking",
+    department: "Institutional Clients Group",
+    branch: userRecord.branch || "Abu Dhabi Global Market (ADGM) Financial Center",
+    email: userRecord.email,
+    clearanceLevel: "Level 4 Senior Executive Banker"
+  };
 
   return res.json({
     success: true,
@@ -49,6 +88,63 @@ router.post("/login", (req, res) => {
     token: sessionToken,
     profile: rmProfile
   });
+});
+
+/**
+ * POST /api/v1/rm/users
+ * Provision additional Relationship Managers or staff members into rm_users table
+ */
+router.post("/users", async (req, res) => {
+  try {
+    const { username, password, fullName, email, role, branch } = req.body;
+    if (!username || !password || !fullName || !email) {
+      return res.status(400).json({ error: "Username, password, fullName, and email are required." });
+    }
+
+    const cleanUser = username.trim().toLowerCase();
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanRole = role ? role.trim() : "Senior Relationship Manager · Corporate Banking";
+    const cleanBranch = branch ? branch.trim() : "ADGM Financial Center";
+
+    let created = null;
+    if (db.isConnected()) {
+      try {
+        const insertRes = await db.query(`
+          INSERT INTO rm_users (username, password_hash, full_name, email, role, branch, status)
+          VALUES ($1, $2, $3, $4, $5, $6, 'active')
+          ON CONFLICT (username) DO UPDATE SET
+            password_hash = EXCLUDED.password_hash,
+            full_name = EXCLUDED.full_name,
+            email = EXCLUDED.email,
+            role = EXCLUDED.role,
+            branch = EXCLUDED.branch
+          RETURNING *
+        `, [cleanUser, password.trim(), fullName.trim(), cleanEmail, cleanRole, cleanBranch]);
+        if (insertRes.rows && insertRes.rows.length > 0) {
+          created = insertRes.rows[0];
+        }
+      } catch (dbErr) {
+        console.warn("[RM-SERVICE] DB insert user warning:", dbErr.message);
+      }
+    }
+
+    const memRecord = memStore.saveRmUser({
+      username: cleanUser,
+      password_hash: password.trim(),
+      full_name: fullName.trim(),
+      email: cleanEmail,
+      role: cleanRole,
+      branch: cleanBranch
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: `User ${cleanUser} registered successfully in rm_users table.`,
+      user: created || memRecord
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message || "Failed to create RM user." });
+  }
 });
 
 /**
@@ -152,8 +248,8 @@ router.post("/invite", async (req, res) => {
       company_name: companyName.trim(),
       contact_person: (contactPerson || "Authorized Signatory").trim(),
       phone: (phone || "").trim(),
-      rm_name: "Sarah Al-Qassimi (VP Corporate Banking)",
-      rm_id: "RM-ADGM-9042",
+      rm_name: req.body.rmName || "Phanee (Senior Relationship Manager)",
+      rm_id: req.body.rmId || "RM-PHANEE",
       invite_token: inviteToken,
       status: "invited",
       invite_link: inviteLink,

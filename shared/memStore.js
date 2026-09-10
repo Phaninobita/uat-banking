@@ -28,6 +28,10 @@ class MemoryStore {
     // Key: `${crn.trim().toUpperCase()}:${email.trim().toLowerCase()}` -> invitation record
     this.rmInvitations = new Map();
 
+    // Relationship Manager (RM) Authorized Users & Executives
+    // Key: username (lowercase) -> user record
+    this.rmUsers = new Map();
+
     // Microservice Telemetry & Health metrics
     this.metrics = {
       startTime: Date.now(),
@@ -47,150 +51,50 @@ class MemoryStore {
   }
 
   _seedInitialData() {
-    // Seed initial live corporate accounts
-    const initialAccounts = [
-      {
-        id: 101,
-        account_number: "7029841001",
-        iban: "AE29033000007029841001",
-        currency: "AED",
-        account_name: "Apex Global Holdings — Operating Account",
-        account_type: "Corporate Checking",
-        balance: 2450890.50,
-        available_balance: 2435890.50,
-        status: "active",
-        application_ref: "AB-2026-DEMO01"
-      },
-      {
-        id: 102,
-        account_number: "7029841002",
-        iban: "AE44033000007029841002",
-        currency: "USD",
-        account_name: "Apex Global Holdings — Global Escrow & Treasury",
-        account_type: "Multi-Currency Escrow",
-        balance: 850200.00,
-        available_balance: 850200.00,
-        status: "active",
-        application_ref: "AB-2026-DEMO01"
-      },
-      {
-        id: 103,
-        account_number: "7029841003",
-        iban: "AE88033000007029841003",
-        currency: "EUR",
-        account_name: "Apex Global Holdings — Trade Settlement EUR",
-        account_type: "Corporate Settlement",
-        balance: 412750.80,
-        available_balance: 412750.80,
-        status: "active",
-        application_ref: "AB-2026-DEMO01"
-      }
-    ];
-
-    initialAccounts.forEach(acc => this.accounts.set(acc.account_number, acc));
-
-    // Seed realistic ledger transactions
-    this.transactions = [
-      {
-        id: 1,
-        transaction_ref: "TX-SWIFT-" + crypto.randomBytes(3).toString("hex").toUpperCase(),
-        account_number: "7029841001",
-        type: "credit",
-        amount: 250000.00,
-        currency: "AED",
-        counterparty_name: "Al Futtaim Capital LLC",
-        counterparty_iban: "AE08033000001234567890",
-        description: "Commercial Lease & Treasury Advance",
-        category: "Corporate Inflow",
-        status: "settled",
-        channel: "swift_gpi",
-        timestamp: new Date(Date.now() - 3600 * 1000 * 4).toISOString()
-      },
-      {
-        id: 2,
-        transaction_ref: "TX-CB-" + crypto.randomBytes(3).toString("hex").toUpperCase(),
-        account_number: "7029841001",
-        type: "debit",
-        amount: 45200.00,
-        currency: "AED",
-        counterparty_name: "ADGM Licensing & Registration Authority",
-        counterparty_iban: "AE55033000009876543210",
-        description: "Commercial Trade Licence Renewal Fee",
-        category: "Government Fees",
-        status: "settled",
-        channel: "portal",
-        timestamp: new Date(Date.now() - 3600 * 1000 * 18).toISOString()
-      },
-      {
-        id: 3,
-        transaction_ref: "TX-FX-" + crypto.randomBytes(3).toString("hex").toUpperCase(),
-        account_number: "7029841002",
-        type: "credit",
-        amount: 120000.00,
-        currency: "USD",
-        counterparty_name: "Standard Chartered London",
-        counterparty_iban: "GB29SCBL000012345678",
-        description: "Cross-border Corporate Inflow FX",
-        category: "International Wire",
-        status: "settled",
-        channel: "swift_gpi",
-        timestamp: new Date(Date.now() - 3600 * 1000 * 28).toISOString()
-      }
-    ];
-
-    // Seed initial RM invitations
-    const initialInvites = [
-      {
-        crn: "999",
-        email: "99@yopmail.com",
-        company_name: "test99",
-        contact_person: "test",
-        phone: "0509077205",
-        rm_name: "Sarah Al-Qassimi (VP Corporate Banking)",
-        rm_id: "RM-ADGM-9042",
-        invite_token: "inv_tok_user_999",
-        status: "invited",
-        invite_link: "http://localhost:3000/?crn=999&email=99%40yopmail.com",
-        notes: "vvip",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        crn: "509077205",
-        email: "sarah.director@innovateholding.ae",
-        company_name: "Innovate Holding Global PJSC",
-        contact_person: "Sarah Jenkins",
-        phone: "+971 50 123 4567",
-        rm_name: "Sarah Al-Qassimi (VP Corporate Banking)",
-        rm_id: "RM-ADGM-9042",
-        invite_token: "inv_tok_demo_509077205",
-        status: "in_progress",
-        invite_link: "http://localhost:3000/?crn=509077205&email=sarah.director%40innovateholding.ae",
-        notes: "Strategic ADGM multinational corporate client. Accelerated VIP onboarding.",
-        created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
-        updated_at: new Date(Date.now() - 3600000 * 5).toISOString()
-      },
-      {
-        crn: "10029481",
-        email: "client@apex.ae",
-        company_name: "Al-Futtaim Global Holdings LLC",
-        contact_person: "Tariq Al-Mansoor",
-        phone: "+971 4 800 9000",
-        rm_name: "Sarah Al-Qassimi (VP Corporate Banking)",
-        rm_id: "RM-ADGM-9042",
-        invite_token: "inv_tok_demo_10029481",
-        status: "invited",
-        invite_link: "http://localhost:3000/?crn=10029481&email=client%40apex.ae",
-        notes: "Tier 1 Conglomerate. Multi-currency treasury and trade finance facilities required.",
-        created_at: new Date(Date.now() - 86400000).toISOString(),
-        updated_at: new Date(Date.now() - 86400000).toISOString()
-      }
-    ];
-
-    initialInvites.forEach(inv => {
-      const key = `${inv.crn.trim().toUpperCase()}:${inv.email.trim().toLowerCase()}`;
-      this.rmInvitations.set(key, inv);
+    // Seed primary Relationship Manager user (Phanee)
+    this.saveRmUser({
+      username: "phanee",
+      password_hash: "Visionbank@324",
+      full_name: "Phanee",
+      email: "phanee@apexbank.ae",
+      role: "Senior Relationship Manager · Corporate Banking",
+      branch: "ADGM Financial Center",
+      status: "active"
     });
+    // Note: No demo accounts, transactions, or customer invitations are pre-seeded.
+    // Database and in-memory stores start completely fresh.
+  }
+
+  getRmUser(usernameOrEmail) {
+    if (!usernameOrEmail) return null;
+    const clean = usernameOrEmail.trim().toLowerCase();
+    if (this.rmUsers.has(clean)) return this.rmUsers.get(clean);
+    for (const u of this.rmUsers.values()) {
+      if (u.email && u.email.toLowerCase() === clean) return u;
+    }
+    return null;
+  }
+
+  saveRmUser(user) {
+    const clean = (user.username || "").trim().toLowerCase();
+    if (!clean) return null;
+    const record = {
+      username: clean,
+      password_hash: user.password_hash || user.password || "Visionbank@324",
+      full_name: user.full_name || user.name || clean,
+      email: (user.email || `${clean}@apexbank.ae`).trim().toLowerCase(),
+      role: user.role || "Senior Relationship Manager · Corporate Banking",
+      branch: user.branch || "ADGM Financial Center",
+      status: user.status || "active",
+      created_at: user.created_at || new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    this.rmUsers.set(clean, record);
+    return record;
+  }
+
+  listRmUsers() {
+    return Array.from(this.rmUsers.values());
   }
 
   saveRmInvitation(invite) {

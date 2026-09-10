@@ -443,18 +443,14 @@ function markUploaded(cardId, input) {
             showToast(`Document "${file.name}" stored in Base64 document vault.`, 'Base64 Vault Active', 'info', 2500);
         }
 
-        // Pre-fill Step 2 company details if currently blank so database always has entity info
-        const activeComp = document.getElementById('hdrCompanyName')?.textContent?.trim() || 'Apex Global Holdings Ltd';
-        const s2Name = document.getElementById('step2_name');
-        if (s2Name && !s2Name.value) s2Name.value = activeComp;
-        const s2Trade = document.getElementById('trade_name');
-        if (s2Trade && !s2Trade.value) s2Trade.value = activeComp;
-        const s2Auth = document.getElementById('step2_issued_by');
-        if (s2Auth && !s2Auth.value) s2Auth.value = 'Abu Dhabi Global Market (ADGM)';
-        const s2Issue = document.getElementById('step2_issue_date');
-        if (s2Issue && !s2Issue.value) s2Issue.value = '2020-05-12';
-        const s2Expiry = document.getElementById('step2_expiry_date');
-        if (s2Expiry && !s2Expiry.value) s2Expiry.value = '2027-05-11';
+        // Pre-fill Step 2 company details only from authenticated RM session if available
+        const activeComp = document.getElementById('hdrCompanyName')?.textContent?.trim();
+        if (activeComp && activeComp !== 'Corporate Client') {
+            const s2Name = document.getElementById('step2_name');
+            if (s2Name && !s2Name.value) s2Name.value = activeComp;
+            const s2Trade = document.getElementById('trade_name');
+            if (s2Trade && !s2Trade.value) s2Trade.value = activeComp;
+        }
 
         triggerAutoSave();
         updateReviewSection();
@@ -2101,7 +2097,7 @@ async function handleLoginStep1() {
             });
         }
     } catch (err) {
-        showLoginError(err.message || 'Failed to dispatch verification code.');
+        showLoginError(err);
     }
 }
 
@@ -2161,7 +2157,7 @@ async function handleOtpSubmit() {
             showToast('Welcome to Apex Bank Corporate Portal', 'Authentication Successful', 'success');
         }
     } catch (err) {
-        showLoginError(err.message || 'Incorrect verification code. Please try again.');
+        showLoginError(err || 'Incorrect verification code. Please try again.');
         inputs.forEach(inp => inp.value = '');
         if (inputs[0]) inputs[0].focus();
     }
@@ -2187,12 +2183,42 @@ async function resendOtp() {
     }
 }
 
-function showLoginError(msg) {
+function showLoginError(err, customTitle = null) {
     const el = document.getElementById('loginError');
-    if (el) {
-        el.textContent = '⚠️ ' + msg;
-        el.classList.add('show');
+    if (!el) return;
+
+    let title = customTitle || (err && err.title) || 'Notice';
+    let detail = '';
+    let isRmInviteError = false;
+
+    const errMsg = typeof err === 'string' ? err : (err?.detail || err?.message || err?.error || 'An error occurred.');
+
+    if ((err && err.code === 'RM_INVITATION_NOT_FOUND') || errMsg.includes('Relationship Manager (RM) Database') || errMsg.includes('Access Restricted')) {
+        isRmInviteError = true;
+        title = '🔒 Access Restricted';
+        const displayCrn = currentLoginCrn || (err && err.crn) || 'entered CRN';
+        const displayEmail = currentLoginEmail || (err && err.email) || 'entered Email';
+        detail = `CRN <code>${displayCrn}</code> and Email <code>${displayEmail}</code> are not registered in the RM onboarding database. Only corporate applicants with an invitation issued by their Relationship Manager can log in.`;
+    } else if (errMsg.includes('OTP') || errMsg.includes('verification code') || errMsg.includes('code are required')) {
+        title = '🔑 Verification Notice';
+        detail = errMsg;
+    } else {
+        detail = errMsg;
     }
+
+    el.innerHTML = `
+        <div class="login-alert-hdr">
+            <span class="login-alert-title">${title}</span>
+            <button type="button" class="login-alert-close" onclick="hideLoginError()" title="Dismiss">&times;</button>
+        </div>
+        <p class="login-alert-desc">${detail}</p>
+        ${isRmInviteError ? `
+        <div class="login-alert-actions">
+            <span style="font-size:11px;color:#cbd5e1;">Need access? Contact your banker or:</span>
+            <a href="/rm" target="_blank" class="login-alert-link">👔 Open RM Executive Portal &rarr;</a>
+        </div>` : ''}
+    `;
+    el.classList.add('show');
 }
 
 function hideLoginError() {
@@ -2964,6 +2990,15 @@ window.addEventListener('DOMContentLoaded', async () => {
     } catch (paramErr) {
         console.warn('[ROUTING] URL params parse notice:', paramErr.message);
     }
+
+    // Auto-dismiss login alerts upon user typing in credentials
+    const crnInputEl = document.getElementById('crnInput');
+    const emailInputEl = document.getElementById('emailInput');
+    if (crnInputEl) crnInputEl.addEventListener('input', hideLoginError);
+    if (emailInputEl) emailInputEl.addEventListener('input', hideLoginError);
+    document.querySelectorAll('#otpInputs input').forEach(inp => {
+        inp.addEventListener('input', hideLoginError);
+    });
 
     // Always initialize Live Banking ticker & accounts in background
     if (window.LiveBanking) window.LiveBanking.init();
