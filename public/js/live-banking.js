@@ -101,7 +101,7 @@
                         </div>
                         <div class="corp-card-footer">
                             <span>IBAN: ${acc.iban}</span>
-                            <button type="button" class="btn-copy-iban" onclick="LiveBanking.copyIban('${acc.iban}')" title="Copy IBAN">­ƒôï Copy</button>
+                            <button type="button" class="btn-copy-iban" onclick="LiveBanking.copyIban('${acc.iban}')" title="Copy IBAN">&#x1F4CB; Copy</button>
                         </div>
                     </div>
                 `;

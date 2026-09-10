@@ -3,7 +3,7 @@
  * Comprehensive state management, non-destructive navigation, OCR extraction, and multi-step persistence.
  */
 
-// ÔöÇÔöÇ GLOBAL APPLICATION STATE ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; GLOBAL APPLICATION STATE &#x1F6C7;&#x1F6C7;
 let currentStep = 1;
 const totalSteps = 7;
 const stepProgress = [0, 14, 28, 43, 57, 71, 86, 100];
@@ -188,13 +188,13 @@ function renderOwnershipErrors() {
             const parent = inputs[0].parentElement;
             const error = document.createElement('div');
             error.className = 'error-note';
-            error.innerHTML = 'ÔØî RM Note: Ownership percentage must not exceed 60% for Corporate entities.';
+            error.innerHTML = '&#x274C; RM Note: Ownership percentage must not exceed 60% for Corporate entities.';
             parent.appendChild(error);
         }
     }
 }
 
-// ÔöÇÔöÇ NAVIGATION & STEPPER (FAST & NON-DESTRUCTIVE) ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; NAVIGATION & STEPPER (FAST & NON-DESTRUCTIVE) &#x1F6C7;&#x1F6C7;
 function goTo(step) {
     if (step < 1 || step > totalSteps) return;
     if (isReworkMode && step !== 4 && step !== 7) {
@@ -260,7 +260,7 @@ function goTo(step) {
     }, 150);
 }
 
-// ÔöÇÔöÇ STATE CACHING ON STEP EXIT ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; STATE CACHING ON STEP EXIT &#x1F6C7;&#x1F6C7;
 function captureCurrentStepState(step) {
     if (step === 4) {
         // Cache ownership rows
@@ -310,7 +310,7 @@ function captureCurrentStepState(step) {
     }
 }
 
-// ÔöÇÔöÇ STEP 1: DOCUMENT UPLOADS ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; STEP 1: DOCUMENT UPLOADS &#x1F6C7;&#x1F6C7;
 function triggerUpload(id) {
     const el = document.getElementById(id);
     if (el) el.click();
@@ -360,7 +360,7 @@ function markUploaded(cardId, input) {
         if (statusEl) {
             statusEl.innerHTML = `
                 <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-                    <div>Ô£ô <strong>${file.name}</strong> (${sizeFormatted})</div>
+                    <div>&#x2705; <strong>${file.name}</strong> (${sizeFormatted})</div>
                     <span class="db-status-chip">­ƒƒó Saved in DB (Base64)</span>
                 </div>
             `;
@@ -385,7 +385,7 @@ function markUploaded(cardId, input) {
         } else {
             thumbContainer.innerHTML = `
                 <div class="uc-pdf-badge">
-                    <span style="font-size:26px;">­ƒôä</span>
+                    <span style="font-size:26px;">&#x1F4E4;</span>
                     <span style="font-weight:700;letter-spacing:0.02em;color:#e2e8f0;">PDF Document</span>
                     <span style="font-size:11px;color:#38bdf8;font-weight:600;">${sizeFormatted}</span>
                 </div>
@@ -459,7 +459,7 @@ function markUploaded(cardId, input) {
     reader.readAsDataURL(file);
 }
 
-// ÔöÇÔöÇ Document Preview & Actions ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; Document Preview & Actions &#x1F6C7;&#x1F6C7;
 let currentPreviewCardId = null;
 
 function openDocPreview(cardId) {
@@ -551,7 +551,7 @@ async function removeUploadedDoc(cardId) {
     updateReviewSection();
 }
 
-// ÔöÇÔöÇ Restore Saved Documents on Load ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; Restore Saved Documents on Load &#x1F6C7;&#x1F6C7;
 async function loadSavedDocuments() {
     try {
         const appRef = (ApexApi.getApplicationRef && ApexApi.getApplicationRef()) || currentAppRef || 'AB-2026-DEMO01';
@@ -581,7 +581,7 @@ async function loadSavedDocuments() {
                 if (statusEl) {
                     statusEl.innerHTML = `
                         <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-                            <div>Ô£ô <strong>${doc.file_name}</strong> (${sizeFormatted})</div>
+                            <div>&#x2705; <strong>${doc.file_name}</strong> (${sizeFormatted})</div>
                             <span class="db-status-chip">­ƒƒó Stored in DB (Base64)</span>
                         </div>
                     `;
@@ -606,7 +606,7 @@ async function loadSavedDocuments() {
                 } else {
                     thumbContainer.innerHTML = `
                         <div class="uc-pdf-badge">
-                            <span style="font-size:26px;">­ƒôä</span>
+                            <span style="font-size:26px;">&#x1F4E4;</span>
                             <span style="font-weight:700;letter-spacing:0.02em;color:#e2e8f0;">PDF Document</span>
                             <span style="font-size:11px;color:#38bdf8;font-weight:600;">${sizeFormatted}</span>
                         </div>
@@ -650,7 +650,7 @@ async function loadSavedDocuments() {
 }
 window.loadSavedDocuments = loadSavedDocuments;
 
-// ÔöÇÔöÇ STEP 2: COMPANY INFO TABS & TOGGLES ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; STEP 2: COMPANY INFO TABS & TOGGLES &#x1F6C7;&#x1F6C7;
 function switchTab(id) {
     document.querySelectorAll('.sub-nav-item').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.sub-pane').forEach(p => p.classList.remove('active'));
@@ -689,7 +689,7 @@ function addOpsRow() {
     triggerAutoSave();
 }
 
-// ÔöÇÔöÇ STEP 3: UBO DETAILS & SERVER-SIDE OCR ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; STEP 3: UBO DETAILS & SERVER-SIDE OCR &#x1F6C7;&#x1F6C7;
 function addUploadBox(type) {
     uploadBoxCount++;
     const container = document.getElementById('ubo-passport-boxes');
@@ -715,7 +715,7 @@ function handleDocUpload(boxIdNum, input) {
         card.style.borderColor = 'var(--success)';
         const strongEl = card.querySelector('strong');
         if (strongEl) {
-            strongEl.textContent = 'Ô£ô ' + input.files[0].name;
+            strongEl.textContent = '&#x2705; ' + input.files[0].name;
             strongEl.style.color = 'var(--success-dark)';
         }
         const extractBtn = document.getElementById('btn-extract-ubos');
@@ -1031,7 +1031,7 @@ async function extractUboData() {
     }
 }
 
-// ÔöÇÔöÇ ROBUST DATE EXPIRY VALIDATION ENGINE ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; ROBUST DATE EXPIRY VALIDATION ENGINE &#x1F6C7;&#x1F6C7;
 function parseDateFlexible(dateVal) {
     if (!dateVal) return null;
     dateVal = String(dateVal).trim();
@@ -1065,7 +1065,7 @@ function evaluateDateInputExpiry(inputEl) {
         inputEl.classList.add('date-expired');
         if (badge) {
             badge.className = 'auto-badge badge-expired';
-            badge.innerHTML = `ÔÜá´©Å Expired (${inputEl.value || 'Past Date'})`;
+            badge.innerHTML = `&#x26A0; Expired (${inputEl.value || 'Past Date'})`;
         }
     } else {
         inputEl.classList.remove('date-expired');
@@ -1101,8 +1101,8 @@ function generatePrefilledIndividualCard(name, nat, dob, pass, expiry, gender) {
 
     card.innerHTML = `
         <div class="ubo-card-hdr">
-            <span class="ubo-n">­ƒæñ UBO ${uboCount} ÔÇö ${name}</span>
-            <button class="ubo-remove" onclick="this.closest('.ubo-card').remove();uboCount--;updateUboCountText();triggerAutoSave();" aria-label="Remove this UBO">Ô£ò Remove</button>
+            <span class="ubo-n">&#x1F464; UBO ${uboCount} ÔÇö ${name}</span>
+            <button class="ubo-remove" onclick="this.closest('.ubo-card').remove();uboCount--;updateUboCountText();triggerAutoSave();" aria-label="Remove this UBO">&#x2715; Remove</button>
         </div>
         <div class="ubo-card-body">
             <div class="g2" style="margin-bottom:14px;">
@@ -1115,7 +1115,7 @@ function generatePrefilledIndividualCard(name, nat, dob, pass, expiry, gender) {
                 </div>
                 <div class="field"><label>Date of Birth</label><input type="date" value="${dob}" class="auto-filled"><span class="auto-badge">ÔÜí Verified</span></div>
                 <div class="field"><label>Passport Number</label><input type="text" value="${pass}" class="auto-filled"><span class="auto-badge">ÔÜí Verified</span></div>
-                <div class="field"><label>Passport Expiry</label><input type="date" value="${expiry}" class="auto-filled ${expExpired ? 'date-expired' : ''}" oninput="evaluateDateInputExpiry(this)" onchange="evaluateDateInputExpiry(this)"><span class="auto-badge ${expExpired ? 'badge-expired' : ''}">${expExpired ? `ÔÜá´©Å Expired (${expiry})` : 'ÔÜí Verified'}</span></div>
+                <div class="field"><label>Passport Expiry</label><input type="date" value="${expiry}" class="auto-filled ${expExpired ? 'date-expired' : ''}" oninput="evaluateDateInputExpiry(this)" onchange="evaluateDateInputExpiry(this)"><span class="auto-badge ${expExpired ? 'badge-expired' : ''}">${expExpired ? `&#x26A0; Expired (${expiry})` : 'ÔÜí Verified'}</span></div>
                 <div class="field"><label>Gender</label><select class="auto-filled"><option ${gender === 'Male' ? 'selected' : ''}>Male</option><option ${gender === 'Female' ? 'selected' : ''}>Female</option></select><span class="auto-badge">ÔÜí Verified</span></div>
             </div>
             <span class="tog-label">Is this person a Politically Exposed Person (PEP)?</span>
@@ -1137,7 +1137,7 @@ function generatePrefilledCorpCard(name, reg, auth, incorp, expiry) {
     card.innerHTML = `
         <div class="ubo-card-hdr">
             <span class="ubo-n">­ƒÅó Corporate Shareholder ${uboCount} ÔÇö ${name}</span>
-            <button class="ubo-remove" onclick="this.closest('.ubo-card').remove();uboCount--;updateUboCountText();triggerAutoSave();" aria-label="Remove this corporate entity">Ô£ò Remove</button>
+            <button class="ubo-remove" onclick="this.closest('.ubo-card').remove();uboCount--;updateUboCountText();triggerAutoSave();" aria-label="Remove this corporate entity">&#x2715; Remove</button>
         </div>
         <div class="ubo-card-body">
             <div class="g2" style="margin-bottom:14px;">
@@ -1145,7 +1145,7 @@ function generatePrefilledCorpCard(name, reg, auth, incorp, expiry) {
                 <div class="field"><label>Licence / Registration No.</label><input type="text" value="${reg}" class="auto-filled"><span class="auto-badge">ÔÜí Verified</span></div>
                 <div class="field"><label>Issuing Authority</label><input type="text" value="${auth}" class="auto-filled"><span class="auto-badge">ÔÜí Verified</span></div>
                 <div class="field"><label>Date of Incorporation</label><input type="date" value="${incorp}" class="auto-filled"><span class="auto-badge">ÔÜí Verified</span></div>
-                <div class="field"><label>Licence Expiry Date</label><input type="date" value="${expiry}" class="auto-filled ${expExpired ? 'date-expired' : ''}" oninput="evaluateDateInputExpiry(this)" onchange="evaluateDateInputExpiry(this)"><span class="auto-badge ${expExpired ? 'badge-expired' : ''}">${expExpired ? `ÔÜá´©Å Expired (${expiry})` : 'ÔÜí Verified'}</span></div>
+                <div class="field"><label>Licence Expiry Date</label><input type="date" value="${expiry}" class="auto-filled ${expExpired ? 'date-expired' : ''}" oninput="evaluateDateInputExpiry(this)" onchange="evaluateDateInputExpiry(this)"><span class="auto-badge ${expExpired ? 'badge-expired' : ''}">${expExpired ? `&#x26A0; Expired (${expiry})` : 'ÔÜí Verified'}</span></div>
             </div>
         </div>
     `;
@@ -1181,7 +1181,7 @@ function resetUboPhase() {
     showToast('Returned to document upload phase.', 'Reset', 'info');
 }
 
-// ÔöÇÔöÇ STEP 4: OWNERSHIP STRUCTURE ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; STEP 4: OWNERSHIP STRUCTURE &#x1F6C7;&#x1F6C7;
 function setView(view) {
     const visualView = document.getElementById('viewVisual');
     const listView = document.getElementById('viewList');
@@ -1228,7 +1228,7 @@ function renderVisualView() {
         if (isCorp) card.classList.add('corp');
         card.dataset.entityName = name;
         card.dataset.entityType = isCorp ? 'corporate' : 'individual';
-        card.innerHTML = `<div class="ec-name">${name}</div><div class="ec-type">${isCorp ? '­ƒÅó Corporate Entity' : '­ƒæñ Individual UBO'}</div>`;
+        card.innerHTML = `<div class="ec-name">${name}</div><div class="ec-type">${isCorp ? '­ƒÅó Corporate Entity' : '&#x1F464; Individual UBO'}</div>`;
         container.appendChild(card);
     });
     checkLevels();
@@ -1333,7 +1333,7 @@ function calcTotal() {
     }
 }
 
-// ÔöÇÔöÇ DRAG & DROP FOR VISUAL BUILDER WITH SHAREHOLDING % & CORPORATE-ONLY LEVEL 2 UNLOCK ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; DRAG & DROP FOR VISUAL BUILDER WITH SHAREHOLDING % & CORPORATE-ONLY LEVEL 2 UNLOCK &#x1F6C7;&#x1F6C7;
 function drag(ev) {
     ev.dataTransfer.setData('text/plain', ev.currentTarget.id);
 }
@@ -1394,7 +1394,7 @@ function drop(ev) {
         dropZone.appendChild(card);
         const removeBtn = document.createElement('button');
         removeBtn.className = 'dz-remove';
-        removeBtn.textContent = 'Ô£ò';
+        removeBtn.textContent = '&#x2715;';
         removeBtn.title = 'Remove entity to pool';
         removeBtn.onclick = (e) => { e.stopPropagation(); removeCard(removeBtn); };
         dropZone.appendChild(removeBtn);
@@ -1593,7 +1593,7 @@ function showDragDemo() {
     }, 900);
 }
 
-// ÔöÇÔöÇ STEP 5: ROLES & GOVERNANCE ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; STEP 5: ROLES & GOVERNANCE &#x1F6C7;&#x1F6C7;
 function renderRoleTables() {
     const govBody = document.getElementById('govTableBody');
     const sysBody = document.getElementById('sysTableBody');
@@ -1712,7 +1712,7 @@ async function extractMakerChecker(input, roleType) {
     }
 }
 
-// ÔöÇÔöÇ STEP 6: FATCA & CRS ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; STEP 6: FATCA & CRS &#x1F6C7;&#x1F6C7;
 function initFATCA_CRS_States() {
     if (cachedTaxSelections) {
         const usYesBtn = document.querySelector('#fatca-us-person-tog .tog-btn:first-child');
@@ -1777,7 +1777,7 @@ function toggleCRS_FI(btn, isYes) {
     triggerAutoSave();
 }
 
-// ÔöÇÔöÇ STEP 7: REVIEW SECTION ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; STEP 7: REVIEW SECTION &#x1F6C7;&#x1F6C7;
 function toggleAccordion(id) {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('open');
@@ -1795,7 +1795,7 @@ function updateReviewSection() {
             const fileStatus = card ? card.querySelector('.file-status') : null;
             if (card && card.classList.contains('uploaded')) {
                 const label = labelInput ? labelInput.value : `Document ${i}`;
-                const filename = fileStatus ? fileStatus.textContent.replace('Ô£ô ', '') : 'Uploaded';
+                const filename = fileStatus ? fileStatus.textContent.replace('&#x2705; ', '') : 'Uploaded';
                 uploaded.push(`${label} (${filename})`);
             }
         }
@@ -1804,7 +1804,7 @@ function updateReviewSection() {
             if (ra1Count) ra1Count.textContent = '0 uploaded';
         } else {
             ra1Docs.innerHTML = uploaded.map(d =>
-                `<div class="rv-row"><span class="rvl">${d}</span><span class="rvv ok">Ô£ô Staged</span></div>`
+                `<div class="rv-row"><span class="rvl">${d}</span><span class="rvv ok">&#x2705; Staged</span></div>`
             ).join('');
             if (ra1Count) ra1Count.textContent = `${uploaded.length} uploaded`;
         }
@@ -1824,7 +1824,7 @@ function updateReviewSection() {
             <div class="rv-row"><span class="rvl">Company Name</span><span class="rvv">${name || 'ÔÇö'}</span></div>
             <div class="rv-row"><span class="rvl">Commercial Reg. No. (CRN)</span><span class="rvv">${crn || 'ÔÇö'}</span></div>
             <div class="rv-row"><span class="rvl">Legal Type</span><span class="rvv">${legalType || 'ÔÇö'}</span></div>
-            <div class="rv-row"><span class="rvl">Licence Expiry</span><span class="rvv" style="${isLicExpired ? 'color:#f87171;font-weight:700;' : ''}">${isLicExpired ? `ÔÜá´©Å Expired (${licenceExp})` : (licenceExp || 'ÔÇö')}</span></div>
+            <div class="rv-row"><span class="rvl">Licence Expiry</span><span class="rvv" style="${isLicExpired ? 'color:#f87171;font-weight:700;' : ''}">${isLicExpired ? `&#x26A0; Expired (${licenceExp})` : (licenceExp || 'ÔÇö')}</span></div>
         `;
     }
 
@@ -1839,7 +1839,7 @@ function updateReviewSection() {
                 const uboName = c.querySelector('.ubo-n')?.textContent || 'UBO';
                 const expInput = c.querySelector('input[type="date"].date-expired, input.date-expired');
                 const hasExpired = !!expInput;
-                uboRowsHtml += `<div class="rv-row"><span class="rvl">${uboName}</span><span class="rvv" style="${hasExpired ? 'color:#f87171;font-weight:700;' : ''}">${hasExpired ? `ÔÜá´©Å Expired Doc (${expInput.value})` : 'Ô£ô Valid'}</span></div>`;
+                uboRowsHtml += `<div class="rv-row"><span class="rvl">${uboName}</span><span class="rvv" style="${hasExpired ? 'color:#f87171;font-weight:700;' : ''}">${hasExpired ? `&#x26A0; Expired Doc (${expInput.value})` : '&#x2705; Valid'}</span></div>`;
             });
             ra3Body.innerHTML = uboRowsHtml;
         } else {
@@ -1875,7 +1875,7 @@ function updateReviewSection() {
     }
 }
 
-// ÔöÇÔöÇ COMPREHENSIVE DATA PERSISTENCE: COLLECT ALL 7 STEPS ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; COMPREHENSIVE DATA PERSISTENCE: COLLECT ALL 7 STEPS &#x1F6C7;&#x1F6C7;
 function collectFullFormData() {
     // Step 1: Uploaded documents
     const step1Docs = [];
@@ -1944,7 +1944,7 @@ function collectFullFormData() {
     };
 }
 
-// ÔöÇÔöÇ COMPREHENSIVE DATA PERSISTENCE: RESTORE ALL 7 STEPS ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; COMPREHENSIVE DATA PERSISTENCE: RESTORE ALL 7 STEPS &#x1F6C7;&#x1F6C7;
 function populateFormData(formData) {
     if (!formData) return;
 
@@ -2020,13 +2020,13 @@ function populateFormData(formData) {
     updateReviewSection();
 }
 
-// ÔöÇÔöÇ AUTOSAVE WITH VISUAL INDICATOR & BACKEND SYNC ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; AUTOSAVE WITH VISUAL INDICATOR & BACKEND SYNC &#x1F6C7;&#x1F6C7;
 function triggerAutoSave() {
     const el = document.getElementById('autosave');
     if (el) {
         const now = new Date();
         const time = now.toLocaleTimeString('en-AE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        el.textContent = `Ô£ô Progress saved at ${time}`;
+        el.textContent = `&#x2705; Progress saved at ${time}`;
         el.classList.add('visible');
         clearTimeout(autoSaveTimer);
         autoSaveTimer = setTimeout(() => el.classList.remove('visible'), 2500);
@@ -2039,7 +2039,7 @@ function triggerAutoSave() {
     }
 }
 
-// ÔöÇÔöÇ AUTHENTICATION & LOGIN WORKFLOW ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; AUTHENTICATION & LOGIN WORKFLOW &#x1F6C7;&#x1F6C7;
 async function handleLoginStep1() {
     const crnInput = document.getElementById('crnInput');
     const emailInput = document.getElementById('emailInput');
@@ -2226,7 +2226,7 @@ function hideLoginError() {
     if (el) el.classList.remove('show');
 }
 
-// ÔöÇÔöÇ Corporate Client Identity Display (Displays company name e.g. test99 on top) ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; Corporate Client Identity Display (Displays company name e.g. test99 on top) &#x1F6C7;&#x1F6C7;
 function displayClientNameOnTop(companyName, crn) {
     const capsule = document.getElementById('hdrCompanyCapsule');
     const nameEl = document.getElementById('hdrCompanyName');
@@ -2256,7 +2256,7 @@ function displayClientNameOnTop(companyName, crn) {
     }
 }
 
-// ÔöÇÔöÇ FINAL APPLICATION SUBMISSION ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; FINAL APPLICATION SUBMISSION &#x1F6C7;&#x1F6C7;
 async function finalizeApp() {
     if (isReworkMode) {
         showToast('Application resubmitted for relationship manager review!', 'Resubmitted', 'success');
@@ -2294,7 +2294,7 @@ async function finalizeApp() {
                     <span style="font-size: 11px; color: #166534; font-weight: 700; text-transform: uppercase;">Application Reference</span><br>
                     <span style="font-size: 24px; font-weight: 800; color: #15803d; font-family: monospace;">${appRef}</span>
                 </div>
-                <p style="color: #475569; font-size: 13px;">Our onboarding desk will complete the verification within 1ÔÇô2 business days. Your assigned Relationship Manager is <strong>Sarah Al-Qassimi</strong> (s.alqassimi@fnb-us.com &bull; +971 2 555 1234).</p>
+                <p style="color: #475569; font-size: 13px;">Our onboarding desk will complete the verification within 1ÔÇô2 business days. Your assigned Relationship Manager is <strong>Michael Vance</strong> (m.vance@fnb-us.com &bull; +1 212 555 0190).</p>
             </div>
         `
     });
@@ -2314,7 +2314,7 @@ async function finalizeApp() {
     showToast('Corporate account application submitted successfully!', 'Congratulations', 'success', 6000);
 }
 
-// ÔöÇÔöÇ UTILITY MODALS & HELPERS ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; UTILITY MODALS & HELPERS &#x1F6C7;&#x1F6C7;
 function showSaveModal() {
     triggerAutoSave();
     const modal = document.getElementById('saveModal');
@@ -2444,16 +2444,16 @@ function triggerDocuSign() {
     const statusItems = document.getElementById('docusign-status-items');
     const alertBox = document.getElementById('docusign-alert');
 
-    if (btn) { btn.innerHTML = 'Ôîø Dispatching InvitesÔÇª'; btn.style.opacity = '0.8'; btn.style.pointerEvents = 'none'; }
+    if (btn) { btn.innerHTML = 'Ôîø Dispatching Invites&hellip;'; btn.style.opacity = '0.8'; btn.style.pointerEvents = 'none'; }
     setTimeout(() => {
         if (actionArea) {
-            actionArea.innerHTML = `<div style="display:flex; align-items:center; gap:8px; color: #6ee7b7; font-weight: 700; font-size: 14px; width: 100%;"><span style="font-size:18px;" aria-hidden="true">Ô£à</span> Invites successfully dispatched to all signatories!</div>`;
+            actionArea.innerHTML = `<div style="display:flex; align-items:center; gap:8px; color: #6ee7b7; font-weight: 700; font-size: 14px; width: 100%;"><span style="font-size:18px;" aria-hidden="true">&#x2705;</span> Invites successfully dispatched to all signatories!</div>`;
             actionArea.style.borderColor = '#10b981';
             actionArea.style.background = 'rgba(16, 185, 129, 0.18)';
         }
         if (statusItems) {
             statusItems.innerHTML = `
-                <div class="timeline-item"><span style="font-weight:600;color:#34d399;">Ô£ô</span><span style="color:#f1f5f9;">DocuSign invitations sent to signatories</span></div>
+                <div class="timeline-item"><span style="font-weight:600;color:#34d399;">&#x2705;</span><span style="color:#f1f5f9;">DocuSign invitations sent to signatories</span></div>
                 <div class="timeline-item"><span style="font-weight:600;color:#fbbf24;">ÔÅ│</span><span style="color:#f1f5f9;">Awaiting document review and signatures</span></div>
                 <div class="timeline-item"><span style="font-weight:600;color:#fbbf24;">ÔÅ│</span><span style="color:#f1f5f9;">Estimated completion: 24ÔÇô72 hours</span></div>
             `;
@@ -2494,7 +2494,7 @@ function downloadReceipt() {
     const company = document.getElementById('step2_name')?.value || 'Apex Global Holdings Ltd';
     const crn = document.getElementById('step2_crn')?.value || currentLoginCrn || '509077205';
 
-    const txt = `First National Bank CORPORATE ONBOARDING RECEIPT\n==========================================\nApplication Ref: ${appRef}\nSubmitted: ${new Date().toLocaleDateString('en-AE', { day: '2-digit', month: 'long', year: 'numeric' })}\nCompany: ${company}\nCRN: ${crn}\n\nNEXT STEPS:\n1. Download First National Bank Mobile App\n2. Sign in with your registered email\n3. Complete biometric identity verification\n4. Sign digital documents via DocuSign\n5. Final onboarding review: 2-3 business days\n\nRELATIONSHIP MANAGER:\nSarah Al-Qassimi | Corporate Banking\nEmail: s.alqassimi@fnb-us.com | Support: support@fnb-us.com\n`;
+    const txt = `First National Bank CORPORATE ONBOARDING RECEIPT\n==========================================\nApplication Ref: ${appRef}\nSubmitted: ${new Date().toLocaleDateString('en-AE', { day: '2-digit', month: 'long', year: 'numeric' })}\nCompany: ${company}\nCRN: ${crn}\n\nNEXT STEPS:\n1. Download First National Bank Mobile App\n2. Sign in with your registered email\n3. Complete biometric identity verification\n4. Sign digital documents via DocuSign\n5. Final onboarding review: 2-3 business days\n\nRELATIONSHIP MANAGER:\nMichael Vance | Corporate Banking\nEmail: m.vance@fnb-us.com | Support: support@fnb-us.com\n`;
 
     const a = Object.assign(document.createElement('a'), {
         href: URL.createObjectURL(new Blob([txt], { type: 'text/plain' })),
@@ -2539,7 +2539,7 @@ function fireConfetti() {
     render();
 }
 
-// ÔöÇÔöÇ KEYBOARD SHORTCUTS & MODAL DISMISSAL ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; KEYBOARD SHORTCUTS & MODAL DISMISSAL &#x1F6C7;&#x1F6C7;
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
@@ -2560,7 +2560,7 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
 });
 
 // ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
-// ÔöÇÔöÇ REAL-TIME EMAIL SIMULATOR (IN-BROWSER VIRTUAL INBOX) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; REAL-TIME EMAIL SIMULATOR (IN-BROWSER VIRTUAL INBOX) &#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;
 // ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
 window.liveSimulatedEmails = [];
 let unreadEmailCount = 0;
@@ -2861,14 +2861,14 @@ function simulateDocuSignSign() {
     const statusItems = document.getElementById('docusign-status-items');
     if (statusItems) {
         statusItems.innerHTML = `
-            <div class="timeline-item"><span style="font-weight:600;color:var(--success);">Ô£ô</span><span>DocuSign invitations dispatched</span></div>
-            <div class="timeline-item"><span style="font-weight:600;color:var(--success);">Ô£ô</span><span>All signatories digitally executed agreements</span></div>
-            <div class="timeline-item"><span style="font-weight:600;color:var(--success);">Ô£ô</span><span>Compliance audit trail verified</span></div>
+            <div class="timeline-item"><span style="font-weight:600;color:var(--success);">&#x2705;</span><span>DocuSign invitations dispatched</span></div>
+            <div class="timeline-item"><span style="font-weight:600;color:var(--success);">&#x2705;</span><span>All signatories digitally executed agreements</span></div>
+            <div class="timeline-item"><span style="font-weight:600;color:var(--success);">&#x2705;</span><span>Compliance audit trail verified</span></div>
         `;
     }
     const alertBox = document.getElementById('docusign-alert');
     if (alertBox) {
-        alertBox.innerHTML = `<strong>Ô£à Complete:</strong> All authorized signatories have signed. Ready for final review.`;
+        alertBox.innerHTML = `<strong>&#x2705; Complete:</strong> All authorized signatories have signed. Ready for final review.`;
         alertBox.style.background = '#f0fdf4';
         alertBox.style.borderColor = '#86efac';
         alertBox.style.color = '#166534';
@@ -2876,7 +2876,7 @@ function simulateDocuSignSign() {
     backToInboxList();
 }
 
-// ÔöÇÔöÇ LIVE FORM INPUT LISTENERS: AUTOMATIC INSTANT DATABASE SYNC ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; LIVE FORM INPUT LISTENERS: AUTOMATIC INSTANT DATABASE SYNC &#x1F6C7;&#x1F6C7;
 let liveAutoSaveDebounce = null;
 document.addEventListener('input', (e) => {
     if (!e.target || e.target.closest('#loginOverlay') || e.target.closest('#demoMailboxWidget')) return;
@@ -2891,7 +2891,7 @@ document.addEventListener('change', (e) => {
     triggerAutoSave();
 });
 
-// ÔöÇÔöÇ INITIALIZATION & SESSION REHYDRATION ON DOM READY ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; INITIALIZATION & SESSION REHYDRATION ON DOM READY &#x1F6C7;&#x1F6C7;
 window.addEventListener('DOMContentLoaded', async () => {
     initTheme();
     initParticles();
@@ -2947,7 +2947,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 if (window.LiveBanking) window.LiveBanking.init();
                 if (window.MobileApp) window.MobileApp.init();
 
-                console.log('Ô£à [SESSION] Successfully rehydrated session for Application:', currentAppRef);
+                console.log('&#x2705; [SESSION] Successfully rehydrated session for Application:', currentAppRef);
             }
         } catch (err) {
             console.warn('Session expired or invalid, please sign in:', err.message);
@@ -3005,7 +3005,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (window.MobileApp) window.MobileApp.init();
 });
 
-// ÔöÇÔöÇ ONBOARDING CONTROLLER HELPERS ÔöÇÔöÇ
+// &#x1F6C7;&#x1F6C7; ONBOARDING CONTROLLER HELPERS &#x1F6C7;&#x1F6C7;
 function switchPortalMode(mode) {
     const onboardingView = document.getElementById('onboardingPortalView');
     if (onboardingView) onboardingView.style.display = 'block';
