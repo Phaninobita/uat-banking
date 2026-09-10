@@ -238,7 +238,41 @@ router.post("/invite", async (req, res) => {
 
     const cleanCrn = crn.trim().toUpperCase();
     const cleanEmail = email.trim().toLowerCase();
-    const companyUid = company_uid || resolveCompanyUid({ crn: cleanCrn, company_uid });
+
+    // Enforce 1:1 Corporate UID resolution: lookup from DB or memStore, else generate canonical CUID
+    let companyUid = "";
+    if (db.isConnected()) {
+      try {
+        const invCorp = await db.query(
+          "SELECT company_uid FROM rm_customer_invitations WHERE crn = $1 AND company_uid IS NOT NULL AND company_uid != '' LIMIT 1",
+          [cleanCrn]
+        );
+        if (invCorp.rows && invCorp.rows.length > 0) {
+          companyUid = invCorp.rows[0].company_uid;
+        } else {
+          const appCorp = await db.query(
+            "SELECT company_uid FROM corporate_onboarding_applications WHERE crn = $1 AND company_uid IS NOT NULL AND company_uid != '' LIMIT 1",
+            [cleanCrn]
+          );
+          if (appCorp.rows && appCorp.rows.length > 0) {
+            companyUid = appCorp.rows[0].company_uid;
+          }
+        }
+      } catch (dbErr) {
+        console.warn("[RM-SERVICE] Error querying existing corporate UID:", dbErr.message);
+      }
+    }
+
+    if (!companyUid) {
+      companyUid = memStore.getCompanyUidForCrn ? memStore.getCompanyUidForCrn(cleanCrn) : "";
+    }
+    if (!companyUid) {
+      companyUid = resolveCompanyUid({ crn: cleanCrn });
+    }
+    if (memStore.setCompanyUidForCrn) {
+      memStore.setCompanyUidForCrn(cleanCrn, companyUid);
+    }
+
     const inviteToken = "inv_" + crypto.randomBytes(12).toString("hex");
 
     // Construct customer portal URL with prefill parameters (including company_uid)

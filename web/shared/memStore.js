@@ -30,6 +30,9 @@ class MemoryStore {
     // Company UID to Application Ref Index
     this.companyUidIndex = new Map();
 
+    // Strict 1:1 CRN to Company UID Index
+    this.crnToCompanyUid = new Map();
+
     // Relationship Manager (RM) Customer Invitations Repository
     // Key: `${crn.trim().toUpperCase()}:${email.trim().toLowerCase()}` -> invitation record
     this.rmInvitations = new Map();
@@ -103,12 +106,67 @@ class MemoryStore {
     return Array.from(this.rmUsers.values());
   }
 
+  getCompanyUidForCrn(crn) {
+    if (!crn) return null;
+    const clean = crn.trim().toUpperCase();
+    if (this.crnToCompanyUid.has(clean)) {
+      return this.crnToCompanyUid.get(clean);
+    }
+    // Check existing applications
+    for (const app of this.applications.values()) {
+      if (app.crn && app.crn.trim().toUpperCase() === clean && app.company_uid) {
+        this.crnToCompanyUid.set(clean, app.company_uid);
+        return app.company_uid;
+      }
+    }
+    // Check existing invitations
+    for (const inv of this.rmInvitations.values()) {
+      if (inv.crn && inv.crn.trim().toUpperCase() === clean && inv.company_uid) {
+        this.crnToCompanyUid.set(clean, inv.company_uid);
+        return inv.company_uid;
+      }
+    }
+    return null;
+  }
+
+  setCompanyUidForCrn(crn, uid) {
+    if (!crn || !uid) return;
+    this.crnToCompanyUid.set(crn.trim().toUpperCase(), uid.trim().toUpperCase());
+  }
+
+  getApplicationByUidAndId(companyUid, id) {
+    if (!companyUid) return null;
+    const cleanUid = companyUid.trim().toUpperCase();
+    const cleanId = id ? id.toString() : null;
+    for (const app of this.applications.values()) {
+      const matchUid = app.company_uid && app.company_uid.trim().toUpperCase() === cleanUid;
+      if (matchUid) {
+        if (!cleanId) return app;
+        if (app.id && app.id.toString() === cleanId) return app;
+        if (app.application_ref && app.application_ref === cleanId) return app;
+      }
+    }
+    return null;
+  }
+
+  getApplicationByUid(companyUid) {
+    return this.getApplicationByUidAndId(companyUid, null);
+  }
+
   saveRmInvitation(invite) {
     const crn = (invite.crn || "").trim().toUpperCase();
     const email = (invite.email || "").trim().toLowerCase();
     const key = `${crn}:${email}`;
     const existing = this.rmInvitations.get(key) || {};
-    const company_uid = (invite.company_uid || existing.company_uid || ("CUID-" + crn.replace(/[^A-Z0-9]/g, ""))).toUpperCase();
+    
+    // Strict 1:1 CRN-to-UID resolution
+    let company_uid = invite.company_uid || existing.company_uid || this.getCompanyUidForCrn(crn);
+    if (!company_uid) {
+      company_uid = "CUID-" + crn.replace(/[^A-Z0-9]/g, "");
+    }
+    company_uid = company_uid.toUpperCase();
+    this.setCompanyUidForCrn(crn, company_uid);
+
     const record = {
       ...existing,
       ...invite,

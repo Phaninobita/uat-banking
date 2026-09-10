@@ -140,8 +140,6 @@ async function handleDispatchInvite(ev) {
     const companyName = document.getElementById("inviteCompany").value.trim();
     const contactPerson = document.getElementById("inviteContact").value.trim();
     const phone = document.getElementById("invitePhone").value.trim();
-    const companyUidInput = document.getElementById("inviteCompanyUid");
-    const company_uid = companyUidInput ? companyUidInput.value.trim() : "";
     const notes = document.getElementById("inviteNotes").value.trim();
 
     const submitBtn = document.getElementById("btnDispatchInvite");
@@ -157,7 +155,6 @@ async function handleDispatchInvite(ev) {
             body: JSON.stringify({
                 crn,
                 email,
-                company_uid,
                 companyName,
                 contactPerson,
                 phone,

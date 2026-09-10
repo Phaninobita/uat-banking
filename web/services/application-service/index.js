@@ -324,6 +324,87 @@ router.post("/audit", requireAuth, async (req, res) => {
   }
 });
 
+// 5. Dual-Key Application Record Query: SELECT * FROM corporate_onboarding_applications WHERE company_uid = $1 AND id = $2
+router.get("/record/:company_uid/:id", async (req, res) => {
+  const { company_uid, id } = req.params;
+  if (!company_uid || !id) {
+    return res.status(400).json({ error: "Both company_uid and id are required parameters." });
+  }
+
+  try {
+    let record = null;
+    if (db.isConnected()) {
+      const isNumericId = /^\d+$/.test(id);
+      const queryText = isNumericId
+        ? "SELECT * FROM corporate_onboarding_applications WHERE company_uid = $1 AND id = $2 LIMIT 1"
+        : "SELECT * FROM corporate_onboarding_applications WHERE company_uid = $1 AND application_ref = $2 LIMIT 1";
+      const result = await db.query(queryText, [company_uid.trim().toUpperCase(), id.trim()]);
+      if (result.rows && result.rows.length > 0) {
+        record = result.rows[0];
+      }
+    }
+
+    if (!record && memStore.getApplicationByUidAndId) {
+      record = memStore.getApplicationByUidAndId(company_uid, id);
+    }
+
+    if (!record) {
+      return res.status(404).json({ error: `Application record not found for company_uid ${company_uid} and id ${id}` });
+    }
+
+    return res.json({
+      success: true,
+      company_uid: record.company_uid,
+      id: record.id,
+      application_ref: record.application_ref,
+      data: record
+    });
+  } catch (err) {
+    console.error("[APPLICATION SERVICE] Dual-key lookup error:", err);
+    return res.status(500).json({ error: "Failed to retrieve application record." });
+  }
+});
+
+// 6. Corporate Application Record Query by Corporate UID: SELECT * FROM corporate_onboarding_applications WHERE company_uid = $1
+router.get("/by-uid/:company_uid", async (req, res) => {
+  const { company_uid } = req.params;
+  if (!company_uid) {
+    return res.status(400).json({ error: "company_uid parameter is required." });
+  }
+
+  try {
+    let record = null;
+    if (db.isConnected()) {
+      const result = await db.query(
+        "SELECT * FROM corporate_onboarding_applications WHERE company_uid = $1 ORDER BY id DESC LIMIT 1",
+        [company_uid.trim().toUpperCase()]
+      );
+      if (result.rows && result.rows.length > 0) {
+        record = result.rows[0];
+      }
+    }
+
+    if (!record && memStore.getApplicationByUid) {
+      record = memStore.getApplicationByUid(company_uid);
+    }
+
+    if (!record) {
+      return res.status(404).json({ error: `Application record not found for company_uid ${company_uid}` });
+    }
+
+    return res.json({
+      success: true,
+      company_uid: record.company_uid,
+      id: record.id,
+      application_ref: record.application_ref,
+      data: record
+    });
+  } catch (err) {
+    console.error("[APPLICATION SERVICE] Corporate UID lookup error:", err);
+    return res.status(500).json({ error: "Failed to retrieve corporate record." });
+  }
+});
+
 // Health check
 router.get("/health", (req, res) => {
   res.json({

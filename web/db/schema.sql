@@ -37,6 +37,9 @@ ALTER TABLE corporate_onboarding_applications ADD COLUMN IF NOT EXISTS address T
 CREATE INDEX IF NOT EXISTS idx_corp_apps_company_uid 
 ON corporate_onboarding_applications (company_uid);
 
+CREATE INDEX IF NOT EXISTS idx_corp_apps_cuid_id 
+ON corporate_onboarding_applications (company_uid, id);
+
 CREATE INDEX IF NOT EXISTS idx_corp_apps_crn_email 
 ON corporate_onboarding_applications (crn, registered_email);
 
@@ -74,6 +77,9 @@ ALTER TABLE rm_customer_invitations ADD COLUMN IF NOT EXISTS current_step INT DE
 CREATE INDEX IF NOT EXISTS idx_rm_inv_company_uid 
 ON rm_customer_invitations (company_uid);
 
+CREATE INDEX IF NOT EXISTS idx_rm_inv_cuid_id 
+ON rm_customer_invitations (company_uid, id);
+
 CREATE INDEX IF NOT EXISTS idx_rm_inv_crn_email 
 ON rm_customer_invitations (crn, email);
 
@@ -99,6 +105,9 @@ ALTER TABLE application_documents ADD COLUMN IF NOT EXISTS company_uid VARCHAR(6
 
 CREATE INDEX IF NOT EXISTS idx_app_docs_company_uid 
 ON application_documents (company_uid);
+
+CREATE INDEX IF NOT EXISTS idx_app_docs_cuid_id 
+ON application_documents (company_uid, id);
 
 CREATE INDEX IF NOT EXISTS idx_app_docs_ref 
 ON application_documents (application_ref);
@@ -130,6 +139,9 @@ ALTER TABLE corporate_accounts ADD COLUMN IF NOT EXISTS company_uid VARCHAR(64);
 CREATE INDEX IF NOT EXISTS idx_corp_acc_company_uid 
 ON corporate_accounts (company_uid);
 
+CREATE INDEX IF NOT EXISTS idx_corp_acc_cuid_id 
+ON corporate_accounts (company_uid, id);
+
 -- =======================================================
 -- 5. Banking Transactions Ledger Table
 -- =======================================================
@@ -157,6 +169,9 @@ ALTER TABLE account_transactions ADD COLUMN IF NOT EXISTS swift_uetr VARCHAR(64)
 
 CREATE INDEX IF NOT EXISTS idx_acc_tx_company_uid 
 ON account_transactions (company_uid);
+
+CREATE INDEX IF NOT EXISTS idx_acc_tx_cuid_id 
+ON account_transactions (company_uid, id);
 
 CREATE INDEX IF NOT EXISTS idx_acc_tx_acc_num 
 ON account_transactions (account_number);
@@ -188,6 +203,9 @@ ALTER TABLE corporate_audit_logs ADD COLUMN IF NOT EXISTS channel TEXT DEFAULT '
 
 CREATE INDEX IF NOT EXISTS idx_audit_company_uid 
 ON corporate_audit_logs (company_uid);
+
+CREATE INDEX IF NOT EXISTS idx_audit_cuid_id 
+ON corporate_audit_logs (company_uid, id);
 
 CREATE INDEX IF NOT EXISTS idx_audit_created_at 
 ON corporate_audit_logs (created_at DESC);
@@ -302,6 +320,52 @@ BEGIN
     UPDATE mobile_audit_logs
     SET company_uid = 'CUID-' || UPPER(REGEXP_REPLACE(target_crn, '[^a-zA-Z0-9]', '', 'g'))
     WHERE (company_uid IS NULL OR company_uid = '') AND target_crn IS NOT NULL;
+
+    -- =======================================================
+    -- 9. Enforce NOT NULL and UNIQUE Primary Constraints
+    -- =======================================================
+    -- Enforce on corporate_onboarding_applications
+    BEGIN
+        ALTER TABLE corporate_onboarding_applications ALTER COLUMN company_uid SET NOT NULL;
+    EXCEPTION WHEN OTHERS THEN NULL;
+    END;
+
+    BEGIN
+        ALTER TABLE corporate_onboarding_applications ADD CONSTRAINT uq_corp_apps_company_uid UNIQUE (company_uid);
+    EXCEPTION WHEN OTHERS THEN NULL;
+    END;
+
+    -- Enforce on rm_customer_invitations
+    BEGIN
+        ALTER TABLE rm_customer_invitations ALTER COLUMN company_uid SET NOT NULL;
+    EXCEPTION WHEN OTHERS THEN NULL;
+    END;
+
+    BEGIN
+        ALTER TABLE rm_customer_invitations ADD CONSTRAINT uq_rm_inv_company_uid UNIQUE (company_uid);
+    EXCEPTION WHEN OTHERS THEN NULL;
+    END;
+
+    -- Enforce NOT NULL on child tables
+    BEGIN
+        ALTER TABLE application_documents ALTER COLUMN company_uid SET NOT NULL;
+    EXCEPTION WHEN OTHERS THEN NULL;
+    END;
+
+    BEGIN
+        ALTER TABLE corporate_accounts ALTER COLUMN company_uid SET NOT NULL;
+    EXCEPTION WHEN OTHERS THEN NULL;
+    END;
+
+    BEGIN
+        ALTER TABLE account_transactions ALTER COLUMN company_uid SET NOT NULL;
+    EXCEPTION WHEN OTHERS THEN NULL;
+    END;
+
+    BEGIN
+        ALTER TABLE corporate_audit_logs ALTER COLUMN company_uid SET NOT NULL;
+    EXCEPTION WHEN OTHERS THEN NULL;
+    END;
 END $$;
 
 -- Automatic updated_at trigger function
