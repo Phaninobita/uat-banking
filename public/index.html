@@ -93,8 +93,16 @@
                 <div class="logo-mark" aria-hidden="true">AB</div>
                 <div>
                     <span class="brand-name">Apex Bank</span>
-                    <small class="brand-sub">Corporate Onboarding Portal</small>
+                    <small class="brand-sub" id="hdrBrandSub">Corporate Onboarding Portal</small>
                 </div>
+            </div>
+
+            <!-- Corporate Client Identity Capsule (Displays Company Name e.g. test99 on top) -->
+            <div class="hdr-company-capsule" id="hdrCompanyCapsule" style="display:none; align-items:center; gap:8px; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); padding:5px 14px; border-radius:20px; animation:fadeUp 0.3s ease;">
+                <span style="font-size:15px;" aria-hidden="true">🏢</span>
+                <span id="hdrCompanyName" style="font-weight:700; color:#ffffff; font-size:13px; letter-spacing:0.02em;"></span>
+                <span style="color:#94a3b8; font-size:11px;">•</span>
+                <span id="hdrCrnDisplay" style="font-size:11px; color:#38bdf8; font-family:monospace; font-weight:600;"></span>
             </div>
 
             <!-- Central Step Indicator Capsule -->
@@ -108,7 +116,6 @@
             <div class="hdr-right">
                 <a href="/rm" target="_blank" class="btn btn-ghost btn-sm" style="color: #f59e0b; border-color: rgba(245, 158, 11, 0.4); text-decoration: none;" title="Open Relationship Manager Portal">👔 RM Portal</a>
                 <button class="btn-rework" id="reworkToggle" onclick="toggleReworkMode()" aria-label="Toggle rework simulation mode" title="Simulate compliance return for correction">🔁 <span class="tt-label">Simulate Rework</span></button>
-                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode"><span id="themeIcon" aria-hidden="true">🌙</span><span class="tt-label">Dark</span></button>
                 <button class="btn btn-ghost btn-sm btn-hdr-save" onclick="showSaveModal()" aria-label="Save progress">💾 Save Draft</button>
                 <button class="btn btn-ghost btn-sm btn-hdr-signout" id="btnSignOut" onclick="handleSignOut()" aria-label="Sign out">🚪 Sign Out</button>
             </div>

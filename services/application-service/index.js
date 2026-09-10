@@ -35,6 +35,15 @@ router.get("/current", requireAuth, async (req, res) => {
       return res.status(404).json({ error: "Application profile not found." });
     }
 
+    // Ensure company_name reflects the RM invitation record if available
+    const rmInv = memStore.getRmInvitation(applicationRecord.crn, applicationRecord.registered_email);
+    if (rmInv && rmInv.company_name) {
+      if (!applicationRecord.company_name || applicationRecord.company_name === "Apex Global Holdings Ltd") {
+        applicationRecord.company_name = rmInv.company_name;
+        applicationRecord.trade_name = rmInv.company_name;
+      }
+    }
+
     return res.json({
       success: true,
       data: applicationRecord,

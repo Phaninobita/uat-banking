@@ -444,10 +444,11 @@ function markUploaded(cardId, input) {
         }
 
         // Pre-fill Step 2 company details if currently blank so database always has entity info
+        const activeComp = document.getElementById('hdrCompanyName')?.textContent?.trim() || 'Apex Global Holdings Ltd';
         const s2Name = document.getElementById('step2_name');
-        if (s2Name && !s2Name.value) s2Name.value = 'Apex Global Holdings Ltd';
+        if (s2Name && !s2Name.value) s2Name.value = activeComp;
         const s2Trade = document.getElementById('trade_name');
-        if (s2Trade && !s2Trade.value) s2Trade.value = 'Apex Global Holdings Ltd';
+        if (s2Trade && !s2Trade.value) s2Trade.value = activeComp;
         const s2Auth = document.getElementById('step2_issued_by');
         if (s2Auth && !s2Auth.value) s2Auth.value = 'Abu Dhabi Global Market (ADGM)';
         const s2Issue = document.getElementById('step2_issue_date');
@@ -2144,6 +2145,10 @@ async function handleOtpSubmit() {
                 populateFormData(result.data.form_data);
             }
 
+            // Display Corporate Client Identity (e.g. test99) prominently on top
+            const compName = result.company_name || result.data.company_name || result.data.form_data?.step2?.company_name || '';
+            displayClientNameOnTop(compName, currentLoginCrn);
+
             if (result.data.current_step && result.data.current_step > 1) {
                 goTo(result.data.current_step);
             }
@@ -2193,6 +2198,36 @@ function showLoginError(msg) {
 function hideLoginError() {
     const el = document.getElementById('loginError');
     if (el) el.classList.remove('show');
+}
+
+// ── Corporate Client Identity Display (Displays company name e.g. test99 on top) ──
+function displayClientNameOnTop(companyName, crn) {
+    const capsule = document.getElementById('hdrCompanyCapsule');
+    const nameEl = document.getElementById('hdrCompanyName');
+    const crnEl = document.getElementById('hdrCrnDisplay');
+    const brandSub = document.getElementById('hdrBrandSub');
+
+    const resolvedName = (companyName || '').trim() || 'Corporate Client';
+    const resolvedCrn = (crn || currentLoginCrn || '').trim();
+
+    if (nameEl) nameEl.textContent = resolvedName;
+    if (crnEl) crnEl.textContent = resolvedCrn ? `CRN: ${resolvedCrn}` : '';
+    if (capsule) capsule.style.display = 'inline-flex';
+    if (brandSub) brandSub.textContent = resolvedName;
+
+    // Auto-fill Step 2 company fields
+    const s2Name = document.getElementById('step2_name');
+    if (s2Name && (!s2Name.value || s2Name.value === 'Apex Global Holdings Ltd')) {
+        s2Name.value = resolvedName;
+    }
+    const s2Trade = document.getElementById('trade_name');
+    if (s2Trade && (!s2Trade.value || s2Trade.value === 'Apex Global Holdings Ltd')) {
+        s2Trade.value = resolvedName;
+    }
+    const s2Crn = document.getElementById('step2_crn');
+    if (s2Crn && (!s2Crn.value || s2Crn.value === '509077205') && resolvedCrn) {
+        s2Crn.value = resolvedCrn;
+    }
 }
 
 // ── FINAL APPLICATION SUBMISSION ──
@@ -2308,6 +2343,10 @@ function handleSignOut() {
     if (window.VBApi) {
         window.VBApi.clearToken();
     }
+    const companyCap = document.getElementById('hdrCompanyCapsule');
+    if (companyCap) companyCap.style.display = 'none';
+    const brandSub = document.getElementById('hdrBrandSub');
+    if (brandSub) brandSub.textContent = 'Corporate Onboarding Portal';
     showToast('Signed out. Enter your CRN and Email to resume your application.', 'Signed Out', 'info', 4000);
     const overlay = document.getElementById('loginOverlay');
     if (overlay) {
@@ -2867,6 +2906,10 @@ window.addEventListener('DOMContentLoaded', async () => {
                 if (record.form_data) {
                     populateFormData(record.form_data);
                 }
+
+                // Display Corporate Client Identity (e.g. test99) prominently on top
+                const compName = record.company_name || record.form_data?.step2?.company_name || '';
+                displayClientNameOnTop(compName, record.crn);
 
                 // Navigate to saved step
                 if (record.current_step && record.current_step > 1) {

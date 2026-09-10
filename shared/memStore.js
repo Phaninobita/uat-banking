@@ -141,6 +141,21 @@ class MemoryStore {
     // Seed initial RM invitations
     const initialInvites = [
       {
+        crn: "999",
+        email: "99@yopmail.com",
+        company_name: "test99",
+        contact_person: "test",
+        phone: "0509077205",
+        rm_name: "Sarah Al-Qassimi (VP Corporate Banking)",
+        rm_id: "RM-ADGM-9042",
+        invite_token: "inv_tok_user_999",
+        status: "invited",
+        invite_link: "http://localhost:3000/?crn=999&email=99%40yopmail.com",
+        notes: "vvip",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
         crn: "509077205",
         email: "sarah.director@innovateholding.ae",
         company_name: "Innovate Holding Global PJSC",

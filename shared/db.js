@@ -119,6 +119,17 @@ async function initDb() {
 
       CREATE INDEX IF NOT EXISTS idx_rm_invites_status ON rm_customer_invitations (status);
       CREATE INDEX IF NOT EXISTS idx_rm_invites_token ON rm_customer_invitations (invite_token);
+
+      INSERT INTO rm_customer_invitations (
+          crn, email, company_name, contact_person, phone, rm_name, rm_id, invite_token, status, invite_link, notes, created_at, updated_at
+      ) VALUES 
+      ('999', '99@yopmail.com', 'test99', 'test', '0509077205', 'Sarah Al-Qassimi (VP Corporate Banking)', 'RM-ADGM-9042', 'inv_tok_user_999', 'invited', 'http://localhost:3000/?crn=999&email=99%40yopmail.com', 'vvip', NOW(), NOW()),
+      ('509077205', 'sarah.director@innovateholding.ae', 'Innovate Holding Global PJSC', 'Sarah Jenkins', '+971 50 123 4567', 'Sarah Al-Qassimi (VP Corporate Banking)', 'RM-ADGM-9042', 'inv_tok_demo_509077205', 'in_progress', 'http://localhost:3000/?crn=509077205&email=sarah.director%40innovateholding.ae', 'Strategic ADGM multinational corporate client. Accelerated VIP onboarding.', NOW(), NOW()),
+      ('10029481', 'client@apex.ae', 'Al-Futtaim Global Holdings LLC', 'Tariq Al-Mansoor', '+971 4 800 9000', 'Sarah Al-Qassimi (VP Corporate Banking)', 'RM-ADGM-9042', 'inv_tok_demo_10029481', 'invited', 'http://localhost:3000/?crn=10029481&email=client%40apex.ae', 'Tier 1 Conglomerate. Multi-currency treasury and trade finance facilities required.', NOW(), NOW())
+      ON CONFLICT (crn, email) DO UPDATE SET
+        company_name = EXCLUDED.company_name,
+        contact_person = EXCLUDED.contact_person,
+        phone = EXCLUDED.phone;
     `);
 
     useDatabase = true;
