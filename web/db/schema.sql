@@ -1,9 +1,13 @@
 -- First National Bank Corporate Account Portal & Core Banking Mesh
 -- Database Schema for PostgreSQL / Supabase
+-- Canonical Corporate Identifier: company_uid across all tables
 
+-- =======================================================
 -- 1. Corporate Onboarding Applications Table
+-- =======================================================
 CREATE TABLE IF NOT EXISTS corporate_onboarding_applications (
     id BIGSERIAL PRIMARY KEY,
+    company_uid VARCHAR(64),
     application_ref VARCHAR(64) UNIQUE NOT NULL,
     crn VARCHAR(64) NOT NULL,
     registered_email VARCHAR(255) NOT NULL,
@@ -24,22 +28,61 @@ CREATE TABLE IF NOT EXISTS corporate_onboarding_applications (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Upgrade existing schema if columns not present
+-- Upgrades for corporate_onboarding_applications
+ALTER TABLE corporate_onboarding_applications ADD COLUMN IF NOT EXISTS company_uid VARCHAR(64);
 ALTER TABLE corporate_onboarding_applications ADD COLUMN IF NOT EXISTS contact_person TEXT;
 ALTER TABLE corporate_onboarding_applications ADD COLUMN IF NOT EXISTS phone TEXT;
 ALTER TABLE corporate_onboarding_applications ADD COLUMN IF NOT EXISTS address TEXT;
 
--- Index for fast authentication lookup by CRN and Email
+CREATE INDEX IF NOT EXISTS idx_corp_apps_company_uid 
+ON corporate_onboarding_applications (company_uid);
+
 CREATE INDEX IF NOT EXISTS idx_corp_apps_crn_email 
 ON corporate_onboarding_applications (crn, registered_email);
 
--- Index for fast reference lookup
 CREATE INDEX IF NOT EXISTS idx_corp_apps_app_ref 
 ON corporate_onboarding_applications (application_ref);
 
--- 2. Base64 Documents Vault Table
+-- =======================================================
+-- 2. Relationship Manager (RM) Customer Invitations Table
+-- =======================================================
+CREATE TABLE IF NOT EXISTS rm_customer_invitations (
+    id BIGSERIAL PRIMARY KEY,
+    company_uid VARCHAR(64),
+    crn VARCHAR(64) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    company_name TEXT NOT NULL,
+    contact_person TEXT,
+    phone TEXT,
+    rm_name TEXT DEFAULT 'Phanee (Senior RM)',
+    rm_id TEXT DEFAULT 'RM-PHANEE',
+    invite_token VARCHAR(64) NOT NULL,
+    status VARCHAR(32) DEFAULT 'invited',
+    invite_link TEXT,
+    notes TEXT,
+    current_step INT DEFAULT 1,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (crn, email)
+);
+
+ALTER TABLE rm_customer_invitations ADD COLUMN IF NOT EXISTS company_uid VARCHAR(64);
+ALTER TABLE rm_customer_invitations ADD COLUMN IF NOT EXISTS contact_person TEXT;
+ALTER TABLE rm_customer_invitations ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE rm_customer_invitations ADD COLUMN IF NOT EXISTS current_step INT DEFAULT 1;
+
+CREATE INDEX IF NOT EXISTS idx_rm_inv_company_uid 
+ON rm_customer_invitations (company_uid);
+
+CREATE INDEX IF NOT EXISTS idx_rm_inv_crn_email 
+ON rm_customer_invitations (crn, email);
+
+-- =======================================================
+-- 3. Base64 Documents Vault Table
+-- =======================================================
 CREATE TABLE IF NOT EXISTS application_documents (
     id BIGSERIAL PRIMARY KEY,
+    company_uid VARCHAR(64),
     application_ref VARCHAR(64) NOT NULL,
     document_type VARCHAR(64) NOT NULL,
     file_name VARCHAR(255) NOT NULL,
@@ -52,15 +95,23 @@ CREATE TABLE IF NOT EXISTS application_documents (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE application_documents ADD COLUMN IF NOT EXISTS company_uid VARCHAR(64);
+
+CREATE INDEX IF NOT EXISTS idx_app_docs_company_uid 
+ON application_documents (company_uid);
+
 CREATE INDEX IF NOT EXISTS idx_app_docs_ref 
 ON application_documents (application_ref);
 
 CREATE INDEX IF NOT EXISTS idx_app_docs_type 
 ON application_documents (application_ref, document_type);
 
--- 3. Core Banking Accounts Table (Live Banking)
+-- =======================================================
+-- 4. Core Banking Accounts Table (Live Banking)
+-- =======================================================
 CREATE TABLE IF NOT EXISTS corporate_accounts (
     id BIGSERIAL PRIMARY KEY,
+    company_uid VARCHAR(64),
     account_number VARCHAR(32) UNIQUE NOT NULL,
     iban VARCHAR(64) UNIQUE NOT NULL,
     currency VARCHAR(8) NOT NULL DEFAULT 'AED',
@@ -74,10 +125,19 @@ CREATE TABLE IF NOT EXISTS corporate_accounts (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 4. Banking Transactions Ledger Table
+ALTER TABLE corporate_accounts ADD COLUMN IF NOT EXISTS company_uid VARCHAR(64);
+
+CREATE INDEX IF NOT EXISTS idx_corp_acc_company_uid 
+ON corporate_accounts (company_uid);
+
+-- =======================================================
+-- 5. Banking Transactions Ledger Table
+-- =======================================================
 CREATE TABLE IF NOT EXISTS account_transactions (
     id BIGSERIAL PRIMARY KEY,
+    company_uid VARCHAR(64),
     transaction_ref VARCHAR(64) UNIQUE NOT NULL,
+    swift_uetr VARCHAR(64),
     account_id BIGINT REFERENCES corporate_accounts(id),
     account_number VARCHAR(32) NOT NULL,
     type VARCHAR(32) NOT NULL, -- 'credit', 'debit', 'wire_transfer', 'fx_exchange'
@@ -92,8 +152,123 @@ CREATE TABLE IF NOT EXISTS account_transactions (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE account_transactions ADD COLUMN IF NOT EXISTS company_uid VARCHAR(64);
+ALTER TABLE account_transactions ADD COLUMN IF NOT EXISTS swift_uetr VARCHAR(64);
+
+CREATE INDEX IF NOT EXISTS idx_acc_tx_company_uid 
+ON account_transactions (company_uid);
+
 CREATE INDEX IF NOT EXISTS idx_acc_tx_acc_num 
 ON account_transactions (account_number);
+
+-- =======================================================
+-- 6. Comprehensive Corporate & Compliance Audit Trail Table
+-- Compatible with both Web applications and Mobile application
+-- =======================================================
+CREATE TABLE IF NOT EXISTS corporate_audit_logs (
+    id TEXT PRIMARY KEY,
+    company_uid VARCHAR(64),
+    action_type TEXT NOT NULL,
+    actor_id TEXT NOT NULL,
+    actor_name TEXT NOT NULL,
+    actor_role TEXT,
+    target_crn TEXT,
+    target_email TEXT,
+    target_company TEXT,
+    details TEXT,
+    status TEXT DEFAULT 'SUCCESS',
+    device_info TEXT,
+    ip_address TEXT,
+    channel TEXT DEFAULT 'web', -- 'web' or 'mobile'
+    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE corporate_audit_logs ADD COLUMN IF NOT EXISTS company_uid VARCHAR(64);
+ALTER TABLE corporate_audit_logs ADD COLUMN IF NOT EXISTS channel TEXT DEFAULT 'web';
+
+CREATE INDEX IF NOT EXISTS idx_audit_company_uid 
+ON corporate_audit_logs (company_uid);
+
+CREATE INDEX IF NOT EXISTS idx_audit_created_at 
+ON corporate_audit_logs (created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_audit_action_type 
+ON corporate_audit_logs (action_type);
+
+CREATE INDEX IF NOT EXISTS idx_audit_target_crn 
+ON corporate_audit_logs (target_crn);
+
+-- Backward compatibility for mobile_audit_logs (if mobile client queries mobile_audit_logs)
+CREATE TABLE IF NOT EXISTS public.mobile_audit_logs (
+    id TEXT PRIMARY KEY,
+    company_uid VARCHAR(64),
+    action_type TEXT NOT NULL,
+    actor_id TEXT NOT NULL,
+    actor_name TEXT NOT NULL,
+    actor_role TEXT,
+    target_crn TEXT,
+    target_email TEXT,
+    target_company TEXT,
+    details TEXT,
+    status TEXT DEFAULT 'SUCCESS',
+    device_info TEXT,
+    ip_address TEXT,
+    channel TEXT DEFAULT 'mobile',
+    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.mobile_audit_logs ADD COLUMN IF NOT EXISTS company_uid VARCHAR(64);
+ALTER TABLE public.mobile_audit_logs ADD COLUMN IF NOT EXISTS channel TEXT DEFAULT 'mobile';
+
+CREATE INDEX IF NOT EXISTS idx_mobile_audit_company_uid 
+ON public.mobile_audit_logs (company_uid);
+
+-- =======================================================
+-- 7. Automated Backfill for company_uid on Existing Data
+-- Standard deterministic format: 'CUID-' + clean uppercase CRN
+-- =======================================================
+DO $$
+BEGIN
+    -- Backfill corporate_onboarding_applications
+    UPDATE corporate_onboarding_applications
+    SET company_uid = 'CUID-' || UPPER(REGEXP_REPLACE(crn, '[^a-zA-Z0-9]', '', 'g'))
+    WHERE company_uid IS NULL OR company_uid = '';
+
+    -- Backfill rm_customer_invitations
+    UPDATE rm_customer_invitations
+    SET company_uid = 'CUID-' || UPPER(REGEXP_REPLACE(crn, '[^a-zA-Z0-9]', '', 'g'))
+    WHERE company_uid IS NULL OR company_uid = '';
+
+    -- Backfill application_documents from applications
+    UPDATE application_documents d
+    SET company_uid = a.company_uid
+    FROM corporate_onboarding_applications a
+    WHERE d.application_ref = a.application_ref
+      AND (d.company_uid IS NULL OR d.company_uid = '');
+
+    -- Backfill corporate_accounts
+    UPDATE corporate_accounts acc
+    SET company_uid = a.company_uid
+    FROM corporate_onboarding_applications a
+    WHERE acc.application_ref = a.application_ref
+      AND (acc.company_uid IS NULL OR acc.company_uid = '');
+
+    -- Backfill account_transactions
+    UPDATE account_transactions tx
+    SET company_uid = acc.company_uid
+    FROM corporate_accounts acc
+    WHERE tx.account_id = acc.id
+      AND (tx.company_uid IS NULL OR tx.company_uid = '');
+
+    -- Backfill corporate_audit_logs & mobile_audit_logs
+    UPDATE corporate_audit_logs
+    SET company_uid = 'CUID-' || UPPER(REGEXP_REPLACE(target_crn, '[^a-zA-Z0-9]', '', 'g'))
+    WHERE (company_uid IS NULL OR company_uid = '') AND target_crn IS NOT NULL;
+
+    UPDATE mobile_audit_logs
+    SET company_uid = 'CUID-' || UPPER(REGEXP_REPLACE(target_crn, '[^a-zA-Z0-9]', '', 'g'))
+    WHERE (company_uid IS NULL OR company_uid = '') AND target_crn IS NOT NULL;
+END $$;
 
 -- Automatic updated_at trigger function
 CREATE OR REPLACE FUNCTION update_modified_column()
@@ -115,5 +290,3 @@ CREATE TRIGGER trg_app_docs_updated_at
 BEFORE UPDATE ON application_documents
 FOR EACH ROW
 EXECUTE FUNCTION update_modified_column();
-
-

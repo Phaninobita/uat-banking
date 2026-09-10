@@ -9,6 +9,7 @@ const totalSteps = 7;
 const stepProgress = [0, 14, 28, 43, 57, 71, 86, 100];
 let currentLoginCrn = '';
 let currentLoginEmail = '';
+let currentCompanyUid = '';
 let currentAppRef = null;
 let isReworkMode = false;
 let uboCount = 0;
@@ -18,6 +19,7 @@ let autoSaveTimer = null;
 let cachedOwnershipRows = [];
 let cachedRoleSelections = null;
 let cachedTaxSelections = null;
+let cachedAuditTrail = [];
 
 // &#8212;&#8212; TOAST NOTIFICATION SYSTEM &#8212;&#8212;
 function showToast(message, title = 'Notification', type = 'info', duration = 4000) {
@@ -2047,7 +2049,14 @@ function collectFullFormData() {
         d3: document.getElementById('d3')?.checked || false
     };
 
+    const resolvedCrn = document.getElementById('step2_crn')?.value || currentLoginCrn || '';
+    const resolvedCuid = currentCompanyUid || (resolvedCrn ? ('CUID-' + resolvedCrn.toUpperCase().replace(/[^A-Z0-9]/g, '')) : '');
+    step2.company_uid = resolvedCuid;
+    step2.companyUid = resolvedCuid;
+
     return {
+        company_uid: resolvedCuid,
+        companyUid: resolvedCuid,
         step1_documents: step1Docs,
         documents: documentsList,
         step2,
@@ -2291,9 +2300,11 @@ async function handleOtpSubmit() {
                 populateFormData(result.data.form_data);
             }
 
+            currentCompanyUid = result.company_uid || result.data.company_uid || ('CUID-' + currentLoginCrn.toUpperCase().replace(/[^A-Z0-9]/g, ''));
+
             // Display Corporate Client Identity (e.g. test99) prominently on top
             const compName = result.company_name || result.data.company_name || result.data.form_data?.step2?.company_name || '';
-            displayClientNameOnTop(compName, currentLoginCrn);
+            displayClientNameOnTop(compName, currentLoginCrn, currentCompanyUid);
 
             if (result.data.current_step && result.data.current_step > 1) {
                 goTo(result.data.current_step);
@@ -2376,18 +2387,27 @@ function hideLoginError() {
     if (el) el.classList.remove('show');
 }
 
-// &#x1F6C7;&#x1F6C7; Corporate Client Identity Display (Displays company name e.g. test99 on top) &#x1F6C7;&#x1F6C7;
-function displayClientNameOnTop(companyName, crn) {
+// ── Corporate Client Identity Display (Displays company name & UID on top) ──
+function displayClientNameOnTop(companyName, crn, companyUid) {
     const capsule = document.getElementById('hdrCompanyCapsule');
     const nameEl = document.getElementById('hdrCompanyName');
     const crnEl = document.getElementById('hdrCrnDisplay');
+    const cuidEl = document.getElementById('hdrCompanyUidDisplay');
     const brandSub = document.getElementById('hdrBrandSub');
 
     const resolvedName = (companyName || '').trim() || 'Corporate Client';
     const resolvedCrn = (crn || currentLoginCrn || '').trim();
+    if (companyUid) currentCompanyUid = companyUid;
+    if (!currentCompanyUid && resolvedCrn) {
+        currentCompanyUid = 'CUID-' + resolvedCrn.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    }
 
     if (nameEl) nameEl.textContent = resolvedName;
     if (crnEl) crnEl.textContent = resolvedCrn ? `CRN: ${resolvedCrn}` : '';
+    if (cuidEl) {
+        cuidEl.textContent = currentCompanyUid ? `UID: ${currentCompanyUid}` : '';
+        cuidEl.style.display = currentCompanyUid ? 'inline-block' : 'none';
+    }
     if (capsule) capsule.style.display = 'inline-flex';
     if (brandSub) brandSub.textContent = resolvedName;
 
@@ -2403,6 +2423,10 @@ function displayClientNameOnTop(companyName, crn) {
     const s2Crn = document.getElementById('step2_crn');
     if (s2Crn && (!s2Crn.value || s2Crn.value === '509077205') && resolvedCrn) {
         s2Crn.value = resolvedCrn;
+    }
+    const s2Uid = document.getElementById('step2_company_uid');
+    if (s2Uid && currentCompanyUid) {
+        s2Uid.value = currentCompanyUid;
     }
 }
 
@@ -3068,6 +3092,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 currentAppRef = record.application_ref;
                 currentLoginCrn = record.crn;
                 currentLoginEmail = record.registered_email;
+                currentCompanyUid = record.company_uid || ('CUID-' + (record.crn || '').toUpperCase().replace(/[^A-Z0-9]/g, ''));
 
                 // Hide login overlay
                 const overlay = document.getElementById('loginOverlay');
@@ -3085,7 +3110,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
                 // Display Corporate Client Identity (e.g. test99) prominently on top
                 const compName = record.company_name || record.form_data?.step2?.company_name || '';
-                displayClientNameOnTop(compName, record.crn);
+                displayClientNameOnTop(compName, record.crn, currentCompanyUid);
 
                 // Navigate to saved step
                 if (record.current_step && record.current_step > 1) {
@@ -3111,7 +3136,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         if (overlay) overlay.classList.remove('hidden');
     }
 
-    // Check for RM customer magic invite URL params (?crn=...&email=...&company=...&contact=...&phone=...)
+    // Check for RM customer magic invite URL params (?crn=...&email=...&company=...&contact=...&phone=...&company_uid=...)
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const inviteCrn = urlParams.get('crn');
@@ -3119,6 +3144,9 @@ window.addEventListener('DOMContentLoaded', async () => {
         const inviteCompany = urlParams.get('company') || urlParams.get('company_name');
         const inviteContact = urlParams.get('contact') || urlParams.get('contact_person');
         const invitePhone = urlParams.get('phone');
+        const inviteCuid = urlParams.get('company_uid') || urlParams.get('cuid');
+
+        if (inviteCuid) currentCompanyUid = inviteCuid;
 
         if (inviteCrn || inviteEmail) {
             const crnInput = document.getElementById('crnInput');
@@ -3179,5 +3207,137 @@ function toggleMobileSimulator(forceState) {
 
 window.switchPortalMode = switchPortalMode;
 window.toggleMobileSimulator = toggleMobileSimulator;
+
+// ── COMPLIANCE AUDIT TRAIL MODAL & TELEMETRY SUBSYSTEM ──
+async function openAuditTrailModal() {
+    const modal = document.getElementById('auditTrailModal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+
+    const cuid = currentCompanyUid || (currentLoginCrn ? 'CUID-' + currentLoginCrn.toUpperCase().replace(/[^A-Z0-9]/g, '') : '');
+    const badge = document.getElementById('auditModalCuidBadge');
+    const cuidLabel = document.getElementById('auditModalCuid');
+    if (badge) badge.textContent = cuid ? `UID: ${cuid}` : '';
+    if (cuidLabel) cuidLabel.textContent = cuid || '-';
+
+    await fetchAuditTrail();
+}
+
+function closeAuditTrailModal() {
+    const modal = document.getElementById('auditTrailModal');
+    if (modal) modal.style.display = 'none';
+}
+
+async function fetchAuditTrail(forceRefresh = false) {
+    const tbody = document.getElementById('auditTrailTableBody');
+    const countEl = document.getElementById('auditTotalCount');
+    if (!tbody) return;
+
+    if (!cachedAuditTrail.length || forceRefresh) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:28px; color:#94a3b8;">Loading audit records from PostgreSQL / corporate_audit_logs...</td></tr>`;
+    }
+
+    try {
+        let logs = [];
+        if (window.VBApi && window.VBApi.isAuthenticated()) {
+            const res = await window.VBApi.request('/application/audit-trail');
+            logs = res.auditTrail || [];
+            if (res.company_uid && !currentCompanyUid) {
+                currentCompanyUid = res.company_uid;
+            }
+        } else if (currentLoginCrn || currentCompanyUid) {
+            const q = currentCompanyUid ? `company_uid=${encodeURIComponent(currentCompanyUid)}` : `crn=${encodeURIComponent(currentLoginCrn)}`;
+            const res = await fetch(`/api/v1/rm/audit-trail?${q}`).then(r => r.json());
+            logs = res.auditTrail || [];
+        }
+
+        cachedAuditTrail = logs;
+        if (countEl) countEl.textContent = logs.length;
+        renderAuditTrail(logs);
+    } catch (err) {
+        console.error('Failed to load audit trail:', err);
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:24px; color:#ef4444;">Failed to fetch audit records: ${escapeHtml(err.message || String(err))}</td></tr>`;
+    }
+}
+
+function renderAuditTrail(logs) {
+    const tbody = document.getElementById('auditTrailTableBody');
+    if (!tbody) return;
+
+    if (!logs || logs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:32px; color:#94a3b8;">No audit trail events recorded yet for this corporate entity.</td></tr>`;
+        return;
+    }
+
+    const actionColors = {
+        CUSTOMER_LOGIN: '#38bdf8',
+        CUSTOMER_OTP_REQUESTED: '#f59e0b',
+        APPLICATION_SAVE: '#10b981',
+        APPLICATION_SUBMITTED: '#8b5cf6',
+        STEP_PROGRESSION: '#06b6d4',
+        DOCUMENT_UPLOADED: '#ec4899',
+        INVITATION_DISPATCHED: '#eab308'
+    };
+
+    const rowsHtml = logs.map(l => {
+        const timeStr = l.timestamp || l.created_at || '';
+        const formattedTime = timeStr ? new Date(timeStr).toLocaleString('en-US', {
+            month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+        }) : '-';
+        const channelBadge = l.channel === 'mobile' 
+            ? `<span style="background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.3); color:#c084fc; font-weight:600; padding:2px 6px; border-radius:4px; font-size:11px;">📱 Mobile</span>`
+            : `<span style="background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.3); color:#38bdf8; font-weight:600; padding:2px 6px; border-radius:4px; font-size:11px;">💻 Web</span>`;
+        const actionColor = actionColors[l.action_type] || '#94a3b8';
+        const statusBadge = (l.status === 'SUCCESS' || !l.status)
+            ? `<span style="color:#10b981; font-weight:600;">✓ SUCCESS</span>`
+            : `<span style="color:#ef4444; font-weight:600;">✕ ${escapeHtml(l.status)}</span>`;
+
+        const metaSummary = l.metadata ? (typeof l.metadata === 'object' ? Object.entries(l.metadata).map(([k,v]) => `${k}:${v}`).join(', ') : String(l.metadata)) : '';
+
+        return `
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.05); transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+                <td style="padding:10px 8px; font-family:monospace; color:#cbd5e1; font-size:11.5px; white-space:nowrap;">${formattedTime}</td>
+                <td style="padding:10px 8px; white-space:nowrap;">${channelBadge}</td>
+                <td style="padding:10px 8px;">
+                    <span style="font-weight:700; color:${actionColor}; font-family:monospace; font-size:12px;">${escapeHtml(l.action_type || 'UNKNOWN')}</span>
+                    ${metaSummary ? `<div style="font-size:11px; color:#64748b; max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(metaSummary)}">${escapeHtml(metaSummary)}</div>` : ''}
+                </td>
+                <td style="padding:10px 8px; color:#e2e8f0; font-family:monospace; font-size:12px;">${escapeHtml(l.actor || '-')}</td>
+                <td style="padding:10px 8px; color:#94a3b8;">${escapeHtml(l.target || l.event_type || '-')}</td>
+                <td style="padding:10px 8px; white-space:nowrap;">${statusBadge}</td>
+                <td style="padding:10px 8px; color:#64748b; font-family:monospace; font-size:11px; white-space:nowrap;">
+                    <div>${escapeHtml(l.ip_address || '127.0.0.1')}</div>
+                    <div style="font-size:10px; color:#475569; max-width:140px; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(l.user_agent || '')}">${escapeHtml((l.user_agent || '').substring(0, 24))}</div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    tbody.innerHTML = rowsHtml;
+}
+
+function filterAuditTrailTable() {
+    const input = document.getElementById('auditSearchInput');
+    if (!input) return;
+    const query = input.value.trim().toLowerCase();
+
+    if (!query) {
+        renderAuditTrail(cachedAuditTrail);
+        return;
+    }
+
+    const filtered = cachedAuditTrail.filter(l => {
+        const text = `${l.action_type || ''} ${l.actor || ''} ${l.target || ''} ${l.ip_address || ''} ${l.channel || ''} ${JSON.stringify(l.metadata || {})}`.toLowerCase();
+        return text.includes(query);
+    });
+
+    renderAuditTrail(filtered);
+}
+
+window.openAuditTrailModal = openAuditTrailModal;
+window.closeAuditTrailModal = closeAuditTrailModal;
+window.fetchAuditTrail = fetchAuditTrail;
+window.renderAuditTrail = renderAuditTrail;
+window.filterAuditTrailTable = filterAuditTrailTable;
 
 

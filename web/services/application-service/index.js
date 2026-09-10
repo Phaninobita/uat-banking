@@ -9,6 +9,7 @@ const config = require("../../shared/config");
 const memStore = require("../../shared/memStore");
 const db = require("../../shared/db");
 const { requireAuth } = require("../auth-service");
+const { logAuditEvent, resolveCompanyUid, getAuditTrail } = require("../../shared/audit");
 
 const router = express.Router();
 
@@ -35,9 +36,15 @@ router.get("/current", requireAuth, async (req, res) => {
       return res.status(404).json({ error: "Application profile not found." });
     }
 
+    // Ensure company_uid is assigned
+    applicationRecord.company_uid = resolveCompanyUid(applicationRecord.company_uid || req.user.company_uid, applicationRecord.crn);
+
     // Ensure company_name, contact_person, and phone reflect the RM invitation record if available
     const rmInv = memStore.getRmInvitation(applicationRecord.crn, applicationRecord.registered_email);
     if (rmInv) {
+      if (rmInv.company_uid && !applicationRecord.company_uid) {
+        applicationRecord.company_uid = rmInv.company_uid;
+      }
       if (rmInv.company_name && (!applicationRecord.company_name || applicationRecord.company_name === "Apex Global Holdings Ltd")) {
         applicationRecord.company_name = rmInv.company_name;
         applicationRecord.trade_name = rmInv.company_name;
@@ -49,6 +56,7 @@ router.get("/current", requireAuth, async (req, res) => {
         applicationRecord.phone = rmInv.phone;
       }
       if (applicationRecord.form_data && applicationRecord.form_data.step2) {
+        applicationRecord.form_data.step2.company_uid = applicationRecord.company_uid;
         if (!applicationRecord.form_data.step2.contact_person && rmInv.contact_person) {
           applicationRecord.form_data.step2.contact_person = rmInv.contact_person;
         }
@@ -56,10 +64,13 @@ router.get("/current", requireAuth, async (req, res) => {
           applicationRecord.form_data.step2.phone = rmInv.phone;
         }
       }
+    } else if (applicationRecord.form_data && applicationRecord.form_data.step2) {
+      applicationRecord.form_data.step2.company_uid = applicationRecord.company_uid;
     }
 
     return res.json({
       success: true,
+      company_uid: applicationRecord.company_uid,
       data: applicationRecord,
       service: "application-service"
     });
@@ -100,12 +111,16 @@ router.post("/save", requireAuth, async (req, res) => {
 
     const resolvedStep = typeof current_step === "number" ? current_step : existingRecord.current_step;
 
+    const resolvedCompanyUid = req.body.company_uid || resolveCompanyUid(existingRecord.company_uid || req.user.company_uid, existingRecord.crn);
     const existingFormData = existingRecord.form_data || {};
     const incomingFormData = form_data || {};
     const mergedFormData = {
       ...existingFormData,
       ...incomingFormData
     };
+    if (mergedFormData.step2) {
+      mergedFormData.step2.company_uid = resolvedCompanyUid;
+    }
 
     let updatedRecord = null;
     if (db.isConnected()) {
@@ -134,18 +149,20 @@ router.post("/save", requireAuth, async (req, res) => {
              contact_person = COALESCE($12, contact_person),
              phone = COALESCE($13, phone),
              address = COALESCE($14, address),
+             company_uid = COALESCE($15, company_uid),
              updated_at = NOW()
          WHERE application_ref = $1
          RETURNING *`,
         [
           application_ref, resolvedStep, resolvedStatus, JSON.stringify(mergedFormData),
           companyName, tradeName, legalType, issueDate, expiryDate, issuedBy, vatTrn,
-          contactPerson, phone, address
+          contactPerson, phone, address, resolvedCompanyUid
         ]
       );
       updatedRecord = result.rows[0];
     } else {
       const s2 = mergedFormData.step2 || {};
+      existingRecord.company_uid = resolvedCompanyUid;
       existingRecord.current_step = resolvedStep;
       existingRecord.status = resolvedStatus;
       existingRecord.company_name = s2.company_name || s2.companyName || existingRecord.company_name;
@@ -162,16 +179,42 @@ router.post("/save", requireAuth, async (req, res) => {
       existingRecord.updated_at = new Date().toISOString();
       updatedRecord = existingRecord;
       memStore.applications.set(application_ref, existingRecord);
+      memStore.companyUidIndex.set(resolvedCompanyUid, application_ref);
     }
 
+    if (!updatedRecord.company_uid) {
+      updatedRecord.company_uid = resolvedCompanyUid;
+    }
+
+    // ── Live Audit Logging for Application Progress ──
+    const targetComp = updatedRecord.company_name || existingRecord.company_name;
+    const targetContact = updatedRecord.contact_person || existingRecord.contact_person || "Authorized Signatory";
+    const userAgent = req.headers["user-agent"] || "Web Browser";
+    const clientIp = req.ip || req.connection?.remoteAddress || "127.0.0.1";
+
     if (resolvedStatus === "submitted") {
+      logAuditEvent({
+        company_uid: resolvedCompanyUid,
+        action_type: "APPLICATION_SUBMITTED",
+        actor_id: req.user.email || existingRecord.registered_email,
+        actor_name: targetContact,
+        actor_role: "Authorized Signatory",
+        target_crn: existingRecord.crn,
+        target_email: existingRecord.registered_email,
+        target_company: targetComp,
+        details: `Corporate onboarding application ${application_ref} completed and submitted for compliance verification`,
+        device_info: userAgent,
+        ip_address: clientIp,
+        channel: "web"
+      });
+
       const recipientEmail = (existingRecord && existingRecord.registered_email) || (req.user && req.user.email) || "admin@corporate.com";
       memStore.recordSimulatedEmail({
         to: recipientEmail,
         from: '"First National Bank Corporate Onboarding" <onboarding@fnb-us.com>',
         subject: `First National Bank — Corporate Application Received (${application_ref})`,
         type: "application_submitted",
-        metadata: { application_ref },
+        metadata: { application_ref, company_uid: resolvedCompanyUid },
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; color: #0f172a;">
             <div style="text-align: center; margin-bottom: 20px;">
@@ -180,7 +223,7 @@ router.post("/save", requireAuth, async (req, res) => {
               <p style="color: #64748b; font-size: 13px; margin: 0;">Application Submission Confirmation</p>
             </div>
             <p style="color: #334155; font-size: 14px; line-height: 1.5;">Dear Corporate Customer,</p>
-            <p style="color: #334155; font-size: 14px; line-height: 1.5;">Your corporate account application has been received and logged into our compliance verification queue.</p>
+            <p style="color: #334155; font-size: 14px; line-height: 1.5;">Your corporate account application for <strong>${targetComp}</strong> (Corporate ID: <strong>${resolvedCompanyUid}</strong>) has been received and logged into our compliance verification queue.</p>
             <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; padding: 16px; margin: 18px 0; text-align: center;">
               <span style="font-size: 11px; color: #166534; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;">Application Reference</span><br>
               <span style="font-size: 24px; font-weight: 800; color: #15803d; letter-spacing: 1px; font-family: monospace;">${application_ref}</span>
@@ -190,16 +233,94 @@ router.post("/save", requireAuth, async (req, res) => {
         `,
         text: `First National Bank: Application ${application_ref} received successfully.`
       });
+    } else if (resolvedStep !== existingRecord.current_step) {
+      logAuditEvent({
+        company_uid: resolvedCompanyUid,
+        action_type: "STEP_PROGRESSION",
+        actor_id: req.user.email || existingRecord.registered_email,
+        actor_name: targetContact,
+        actor_role: "Authorized Signatory",
+        target_crn: existingRecord.crn,
+        target_email: existingRecord.registered_email,
+        target_company: targetComp,
+        details: `Corporate onboarding advanced from Step ${existingRecord.current_step} to Step ${resolvedStep} of 7`,
+        device_info: userAgent,
+        ip_address: clientIp,
+        channel: "web"
+      });
+    } else {
+      logAuditEvent({
+        company_uid: resolvedCompanyUid,
+        action_type: "APPLICATION_SAVE",
+        actor_id: req.user.email || existingRecord.registered_email,
+        actor_name: targetContact,
+        actor_role: "Authorized Signatory",
+        target_crn: existingRecord.crn,
+        target_email: existingRecord.registered_email,
+        target_company: targetComp,
+        details: `Draft progress saved for Step ${resolvedStep} (${targetComp})`,
+        device_info: userAgent,
+        ip_address: clientIp,
+        channel: "web"
+      });
     }
 
     return res.json({
       success: true,
+      company_uid: resolvedCompanyUid,
       data: updatedRecord,
       service: "application-service"
     });
   } catch (err) {
     console.error("[APPLICATION SERVICE] Save error:", err);
     return res.status(500).json({ error: "Failed to persist application progress." });
+  }
+});
+
+// 3. Live Audit Trail Endpoint for Web Application
+router.get("/audit-trail", requireAuth, async (req, res) => {
+  memStore.metrics.serviceRequests.applications++;
+  try {
+    const company_uid = req.user.company_uid || resolveCompanyUid(null, req.user.crn);
+    const crn = req.user.crn;
+    const limit = parseInt(req.query.limit, 10) || 100;
+    const logs = await getAuditTrail({ company_uid, crn, limit });
+    return res.json({
+      success: true,
+      company_uid,
+      crn,
+      count: logs.length,
+      logs
+    });
+  } catch (err) {
+    console.error("[APPLICATION SERVICE] Audit trail error:", err);
+    return res.status(500).json({ error: "Failed to retrieve audit trail." });
+  }
+});
+
+// 4. Custom Client-Side Audit Event Endpoint
+router.post("/audit", requireAuth, async (req, res) => {
+  try {
+    const { action_type, details, status } = req.body;
+    const company_uid = req.user.company_uid || resolveCompanyUid(null, req.user.crn);
+    const auditEntry = await logAuditEvent({
+      company_uid,
+      action_type: action_type || "CLIENT_INTERACTION",
+      actor_id: req.user.email || "applicant",
+      actor_name: req.user.company_name || "Authorized Signatory",
+      actor_role: "Authorized Signatory",
+      target_crn: req.user.crn,
+      target_email: req.user.email,
+      target_company: req.user.company_name,
+      details: details || "Web interaction event recorded",
+      status: status || "SUCCESS",
+      device_info: req.headers["user-agent"] || "Web Browser",
+      ip_address: req.ip || req.connection?.remoteAddress || "127.0.0.1",
+      channel: "web"
+    });
+    return res.json({ success: true, log: auditEntry });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
   }
 });
 

@@ -10,6 +10,7 @@ const crypto = require("crypto");
 const config = require("../../shared/config");
 const memStore = require("../../shared/memStore");
 const db = require("../../shared/db");
+const { logAuditEvent, resolveCompanyUid } = require("../../shared/audit");
 
 const router = express.Router();
 
@@ -23,7 +24,10 @@ function requireAuth(req, res, next) {
   const token = authHeader.substring(7);
   try {
     const decoded = jwt.verify(token, config.JWT_SECRET);
-    req.user = decoded; // { crn, email, application_ref }
+    req.user = decoded; // { crn, email, application_ref, company_uid, company_name }
+    if (!req.user.company_uid && req.user.crn) {
+      req.user.company_uid = resolveCompanyUid(null, req.user.crn);
+    }
     next();
   } catch (err) {
     return res.status(401).json({ error: "Unauthorized: Invalid or expired session token." });
@@ -92,6 +96,7 @@ router.post("/request-otp", async (req, res) => {
   memStore.otpStore.set(key, { otp: randomCode, expiresAt, rmInvite });
 
   const companyTitle = (rmInvite.company_name || "").trim() || cleanCrn;
+  const company_uid = resolveCompanyUid(rmInvite.company_uid, cleanCrn);
 
   // Record into simulated email buffer
   const emailItem = memStore.recordSimulatedEmail({
@@ -101,7 +106,7 @@ router.post("/request-otp", async (req, res) => {
     text: `Your verification code for ${companyTitle} (CRN ${cleanCrn}) is: ${randomCode}`,
     code: randomCode,
     type: "otp",
-    metadata: { crn: cleanCrn, otp: randomCode, company_name: companyTitle },
+    metadata: { crn: cleanCrn, otp: randomCode, company_name: companyTitle, company_uid },
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; color: #0f172a;">
         <div style="text-align: center; margin-bottom: 20px;">
@@ -119,10 +124,27 @@ router.post("/request-otp", async (req, res) => {
     `
   });
 
+  // Log compliance audit event
+  logAuditEvent({
+    company_uid,
+    action_type: "CUSTOMER_OTP_REQUESTED",
+    actor_id: cleanEmail,
+    actor_name: rmInvite.contact_person || "Corporate Applicant",
+    actor_role: "Corporate Applicant",
+    target_crn: cleanCrn,
+    target_email: cleanEmail,
+    target_company: companyTitle,
+    details: `One-Time Security Passcode dispatched to ${cleanEmail} for CRN ${cleanCrn}`,
+    device_info: req.headers["user-agent"] || "Web Browser",
+    ip_address: req.ip || req.connection?.remoteAddress || "127.0.0.1",
+    channel: "web"
+  });
+
   return res.json({
     success: true,
     message: `A verification code has been dispatched to ${cleanEmail}.`,
     company_name: companyTitle,
+    company_uid,
     simulatedEmail: emailItem,
     debugOtp: randomCode,
     demoCode: "1111",
@@ -169,6 +191,7 @@ router.post("/verify-otp", async (req, res) => {
   const companyNameFromRm = (rmInvite.company_name || "").trim() || "Corporate Client";
   const contactPersonFromRm = (rmInvite.contact_person || "").trim();
   const phoneFromRm = (rmInvite.phone || "").trim();
+  const company_uid = resolveCompanyUid(rmInvite.company_uid, cleanCrn);
 
   try {
     let applicationRecord = null;
@@ -181,14 +204,14 @@ router.post("/verify-otp", async (req, res) => {
       );
       if (existing.rows.length > 0) {
         applicationRecord = existing.rows[0];
-        // Ensure company name is synced from RM record
-        if (!applicationRecord.company_name || applicationRecord.company_name === "First National Holdings Inc" || applicationRecord.company_name !== companyNameFromRm) {
+        // Ensure company name and company_uid are synced
+        if (!applicationRecord.company_uid || !applicationRecord.company_name || applicationRecord.company_name === "First National Holdings Inc" || applicationRecord.company_name !== companyNameFromRm) {
           const updated = await db.query(
             `UPDATE corporate_onboarding_applications
-             SET company_name = $1, trade_name = $1, updated_at = NOW()
-             WHERE application_ref = $2
+             SET company_name = $1, trade_name = $1, company_uid = COALESCE(company_uid, $2), updated_at = NOW()
+             WHERE application_ref = $3
              RETURNING *`,
-            [companyNameFromRm, applicationRecord.application_ref]
+            [companyNameFromRm, company_uid, applicationRecord.application_ref]
           );
           if (updated.rows && updated.rows.length > 0) {
             applicationRecord = updated.rows[0];
@@ -199,6 +222,7 @@ router.post("/verify-otp", async (req, res) => {
         const initialFormData = {
           step2: {
             crn: cleanCrn,
+            company_uid,
             company_name: companyNameFromRm,
             trade_name: companyNameFromRm,
             legal_type: "Limited Liability Company (LLC)",
@@ -209,9 +233,9 @@ router.post("/verify-otp", async (req, res) => {
         };
         const newRecord = await db.query(
           `INSERT INTO corporate_onboarding_applications (
-             application_ref, crn, registered_email, current_step, status, form_data, legal_type, company_name, trade_name
-           ) VALUES ($1, $2, $3, 1, 'draft', $4::jsonb, $5, $6, $7) RETURNING *`,
-          [appRef, cleanCrn, cleanEmail, JSON.stringify(initialFormData), "Limited Liability Company (LLC)", companyNameFromRm, companyNameFromRm]
+             application_ref, crn, company_uid, registered_email, current_step, status, form_data, legal_type, company_name, trade_name
+           ) VALUES ($1, $2, $3, $4, 1, 'draft', $5::jsonb, $6, $7, $8) RETURNING *`,
+          [appRef, cleanCrn, company_uid, cleanEmail, JSON.stringify(initialFormData), "Limited Liability Company (LLC)", companyNameFromRm, companyNameFromRm]
         );
         applicationRecord = newRecord.rows[0];
         isNew = true;
@@ -220,9 +244,11 @@ router.post("/verify-otp", async (req, res) => {
       const existingRef = memStore.crnEmailIndex.get(key);
       if (existingRef && memStore.applications.has(existingRef)) {
         applicationRecord = memStore.applications.get(existingRef);
+        applicationRecord.company_uid = applicationRecord.company_uid || company_uid;
         applicationRecord.company_name = companyNameFromRm;
         applicationRecord.trade_name = companyNameFromRm;
         if (applicationRecord.form_data && applicationRecord.form_data.step2) {
+          applicationRecord.form_data.step2.company_uid = company_uid;
           applicationRecord.form_data.step2.company_name = companyNameFromRm;
           applicationRecord.form_data.step2.trade_name = companyNameFromRm;
         }
@@ -230,6 +256,7 @@ router.post("/verify-otp", async (req, res) => {
         const appRef = "AB-" + new Date().getFullYear() + "-" + crypto.randomBytes(3).toString("hex").toUpperCase();
         applicationRecord = {
           id: Date.now(),
+          company_uid,
           application_ref: appRef,
           crn: cleanCrn,
           registered_email: cleanEmail,
@@ -241,6 +268,7 @@ router.post("/verify-otp", async (req, res) => {
           form_data: {
             step2: {
               crn: cleanCrn,
+              company_uid,
               company_name: companyNameFromRm,
               trade_name: companyNameFromRm,
               legal_type: "Limited Liability Company (LLC)",
@@ -254,28 +282,50 @@ router.post("/verify-otp", async (req, res) => {
         };
         memStore.applications.set(appRef, applicationRecord);
         memStore.crnEmailIndex.set(key, appRef);
+        memStore.companyUidIndex.set(company_uid, appRef);
         isNew = true;
       }
     }
+
+    const resolvedCompanyUid = applicationRecord.company_uid || company_uid;
 
     const token = jwt.sign(
       {
         crn: applicationRecord.crn,
         email: applicationRecord.registered_email,
         application_ref: applicationRecord.application_ref,
+        company_uid: resolvedCompanyUid,
         company_name: companyNameFromRm
       },
       config.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
+    // Record compliance audit log for user login
+    logAuditEvent({
+      company_uid: resolvedCompanyUid,
+      action_type: "CUSTOMER_LOGIN",
+      actor_id: cleanEmail,
+      actor_name: contactPersonFromRm || "Authorized Signatory",
+      actor_role: "Authorized Signatory",
+      target_crn: cleanCrn,
+      target_email: cleanEmail,
+      target_company: companyNameFromRm,
+      details: `Successful corporate login via OTP for ${companyNameFromRm} (${resolvedCompanyUid})`,
+      device_info: req.headers["user-agent"] || "Web Browser",
+      ip_address: req.ip || req.connection?.remoteAddress || "127.0.0.1",
+      channel: "web"
+    });
+
     return res.json({
       success: true,
       isNew,
       token,
       company_name: companyNameFromRm,
+      company_uid: resolvedCompanyUid,
       data: {
         ...applicationRecord,
+        company_uid: resolvedCompanyUid,
         company_name: companyNameFromRm,
         trade_name: companyNameFromRm
       },

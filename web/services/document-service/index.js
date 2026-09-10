@@ -10,6 +10,7 @@ const config = require("../../shared/config");
 const memStore = require("../../shared/memStore");
 const db = require("../../shared/db");
 const { requireAuth } = require("../auth-service");
+const { resolveCompanyUid, logAuditEvent } = require("../../shared/audit");
 
 const router = express.Router();
 
@@ -171,6 +172,12 @@ router.post("/upload", requireAuth, async (req, res) => {
   } = req.body;
 
   const activeAppRef = req.user.application_ref || application_ref;
+  const activeCrn = req.user.crn || "";
+  const companyUid = req.user.company_uid || resolveCompanyUid({
+    crn: activeCrn,
+    company_uid: req.body.company_uid,
+    application_ref: activeAppRef
+  });
 
   if (!file_data_base64 || !document_type || !file_name) {
     return res.status(400).json({ error: "Missing required document data (base64, document_type, or file_name)." });
@@ -189,19 +196,19 @@ router.post("/upload", requireAuth, async (req, res) => {
       if (existing.rows.length > 0) {
         const updateRes = await db.query(
           `UPDATE application_documents
-           SET file_name = $1, file_type = $2, file_size = $3, file_data_base64 = $4, updated_at = NOW()
-           WHERE id = $5
-           RETURNING id, application_ref, document_type, file_name, file_type, file_size, ocr_status, created_at, updated_at`,
-          [file_name, file_type || "application/pdf", file_size || 0, file_data_base64, existing.rows[0].id]
+           SET file_name = $1, file_type = $2, file_size = $3, file_data_base64 = $4, company_uid = $5, updated_at = NOW()
+           WHERE id = $6
+           RETURNING id, application_ref, company_uid, document_type, file_name, file_type, file_size, ocr_status, created_at, updated_at`,
+          [file_name, file_type || "application/pdf", file_size || 0, file_data_base64, companyUid, existing.rows[0].id]
         );
         savedDocument = updateRes.rows[0];
       } else {
         const insertRes = await db.query(
           `INSERT INTO application_documents (
-             application_ref, document_type, file_name, file_type, file_size, file_data_base64, ocr_status
-           ) VALUES ($1, $2, $3, $4, $5, $6, 'stored')
-           RETURNING id, application_ref, document_type, file_name, file_type, file_size, ocr_status, created_at, updated_at`,
-          [activeAppRef, document_type, file_name, file_type || "application/pdf", file_size || 0, file_data_base64]
+             application_ref, company_uid, document_type, file_name, file_type, file_size, file_data_base64, ocr_status
+           ) VALUES ($1, $2, $3, $4, $5, $6, $7, 'stored')
+           RETURNING id, application_ref, company_uid, document_type, file_name, file_type, file_size, ocr_status, created_at, updated_at`,
+          [activeAppRef, companyUid, document_type, file_name, file_type || "application/pdf", file_size || 0, file_data_base64]
         );
         savedDocument = insertRes.rows[0];
       }
@@ -211,6 +218,7 @@ router.post("/upload", requireAuth, async (req, res) => {
       savedDocument = {
         id: docId,
         application_ref: activeAppRef,
+        company_uid: companyUid,
         document_type,
         file_name,
         file_type: file_type || "application/pdf",
@@ -223,7 +231,22 @@ router.post("/upload", requireAuth, async (req, res) => {
       memStore.documents.set(docId, savedDocument);
     }
 
-    console.log(`📑 [DOCUMENT SERVICE] Saved Base64 doc (${document_type}: "${file_name}") for ${activeAppRef}`);
+    console.log(`📑 [DOCUMENT SERVICE] Saved Base64 doc (${document_type}: "${file_name}") for ${activeAppRef} (CUID: ${companyUid})`);
+
+    // Audit Logging
+    await logAuditEvent({
+      company_uid: companyUid,
+      crn: activeCrn,
+      application_ref: activeAppRef,
+      channel: "web",
+      action_type: "DOCUMENT_UPLOADED",
+      actor: activeCrn || "CUSTOMER",
+      target: document_type,
+      status: "SUCCESS",
+      ip_address: req.ip || req.headers["x-forwarded-for"] || "127.0.0.1",
+      user_agent: req.headers["user-agent"] || "Web-Browser",
+      metadata: { file_name, file_type, file_size, document_id: savedDocument.id }
+    });
 
     return res.json({
       success: true,
@@ -231,6 +254,7 @@ router.post("/upload", requireAuth, async (req, res) => {
       document: {
         id: savedDocument.id,
         application_ref: savedDocument.application_ref,
+        company_uid: savedDocument.company_uid || companyUid,
         document_type: savedDocument.document_type,
         file_name: savedDocument.file_name,
         file_type: savedDocument.file_type,
@@ -256,7 +280,7 @@ router.get("/list/:applicationRef?", requireAuth, async (req, res) => {
 
     if (db.isConnected()) {
       const result = await db.query(
-        `SELECT id, application_ref, document_type, file_name, file_type, file_size, file_data_base64, ocr_status, created_at, updated_at
+        `SELECT id, application_ref, company_uid, document_type, file_name, file_type, file_size, file_data_base64, ocr_status, created_at, updated_at
          FROM application_documents
          WHERE application_ref = $1
          ORDER BY id ASC`,

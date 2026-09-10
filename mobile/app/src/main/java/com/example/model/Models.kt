@@ -18,6 +18,7 @@ data class DocumentItem(
 data class CompanyInfo(
     val crn: String = "",
     val email: String = "",
+    val companyUid: String = "",
     val companyName: String = "",
     val tradeName: String = "",
     val legalType: String = "",
@@ -74,6 +75,7 @@ data class OnboardingApplication(
     val appRef: String = "",
     val crn: String = "",
     val registeredEmail: String = "",
+    val companyUid: String = "",
     val currentStep: Int = 1,
     val status: String = "draft", // draft, in_review, submitted, approved
     val companyInfo: CompanyInfo = CompanyInfo(),
@@ -96,7 +98,8 @@ data class CorporateAccount(
     val accountName: String,
     val accountType: String,
     val balance: Double,
-    val availableBalance: Double
+    val availableBalance: Double,
+    val companyUid: String = ""
 )
 
 data class TransactionRecord(
@@ -128,6 +131,7 @@ data class FxRate(
 data class RmInvitation(
     val crn: String,
     val email: String,
+    val companyUid: String = "",
     val companyName: String,
     val contactPerson: String,
     val phone: String,
@@ -169,6 +173,7 @@ data class MobileAuditLog(
     val actorId: String,
     val actorName: String,
     val actorRole: String = "RM Executive",
+    val companyUid: String = "",
     val targetCrn: String? = null,
     val targetEmail: String? = null,
     val targetCompany: String? = null,

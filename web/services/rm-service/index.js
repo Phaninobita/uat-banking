@@ -8,6 +8,7 @@ const express = require("express");
 const crypto = require("crypto");
 const memStore = require("../../shared/memStore");
 const db = require("../../shared/db");
+const { resolveCompanyUid, logAuditEvent, getAuditTrail } = require("../../shared/audit");
 
 const router = express.Router();
 
@@ -160,6 +161,7 @@ router.get("/invitations", async (req, res) => {
           SELECT 
             i.crn,
             i.email,
+            i.company_uid,
             i.company_name,
             i.contact_person,
             i.phone,
@@ -193,9 +195,11 @@ router.get("/invitations", async (req, res) => {
       const crnKey = `${(inv.crn || "").trim().toUpperCase()}:${(inv.email || "").trim().toLowerCase()}`;
       const appRef = memStore.crnEmailIndex.get(crnKey);
       const app = appRef ? memStore.applications.get(appRef) : null;
+      const companyUid = inv.company_uid || (app ? app.company_uid : null) || resolveCompanyUid({ crn: inv.crn, company_uid: inv.company_uid });
       
       return {
         ...inv,
+        company_uid: companyUid,
         current_step: inv.current_step || (app ? app.current_step : 1),
         application_ref: inv.application_ref || (app ? app.application_ref : null),
         status: app ? (app.status === 'approved' ? 'completed' : 'in_progress') : inv.status
@@ -216,11 +220,11 @@ router.get("/invitations", async (req, res) => {
 /**
  * POST /api/v1/rm/invite
  * Create and dispatch a new customer onboarding invitation link
- * Composite Primary Key: (crn, email)
+ * Composite Primary Key: (crn, email), Canonical Corporate Key: company_uid
  */
 router.post("/invite", async (req, res) => {
   try {
-    const { crn, email, companyName, contactPerson, phone, notes } = req.body;
+    const { crn, email, companyName, contactPerson, phone, notes, company_uid } = req.body;
 
     if (!crn || !crn.trim()) {
       return res.status(400).json({ error: "Commercial Registration Number (CRN) is required." });
@@ -234,16 +238,18 @@ router.post("/invite", async (req, res) => {
 
     const cleanCrn = crn.trim().toUpperCase();
     const cleanEmail = email.trim().toLowerCase();
+    const companyUid = company_uid || resolveCompanyUid({ crn: cleanCrn, company_uid });
     const inviteToken = "inv_" + crypto.randomBytes(12).toString("hex");
 
-    // Construct customer portal URL with prefill parameters
+    // Construct customer portal URL with prefill parameters (including company_uid)
     const host = req.get("host") || "localhost:3000";
     const protocol = req.protocol === "https" || req.get("x-forwarded-proto") === "https" ? "https" : "http";
-    const inviteLink = `${protocol}://${host}/?crn=${encodeURIComponent(cleanCrn)}&email=${encodeURIComponent(cleanEmail)}&company=${encodeURIComponent(companyName.trim())}&contact=${encodeURIComponent((contactPerson || "").trim())}&phone=${encodeURIComponent((phone || "").trim())}&token=${inviteToken}`;
+    const inviteLink = `${protocol}://${host}/?crn=${encodeURIComponent(cleanCrn)}&email=${encodeURIComponent(cleanEmail)}&company=${encodeURIComponent(companyName.trim())}&contact=${encodeURIComponent((contactPerson || "").trim())}&phone=${encodeURIComponent((phone || "").trim())}&token=${inviteToken}&company_uid=${encodeURIComponent(companyUid)}`;
 
     const inviteRecord = {
       crn: cleanCrn,
       email: cleanEmail,
+      company_uid: companyUid,
       company_name: companyName.trim(),
       contact_person: (contactPerson || "Authorized Signatory").trim(),
       phone: (phone || "").trim(),
@@ -262,9 +268,10 @@ router.post("/invite", async (req, res) => {
       try {
         await db.query(`
           INSERT INTO rm_customer_invitations (
-            crn, email, company_name, contact_person, phone, rm_name, rm_id, invite_token, status, invite_link, notes, created_at, updated_at
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())
+            crn, email, company_uid, company_name, contact_person, phone, rm_name, rm_id, invite_token, status, invite_link, notes, created_at, updated_at
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
           ON CONFLICT (crn, email) DO UPDATE SET
+            company_uid = EXCLUDED.company_uid,
             company_name = EXCLUDED.company_name,
             contact_person = EXCLUDED.contact_person,
             phone = EXCLUDED.phone,
@@ -276,6 +283,7 @@ router.post("/invite", async (req, res) => {
         `, [
           inviteRecord.crn,
           inviteRecord.email,
+          inviteRecord.company_uid,
           inviteRecord.company_name,
           inviteRecord.contact_person,
           inviteRecord.phone,
@@ -293,6 +301,25 @@ router.post("/invite", async (req, res) => {
 
     // Always mirror in high-speed in-memory repository
     memStore.saveRmInvitation(inviteRecord);
+
+    // Record Audit Trail Event
+    await logAuditEvent({
+      company_uid: companyUid,
+      crn: cleanCrn,
+      channel: "web",
+      action_type: "INVITATION_DISPATCHED",
+      actor: inviteRecord.rm_name,
+      target: cleanEmail,
+      status: "SUCCESS",
+      ip_address: req.ip || req.headers["x-forwarded-for"] || "127.0.0.1",
+      user_agent: req.headers["user-agent"] || "RM-Portal",
+      metadata: {
+        rm_id: inviteRecord.rm_id,
+        company_name: inviteRecord.company_name,
+        invite_token: inviteToken,
+        phone: inviteRecord.phone
+      }
+    });
 
     // Dispatch simulated VIP corporate invitation email
     const emailSubject = `Invitation to Onboard: First National Bank Corporate Banking Package for ${inviteRecord.company_name}`;
@@ -445,11 +472,14 @@ router.get("/verify-invite", async (req, res) => {
       invite.status = "in_progress";
       memStore.saveRmInvitation(invite);
 
+      const companyUid = invite.company_uid || resolveCompanyUid({ crn: invite.crn, company_uid: invite.company_uid });
+
       return res.json({
         valid: true,
         invitation: {
           crn: invite.crn,
           email: invite.email,
+          company_uid: companyUid,
           companyName: invite.company_name,
           contactPerson: invite.contact_person,
           rmName: invite.rm_name
@@ -463,6 +493,36 @@ router.get("/verify-invite", async (req, res) => {
     });
   } catch (err) {
     return res.status(500).json({ valid: false, error: "Verification error" });
+  }
+});
+
+/**
+ * GET /api/v1/rm/audit-trail
+ * Query complete audit trail by company_uid or crn for the RM command center
+ */
+router.get("/audit-trail", async (req, res) => {
+  try {
+    const { company_uid, crn, limit } = req.query;
+    if (!company_uid && !crn) {
+      return res.status(400).json({ error: "Query parameter company_uid or crn is required." });
+    }
+
+    const resolvedUid = company_uid || resolveCompanyUid({ crn });
+    const logs = await getAuditTrail({
+      company_uid: resolvedUid,
+      crn,
+      limit: parseInt(limit, 10) || 100
+    });
+
+    return res.json({
+      success: true,
+      company_uid: resolvedUid,
+      count: logs.length,
+      auditTrail: logs
+    });
+  } catch (err) {
+    console.error("[RM-SERVICE] Error fetching audit trail:", err);
+    return res.status(500).json({ error: "Failed to retrieve audit trail." });
   }
 });
 

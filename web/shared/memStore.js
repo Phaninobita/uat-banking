@@ -24,6 +24,12 @@ class MemoryStore {
     // Real-Time Simulated Email Buffer
     this.simulatedEmails = [];
 
+    // Corporate Audit Logs Store (Web and Mobile Events)
+    this.auditLogs = [];
+
+    // Company UID to Application Ref Index
+    this.companyUidIndex = new Map();
+
     // Relationship Manager (RM) Customer Invitations Repository
     // Key: `${crn.trim().toUpperCase()}:${email.trim().toLowerCase()}` -> invitation record
     this.rmInvitations = new Map();
@@ -102,9 +108,11 @@ class MemoryStore {
     const email = (invite.email || "").trim().toLowerCase();
     const key = `${crn}:${email}`;
     const existing = this.rmInvitations.get(key) || {};
+    const company_uid = (invite.company_uid || existing.company_uid || ("CUID-" + crn.replace(/[^A-Z0-9]/g, ""))).toUpperCase();
     const record = {
       ...existing,
       ...invite,
+      company_uid,
       crn,
       email,
       updated_at: new Date().toISOString()
@@ -131,6 +139,42 @@ class MemoryStore {
   deleteRmInvitation(crn, email) {
     const key = `${crn.trim().toUpperCase()}:${email.trim().toLowerCase()}`;
     return this.rmInvitations.delete(key);
+  }
+
+  recordAuditLog(log) {
+    const record = {
+      id: log.id || ("aud_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7)),
+      company_uid: log.company_uid || null,
+      action_type: (log.action_type || "ACTION").toUpperCase(),
+      actor_id: (log.actor_id || "corporate_user").toString(),
+      actor_name: log.actor_name || "Authorized Signatory",
+      actor_role: log.actor_role || "Corporate User",
+      target_crn: log.target_crn ? log.target_crn.toString().trim() : null,
+      target_email: log.target_email ? log.target_email.toString().trim().toLowerCase() : null,
+      target_company: log.target_company || null,
+      details: log.details || "",
+      status: log.status || "SUCCESS",
+      device_info: log.device_info || "Web Portal",
+      ip_address: log.ip_address || "127.0.0.1",
+      channel: log.channel || "web",
+      created_at: log.created_at || new Date().toISOString()
+    };
+    this.auditLogs.unshift(record);
+    if (this.auditLogs.length > 500) {
+      this.auditLogs.pop();
+    }
+    return record;
+  }
+
+  getAuditLogs(companyUid, crn, limit = 100) {
+    let filtered = this.auditLogs;
+    if (companyUid) {
+      const cleanUid = companyUid.trim().toUpperCase();
+      filtered = filtered.filter(l => (l.company_uid && l.company_uid.toUpperCase() === cleanUid) || (crn && l.target_crn === crn));
+    } else if (crn) {
+      filtered = filtered.filter(l => l.target_crn === crn);
+    }
+    return filtered.slice(0, limit);
   }
 
   recordSimulatedEmail({ to, from, subject, html, text, code, type, metadata }) {

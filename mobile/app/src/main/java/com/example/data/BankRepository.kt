@@ -581,6 +581,7 @@ object BankRepository {
         actorId: String,
         actorName: String,
         actorRole: String = "RM Executive",
+        companyUid: String = "",
         targetCrn: String? = null,
         targetEmail: String? = null,
         targetCompany: String? = null,
@@ -589,6 +590,7 @@ object BankRepository {
         deviceInfo: String = "Android Mobile (Google Pixel / API 34)",
         ipAddress: String = "10.0.2.16 (Secure Core VPN)"
     ): MobileAuditLog {
+        val resolvedCuid = if (companyUid.isNotBlank()) companyUid else if (!targetCrn.isNullOrBlank()) "CUID-${targetCrn.uppercase().replace("[^A-Z0-9]".toRegex(), "")}" else ""
         val log = MobileAuditLog(
             id = UUID.randomUUID().toString(),
             timestamp = currentTimestamp(),
@@ -596,6 +598,7 @@ object BankRepository {
             actorId = actorId,
             actorName = actorName,
             actorRole = actorRole,
+            companyUid = resolvedCuid,
             targetCrn = targetCrn,
             targetEmail = targetEmail,
             targetCompany = targetCompany,

@@ -140,6 +140,8 @@ async function handleDispatchInvite(ev) {
     const companyName = document.getElementById("inviteCompany").value.trim();
     const contactPerson = document.getElementById("inviteContact").value.trim();
     const phone = document.getElementById("invitePhone").value.trim();
+    const companyUidInput = document.getElementById("inviteCompanyUid");
+    const company_uid = companyUidInput ? companyUidInput.value.trim() : "";
     const notes = document.getElementById("inviteNotes").value.trim();
 
     const submitBtn = document.getElementById("btnDispatchInvite");
@@ -155,6 +157,7 @@ async function handleDispatchInvite(ev) {
             body: JSON.stringify({
                 crn,
                 email,
+                company_uid,
                 companyName,
                 contactPerson,
                 phone,
@@ -188,11 +191,13 @@ function displayGeneratedInvite(invitation, inviteLink) {
     const linkInput = document.getElementById("generatedLinkInput");
     const btnTest = document.getElementById("btnTestCustomerLink");
     const chipCrn = document.getElementById("chipCrn");
+    const chipCuid = document.getElementById("chipCuid");
     const chipEmail = document.getElementById("chipEmail");
 
     if (linkInput) linkInput.value = inviteLink;
     if (btnTest) btnTest.href = inviteLink;
     if (chipCrn) chipCrn.textContent = invitation.crn;
+    if (chipCuid) chipCuid.textContent = invitation.company_uid || ('CUID-' + (invitation.crn || '').toUpperCase().replace(/[^A-Z0-9]/g, ''));
     if (chipEmail) chipEmail.textContent = invitation.email;
 
     if (successCard) {
@@ -253,7 +258,7 @@ function renderPipelineTable(invitations) {
     if (invitations.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="7" style="text-align:center; padding:36px; color:var(--rm-text-muted);">
+                <td colspan="8" style="text-align:center; padding:36px; color:var(--rm-text-muted);">
                     No customer invitations found. Use the dispatcher above to issue an onboarding link.
                 </td>
             </tr>
@@ -277,9 +282,13 @@ function renderPipelineTable(invitations) {
                            (inv.status === "review" ? "&#x1F4CB; In Review" : "&#x2709; Dispatched"));
 
         const stepText = inv.current_step ? `Step ${inv.current_step} of 7` : "Step 1 of 7";
+        const cuid = inv.company_uid || ('CUID-' + (inv.crn || '').toUpperCase().replace(/[^A-Z0-9]/g, ''));
 
         return `
             <tr>
+                <td>
+                    <span style="color:#f59e0b; font-family:monospace; font-weight:700; font-size:11.5px; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.25); padding:2px 6px; border-radius:4px;">${cuid}</span>
+                </td>
                 <td>
                     <strong style="color:#ffffff; font-family:monospace; font-size:13px;">${inv.crn}</strong>
                 </td>
@@ -309,6 +318,9 @@ function renderPipelineTable(invitations) {
                         <a href="${inv.invite_link}" target="_blank" class="rm-btn-action" style="color:#38bdf8;" title="Open Customer Portal">
                             &#x1F680; Portal
                         </a>
+                        <button class="rm-btn-action" onclick="openRmAuditModal('${cuid}', '${inv.crn}', '${escapeHtml(inv.company_name || '')}')" style="color:#f59e0b;" title="View Omnichannel Compliance Audit Trail">
+                            &#x1F6E1;&#xFE0F; Audit
+                        </button>
                         <button class="rm-btn-action" onclick="resendInvite('${inv.crn}', '${inv.email}')" title="Resend Notification Email">
                             &#x2709; Resend
                         </button>
@@ -413,4 +425,128 @@ async function deleteInvite(crn, email) {
 function closeEmailPreview() {
     const modal = document.getElementById("emailPreviewModal");
     if (modal) modal.style.display = "none";
+}
+
+function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+let activeRmAuditTarget = { companyUid: "", crn: "", companyName: "" };
+
+async function openRmAuditModal(companyUid, crn, companyName) {
+    activeRmAuditTarget = { companyUid, crn, companyName };
+    const modal = document.getElementById("rmAuditModal");
+    if (!modal) return;
+    modal.style.display = "flex";
+
+    const titleEl = document.getElementById("rmAuditTitle");
+    const subEl = document.getElementById("rmAuditSub");
+    if (titleEl) titleEl.innerHTML = `Audit Trail: <strong>${escapeHtml(companyName || crn)}</strong> <span style="font-size:12px; color:#f59e0b; font-family:monospace; margin-left:8px;">${companyUid}</span>`;
+    if (subEl) subEl.textContent = `Omnichannel immutable telemetry (CRN: ${crn}) mapped across corporate_audit_logs`;
+
+    await refreshRmAudit();
+}
+
+function closeRmAuditModal(ev) {
+    const modal = document.getElementById("rmAuditModal");
+    if (modal) modal.style.display = "none";
+}
+
+async function refreshRmAudit() {
+    const content = document.getElementById("rmAuditContent");
+    const countEl = document.getElementById("rmAuditCount");
+    if (!content) return;
+
+    content.innerHTML = `<div style="text-align:center; padding:32px; color:var(--rm-text-muted);">Fetching audit records from PostgreSQL corporate_audit_logs...</div>`;
+
+    try {
+        const { companyUid, crn } = activeRmAuditTarget;
+        const q = companyUid ? `company_uid=${encodeURIComponent(companyUid)}` : `crn=${encodeURIComponent(crn)}`;
+        const res = await fetch(`/api/v1/rm/audit-trail?${q}`);
+        const data = await res.json();
+
+        const logs = data.auditTrail || [];
+        if (countEl) countEl.textContent = logs.length;
+        renderRmAuditTrail(logs);
+    } catch (err) {
+        content.innerHTML = `<div style="text-align:center; padding:24px; color:#f87171;">Failed to load audit trail: ${escapeHtml(err.message || String(err))}</div>`;
+    }
+}
+
+function renderRmAuditTrail(logs) {
+    const content = document.getElementById("rmAuditContent");
+    if (!content) return;
+
+    if (!logs || logs.length === 0) {
+        content.innerHTML = `<div style="text-align:center; padding:36px; color:var(--rm-text-muted);">No audit events recorded for this entity yet.</div>`;
+        return;
+    }
+
+    const actionColors = {
+        CUSTOMER_LOGIN: '#38bdf8',
+        CUSTOMER_OTP_REQUESTED: '#f59e0b',
+        APPLICATION_SAVE: '#10b981',
+        APPLICATION_SUBMITTED: '#a855f7',
+        STEP_PROGRESSION: '#06b6d4',
+        DOCUMENT_UPLOADED: '#ec4899',
+        INVITATION_DISPATCHED: '#eab308'
+    };
+
+    const tableHtml = `
+        <table class="rm-table" style="font-size:12px;">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Channel</th>
+                    <th>Action</th>
+                    <th>Actor</th>
+                    <th>Target / Step</th>
+                    <th>Status</th>
+                    <th>IP &amp; Device</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${logs.map(l => {
+                    const timeStr = l.timestamp || l.created_at || '';
+                    const formatted = timeStr ? new Date(timeStr).toLocaleString('en-GB', {
+                        month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+                    }) : '-';
+                    const channelBadge = l.channel === 'mobile' 
+                        ? `<span style="background:rgba(168,85,247,0.15); border:1px solid rgba(168,85,247,0.3); color:#c084fc; font-weight:600; padding:2px 6px; border-radius:4px; font-size:11px;">📱 Mobile</span>`
+                        : `<span style="background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.3); color:#38bdf8; font-weight:600; padding:2px 6px; border-radius:4px; font-size:11px;">💻 Web</span>`;
+                    const color = actionColors[l.action_type] || '#94a3b8';
+                    const statusStr = (l.status === 'SUCCESS' || !l.status)
+                        ? `<span style="color:#10b981; font-weight:600;">✓ SUCCESS</span>`
+                        : `<span style="color:#ef4444; font-weight:600;">✕ ${escapeHtml(l.status)}</span>`;
+                    const metaStr = l.metadata ? (typeof l.metadata === 'object' ? Object.entries(l.metadata).map(([k,v]) => `${k}:${v}`).join(', ') : String(l.metadata)) : '';
+
+                    return `
+                        <tr>
+                            <td style="font-family:monospace; color:#cbd5e1; white-space:nowrap;">${formatted}</td>
+                            <td>${channelBadge}</td>
+                            <td>
+                                <span style="font-weight:700; color:${color}; font-family:monospace;">${escapeHtml(l.action_type || '')}</span>
+                                ${metaStr ? `<div style="font-size:10.5px; color:var(--rm-text-muted); max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(metaStr)}">${escapeHtml(metaStr)}</div>` : ''}
+                            </td>
+                            <td style="color:#e2e8f0; font-family:monospace;">${escapeHtml(l.actor || '-')}</td>
+                            <td style="color:var(--rm-text-muted);">${escapeHtml(l.target || l.event_type || '-')}</td>
+                            <td>${statusStr}</td>
+                            <td style="font-family:monospace; font-size:11px; color:var(--rm-text-muted);">
+                                <div>${escapeHtml(l.ip_address || '127.0.0.1')}</div>
+                                <div style="font-size:10px; color:#475569; max-width:140px; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(l.user_agent || '')}">${escapeHtml((l.user_agent || '').substring(0, 22))}</div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('')}
+            </tbody>
+        </table>
+    `;
+
+    content.innerHTML = tableHtml;
 }

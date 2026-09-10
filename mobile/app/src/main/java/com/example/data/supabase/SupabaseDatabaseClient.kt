@@ -241,9 +241,11 @@ class SupabaseDatabaseClient {
 
         try {
             val postUrl = "$restApiUrl/rm_customer_invitations"
+            val cuid = if (invite.companyUid.isNotBlank()) invite.companyUid else "CUID-${invite.crn.uppercase().replace("[^A-Z0-9]".toRegex(), "")}"
             val payload = JSONObject().apply {
                 put("crn", invite.crn)
                 put("email", invite.email)
+                put("company_uid", cuid)
                 put("company_name", invite.companyName)
                 put("contact_person", invite.contactPerson)
                 put("phone", invite.phone)
@@ -334,11 +336,19 @@ class SupabaseDatabaseClient {
             val resolvedAppRef = application.appRef.ifBlank {
                 "AB-2026-" + UUID.randomUUID().toString().replace("-", "").take(6).uppercase()
             }
+            val resolvedCuid = if (application.companyUid.isNotBlank()) {
+                application.companyUid
+            } else if (application.companyInfo.companyUid.isNotBlank()) {
+                application.companyInfo.companyUid
+            } else {
+                "CUID-${application.crn.uppercase().replace("[^A-Z0-9]".toRegex(), "")}"
+            }
             val postUrl = "$restApiUrl/corporate_onboarding_applications?on_conflict=application_ref"
 
             val payload = JSONObject().apply {
                 put("application_ref", resolvedAppRef)
                 put("crn", application.crn)
+                put("company_uid", resolvedCuid)
                 put("registered_email", application.registeredEmail)
                 put("status", application.status.ifBlank { "draft" })
                 put("company_name", application.companyInfo.companyName)
@@ -357,6 +367,8 @@ class SupabaseDatabaseClient {
                 // JSON form_data format for seamless web-portal interoperability (all collections inside form_data)
                 val step2Json = JSONObject().apply {
                     put("crn", application.companyInfo.crn)
+                    put("company_uid", resolvedCuid)
+                    put("companyUid", resolvedCuid)
                     put("company_name", application.companyInfo.companyName)
                     put("companyName", application.companyInfo.companyName)
                     put("trade_name", application.companyInfo.tradeName.ifBlank { application.companyInfo.companyName })
@@ -494,6 +506,8 @@ class SupabaseDatabaseClient {
                 }
 
                 val formData = JSONObject().apply {
+                    put("company_uid", resolvedCuid)
+                    put("companyUid", resolvedCuid)
                     put("step1_documents", docsArray)
                     put("documents", docsArray)
                     put("step2", step2Json)
@@ -708,15 +722,28 @@ class SupabaseDatabaseClient {
                         )
                     } else FatcaCrsInfo()
 
+                    val rawCuid = obj.optString("company_uid", "")
+                    val cuidFromFormData = formData?.optString("company_uid", formData.optString("companyUid", "")) ?: ""
+                    val cuidFromStep2 = step2?.optString("company_uid", step2.optString("companyUid", "")) ?: ""
+                    val resolvedCompanyUid = when {
+                        rawCuid.isNotBlank() -> rawCuid
+                        cuidFromFormData.isNotBlank() -> cuidFromFormData
+                        cuidFromStep2.isNotBlank() -> cuidFromStep2
+                        appCrn.isNotBlank() -> "CUID-${appCrn.uppercase().replace("[^A-Z0-9]".toRegex(), "")}"
+                        else -> ""
+                    }
+
                     val app = OnboardingApplication(
                         appRef = appRef,
                         crn = appCrn,
                         registeredEmail = registeredEmail,
+                        companyUid = resolvedCompanyUid,
                         currentStep = currentStep.coerceIn(1, 7),
                         status = status,
                         companyInfo = CompanyInfo(
                             crn = appCrn,
                             email = registeredEmail,
+                            companyUid = resolvedCompanyUid,
                             companyName = companyName,
                             tradeName = tradeName,
                             legalType = legalType,
@@ -794,9 +821,14 @@ class SupabaseDatabaseClient {
     }
 
     private fun parseJsonInvitation(obj: JSONObject): RmInvitation {
+        val rawCuid = obj.optString("company_uid", "")
+        val crnVal = obj.optString("crn")
+        val resolvedCuid = if (rawCuid.isNotBlank()) rawCuid else if (crnVal.isNotBlank()) "CUID-${crnVal.uppercase().replace("[^A-Z0-9]".toRegex(), "")}" else ""
+
         return RmInvitation(
-            crn = obj.optString("crn"),
+            crn = crnVal,
             email = obj.optString("email"),
+            companyUid = resolvedCuid,
             companyName = obj.optString("company_name", "Corporate Client"),
             contactPerson = obj.optString("contact_person", "Authorized Signatory"),
             phone = obj.optString("phone", ""),
@@ -830,12 +862,19 @@ class SupabaseDatabaseClient {
                 UUID.randomUUID().toString()
             }
 
+            val cuid = if (log.companyUid.isNotBlank()) {
+                log.companyUid
+            } else if (!log.targetCrn.isNullOrBlank()) {
+                "CUID-${log.targetCrn.uppercase().replace("[^A-Z0-9]".toRegex(), "")}"
+            } else ""
+
             val payload = JSONObject().apply {
                 put("id", validUuid)
                 put("action_type", log.actionType)
                 put("actor_id", log.actorId)
                 put("actor_name", log.actorName)
                 put("actor_role", log.actorRole)
+                if (cuid.isNotBlank()) put("company_uid", cuid)
                 if (!log.targetCrn.isNullOrBlank()) put("target_crn", log.targetCrn)
                 if (!log.targetEmail.isNullOrBlank()) put("target_email", log.targetEmail)
                 if (!log.targetCompany.isNullOrBlank()) put("target_company", log.targetCompany)
@@ -917,6 +956,10 @@ class SupabaseDatabaseClient {
     }
 
     private fun parseJsonAuditLog(obj: JSONObject): MobileAuditLog {
+        val rawCuid = obj.optString("company_uid", "")
+        val targetCrn = obj.optString("target_crn").takeIf { it.isNotBlank() }
+        val resolvedCuid = if (rawCuid.isNotBlank()) rawCuid else if (!targetCrn.isNullOrBlank()) "CUID-${targetCrn.uppercase().replace("[^A-Z0-9]".toRegex(), "")}" else ""
+
         return MobileAuditLog(
             id = obj.optString("id", UUID.randomUUID().toString()),
             timestamp = obj.optString("created_at", getCurrentIsoTimestamp()),
@@ -924,7 +967,8 @@ class SupabaseDatabaseClient {
             actorId = obj.optString("actor_id", "RM-PHANEE"),
             actorName = obj.optString("actor_name", "Phanee"),
             actorRole = obj.optString("actor_role", "RM Executive"),
-            targetCrn = obj.optString("target_crn").takeIf { it.isNotBlank() },
+            companyUid = resolvedCuid,
+            targetCrn = targetCrn,
             targetEmail = obj.optString("target_email").takeIf { it.isNotBlank() },
             targetCompany = obj.optString("target_company").takeIf { it.isNotBlank() },
             details = obj.optString("details", ""),
