@@ -26,7 +26,8 @@ data class CompanyInfo(
     val issuedBy: String = "",
     val vatTrn: String = "",
     val contactPerson: String = "",
-    val phone: String = ""
+    val phone: String = "",
+    val address: String = ""
 )
 
 data class UboItem(

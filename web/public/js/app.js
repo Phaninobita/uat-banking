@@ -1877,53 +1877,167 @@ function updateReviewSection() {
 
 // &#x1F6C7;&#x1F6C7; COMPREHENSIVE DATA PERSISTENCE: COLLECT ALL 7 STEPS &#x1F6C7;&#x1F6C7;
 function collectFullFormData() {
-    // Step 1: Uploaded documents
+    // Step 1: Uploaded documents (Supports both web and mobile schemas)
     const step1Docs = [];
+    const documentsList = [];
     for (let i = 1; i <= 4; i++) {
         const card = document.getElementById('uc-' + i);
         if (card) {
+            const label = card.querySelector('.doc-label-input')?.value || `Document ${i}`;
+            const uploaded = card.classList.contains('uploaded');
+            const filename = card.querySelector('.file-status')?.textContent || '';
             step1Docs.push({
                 id: 'uc-' + i,
-                label: card.querySelector('.doc-label-input')?.value || `Document ${i}`,
-                uploaded: card.classList.contains('uploaded'),
-                filename: card.querySelector('.file-status')?.textContent || ''
+                label: label,
+                uploaded: uploaded,
+                filename: filename
+            });
+            documentsList.push({
+                id: 'doc_' + i,
+                title: label,
+                recommended: i <= 3,
+                is_uploaded: uploaded,
+                uploaded: uploaded,
+                file_name: filename,
+                filename: filename,
+                file_size_kb: uploaded ? 245 : 0,
+                ocr_status: uploaded ? 'Ready' : 'Pending',
+                extracted_info: ''
             });
         }
     }
 
-    // Step 2: Company details
+    // Step 2: Company details (Supports both web and mobile fields)
+    const street = document.getElementById('step2_street')?.value || '';
+    const city = document.getElementById('step2_city')?.value || '';
+    const state = document.getElementById('step2_state')?.value || '';
+    const country = document.getElementById('step2_country')?.value || 'United States';
+    const building = document.getElementById('step2_building')?.value || '';
+    const fullAddress = [building, street, city, state, country].filter(Boolean).join(', ');
+
     const step2 = {
         crn: document.getElementById('step2_crn')?.value || '',
         company_name: document.getElementById('step2_name')?.value || '',
+        companyName: document.getElementById('step2_name')?.value || '',
         trade_name: document.getElementById('trade_name')?.value || '',
+        tradeName: document.getElementById('trade_name')?.value || '',
         legal_type: document.getElementById('step2_legal_type')?.value || '',
+        legalType: document.getElementById('step2_legal_type')?.value || '',
         issue_date: document.getElementById('step2_issue_date')?.value || '',
+        issueDate: document.getElementById('step2_issue_date')?.value || '',
         expiry_date: document.getElementById('step2_expiry_date')?.value || '',
+        expiryDate: document.getElementById('step2_expiry_date')?.value || '',
         issued_by: document.getElementById('step2_issued_by')?.value || '',
-        address: document.querySelector('#tab-address input')?.value || '',
-        vat_trn: document.querySelector('#tab-vat input')?.value || ''
+        issuedBy: document.getElementById('step2_issued_by')?.value || '',
+        contact_person: document.getElementById('step2_contact_person')?.value || '',
+        contactPerson: document.getElementById('step2_contact_person')?.value || '',
+        email: document.getElementById('step2_email')?.value || '',
+        phone: document.getElementById('step2_phone')?.value || '',
+        address: fullAddress || document.querySelector('#tab-address input')?.value || '',
+        vat_trn: document.getElementById('step2_vat_trn')?.value || document.querySelector('#tab-vat input')?.value || '',
+        vatTrn: document.getElementById('step2_vat_trn')?.value || document.querySelector('#tab-vat input')?.value || ''
     };
 
-    // Step 3 & 4: Entities and Ownership rows
+    // Step 3: Extract UBO items
+    const uboItems = [];
+    document.querySelectorAll('#uboCardsWrap .ubo-card').forEach((card, idx) => {
+        const name = card.querySelector('input[type="text"]')?.value || `UBO ${idx + 1}`;
+        const nat = card.querySelector('select')?.value || 'American';
+        const dateInputs = card.querySelectorAll('input[type="date"]');
+        const dob = dateInputs[0]?.value || '1985-06-15';
+        const expiry = dateInputs[1]?.value || '2032-06-14';
+        const textInputs = card.querySelectorAll('input[type="text"]');
+        const pass = textInputs[1]?.value || `PASS-${idx + 1}`;
+        const isPep = card.querySelector('.tog-group .tog-btn:first-child')?.classList.contains('on') || false;
+        uboItems.push({
+            id: 'ubo_' + (idx + 1),
+            fullName: name,
+            name: name,
+            nationality: nat,
+            idPassportNumber: pass,
+            passportNumber: pass,
+            dob: dob,
+            expiryDate: expiry,
+            shareholdingPct: idx === 0 ? 60.0 : 40.0,
+            percentage: idx === 0 ? 60.0 : 40.0,
+            votingRightsPct: idx === 0 ? 60.0 : 40.0,
+            isPep: isPep
+        });
+    });
+
+    // Step 4: Ownership structure / Cap table
     const ownershipRows = [];
-    document.querySelectorAll('#struct-rows .struct-row').forEach(row => {
+    document.querySelectorAll('#struct-rows .struct-row').forEach((row, idx) => {
         const lvl = row.querySelector('select[id^="level-"]')?.value || '1';
         const ent = row.querySelector('select[id^="entity-select-"]')?.value || '';
-        const pct = row.querySelector('input[type="number"]')?.value || '0';
-        if (ent) ownershipRows.push({ level: lvl, entity: ent, percentage: pct });
+        const pct = parseFloat(row.querySelector('input[type="number"]')?.value) || 0;
+        if (ent) {
+            ownershipRows.push({
+                id: 'sh_' + (idx + 1),
+                name: ent,
+                entity: ent,
+                level: lvl,
+                percentage: pct,
+                category: ent.includes('LLC') || ent.includes('PLC') || ent.includes('Corp') || ent.includes('Holdings') ? 'Corporate' : 'Individual',
+                shareClass: 'Ordinary Voting Class A',
+                share_class: 'Ordinary Voting Class A',
+                country: 'United States',
+                votingRightsPct: pct,
+                voting_rights_pct: pct,
+                isFlaggedForRework: false,
+                is_flagged_for_rework: false,
+                reworkNotes: '',
+                rework_notes: ''
+            });
+        }
     });
 
     // Step 5: Roles
     const step5 = {
         maker: document.getElementById('maker-select')?.value || '',
-        checker: document.getElementById('checker-select')?.value || ''
+        checker: document.getElementById('checker-select')?.value || '',
+        items: [
+            {
+                id: 'role_1',
+                name: document.getElementById('maker-select')?.value || (extractedEntities[0] || 'Managing Director'),
+                title: 'Managing Director & Signatory',
+                authority_level: 'Sole Signatory',
+                authorityLevel: 'Sole Signatory',
+                is_signature_uploaded: true,
+                isSignatureUploaded: true
+            },
+            {
+                id: 'role_2',
+                name: document.getElementById('checker-select')?.value || (extractedEntities[1] || 'Chief Financial Officer'),
+                title: 'Chief Financial Officer',
+                authority_level: 'Joint Signatory',
+                authorityLevel: 'Joint Signatory',
+                is_signature_uploaded: true,
+                isSignatureUploaded: true
+            }
+        ]
     };
 
     // Step 6: Tax
+    const isUs = document.querySelector('#fatca-us-person-tog .tog-btn:first-child')?.classList.contains('on') || false;
+    const fatcaClass = document.getElementById('fatca-entity-class')?.value || (isUs ? 'Specified US Person' : 'NFFE');
+    const crsFi = document.querySelector('#crs-fi-tog .tog-btn:first-child')?.classList.contains('on') || false;
     const step6 = {
-        fatca_class: document.getElementById('fatca-entity-class')?.value || '',
-        us_person: document.querySelector('#fatca-us-person-tog .tog-btn:first-child')?.classList.contains('on') || false,
-        crs_fi: document.querySelector('#crs-fi-tog .tog-btn:first-child')?.classList.contains('on') || false
+        us_person: isUs,
+        is_us_person: isUs,
+        isUsPerson: isUs,
+        us_tin: isUs ? '12-3456789' : '',
+        usTin: isUs ? '12-3456789' : '',
+        primary_tax_country: 'United States',
+        primaryTaxCountry: 'United States',
+        tax_id_number: document.getElementById('step2_vat_trn')?.value || '12-3456789',
+        taxIdNumber: document.getElementById('step2_vat_trn')?.value || '12-3456789',
+        entity_classification: fatcaClass,
+        entityClassification: fatcaClass,
+        fatca_class: fatcaClass,
+        crs_fi: crsFi,
+        crs_confirmed: true,
+        crsConfirmed: true
     };
 
     // Step 7: Declarations
@@ -1935,30 +2049,39 @@ function collectFullFormData() {
 
     return {
         step1_documents: step1Docs,
+        documents: documentsList,
         step2,
         entities: extractedEntities,
+        ubos: uboItems,
         ownership_structure: ownershipRows,
+        ownership: ownershipRows,
         roles: step5,
         tax: step6,
+        tax_compliance: step6,
         declarations
     };
 }
 
-// &#x1F6C7;&#x1F6C7; COMPREHENSIVE DATA PERSISTENCE: RESTORE ALL 7 STEPS &#x1F6C7;&#x1F6C7;
+// ── COMPREHENSIVE DATA PERSISTENCE: RESTORE ALL 7 STEPS ──
 function populateFormData(formData) {
     if (!formData) return;
 
     // Restore Step 1 documents
-    if (formData.step1_documents && Array.isArray(formData.step1_documents)) {
-        formData.step1_documents.forEach(doc => {
-            const card = document.getElementById(doc.id);
+    const docSource = formData.documents || formData.step1_documents;
+    if (docSource && Array.isArray(docSource)) {
+        docSource.forEach(doc => {
+            const card = document.getElementById(doc.id) || document.getElementById('uc-' + doc.id.replace(/\D/g, ''));
             if (card) {
                 const labelInput = card.querySelector('.doc-label-input');
                 const statusEl = card.querySelector('.file-status');
-                if (labelInput && doc.label) labelInput.value = doc.label;
-                if (doc.uploaded) {
+                const labelText = doc.title || doc.label;
+                const fileName = doc.fileName || doc.file_name || doc.filename;
+                const isUp = Boolean(doc.isUploaded || doc.is_uploaded || doc.uploaded);
+
+                if (labelInput && labelText) labelInput.value = labelText;
+                if (isUp) {
                     card.classList.add('uploaded');
-                    if (statusEl && doc.filename) statusEl.textContent = doc.filename;
+                    if (statusEl && fileName) statusEl.textContent = fileName;
                 }
             }
         });
@@ -1967,27 +2090,53 @@ function populateFormData(formData) {
     // Restore Step 2 company details
     if (formData.step2) {
         const s2 = formData.step2;
-        if (s2.crn && document.getElementById('step2_crn')) document.getElementById('step2_crn').value = s2.crn;
-        if (s2.company_name && document.getElementById('step2_name')) document.getElementById('step2_name').value = s2.company_name;
-        if (s2.trade_name && document.getElementById('trade_name')) document.getElementById('trade_name').value = s2.trade_name;
-        if (s2.legal_type && document.getElementById('step2_legal_type')) document.getElementById('step2_legal_type').value = s2.legal_type;
-        if (s2.issue_date && document.getElementById('step2_issue_date')) document.getElementById('step2_issue_date').value = s2.issue_date;
-        if (s2.expiry_date && document.getElementById('step2_expiry_date')) document.getElementById('step2_expiry_date').value = s2.expiry_date;
-        if (s2.issued_by && document.getElementById('step2_issued_by')) document.getElementById('step2_issued_by').value = s2.issued_by;
-        if (s2.address && document.querySelector('#tab-address input')) document.querySelector('#tab-address input').value = s2.address;
-        if (s2.vat_trn && document.querySelector('#tab-vat input')) document.querySelector('#tab-vat input').value = s2.vat_trn;
+        const crnVal = s2.crn || '';
+        const nameVal = s2.company_name || s2.companyName || '';
+        const tradeVal = s2.trade_name || s2.tradeName || '';
+        const legalVal = s2.legal_type || s2.legalType || '';
+        const issueVal = s2.issue_date || s2.issueDate || '';
+        const expiryVal = s2.expiry_date || s2.expiryDate || '';
+        const issuedByVal = s2.issued_by || s2.issuedBy || '';
+        const contactVal = s2.contact_person || s2.contactPerson || '';
+        const phoneVal = s2.phone || '';
+        const emailVal = s2.email || '';
+        const vatVal = s2.vat_trn || s2.vatTrn || '';
+        const addrVal = s2.address || '';
+
+        if (crnVal && document.getElementById('step2_crn')) document.getElementById('step2_crn').value = crnVal;
+        if (nameVal && document.getElementById('step2_name')) document.getElementById('step2_name').value = nameVal;
+        if (tradeVal && document.getElementById('trade_name')) document.getElementById('trade_name').value = tradeVal;
+        if (legalVal && document.getElementById('step2_legal_type')) document.getElementById('step2_legal_type').value = legalVal;
+        if (issueVal && document.getElementById('step2_issue_date')) document.getElementById('step2_issue_date').value = issueVal;
+        if (expiryVal && document.getElementById('step2_expiry_date')) document.getElementById('step2_expiry_date').value = expiryVal;
+        if (issuedByVal && document.getElementById('step2_issued_by')) document.getElementById('step2_issued_by').value = issuedByVal;
+        if (contactVal && document.getElementById('step2_contact_person')) document.getElementById('step2_contact_person').value = contactVal;
+        if (phoneVal && document.getElementById('step2_phone')) document.getElementById('step2_phone').value = phoneVal;
+        if (emailVal && document.getElementById('step2_email')) document.getElementById('step2_email').value = emailVal;
+        if (vatVal && document.getElementById('step2_vat_trn')) document.getElementById('step2_vat_trn').value = vatVal;
+        if (addrVal && document.querySelector('#tab-address input')) document.querySelector('#tab-address input').value = addrVal;
     }
 
-    // Restore Step 3 & 4 entities
-    if (formData.entities && Array.isArray(formData.entities) && formData.entities.length > 0) {
+    // Restore Step 3 & 4 entities and UBOs
+    if (formData.ubos && Array.isArray(formData.ubos) && formData.ubos.length > 0) {
+        extractedEntities = formData.ubos.map(u => u.fullName || u.name);
+        uboCount = extractedEntities.length;
+        updateUboCountText();
+    } else if (formData.entities && Array.isArray(formData.entities) && formData.entities.length > 0) {
         extractedEntities = formData.entities;
         uboCount = extractedEntities.length;
         updateUboCountText();
     }
 
     // Restore Step 4 ownership structure
-    if (formData.ownership_structure && Array.isArray(formData.ownership_structure) && formData.ownership_structure.length > 0) {
-        cachedOwnershipRows = formData.ownership_structure;
+    const ownSource = formData.ownership || formData.ownership_structure;
+    if (ownSource && Array.isArray(ownSource) && ownSource.length > 0) {
+        cachedOwnershipRows = ownSource.map(r => ({
+            entity: r.entity || r.name,
+            name: r.name || r.entity,
+            percentage: r.percentage,
+            level: r.level || '1'
+        }));
         renderListView();
     }
 
@@ -2001,11 +2150,12 @@ function populateFormData(formData) {
     }
 
     // Restore Step 6 tax
-    if (formData.tax) {
+    const taxSource = formData.tax || formData.tax_compliance;
+    if (taxSource) {
         cachedTaxSelections = {
-            usPerson: formData.tax.us_person,
-            fatcaClass: formData.tax.fatca_class,
-            crsFi: formData.tax.crs_fi
+            usPerson: Boolean(taxSource.us_person ?? taxSource.is_us_person ?? taxSource.isUsPerson),
+            fatcaClass: taxSource.fatca_class || taxSource.entity_classification || taxSource.entityClassification || '',
+            crsFi: Boolean(taxSource.crs_fi ?? taxSource.crsFi)
         };
         initFATCA_CRS_States();
     }
@@ -2961,16 +3111,27 @@ window.addEventListener('DOMContentLoaded', async () => {
         if (overlay) overlay.classList.remove('hidden');
     }
 
-    // Check for RM customer magic invite URL params (?crn=...&email=...)
+    // Check for RM customer magic invite URL params (?crn=...&email=...&company=...&contact=...&phone=...)
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const inviteCrn = urlParams.get('crn');
         const inviteEmail = urlParams.get('email');
+        const inviteCompany = urlParams.get('company') || urlParams.get('company_name');
+        const inviteContact = urlParams.get('contact') || urlParams.get('contact_person');
+        const invitePhone = urlParams.get('phone');
+
         if (inviteCrn || inviteEmail) {
             const crnInput = document.getElementById('crnInput');
             const emailInput = document.getElementById('emailInput');
             if (inviteCrn && crnInput) crnInput.value = inviteCrn;
             if (inviteEmail && emailInput) emailInput.value = inviteEmail;
+
+            // Pre-seed Step 2 DOM inputs if available
+            if (inviteCrn && document.getElementById('step2_crn')) document.getElementById('step2_crn').value = inviteCrn;
+            if (inviteCompany && document.getElementById('step2_name')) document.getElementById('step2_name').value = inviteCompany;
+            if (inviteContact && document.getElementById('step2_contact_person')) document.getElementById('step2_contact_person').value = inviteContact;
+            if (invitePhone && document.getElementById('step2_phone')) document.getElementById('step2_phone').value = invitePhone;
+            if (inviteEmail && document.getElementById('step2_email')) document.getElementById('step2_email').value = inviteEmail;
 
             // Display VIP Relationship Manager Invitation Banner on login card
             const loginBox = document.querySelector('.login-box');
@@ -2978,7 +3139,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 const banner = document.createElement('div');
                 banner.id = 'rm-invite-banner';
                 banner.style.cssText = 'margin-bottom:16px; padding:12px 16px; background:rgba(245,158,11,0.15); border:1.5px solid #f59e0b; border-radius:10px; font-size:12.5px; color:#fef08a; text-align:left; animation:fadeUp 0.3s ease;';
-                banner.innerHTML = `<strong style="color:#ffffff; font-size:13px;">&#x1F4CB; Relationship Manager Invitation</strong><br>Welcome to First National Bank! You are accessing your onboarding journey with CRN <strong>${inviteCrn || ''}</strong>. Click Request OTP to begin.`;
+                banner.innerHTML = `<strong style="color:#ffffff; font-size:13px;">&#x1F4CB; Relationship Manager Invitation</strong><br>Welcome to First National Bank! You are accessing your onboarding journey with CRN <strong>${inviteCrn || ''}</strong>${inviteCompany ? ` (${inviteCompany})` : ''}. Click Request OTP to begin.`;
                 const errorBox = document.getElementById('loginError');
                 if (errorBox) {
                     errorBox.parentNode.insertBefore(banner, errorBox.nextSibling);

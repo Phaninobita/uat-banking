@@ -304,6 +304,11 @@
                                     <input type="date" id="step2_expiry_date" class="auto-filled" oninput="evaluateDateInputExpiry(this)" onchange="evaluateDateInputExpiry(this)">
                                     <span class="auto-badge" id="step2_expiry_badge">&#x26A1; Auto-filled</span>
                                 </div>
+                                <div class="field">
+                                    <label>Authorized Signatory / Primary Contact</label>
+                                    <input type="text" id="step2_contact_person" placeholder="e.g. Michael Vance">
+                                    <span class="help">Optional</span>
+                                </div>
                                 <div class="field span2">
                                     <label>Licence Issued By</label>
                                     <input type="text" id="step2_issued_by" placeholder="e.g. US Federal Reserve (Federal Reserve)" class="auto-filled">
@@ -331,17 +336,17 @@
                         </div>
                         <div class="sub-pane" id="tab-address" role="tabpanel" aria-labelledby="snav-address">
                             <div class="g2">
-                                <div class="field"><label>Building / Unit</label><input type="text" placeholder="e.g. Tower 1, Suite 402"></div>
-                                <div class="field"><label>Street / Area</label><input type="text" placeholder="e.g. Commercial District"></div>
-                                <div class="field"><label>City</label><input type="text" placeholder="e.g. New York"></div>
-                                <div class="field"><label>State</label><input type="text" placeholder="e.g. New York"></div>
-                                <div class="field"><label>P.O. Box</label><input type="text" placeholder="e.g. 12345"><span class="help">Optional</span></div>
-                                <div class="field"><label>Country</label><select><option>United Arab Emirates</option><option>United Kingdom</option><option>India</option><option selected>United States</option><option>Singapore</option></select></div>
-                                <div class="field"><label>Corporate Email</label><input type="email" placeholder="e.g. corporate@company.ae"></div>
+                                <div class="field"><label>Building / Unit</label><input type="text" id="step2_building" placeholder="e.g. Tower 1, Suite 402"></div>
+                                <div class="field"><label>Street / Area</label><input type="text" id="step2_street" placeholder="e.g. Commercial District"></div>
+                                <div class="field"><label>City</label><input type="text" id="step2_city" placeholder="e.g. New York"></div>
+                                <div class="field"><label>State</label><input type="text" id="step2_state" placeholder="e.g. New York"></div>
+                                <div class="field"><label>P.O. Box</label><input type="text" id="step2_pobox" placeholder="e.g. 12345"><span class="help">Optional</span></div>
+                                <div class="field"><label>Country</label><select id="step2_country"><option>United Arab Emirates</option><option>United Kingdom</option><option>India</option><option selected>United States</option><option>Singapore</option></select></div>
+                                <div class="field"><label>Corporate Email</label><input type="email" id="step2_email" placeholder="e.g. corporate@company.ae"></div>
                                 <div class="field"><label>Phone Number</label>
                                     <div style="display:flex;gap:8px;">
-                                        <select style="width:90px;"><option>+971</option><option>+44</option><option>+1</option><option>+91</option><option>+65</option></select>
-                                        <input type="text" placeholder="e.g. 50 123 4567" style="flex:1;">
+                                        <select id="step2_phone_code" style="width:90px;"><option>+1</option><option>+971</option><option>+44</option><option>+91</option><option>+65</option></select>
+                                        <input type="text" id="step2_phone" placeholder="e.g. 212 555 0199" style="flex:1;">
                                     </div>
                                 </div>
                                 <div class="field span2">
@@ -358,7 +363,7 @@
                         <div class="sub-pane" id="tab-ops" role="tabpanel" aria-labelledby="snav-ops">
                             <div class="field" style="margin-bottom:24px;">
                                 <label>Country of Domicile</label>
-                                <select style="max-width:340px;"><option>United Arab Emirates</option><option>United Kingdom</option><option>Indonesia</option></select>
+                                <select id="step2_domicile" style="max-width:340px;"><option selected>United States</option><option>United Arab Emirates</option><option>United Kingdom</option><option>Singapore</option></select>
                             </div>
                             <span class="tog-label">Does the entity operate outside its country of domicile?</span>
                             <div class="tog-group" role="group">
@@ -367,7 +372,7 @@
                             </div>
                             <div id="ops-list" style="display:none;">
                                 <div class="g2" style="align-items:end;margin-bottom:12px;">
-                                    <div class="field"><label>Country</label><select><option>Bahamas</option><option>India</option><option>UK</option></select></div>
+                                    <div class="field"><label>Country</label><select><option>United Kingdom</option><option>Singapore</option><option>Germany</option></select></div>
                                     <div class="field"><label>Type of Operation</label><select><option>Subsidiary Company</option><option>Branch</option><option>Representative Office</option></select></div>
                                 </div>
                             </div>
@@ -378,15 +383,15 @@
                             </div>
                         </div>
                         <div class="sub-pane" id="tab-vat" role="tabpanel" aria-labelledby="snav-vat">
-                            <span class="tog-label">Is your company registered for VAT?</span>
+                            <span class="tog-label">Is your company registered for VAT / Federal Tax?</span>
                             <div class="tog-group" role="group">
                                 <button class="tog-btn on" onclick="tog(this)">Yes</button>
                                 <button class="tog-btn" onclick="tog(this)">No</button>
                             </div>
                             <div class="field" style="max-width:340px;margin-bottom:32px;">
-                                <label>Tax Registration Number (TRN)</label>
-                                <input type="text" placeholder="e.g. 100345678900003">
-                                <span class="help">15-digit TRN from your VAT certificate</span>
+                                <label>Tax Registration Number (TRN / EIN)</label>
+                                <input type="text" id="step2_vat_trn" placeholder="e.g. 12-3456789">
+                                <span class="help">Federal Tax ID / EIN or VAT registration number</span>
                             </div>
                             <div style="display:flex;justify-content:space-between;margin-top:24px;">
                                 <button class="btn btn-ghost" onclick="switchTab('ops')">&larr; Back</button>

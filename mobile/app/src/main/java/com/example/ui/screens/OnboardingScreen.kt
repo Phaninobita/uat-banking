@@ -968,6 +968,24 @@ fun Step2CompanyInfoView(viewModel: BankViewModel, app: OnboardingApplication) {
                 unfocusedBorderColor = FnbBorder
             )
         )
+
+        OutlinedTextField(
+            value = info.address,
+            onValueChange = {
+                info = info.copy(address = it)
+                viewModel.updateCompanyInfo(info)
+            },
+            label = { Text("Registered Business Address") },
+            singleLine = false,
+            maxLines = 2,
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = FnbTextPrimary,
+                unfocusedTextColor = FnbTextPrimary,
+                focusedBorderColor = FnbPrimary,
+                unfocusedBorderColor = FnbBorder
+            )
+        )
     }
 }
 

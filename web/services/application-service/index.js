@@ -35,12 +35,26 @@ router.get("/current", requireAuth, async (req, res) => {
       return res.status(404).json({ error: "Application profile not found." });
     }
 
-    // Ensure company_name reflects the RM invitation record if available
+    // Ensure company_name, contact_person, and phone reflect the RM invitation record if available
     const rmInv = memStore.getRmInvitation(applicationRecord.crn, applicationRecord.registered_email);
-    if (rmInv && rmInv.company_name) {
-      if (!applicationRecord.company_name || applicationRecord.company_name === "Apex Global Holdings Ltd") {
+    if (rmInv) {
+      if (rmInv.company_name && (!applicationRecord.company_name || applicationRecord.company_name === "Apex Global Holdings Ltd")) {
         applicationRecord.company_name = rmInv.company_name;
         applicationRecord.trade_name = rmInv.company_name;
+      }
+      if (rmInv.contact_person && !applicationRecord.contact_person) {
+        applicationRecord.contact_person = rmInv.contact_person;
+      }
+      if (rmInv.phone && !applicationRecord.phone) {
+        applicationRecord.phone = rmInv.phone;
+      }
+      if (applicationRecord.form_data && applicationRecord.form_data.step2) {
+        if (!applicationRecord.form_data.step2.contact_person && rmInv.contact_person) {
+          applicationRecord.form_data.step2.contact_person = rmInv.contact_person;
+        }
+        if (!applicationRecord.form_data.step2.phone && rmInv.phone) {
+          applicationRecord.form_data.step2.phone = rmInv.phone;
+        }
       }
     }
 
@@ -96,13 +110,16 @@ router.post("/save", requireAuth, async (req, res) => {
     let updatedRecord = null;
     if (db.isConnected()) {
       const s2 = mergedFormData.step2 || {};
-      const companyName = s2.company_name || null;
-      const tradeName = s2.trade_name || null;
-      const legalType = s2.legal_type || null;
-      const issueDate = s2.issue_date || null;
-      const expiryDate = s2.expiry_date || null;
-      const issuedBy = s2.issued_by || null;
-      const vatTrn = s2.vat_trn || null;
+      const companyName = s2.company_name || s2.companyName || null;
+      const tradeName = s2.trade_name || s2.tradeName || null;
+      const legalType = s2.legal_type || s2.legalType || null;
+      const issueDate = s2.issue_date || s2.issueDate || null;
+      const expiryDate = s2.expiry_date || s2.expiryDate || null;
+      const issuedBy = s2.issued_by || s2.issuedBy || null;
+      const vatTrn = s2.vat_trn || s2.vatTrn || null;
+      const contactPerson = s2.contact_person || s2.contactPerson || null;
+      const phone = s2.phone || null;
+      const address = s2.address || null;
 
       const result = await db.query(
         `UPDATE corporate_onboarding_applications
@@ -114,18 +131,33 @@ router.post("/save", requireAuth, async (req, res) => {
              licence_expiry_date = COALESCE($9, licence_expiry_date),
              licence_issued_by = COALESCE($10, licence_issued_by),
              vat_trn = COALESCE($11, vat_trn),
+             contact_person = COALESCE($12, contact_person),
+             phone = COALESCE($13, phone),
+             address = COALESCE($14, address),
              updated_at = NOW()
          WHERE application_ref = $1
          RETURNING *`,
         [
           application_ref, resolvedStep, resolvedStatus, JSON.stringify(mergedFormData),
-          companyName, tradeName, legalType, issueDate, expiryDate, issuedBy, vatTrn
+          companyName, tradeName, legalType, issueDate, expiryDate, issuedBy, vatTrn,
+          contactPerson, phone, address
         ]
       );
       updatedRecord = result.rows[0];
     } else {
+      const s2 = mergedFormData.step2 || {};
       existingRecord.current_step = resolvedStep;
       existingRecord.status = resolvedStatus;
+      existingRecord.company_name = s2.company_name || s2.companyName || existingRecord.company_name;
+      existingRecord.trade_name = s2.trade_name || s2.tradeName || existingRecord.trade_name;
+      existingRecord.legal_type = s2.legal_type || s2.legalType || existingRecord.legal_type;
+      existingRecord.licence_issue_date = s2.issue_date || s2.issueDate || existingRecord.licence_issue_date;
+      existingRecord.licence_expiry_date = s2.expiry_date || s2.expiryDate || existingRecord.licence_expiry_date;
+      existingRecord.licence_issued_by = s2.issued_by || s2.issuedBy || existingRecord.licence_issued_by;
+      existingRecord.vat_trn = s2.vat_trn || s2.vatTrn || existingRecord.vat_trn;
+      existingRecord.contact_person = s2.contact_person || s2.contactPerson || existingRecord.contact_person;
+      existingRecord.phone = s2.phone || existingRecord.phone;
+      existingRecord.address = s2.address || existingRecord.address;
       existingRecord.form_data = mergedFormData;
       existingRecord.updated_at = new Date().toISOString();
       updatedRecord = existingRecord;

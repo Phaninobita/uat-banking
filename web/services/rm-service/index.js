@@ -239,7 +239,7 @@ router.post("/invite", async (req, res) => {
     // Construct customer portal URL with prefill parameters
     const host = req.get("host") || "localhost:3000";
     const protocol = req.protocol === "https" || req.get("x-forwarded-proto") === "https" ? "https" : "http";
-    const inviteLink = `${protocol}://${host}/?crn=${encodeURIComponent(cleanCrn)}&email=${encodeURIComponent(cleanEmail)}&token=${inviteToken}`;
+    const inviteLink = `${protocol}://${host}/?crn=${encodeURIComponent(cleanCrn)}&email=${encodeURIComponent(cleanEmail)}&company=${encodeURIComponent(companyName.trim())}&contact=${encodeURIComponent((contactPerson || "").trim())}&phone=${encodeURIComponent((phone || "").trim())}&token=${inviteToken}`;
 
     const inviteRecord = {
       crn: cleanCrn,

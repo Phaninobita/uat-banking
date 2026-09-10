@@ -1,4 +1,4 @@
-﻿-- First National Bank Corporate Account Portal & Core Banking Mesh
+-- First National Bank Corporate Account Portal & Core Banking Mesh
 -- Database Schema for PostgreSQL / Supabase
 
 -- 1. Corporate Onboarding Applications Table
@@ -16,10 +16,18 @@ CREATE TABLE IF NOT EXISTS corporate_onboarding_applications (
     licence_expiry_date TEXT,
     licence_issued_by TEXT,
     vat_trn TEXT,
+    contact_person TEXT,
+    phone TEXT,
+    address TEXT,
     form_data JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Upgrade existing schema if columns not present
+ALTER TABLE corporate_onboarding_applications ADD COLUMN IF NOT EXISTS contact_person TEXT;
+ALTER TABLE corporate_onboarding_applications ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE corporate_onboarding_applications ADD COLUMN IF NOT EXISTS address TEXT;
 
 -- Index for fast authentication lookup by CRN and Email
 CREATE INDEX IF NOT EXISTS idx_corp_apps_crn_email 

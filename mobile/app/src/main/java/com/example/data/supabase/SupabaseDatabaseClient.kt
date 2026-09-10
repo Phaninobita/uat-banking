@@ -348,26 +348,35 @@ class SupabaseDatabaseClient {
                 if (application.companyInfo.expiryDate.isNotBlank()) put("licence_expiry_date", application.companyInfo.expiryDate)
                 if (application.companyInfo.issuedBy.isNotBlank()) put("licence_issued_by", application.companyInfo.issuedBy)
                 if (application.companyInfo.vatTrn.isNotBlank()) put("vat_trn", application.companyInfo.vatTrn)
+                if (application.companyInfo.contactPerson.isNotBlank()) put("contact_person", application.companyInfo.contactPerson)
+                if (application.companyInfo.phone.isNotBlank()) put("phone", application.companyInfo.phone)
+                if (application.companyInfo.address.isNotBlank()) put("address", application.companyInfo.address)
                 put("current_step", application.currentStep)
                 put("updated_at", nowIso)
 
-                // JSON form_data format for seamless web-portal interoperability
+                // JSON form_data format for seamless web-portal interoperability (all collections inside form_data)
                 val step2Json = JSONObject().apply {
                     put("crn", application.companyInfo.crn)
                     put("company_name", application.companyInfo.companyName)
+                    put("companyName", application.companyInfo.companyName)
                     put("trade_name", application.companyInfo.tradeName.ifBlank { application.companyInfo.companyName })
+                    put("tradeName", application.companyInfo.tradeName.ifBlank { application.companyInfo.companyName })
                     put("legal_type", application.companyInfo.legalType)
+                    put("legalType", application.companyInfo.legalType)
                     put("issued_by", application.companyInfo.issuedBy)
+                    put("issuedBy", application.companyInfo.issuedBy)
                     put("issue_date", application.companyInfo.issueDate)
+                    put("issueDate", application.companyInfo.issueDate)
                     put("expiry_date", application.companyInfo.expiryDate)
+                    put("expiryDate", application.companyInfo.expiryDate)
                     put("vat_trn", application.companyInfo.vatTrn)
+                    put("vatTrn", application.companyInfo.vatTrn)
                     put("contact_person", application.companyInfo.contactPerson)
+                    put("contactPerson", application.companyInfo.contactPerson)
                     put("phone", application.companyInfo.phone)
+                    put("email", application.companyInfo.email.ifBlank { application.registeredEmail })
+                    put("address", application.companyInfo.address)
                 }
-                val formData = JSONObject().apply {
-                    put("step2", step2Json)
-                }
-                put("form_data", formData)
 
                 // Documents array
                 val docsArray = JSONArray()
@@ -375,34 +384,66 @@ class SupabaseDatabaseClient {
                     val d = JSONObject().apply {
                         put("id", doc.id)
                         put("title", doc.title)
+                        put("label", doc.title)
                         put("recommended", doc.recommended)
                         put("is_uploaded", doc.isUploaded)
+                        put("isUploaded", doc.isUploaded)
+                        put("uploaded", doc.isUploaded)
                         put("file_name", doc.fileName)
+                        put("fileName", doc.fileName)
                         put("file_size_kb", doc.fileSizeKb)
                         put("ocr_status", doc.ocrStatus)
                         put("extracted_info", doc.extractedInfo)
                     }
                     docsArray.put(d)
                 }
-                put("documents", docsArray)
 
-                // Ownership & UBOs
+                // UBOs & extracted entities
+                val ubosArray = JSONArray()
+                val entitiesArray = JSONArray()
+                application.ubos.forEach { ubo ->
+                    val u = JSONObject().apply {
+                        put("id", ubo.id)
+                        put("name", ubo.fullName)
+                        put("fullName", ubo.fullName)
+                        put("nationality", ubo.nationality)
+                        put("idPassportNumber", ubo.idPassportNumber)
+                        put("id_passport_number", ubo.idPassportNumber)
+                        put("dob", ubo.dob)
+                        put("percentage", ubo.shareholdingPct)
+                        put("shareholdingPct", ubo.shareholdingPct)
+                        put("shareholding_pct", ubo.shareholdingPct)
+                        put("votingRightsPct", ubo.votingRightsPct)
+                        put("voting_rights_pct", ubo.votingRightsPct)
+                        put("isPep", ubo.isPep)
+                        put("is_pep", ubo.isPep)
+                    }
+                    ubosArray.put(u)
+                    entitiesArray.put(ubo.fullName)
+                }
+
+                // Ownership & Shareholders
                 val ownArray = JSONArray()
                 application.ownership.forEach { sh ->
                     val s = JSONObject().apply {
                         put("id", sh.id)
                         put("name", sh.name)
+                        put("entity", sh.name)
                         put("category", sh.category)
                         put("percentage", sh.percentage)
+                        put("shareClass", sh.shareClass)
                         put("share_class", sh.shareClass)
                         put("country", sh.country)
+                        put("votingRightsPct", sh.votingRightsPct)
                         put("voting_rights_pct", sh.votingRightsPct)
+                        put("isFlaggedForRework", sh.isFlaggedForRework)
                         put("is_flagged_for_rework", sh.isFlaggedForRework)
+                        put("reworkNotes", sh.reworkNotes)
                         put("rework_notes", sh.reworkNotes)
+                        put("level", "1")
                     }
                     ownArray.put(s)
                 }
-                put("ownership_structure", ownArray)
 
                 // Governance roles
                 val rolesArray = JSONArray()
@@ -411,22 +452,62 @@ class SupabaseDatabaseClient {
                         put("id", r.id)
                         put("name", r.name)
                         put("title", r.title)
+                        put("authorityLevel", r.authorityLevel)
                         put("authority_level", r.authorityLevel)
+                        put("isSignatureUploaded", r.isSignatureUploaded)
                         put("is_signature_uploaded", r.isSignatureUploaded)
                     }
                     rolesArray.put(ro)
                 }
-                put("roles", rolesArray)
+                val rolesWrapper = JSONObject().apply {
+                    put("items", rolesArray)
+                    val maker = application.roles.firstOrNull()?.name ?: ""
+                    val checker = application.roles.drop(1).firstOrNull()?.name ?: ""
+                    put("maker", maker)
+                    put("checker", checker)
+                }
 
                 // Tax compliance
                 val taxJson = JSONObject().apply {
                     put("us_tin", application.fatcaCrs.usTin)
+                    put("usTin", application.fatcaCrs.usTin)
                     put("primary_tax_country", application.fatcaCrs.primaryTaxCountry)
+                    put("primaryTaxCountry", application.fatcaCrs.primaryTaxCountry)
                     put("tax_id_number", application.fatcaCrs.taxIdNumber)
+                    put("taxIdNumber", application.fatcaCrs.taxIdNumber)
                     put("entity_classification", application.fatcaCrs.entityClassification)
+                    put("entityClassification", application.fatcaCrs.entityClassification)
+                    put("fatca_class", application.fatcaCrs.entityClassification)
                     put("crs_confirmed", application.fatcaCrs.crsConfirmed)
+                    put("crsConfirmed", application.fatcaCrs.crsConfirmed)
+                    val isUs = application.fatcaCrs.usTin.isNotBlank() || application.fatcaCrs.primaryTaxCountry.equals("United States", ignoreCase = true)
+                    put("us_person", isUs)
+                    put("is_us_person", isUs)
+                    put("isUsPerson", isUs)
+                    put("crs_fi", false)
                 }
-                put("tax_compliance", taxJson)
+
+                val declarationsJson = JSONObject().apply {
+                    put("d1", true)
+                    put("d2", true)
+                    put("d3", true)
+                }
+
+                val formData = JSONObject().apply {
+                    put("step1_documents", docsArray)
+                    put("documents", docsArray)
+                    put("step2", step2Json)
+                    put("entities", entitiesArray)
+                    put("ubos", ubosArray)
+                    put("ownership_structure", ownArray)
+                    put("ownership", ownArray)
+                    put("roles", rolesWrapper)
+                    put("tax", taxJson)
+                    put("tax_compliance", taxJson)
+                    put("declarations", declarationsJson)
+                }
+
+                put("form_data", formData)
             }
 
             val url = URL(postUrl)
@@ -494,39 +575,43 @@ class SupabaseDatabaseClient {
                     var expiryDate = obj.optString("licence_expiry_date", "")
                     var issuedBy = obj.optString("licence_issued_by", "")
                     var vatTrn = obj.optString("vat_trn", "")
-                    var contactPerson = ""
-                    var phone = ""
+                    var contactPerson = obj.optString("contact_person", "")
+                    var phone = obj.optString("phone", "")
+                    var address = obj.optString("address", "")
 
                     // Extract from form_data.step2 if available (standard web contract)
                     val formData = obj.optJSONObject("form_data")
                     val step2 = formData?.optJSONObject("step2")
                     if (step2 != null) {
-                        if (companyName.isBlank()) companyName = step2.optString("company_name", "")
-                        if (tradeName.isBlank()) tradeName = step2.optString("trade_name", companyName)
-                        if (legalType.isBlank()) legalType = step2.optString("legal_type", "")
-                        if (issuedBy.isBlank()) issuedBy = step2.optString("issued_by", "")
-                        if (issueDate.isBlank()) issueDate = step2.optString("issue_date", "")
-                        if (expiryDate.isBlank()) expiryDate = step2.optString("expiry_date", "")
-                        if (vatTrn.isBlank()) vatTrn = step2.optString("vat_trn", "")
-                        contactPerson = step2.optString("contact_person", "")
-                        phone = step2.optString("phone", "")
+                        if (companyName.isBlank()) companyName = step2.optString("company_name", step2.optString("companyName", ""))
+                        if (tradeName.isBlank()) tradeName = step2.optString("trade_name", step2.optString("tradeName", companyName))
+                        if (legalType.isBlank()) legalType = step2.optString("legal_type", step2.optString("legalType", ""))
+                        if (issuedBy.isBlank()) issuedBy = step2.optString("issued_by", step2.optString("issuedBy", ""))
+                        if (issueDate.isBlank()) issueDate = step2.optString("issue_date", step2.optString("issueDate", ""))
+                        if (expiryDate.isBlank()) expiryDate = step2.optString("expiry_date", step2.optString("expiryDate", ""))
+                        if (vatTrn.isBlank()) vatTrn = step2.optString("vat_trn", step2.optString("vatTrn", ""))
+                        if (contactPerson.isBlank()) contactPerson = step2.optString("contact_person", step2.optString("contactPerson", ""))
+                        if (phone.isBlank()) phone = step2.optString("phone", "")
+                        if (address.isBlank()) address = step2.optString("address", "")
                     }
 
                     // Documents
                     val docs = mutableListOf<DocumentItem>()
-                    val docsArray = obj.optJSONArray("documents")
+                    val docsArray = formData?.optJSONArray("documents")
+                        ?: formData?.optJSONArray("step1_documents")
+                        ?: obj.optJSONArray("documents")
                     if (docsArray != null && docsArray.length() > 0) {
                         for (i in 0 until docsArray.length()) {
                             val d = docsArray.optJSONObject(i) ?: continue
                             docs.add(
                                 DocumentItem(
                                     id = d.optString("id", "doc_${i + 1}"),
-                                    title = d.optString("title", "Document ${i + 1}"),
+                                    title = d.optString("title", d.optString("label", "Document ${i + 1}")),
                                     recommended = d.optBoolean("recommended", false),
-                                    isUploaded = d.optBoolean("is_uploaded", false),
-                                    fileName = d.optString("file_name", ""),
-                                    fileSizeKb = d.optInt("file_size_kb", 0),
-                                    ocrStatus = d.optString("ocr_status", "Pending"),
+                                    isUploaded = d.optBoolean("is_uploaded", d.optBoolean("isUploaded", d.optBoolean("uploaded", false))),
+                                    fileName = d.optString("file_name", d.optString("fileName", "")),
+                                    fileSizeKb = d.optInt("file_size_kb", d.optInt("fileSizeKb", 0)),
+                                    ocrStatus = d.optString("ocr_status", "Completed"),
                                     extractedInfo = d.optString("extracted_info", "")
                                 )
                             )
@@ -544,22 +629,43 @@ class SupabaseDatabaseClient {
 
                     // Ownership & UBOs
                     val ubos = mutableListOf<UboItem>()
+                    val ubosArray = formData?.optJSONArray("ubos") ?: obj.optJSONArray("ubos")
+                    if (ubosArray != null && ubosArray.length() > 0) {
+                        for (i in 0 until ubosArray.length()) {
+                            val u = ubosArray.optJSONObject(i) ?: continue
+                            ubos.add(
+                                UboItem(
+                                    id = u.optString("id", "ubo_${i + 1}"),
+                                    fullName = u.optString("fullName", u.optString("name", "Beneficial Owner")),
+                                    nationality = u.optString("nationality", "United States"),
+                                    idPassportNumber = u.optString("idPassportNumber", u.optString("id_passport_number", "")),
+                                    dob = u.optString("dob", "1985-01-01"),
+                                    shareholdingPct = u.optDouble("shareholdingPct", u.optDouble("percentage", u.optDouble("shareholding_pct", 25.0))),
+                                    votingRightsPct = u.optDouble("votingRightsPct", u.optDouble("voting_rights_pct", 25.0)),
+                                    isPep = u.optBoolean("isPep", u.optBoolean("is_pep", false))
+                                )
+                            )
+                        }
+                    }
+
                     val ownership = mutableListOf<ShareholderItem>()
-                    val ownArray = obj.optJSONArray("ownership_structure")
-                    if (ownArray != null) {
+                    val ownArray = formData?.optJSONArray("ownership")
+                        ?: formData?.optJSONArray("ownership_structure")
+                        ?: obj.optJSONArray("ownership_structure")
+                    if (ownArray != null && ownArray.length() > 0) {
                         for (i in 0 until ownArray.length()) {
                             val sh = ownArray.optJSONObject(i) ?: continue
                             ownership.add(
                                 ShareholderItem(
                                     id = sh.optString("id", "sh_$i"),
-                                    name = sh.optString("name"),
+                                    name = sh.optString("name", sh.optString("entity", "")),
                                     category = sh.optString("category", "Individual"),
                                     percentage = sh.optDouble("percentage", 0.0),
-                                    shareClass = sh.optString("share_class", "Ordinary Voting Class A"),
-                                    country = sh.optString("country", ""),
-                                    votingRightsPct = sh.optDouble("voting_rights_pct", 0.0),
-                                    isFlaggedForRework = sh.optBoolean("is_flagged_for_rework", false),
-                                    reworkNotes = sh.optString("rework_notes", "")
+                                    shareClass = sh.optString("shareClass", sh.optString("share_class", "Ordinary Voting Class A")),
+                                    country = sh.optString("country", "United States"),
+                                    votingRightsPct = sh.optDouble("votingRightsPct", sh.optDouble("voting_rights_pct", 0.0)),
+                                    isFlaggedForRework = sh.optBoolean("isFlaggedForRework", sh.optBoolean("is_flagged_for_rework", false)),
+                                    reworkNotes = sh.optString("reworkNotes", sh.optString("rework_notes", ""))
                                 )
                             )
                         }
@@ -567,31 +673,38 @@ class SupabaseDatabaseClient {
 
                     // Roles
                     val roles = mutableListOf<GovernanceRoleItem>()
-                    val rolesObj = obj.opt("roles")
-                    if (rolesObj is JSONArray) {
-                        for (i in 0 until rolesObj.length()) {
-                            val r = rolesObj.optJSONObject(i) ?: continue
+                    val rolesVal = formData?.opt("roles") ?: obj.opt("roles")
+                    val rolesArray = when (rolesVal) {
+                        is JSONArray -> rolesVal
+                        is JSONObject -> rolesVal.optJSONArray("items")
+                        else -> null
+                    }
+                    if (rolesArray != null && rolesArray.length() > 0) {
+                        for (i in 0 until rolesArray.length()) {
+                            val r = rolesArray.optJSONObject(i) ?: continue
                             roles.add(
                                 GovernanceRoleItem(
                                     id = r.optString("id", "role_$i"),
                                     name = r.optString("name"),
                                     title = r.optString("title"),
-                                    authorityLevel = r.optString("authority_level", "Sole Signatory"),
-                                    isSignatureUploaded = r.optBoolean("is_signature_uploaded", false)
+                                    authorityLevel = r.optString("authorityLevel", r.optString("authority_level", "Sole Signatory")),
+                                    isSignatureUploaded = r.optBoolean("isSignatureUploaded", r.optBoolean("is_signature_uploaded", false))
                                 )
                             )
                         }
                     }
 
                     // Tax compliance
-                    val taxObj = obj.optJSONObject("tax_compliance")
+                    val taxObj = formData?.optJSONObject("tax_compliance")
+                        ?: formData?.optJSONObject("tax")
+                        ?: obj.optJSONObject("tax_compliance")
                     val fatca = if (taxObj != null) {
                         FatcaCrsInfo(
-                            usTin = taxObj.optString("us_tin", ""),
-                            primaryTaxCountry = taxObj.optString("primary_tax_country", ""),
-                            taxIdNumber = taxObj.optString("tax_id_number", ""),
-                            entityClassification = taxObj.optString("entity_classification", ""),
-                            crsConfirmed = taxObj.optBoolean("crs_confirmed", false)
+                            usTin = taxObj.optString("usTin", taxObj.optString("us_tin", "")),
+                            primaryTaxCountry = taxObj.optString("primaryTaxCountry", taxObj.optString("primary_tax_country", "United States")),
+                            taxIdNumber = taxObj.optString("taxIdNumber", taxObj.optString("tax_id_number", "")),
+                            entityClassification = taxObj.optString("entityClassification", taxObj.optString("entity_classification", taxObj.optString("fatca_class", ""))),
+                            crsConfirmed = taxObj.optBoolean("crsConfirmed", taxObj.optBoolean("crs_confirmed", false))
                         )
                     } else FatcaCrsInfo()
 
@@ -612,7 +725,8 @@ class SupabaseDatabaseClient {
                             issuedBy = issuedBy,
                             vatTrn = vatTrn,
                             contactPerson = contactPerson,
-                            phone = phone
+                            phone = phone,
+                            address = address
                         ),
                         documents = docs,
                         ubos = ubos,
@@ -692,7 +806,7 @@ class SupabaseDatabaseClient {
             status = obj.optString("status", "invited"),
             inviteLink = obj.optString("invite_link", ""),
             notes = obj.optString("notes", ""),
-            currentStep = 1,
+            currentStep = obj.optInt("current_step", 1),
             createdAt = obj.optString("created_at", "")
         )
     }
