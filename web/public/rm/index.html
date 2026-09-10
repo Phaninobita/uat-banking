@@ -106,14 +106,13 @@
                             <p class="rm-card-sub">Enter the customer's CRN and Email to generate their dedicated access link.</p>
                         </div>
                     </div>
-                    <span class="rm-pill-key">Primary Composite Key: (CRN, Email)</span>
                 </div>
                 <form id="rmInviteForm" onsubmit="handleDispatchInvite(event)" class="rm-dispatch-form">
                     <div class="rm-grid-2">
                         <div class="rm-form-group">
                             <label for="inviteCrn">Commercial Registration No. (CRN) <span class="rm-req">*</span></label>
                             <input type="text" id="inviteCrn" class="rm-input" placeholder="e.g. 10029481 or CRN-509077205" required>
-                            <small class="rm-hint">Primary identification key for corporate verification</small>
+                            <small class="rm-hint">Commercial registration number for corporate verification</small>
                         </div>
                         <div class="rm-form-group">
                             <label for="inviteEmail">Customer Corporate Email <span class="rm-req">*</span></label>
@@ -161,9 +160,9 @@
                     </div>
                     <div class="rm-success-chips">
                         <span>CRN: <strong id="chipCrn"></strong></span>
-                        <span>UID: <strong id="chipCuid" style="color:#f59e0b;"></strong></span>
+                        <span>Corporate ID: <strong id="chipCuid" style="color:#f59e0b;"></strong></span>
                         <span>Email: <strong id="chipEmail"></strong></span>
-                        <span>Database: <strong>rm_customer_invitations</strong> (Active)</span>
+                        <span>Status: <strong style="color:#10b981;">Ready to Onboard</strong></span>
                     </div>
                 </div>
             </section>
@@ -185,7 +184,7 @@
                     <table class="rm-table">
                         <thead>
                             <tr>
-                                <th>Corporate UID</th>
+                                <th>Corporate ID</th>
                                 <th>CRN</th>
                                 <th>Company &amp; Contact</th>
                                 <th>Email</th>
@@ -219,7 +218,7 @@
                     <span style="font-size:20px;">&#x1F6E1;&#xFE0F;</span>
                     <div>
                         <h3 style="margin:0; font-size:16px;" id="rmAuditTitle">Corporate Compliance Audit Trail</h3>
-                        <small style="color:var(--rm-text-muted);" id="rmAuditSub">Immutable telemetry log across Web &amp; Mobile</small>
+                        <small style="color:var(--rm-text-muted);" id="rmAuditSub">Activity and verification history across channels</small>
                     </div>
                 </div>
                 <button class="rm-modal-close" onclick="closeRmAuditModal()">&#x2715;</button>

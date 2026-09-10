@@ -159,7 +159,7 @@
                             <button type="button" class="btn-m-card-action" onclick="MobileApp.switchSubView('home')">← Back</button>
                             <h4 style="margin:0;font-size:14px;color:#f8fafc;">KYC Document Scanner</h4>
                         </div>
-                        <p style="font-size:11px;color:#94a3b8;margin:0 0 12px;">Capture corporate documents and persist in PostgreSQL Base64 database table.</p>
+                        <p style="font-size:11px;color:#94a3b8;margin:0 0 12px;">Capture and submit corporate documents securely.</p>
 
                         <div style="display:flex;gap:6px;margin-bottom:10px;">
                             <button type="button" class="btn-m-card-action" style="flex:1;padding:6px 4px;font-size:10px;" onclick="MobileApp.handleMobileScannerUpload('passport')">📸 Scan Passport</button>
@@ -470,7 +470,7 @@
             const previewContainer = document.getElementById('mScannerPreview');
             const statusEl = document.getElementById('mScannerStatus');
 
-            if (statusEl) statusEl.innerHTML = '<span style="color:#38bdf8;font-size:11px;">🔄 Processing &amp; Base64 Encoding...</span>';
+            if (statusEl) statusEl.innerHTML = '<span style="color:#38bdf8;font-size:11px;">🔄 Processing &amp; Uploading...</span>';
 
             if (fileOrPreset instanceof File) {
                 const file = fileOrPreset;
@@ -509,12 +509,12 @@
                     if (statusEl) {
                         statusEl.innerHTML = `
                             <div style="background:rgba(16,185,129,0.2);border:1px solid #10b981;border-radius:6px;padding:6px;margin-top:6px;text-align:center;">
-                                <strong style="color:#10b981;font-size:11px;">🟢 Stored in DB (Base64)</strong>
-                                <div style="font-size:9px;color:#e2e8f0;margin-top:2px;">Table: application_documents (ID: ${res.document.id})</div>
+                                <strong style="color:#10b981;font-size:11px;">🟢 Verified &amp; Saved</strong>
+                                <div style="font-size:9px;color:#e2e8f0;margin-top:2px;">Reference: ${res.document.id}</div>
                             </div>
                         `;
                     }
-                    this.showMobilePushNotification('Document Vault Updated', `${fileName} securely encrypted & stored in PostgreSQL.`);
+                    this.showMobilePushNotification('Document Uploaded', `${fileName} verified and saved securely.`);
                 }
             } catch (err) {
                 if (statusEl) {

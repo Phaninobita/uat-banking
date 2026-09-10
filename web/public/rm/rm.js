@@ -460,7 +460,7 @@ async function refreshRmAudit() {
     const countEl = document.getElementById("rmAuditCount");
     if (!content) return;
 
-    content.innerHTML = `<div style="text-align:center; padding:32px; color:var(--rm-text-muted);">Fetching audit records from PostgreSQL corporate_audit_logs...</div>`;
+    content.innerHTML = `<div style="text-align:center; padding:32px; color:var(--rm-text-muted);">Loading activity and audit history...</div>`;
 
     try {
         const { companyUid, crn } = activeRmAuditTarget;

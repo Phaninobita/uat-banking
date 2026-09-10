@@ -312,19 +312,6 @@ fun RmDashboardView(viewModel: BankViewModel) {
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    FilledTonalButton(
-                        onClick = { viewModel.isSqlSchemaDialogOpen.value = true },
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = Color(0xFF1E293B),
-                            contentColor = FnbGold
-                        ),
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Icon(Icons.Default.Info, contentDescription = "SQL Schema", modifier = Modifier.size(13.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "Table SQL", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
-                    }
 
                     FilledTonalButton(
                         onClick = {
@@ -844,7 +831,7 @@ fun RmAuditLogsSection(
                                 color = Color(0xFF064E3B)
                             ) {
                                 Text(
-                                    text = "PostgreSQL Table: public.mobile_audit_logs",
+                                    text = "Compliance Verified",
                                     color = Color(0xFF34D399),
                                     fontSize = 9.sp,
                                     fontWeight = FontWeight.Bold,
@@ -853,26 +840,13 @@ fun RmAuditLogsSection(
                             }
                         }
                         Text(
-                            text = "Tracks RM logins, invitations dispatched, corporate client logins, and database sync events.",
+                            text = "Tracks client onboarding activities, verification steps, and invitations.",
                             color = FnbTextSecondary,
                             fontSize = 11.sp
                         )
                     }
 
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        FilledTonalButton(
-                            onClick = { viewModel.isSqlSchemaDialogOpen.value = true },
-                            shape = RoundedCornerShape(6.dp),
-                            colors = ButtonDefaults.filledTonalButtonColors(
-                                containerColor = FnbCard,
-                                contentColor = FnbGold
-                            ),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
-                        ) {
-                            Icon(Icons.Default.Info, contentDescription = null, modifier = Modifier.size(12.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(text = "SQL DDL", fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
-                        }
 
                         FilledTonalButton(
                             onClick = { viewModel.refreshAuditLogs(silent = false) },

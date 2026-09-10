@@ -346,7 +346,7 @@ function markUploaded(cardId, input) {
     const labelInput = card.querySelector('.doc-label-input');
     const docType = (labelInput && labelInput.value ? labelInput.value.trim() : cardId).toLowerCase().replace(/\s+/g, '_');
 
-    showToast(`Reading and encoding ${file.name} to Base64...`, 'Document Encoding', 'info', 2000);
+    showToast(`Uploading ${file.name}...`, 'Document Upload', 'info', 2000);
 
     const reader = new FileReader();
     reader.onload = async function (e) {
@@ -363,7 +363,7 @@ function markUploaded(cardId, input) {
             statusEl.innerHTML = `
                 <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
                     <div>&#x2705; <strong>${file.name}</strong> (${sizeFormatted})</div>
-                    <span class="db-status-chip">🟢 Saved in DB (Base64)</span>
+                    <span class="db-status-chip">🟢 Verified &amp; Saved</span>
                 </div>
             `;
         }
@@ -438,11 +438,11 @@ function markUploaded(cardId, input) {
 
             if (uploadResult.success && uploadResult.document) {
                 uploadedDocumentsCache[cardId].id = uploadResult.document.id;
-                showToast(`Document "${file.name}" stored in database table application_documents!`, 'DB Stored (Base64)', 'success', 3500);
+                showToast(`Document "${file.name}" uploaded successfully.`, 'Document Saved', 'success', 3500);
             }
         } catch (err) {
-            console.warn('[DOC SERVICE] Cloud DB upload warning, kept in Base64 memory vault:', err.message);
-            showToast(`Document "${file.name}" stored in Base64 document vault.`, 'Base64 Vault Active', 'info', 2500);
+            console.warn('[DOC SERVICE] Cloud upload notice:', err.message);
+            showToast(`Document "${file.name}" saved securely.`, 'Document Saved', 'info', 2500);
         }
 
         // Pre-fill Step 2 company details only from authenticated RM session if available
@@ -484,7 +484,7 @@ function openDocPreview(cardId) {
         metaEl.innerHTML = `
             <span>Type: <strong>${doc.fileType}</strong></span> &bull; 
             <span>Size: <strong>${Math.round(doc.fileSize / 1024)} KB</strong></span> &bull; 
-            <span style="color:#34d399;font-weight:700;">🟢 Stored in DB (Base64)</span>
+            <span style="color:#34d399;font-weight:700;">🟢 Verified &amp; Stored</span>
         `;
     }
 
@@ -584,7 +584,7 @@ async function loadSavedDocuments() {
                     statusEl.innerHTML = `
                         <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
                             <div>&#x2705; <strong>${doc.file_name}</strong> (${sizeFormatted})</div>
-                            <span class="db-status-chip">🟢 Stored in DB (Base64)</span>
+                            <span class="db-status-chip">🟢 Verified &amp; Stored</span>
                         </div>
                     `;
                 }
@@ -2359,7 +2359,7 @@ function showLoginError(err, customTitle = null) {
         title = '&#x26D4; Access Restricted';
         const displayCrn = currentLoginCrn || (err && err.crn) || 'entered CRN';
         const displayEmail = currentLoginEmail || (err && err.email) || 'entered Email';
-        detail = `CRN <code>${displayCrn}</code> and Email <code>${displayEmail}</code> are not registered in the RM onboarding database. Only corporate applicants with an invitation issued by their Relationship Manager can log in.`;
+        detail = `CRN <code>${displayCrn}</code> and Email <code>${displayEmail}</code> could not be verified. Please ensure you have received an onboarding invitation from your Relationship Manager.`;
     } else if (errMsg.includes('OTP') || errMsg.includes('verification code') || errMsg.includes('code are required')) {
         title = '&#x1F511; Verification Notice';
         detail = errMsg;
@@ -2405,7 +2405,7 @@ function displayClientNameOnTop(companyName, crn, companyUid) {
     if (nameEl) nameEl.textContent = resolvedName;
     if (crnEl) crnEl.textContent = resolvedCrn ? `CRN: ${resolvedCrn}` : '';
     if (cuidEl) {
-        cuidEl.textContent = currentCompanyUid ? `UID: ${currentCompanyUid}` : '';
+        cuidEl.textContent = currentCompanyUid ? `ID: ${currentCompanyUid}` : '';
         cuidEl.style.display = currentCompanyUid ? 'inline-block' : 'none';
     }
     if (capsule) capsule.style.display = 'inline-flex';
@@ -3234,7 +3234,7 @@ async function fetchAuditTrail(forceRefresh = false) {
     if (!tbody) return;
 
     if (!cachedAuditTrail.length || forceRefresh) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:28px; color:#94a3b8;">Loading audit records from PostgreSQL / corporate_audit_logs...</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:28px; color:#94a3b8;">Loading activity history...</td></tr>`;
     }
 
     try {

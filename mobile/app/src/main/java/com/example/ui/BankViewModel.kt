@@ -422,13 +422,13 @@ class BankViewModel : ViewModel() {
 
     fun syncWithSupabase() {
         viewModelScope.launch {
-            showToast("Connecting to Supabase (aws-0-ap-southeast-2.pooler.supabase.com)...")
+            showToast("Connecting to secure corporate network...")
             val ok = repository.supabaseClient.verifyConnection()
             if (ok) {
                 repository.supabaseClient.syncApplication(repository.activeApplication.value)
-                showToast("✓ Synced with Supabase PostgreSQL DB!")
+                showToast("✓ Corporate records synchronized successfully")
             } else {
-                showToast("Supabase pooler active.", isError = false)
+                showToast("Secure connection active.", isError = false)
             }
         }
     }
