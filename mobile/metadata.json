@@ -1,0 +1,6 @@
+{
+  "name": "First Bank Demo",
+  "description": "Corporate Onboarding & Core Banking Demo with Voice Controls",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

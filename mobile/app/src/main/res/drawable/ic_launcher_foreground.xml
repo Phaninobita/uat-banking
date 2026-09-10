@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Pediment Roof Triangle -->
+    <path
+        android:fillColor="#FFF59E0B"
+        android:pathData="M54,28 L28,42 L80,42 Z" />
+    <!-- Roof Base Beam -->
+    <path
+        android:fillColor="#FF38BDF8"
+        android:pathData="M26,44 L82,44 L82,48 L26,48 Z" />
+    <!-- Pillars -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M30,50 L38,50 L38,70 L30,70 Z
+                          M44,50 L52,50 L52,70 L44,70 Z
+                          M56,50 L64,50 L64,70 L56,70 Z
+                          M70,50 L78,50 L78,70 L70,70 Z" />
+    <!-- Bank Plinth Base -->
+    <path
+        android:fillColor="#FF38BDF8"
+        android:pathData="M24,72 L84,72 L84,76 L24,76 Z" />
+    <path
+        android:fillColor="#FFF59E0B"
+        android:pathData="M20,78 L88,78 L88,82 L20,82 Z" />
+</vector>
