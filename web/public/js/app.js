@@ -424,7 +424,7 @@ function markUploaded(cardId, input) {
             base64Data
         };
 
-        // Upload to Document Microservice (persisted in PostgreSQL table application_documents)
+        // Upload to Document Microservice (secure document storage)
         try {
             const appRef = (ApexApi.getApplicationRef && ApexApi.getApplicationRef()) || currentAppRef || 'AB-2026-DEMO01';
             const uploadResult = await ApexApi.uploadDocumentBase64({
@@ -548,7 +548,7 @@ async function removeUploadedDoc(cardId) {
         if (input) input.value = '';
     }
 
-    showToast('Document removed from database.', 'Removed', 'info', 2000);
+    showToast('Document removed.', 'Removed', 'info', 2000);
     triggerAutoSave();
     updateReviewSection();
 }
@@ -2500,7 +2500,7 @@ function showSaveModal() {
         const bodyEl = modal.querySelector('.modal-body');
         if (bodyEl) {
             bodyEl.innerHTML = `
-                Your application progress has been saved securely to the database.<br><br>
+                Your application progress has been saved securely.<br><br>
                 You can return anytime with the link below or by signing in with CRN <strong>${crn}</strong> and email <strong>${email}</strong>.<br><br>
                 <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:12px;margin:8px 0;word-break:break-all;">
                     <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;">Application Reference</span><br>
@@ -3208,7 +3208,7 @@ function toggleMobileSimulator(forceState) {
 window.switchPortalMode = switchPortalMode;
 window.toggleMobileSimulator = toggleMobileSimulator;
 
-// ── COMPLIANCE AUDIT TRAIL MODAL & TELEMETRY SUBSYSTEM ──
+// ── COMPLIANCE AUDIT TRAIL MODAL & ACTIVITY SUBSYSTEM ──
 async function openAuditTrailModal() {
     const modal = document.getElementById('auditTrailModal');
     if (!modal) return;
@@ -3276,7 +3276,23 @@ function renderAuditTrail(logs) {
         APPLICATION_SUBMITTED: '#8b5cf6',
         STEP_PROGRESSION: '#06b6d4',
         DOCUMENT_UPLOADED: '#ec4899',
-        INVITATION_DISPATCHED: '#eab308'
+        INVITATION_DISPATCHED: '#eab308',
+        INVITATION_RESENT: '#38bdf8',
+        DB_SYNC: '#60a5fa',
+        PIPELINE_SYNC: '#60a5fa'
+    };
+
+    const actionLabels = {
+        CUSTOMER_LOGIN: 'Client Login',
+        CUSTOMER_OTP_REQUESTED: 'Security Code Sent',
+        APPLICATION_SAVE: 'Application Saved',
+        APPLICATION_SUBMITTED: 'Application Submitted',
+        STEP_PROGRESSION: 'Step Completed',
+        DOCUMENT_UPLOADED: 'Document Uploaded',
+        INVITATION_DISPATCHED: 'Invitation Sent',
+        INVITATION_RESENT: 'Invitation Re-sent',
+        DB_SYNC: 'Records Synchronized',
+        PIPELINE_SYNC: 'Pipeline Synchronized'
     };
 
     const rowsHtml = logs.map(l => {
@@ -3288,6 +3304,7 @@ function renderAuditTrail(logs) {
             ? `<span style="background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.3); color:#c084fc; font-weight:600; padding:2px 6px; border-radius:4px; font-size:11px;">📱 Mobile</span>`
             : `<span style="background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.3); color:#38bdf8; font-weight:600; padding:2px 6px; border-radius:4px; font-size:11px;">💻 Web</span>`;
         const actionColor = actionColors[l.action_type] || '#94a3b8';
+        const displayAction = actionLabels[l.action_type] || (l.action_type ? l.action_type.replace(/_/g, ' ') : 'Activity');
         const statusBadge = (l.status === 'SUCCESS' || !l.status)
             ? `<span style="color:#10b981; font-weight:600;">✓ SUCCESS</span>`
             : `<span style="color:#ef4444; font-weight:600;">✕ ${escapeHtml(l.status)}</span>`;
@@ -3299,7 +3316,7 @@ function renderAuditTrail(logs) {
                 <td style="padding:10px 8px; font-family:monospace; color:#cbd5e1; font-size:11.5px; white-space:nowrap;">${formattedTime}</td>
                 <td style="padding:10px 8px; white-space:nowrap;">${channelBadge}</td>
                 <td style="padding:10px 8px;">
-                    <span style="font-weight:700; color:${actionColor}; font-family:monospace; font-size:12px;">${escapeHtml(l.action_type || 'UNKNOWN')}</span>
+                    <span style="font-weight:700; color:${actionColor}; font-size:12px;">${escapeHtml(displayAction)}</span>
                     ${metaSummary ? `<div style="font-size:11px; color:#64748b; max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(metaSummary)}">${escapeHtml(metaSummary)}</div>` : ''}
                 </td>
                 <td style="padding:10px 8px; color:#e2e8f0; font-family:monospace; font-size:12px;">${escapeHtml(l.actor || '-')}</td>

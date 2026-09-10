@@ -445,7 +445,7 @@ async function openRmAuditModal(companyUid, crn, companyName) {
     const titleEl = document.getElementById("rmAuditTitle");
     const subEl = document.getElementById("rmAuditSub");
     if (titleEl) titleEl.innerHTML = `Audit Trail: <strong>${escapeHtml(companyName || crn)}</strong> <span style="font-size:12px; color:#f59e0b; font-family:monospace; margin-left:8px;">${companyUid}</span>`;
-    if (subEl) subEl.textContent = `Omnichannel immutable telemetry (CRN: ${crn}) mapped across corporate_audit_logs`;
+    if (subEl) subEl.textContent = `Activity and verification history for CRN ${crn}`;
 
     await refreshRmAudit();
 }
@@ -492,7 +492,23 @@ function renderRmAuditTrail(logs) {
         APPLICATION_SUBMITTED: '#a855f7',
         STEP_PROGRESSION: '#06b6d4',
         DOCUMENT_UPLOADED: '#ec4899',
-        INVITATION_DISPATCHED: '#eab308'
+        INVITATION_DISPATCHED: '#eab308',
+        INVITATION_RESENT: '#38bdf8',
+        DB_SYNC: '#60a5fa',
+        PIPELINE_SYNC: '#60a5fa'
+    };
+
+    const actionLabels = {
+        CUSTOMER_LOGIN: 'Client Login',
+        CUSTOMER_OTP_REQUESTED: 'Security Code Sent',
+        APPLICATION_SAVE: 'Application Saved',
+        APPLICATION_SUBMITTED: 'Application Submitted',
+        STEP_PROGRESSION: 'Step Completed',
+        DOCUMENT_UPLOADED: 'Document Uploaded',
+        INVITATION_DISPATCHED: 'Invitation Sent',
+        INVITATION_RESENT: 'Invitation Re-sent',
+        DB_SYNC: 'Records Synchronized',
+        PIPELINE_SYNC: 'Pipeline Synchronized'
     };
 
     const tableHtml = `
@@ -518,6 +534,7 @@ function renderRmAuditTrail(logs) {
                         ? `<span style="background:rgba(168,85,247,0.15); border:1px solid rgba(168,85,247,0.3); color:#c084fc; font-weight:600; padding:2px 6px; border-radius:4px; font-size:11px;">📱 Mobile</span>`
                         : `<span style="background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.3); color:#38bdf8; font-weight:600; padding:2px 6px; border-radius:4px; font-size:11px;">💻 Web</span>`;
                     const color = actionColors[l.action_type] || '#94a3b8';
+                    const displayAction = actionLabels[l.action_type] || (l.action_type ? l.action_type.replace(/_/g, ' ') : 'Activity');
                     const statusStr = (l.status === 'SUCCESS' || !l.status)
                         ? `<span style="color:#10b981; font-weight:600;">✓ SUCCESS</span>`
                         : `<span style="color:#ef4444; font-weight:600;">✕ ${escapeHtml(l.status)}</span>`;
@@ -528,7 +545,7 @@ function renderRmAuditTrail(logs) {
                             <td style="font-family:monospace; color:#cbd5e1; white-space:nowrap;">${formatted}</td>
                             <td>${channelBadge}</td>
                             <td>
-                                <span style="font-weight:700; color:${color}; font-family:monospace;">${escapeHtml(l.action_type || '')}</span>
+                                <span style="font-weight:700; color:${color};">${escapeHtml(displayAction)}</span>
                                 ${metaStr ? `<div style="font-size:10.5px; color:var(--rm-text-muted); max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(metaStr)}">${escapeHtml(metaStr)}</div>` : ''}
                             </td>
                             <td style="color:#e2e8f0; font-family:monospace;">${escapeHtml(l.actor || '-')}</td>

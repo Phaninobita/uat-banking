@@ -438,7 +438,7 @@ class BankViewModel : ViewModel() {
         repository.syncActiveApplicationToSupabase()
         if (!silent) {
             val company = app.companyInfo.companyName.ifBlank { "CRN ${app.crn}" }
-            showToast("Draft saved to Supabase Cloud DB for $company (Step ${app.currentStep} of 7) ✓")
+            showToast("Draft saved securely for $company (Step ${app.currentStep} of 7) ✓")
         }
     }
 
@@ -532,7 +532,7 @@ class BankViewModel : ViewModel() {
         viewModelScope.launch {
             val invite = repository.dispatchRmInvitation(crn, email, company, contact, phone, notes)
             clearInviteForm(showNotification = false)
-            showToast("✓ Link initiated & saved to Supabase for ${invite.email} (CRN: ${invite.crn})")
+            showToast("✓ Invitation generated for ${invite.email} (CRN: ${invite.crn})")
         }
     }
 
@@ -557,7 +557,7 @@ class BankViewModel : ViewModel() {
         viewModelScope.launch {
             val list = repository.refreshInvitationsFromSupabase()
             if (!silent) {
-                showToast("Synced ${list.size} invitation(s) from Supabase Cloud DB")
+                showToast("Updated ${list.size} invitation(s)")
             }
         }
     }
@@ -579,7 +579,7 @@ class BankViewModel : ViewModel() {
         viewModelScope.launch {
             val list = repository.refreshAuditLogsFromSupabase()
             if (!silent) {
-                showToast("Synced ${list.size} audit records from Supabase")
+                showToast("Updated ${list.size} activity record(s)")
             }
         }
     }
@@ -590,8 +590,8 @@ class BankViewModel : ViewModel() {
 
     fun copySqlToClipboard(context: android.content.Context) {
         val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager
-        val clip = android.content.ClipData.newPlainText("Supabase Audit Log SQL", getAuditTableSql())
+        val clip = android.content.ClipData.newPlainText("Audit Log", getAuditTableSql())
         clipboard?.setPrimaryClip(clip)
-        showToast("✓ Copied Supabase Table SQL to Clipboard!")
+        showToast("✓ Copied activity record export")
     }
 }

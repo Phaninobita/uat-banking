@@ -217,7 +217,6 @@ fun RmDashboardView(viewModel: BankViewModel) {
     val auditLogs by viewModel.auditLogs.collectAsState()
     val auditSearch by viewModel.auditSearch.collectAsState()
     val auditFilter by viewModel.auditFilter.collectAsState()
-    val isSqlDialogOpen by viewModel.isSqlSchemaDialogOpen.collectAsState()
     val context = LocalContext.current
 
     val crn by viewModel.inviteCrn.collectAsState()
@@ -760,14 +759,6 @@ fun RmDashboardView(viewModel: BankViewModel) {
             )
         }
     }
-
-    if (isSqlDialogOpen) {
-        SqlSchemaDialog(
-            sql = viewModel.getAuditTableSql(),
-            onDismiss = { viewModel.isSqlSchemaDialogOpen.value = false },
-            onCopy = { viewModel.copySqlToClipboard(context) }
-        )
-    }
 }
 
 @Composable
@@ -859,7 +850,7 @@ fun RmAuditLogsSection(
                         ) {
                             Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(12.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text(text = "Sync Cloud", fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                            Text(text = "Sync", fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
                         }
                     }
                 }
@@ -874,7 +865,7 @@ fun RmAuditLogsSection(
                         "LOGINS" to "🔑 Logins (${auditLogs.count { it.actionType.contains("LOGIN") || it.actionType.contains("LOGOUT") }})",
                         "DISPATCHES" to "🚀 Dispatches (${auditLogs.count { it.actionType.contains("INVITATION") }})",
                         "ONBOARDING" to "📝 Onboarding (${auditLogs.count { it.actionType.contains("STEP") || it.actionType.contains("CUSTOMER") }})",
-                        "SYSTEM" to "⚡ DB & System (${auditLogs.count { it.actionType.contains("SYNC") || it.actionType.contains("BOOT") }})"
+                        "SYSTEM" to "⚡ System Sync (${auditLogs.count { it.actionType.contains("SYNC") || it.actionType.contains("BOOT") }})"
                     )
 
                     filterOptions.forEach { (key, label) ->
@@ -1112,76 +1103,6 @@ fun AuditLogCard(log: MobileAuditLog) {
             }
         }
     }
-}
-
-@Composable
-fun SqlSchemaDialog(
-    sql: String,
-    onDismiss: () -> Unit,
-    onCopy: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Info, contentDescription = null, tint = FnbGold, modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Supabase PostgreSQL Audit Table", color = FnbTextPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-            }
-        },
-        text = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Text(
-                    text = "To query or view audit logs in your Supabase SQL editor, execute the DDL script below. The table stores all mobile actions (RM & Client logins, dispatches, KYC steps):",
-                    color = FnbTextSecondary,
-                    fontSize = 11.sp
-                )
-
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = Color(0xFF0F172A),
-                    border = BorderStroke(1.dp, Color(0xFF334155)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    SelectionContainer {
-                        Text(
-                            text = sql,
-                            color = Color(0xFF93C5FD),
-                            fontSize = 10.sp,
-                            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                            modifier = Modifier.padding(10.dp)
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = onCopy,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = FnbGold,
-                    contentColor = FnbDarkBg
-                ),
-                shape = RoundedCornerShape(6.dp)
-            ) {
-                Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(13.dp))
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "Copy SQL to Clipboard", fontWeight = FontWeight.Bold, fontSize = 11.sp)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = "Close", color = FnbTextSecondary, fontSize = 11.sp)
-            }
-        },
-        containerColor = FnbSurface,
-        shape = RoundedCornerShape(12.dp)
-    )
 }
 
 @Composable

@@ -79,11 +79,11 @@ router.post("/request-otp", async (req, res) => {
   const rmInvite = await getRmCustomerInvitation(cleanCrn, cleanEmail);
   if (!rmInvite) {
     return res.status(403).json({
-      error: `Access Restricted: CRN "${cleanCrn}" and Email "${cleanEmail}" were not found in the Relationship Manager (RM) Database. Only records created on the RM Portal can access this system.`,
+      error: `Access Restricted: CRN "${cleanCrn}" and Email "${cleanEmail}" could not be verified. An active Relationship Manager invitation is required to access this system.`,
       title: "Access Restricted",
       crn: cleanCrn,
       email: cleanEmail,
-      detail: `CRN "${cleanCrn}" and Email "${cleanEmail}" do not match an active Relationship Manager invitation. Only corporate clients onboarded via the RM Suite can log in.`,
+      detail: `CRN "${cleanCrn}" and Email "${cleanEmail}" do not match an active Relationship Manager invitation. Please contact your Relationship Manager for onboarding access.`,
       code: "RM_INVITATION_NOT_FOUND",
       unauthorized: true
     });

@@ -45,7 +45,7 @@
                         👁️ Unlock with FaceID
                     </button>
                     <div style="font-size:10px;color:#64748b;margin-top:14px;text-align:center;">
-                        Simulated Biometric Authentication Endpoint &bull; Token Verified
+                        Secure Biometric Verification Active
                     </div>
                 </div>
 

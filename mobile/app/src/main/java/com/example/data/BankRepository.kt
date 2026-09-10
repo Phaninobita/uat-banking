@@ -555,11 +555,11 @@ object BankRepository {
             _rmInvitations.value = list
         }
         recordAuditLog(
-            actionType = "DB_SYNC",
+            actionType = "PIPELINE_SYNC",
             actorId = "RM-" + (_currentRmUser.value?.username?.uppercase() ?: "PHANEE"),
             actorName = _currentRmUser.value?.fullName ?: "Phanee (Senior RM)",
             actorRole = "RM Executive",
-            details = "Synchronized customer invitations pipeline with Supabase PostgreSQL instance (${list.size} records)",
+            details = "Synchronized customer invitations pipeline (${list.size} records)",
             status = "SUCCESS"
         )
         return _rmInvitations.value

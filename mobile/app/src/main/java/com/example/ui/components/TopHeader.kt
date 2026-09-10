@@ -87,7 +87,7 @@ fun TopHeader(
                             modifier = Modifier.clickable { onSyncDatabase() }
                         ) {
                             Text(
-                                text = "⚡ Supabase",
+                                text = "⚡ Live Sync",
                                 color = FnbSuccess,
                                 fontSize = 8.sp,
                                 fontWeight = FontWeight.Bold,

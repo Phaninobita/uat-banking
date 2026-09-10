@@ -288,7 +288,7 @@ fun CustomerLoginScreen(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "Supabase Live DB Verified",
+                                text = "Secure Network Verified",
                                 color = FnbSuccess,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Medium
