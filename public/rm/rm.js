@@ -1,5 +1,5 @@
 /**
- * First National Bank — Relationship Manager (RM) Executive Suite Client Logic
+ * First National Bank ÔÇö Relationship Manager (RM) Executive Suite Client Logic
  * Handles executive authentication, customer invitation dispatch,
  * magic link generation, pipeline tracking, and email previews.
  */
@@ -23,14 +23,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (pwdInput) pwdInput.addEventListener("input", hideAlert);
 });
 
-// ── TOAST NOTIFICATIONS ──
+// ÔöÇÔöÇ TOAST NOTIFICATIONS ÔöÇÔöÇ
 function showRmToast(message, type = "success") {
     const container = document.getElementById("rmToastContainer");
     if (!container) return;
 
     const toast = document.createElement("div");
     toast.className = `rm-toast ${type}`;
-    const icon = type === "success" ? "✅" : (type === "error" ? "❌" : "ℹ️");
+    const icon = type === "success" ? "Ô£à" : (type === "error" ? "ÔØî" : "Ôä╣´©Å");
     toast.innerHTML = `<span style="font-size:16px;">${icon}</span><span>${message}</span>`;
     container.appendChild(toast);
 
@@ -42,11 +42,11 @@ function showRmToast(message, type = "success") {
     }, 4000);
 }
 
-// ── AUTHENTICATION ──
+// ÔöÇÔöÇ AUTHENTICATION ÔöÇÔöÇ
 function checkRmAuthSession() {
     if (currentRmToken) {
         try {
-            const cachedProfile = localStorage.getItem("apex_rm_profile");
+            const cachedProfile = localStorage.getItem("fnb_rm_profile");
             if (cachedProfile) {
                 currentRmProfile = JSON.parse(cachedProfile);
                 showDashboardView();
@@ -74,7 +74,7 @@ function showDashboardView() {
         const nameEl = document.getElementById("rmTopName");
         const roleEl = document.getElementById("rmTopRole");
         if (nameEl) nameEl.textContent = currentRmProfile.name || "Phanee";
-        if (roleEl) roleEl.textContent = currentRmProfile.role || "Senior Relationship Manager · Corporate Banking";
+        if (roleEl) roleEl.textContent = currentRmProfile.role || "Senior Relationship Manager ┬À Corporate Banking";
     }
 
     fetchInvitations();
@@ -101,7 +101,7 @@ async function handleRmLoginSubmit(ev) {
         currentRmToken = data.token;
         currentRmProfile = data.profile;
         localStorage.setItem("fnb_rm_token", currentRmToken);
-        localStorage.setItem("apex_rm_profile", JSON.stringify(currentRmProfile));
+        localStorage.setItem("fnb_rm_profile", JSON.stringify(currentRmProfile));
 
         showRmToast(`Executive session authenticated. Welcome back, ${currentRmProfile.name || 'Phanee'}.`, "success");
         showDashboardView();
@@ -111,7 +111,7 @@ async function handleRmLoginSubmit(ev) {
             alertBox.innerHTML = `
                 <div style="display:flex;align-items:flex-start;gap:8px;justify-content:space-between;">
                     <div>
-                        <strong style="color:#fca5a5;display:block;margin-bottom:2px;font-size:13px;">⚠️ Authentication Notice</strong>
+                        <strong style="color:#fca5a5;display:block;margin-bottom:2px;font-size:13px;">ÔÜá´©Å Authentication Notice</strong>
                         <span style="color:#e2e8f0;font-size:12px;line-height:1.4;">${err.message}</span>
                     </div>
                     <button type="button" onclick="document.getElementById('rmLoginAlert').style.display='none'" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;line-height:1;">&times;</button>
@@ -124,14 +124,14 @@ async function handleRmLoginSubmit(ev) {
 
 function handleRmSignOut() {
     localStorage.removeItem("fnb_rm_token");
-    localStorage.removeItem("apex_rm_profile");
+    localStorage.removeItem("fnb_rm_profile");
     currentRmToken = null;
     currentRmProfile = null;
     showLoginView();
     showRmToast("RM Executive Session terminated.", "info");
 }
 
-// ── CUSTOMER INVITATION DISPATCH ──
+// ÔöÇÔöÇ CUSTOMER INVITATION DISPATCH ÔöÇÔöÇ
 async function handleDispatchInvite(ev) {
     ev.preventDefault();
 
@@ -145,7 +145,7 @@ async function handleDispatchInvite(ev) {
     const submitBtn = document.getElementById("btnDispatchInvite");
     if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = "⏳ Dispatching Invitation &amp; Generating Link…";
+        submitBtn.innerHTML = "ÔÅ│ Dispatching Invitation &amp; Generating LinkÔÇª";
     }
 
     try {
@@ -178,7 +178,7 @@ async function handleDispatchInvite(ev) {
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = "🚀 Dispatch Customer Invitation &amp; Generate Magic Link";
+            submitBtn.innerHTML = "­ƒÜÇ Dispatch Customer Invitation &amp; Generate Magic Link";
         }
     }
 }
@@ -227,7 +227,7 @@ function focusInviteForm() {
     if (crnInput) crnInput.focus();
 }
 
-// ── PIPELINE & INVITATIONS TABLE ──
+// ÔöÇÔöÇ PIPELINE & INVITATIONS TABLE ÔöÇÔöÇ
 async function fetchInvitations() {
     const tbody = document.getElementById("pipelineTableBody");
     try {
@@ -272,9 +272,9 @@ function renderPipelineTable(invitations) {
                            (inv.status === "in_progress" ? "in_progress" : 
                            (inv.status === "review" ? "review" : "invited"));
 
-        const statusLabel = inv.status === "completed" ? "✅ Activated" : 
-                           (inv.status === "in_progress" ? "⏳ In Progress" : 
-                           (inv.status === "review" ? "📋 In Review" : "✉️ Dispatched"));
+        const statusLabel = inv.status === "completed" ? "Ô£à Activated" : 
+                           (inv.status === "in_progress" ? "ÔÅ│ In Progress" : 
+                           (inv.status === "review" ? "­ƒôï In Review" : "Ô£ë´©Å Dispatched"));
 
         const stepText = inv.current_step ? `Step ${inv.current_step} of 7` : "Step 1 of 7";
 
@@ -285,11 +285,11 @@ function renderPipelineTable(invitations) {
                 </td>
                 <td>
                     <div style="font-weight:700; color:#ffffff;">${inv.company_name}</div>
-                    <div style="font-size:12px; color:var(--rm-text-muted);">👤 ${inv.contact_person || 'Signatory'}</div>
+                    <div style="font-size:12px; color:var(--rm-text-muted);">­ƒæñ ${inv.contact_person || 'Signatory'}</div>
                 </td>
                 <td>
                     <span style="color:#93c5fd;">${inv.email}</span>
-                    ${inv.phone ? `<div style="font-size:11.5px; color:var(--rm-text-muted);">📞 ${inv.phone}</div>` : ''}
+                    ${inv.phone ? `<div style="font-size:11.5px; color:var(--rm-text-muted);">­ƒô× ${inv.phone}</div>` : ''}
                 </td>
                 <td>
                     <span style="font-size:12px; font-weight:600; color:#e2e8f0;">${stepText}</span>
@@ -304,16 +304,16 @@ function renderPipelineTable(invitations) {
                 <td style="text-align:right;">
                     <div class="rm-action-btns">
                         <button class="rm-btn-action" onclick="copySpecificLink('${encodeURIComponent(inv.invite_link)}')" title="Copy Magic Link">
-                            📋 Link
+                            ­ƒôï Link
                         </button>
                         <a href="${inv.invite_link}" target="_blank" class="rm-btn-action" style="color:#38bdf8;" title="Open Customer Portal">
-                            🚀 Portal
+                            ­ƒÜÇ Portal
                         </a>
                         <button class="rm-btn-action" onclick="resendInvite('${inv.crn}', '${inv.email}')" title="Resend Notification Email">
-                            ✉️ Resend
+                            Ô£ë´©Å Resend
                         </button>
                         <button class="rm-btn-action delete" onclick="deleteInvite('${inv.crn}', '${inv.email}')" title="Revoke Invitation">
-                            ✕
+                            Ô£ò
                         </button>
                     </div>
                 </td>

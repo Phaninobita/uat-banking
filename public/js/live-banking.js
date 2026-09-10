@@ -1,5 +1,5 @@
-﻿/**
- * First National Bank Platform â€” Live Core Banking & FX Controller
+/**
+ * First National Bank Platform ÔÇö Live Core Banking & FX Controller
  * Manages real-time corporate balances, live FX rate feeds, instant wire transfers,
  * and SWIFT GPI transaction ledger.
  */
@@ -45,7 +45,7 @@
                 const res = await ApexApi.getAccounts();
                 if (res.success && res.accounts) {
                     this.accounts = res.accounts;
-                    this.renderAccounts(res.accounts, res.totalLiquidityUSD || res.totalLiquidityAED);
+                    this.renderAccounts(res.accounts, res.totalLiquidityAED);
                     this.populateAccountDropdown(res.accounts);
                 }
             } catch (err) {
@@ -59,7 +59,7 @@
             const totalLiquidityEl = document.getElementById('totalLiquidityDisplay') || document.getElementById('totalLiquidityValue');
 
             if (totalLiquidityEl && totalLiquidity) {
-                totalLiquidityEl.textContent = 'USD ' + Number(totalLiquidity).toLocaleString(undefined, {
+                totalLiquidityEl.textContent = 'AED ' + Number(totalLiquidity).toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                 });
@@ -67,11 +67,11 @@
 
             if (!container) return;
 
-            const currencySymbols = { USD: '$', EUR: 'â‚¬', GBP: 'Â£', CAD: 'CA$' };
+            const currencySymbols = { AED: 'Ï».ÏÑ', USD: '$', EUR: 'Ôé¼', GBP: '┬ú' };
             const cardThemes = {
+                AED: { cardClass: 'corp-card-indigo', grad: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%)' },
                 USD: { cardClass: 'corp-card-emerald', grad: 'linear-gradient(135deg, #064e3b 0%, #065f46 40%, #059669 100%)' },
-                EUR: { cardClass: 'corp-card-violet', grad: 'linear-gradient(135deg, #1e293b 0%, #0f766e 50%, #0d9488 100%)' },
-                GBP: { cardClass: 'corp-card-indigo', grad: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%)' }
+                EUR: { cardClass: 'corp-card-violet', grad: 'linear-gradient(135deg, #1e293b 0%, #0f766e 50%, #0d9488 100%)' }
             };
 
             container.innerHTML = accounts.map(acc => {
@@ -101,7 +101,7 @@
                         </div>
                         <div class="corp-card-footer">
                             <span>IBAN: ${acc.iban}</span>
-                            <button type="button" class="btn-copy-iban" onclick="LiveBanking.copyIban('${acc.iban}')" title="Copy IBAN">ðŸ“‹ Copy</button>
+                            <button type="button" class="btn-copy-iban" onclick="LiveBanking.copyIban('${acc.iban}')" title="Copy IBAN">­ƒôï Copy</button>
                         </div>
                     </div>
                 `;
@@ -114,7 +114,7 @@
 
             select.innerHTML = accounts.map(acc => `
                 <option value="${acc.account_number}">
-                    ${acc.currency} â€” ${acc.account_name} (${acc.currency} ${Number(acc.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })})
+                    ${acc.currency} ÔÇö ${acc.account_name} (${acc.currency} ${Number(acc.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })})
                 </option>
             `).join('');
         },
@@ -193,7 +193,7 @@
                             </span>
                         </td>
                         <td>
-                            <span style="font-size:11px;color:#34d399;font-weight:700;">â— Settled</span>
+                            <span style="font-size:11px;color:#34d399;font-weight:700;">ÔùÅ Settled</span>
                             <div style="font-size:10px;color:var(--text-muted);">${dateStr}</div>
                         </td>
                     </tr>
@@ -234,7 +234,7 @@
                     <span class="fx-pair-symbol">${r.pair}</span>
                     <span class="fx-pair-rate">${r.rate.toFixed(4)}</span>
                     <span class="${r.change24h.startsWith('-') ? 'fx-down' : 'fx-up'}">
-                        ${r.change24h.startsWith('-') ? 'â–¼' : 'â–²'} ${r.change24h}
+                        ${r.change24h.startsWith('-') ? 'Ôû╝' : 'Ôû▓'} ${r.change24h}
                     </span>
                 </span>
             `).join('');
@@ -263,11 +263,11 @@
             }
 
             const submitBtn = document.querySelector('#liveBankingHub form button[type="submit"]') || document.getElementById('btnSubmitTransfer');
-            const originalText = submitBtn ? submitBtn.innerHTML : 'âš¡ Authorize & Execute Wire';
+            const originalText = submitBtn ? submitBtn.innerHTML : 'ÔÜí Authorize & Execute Wire';
 
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = 'ðŸ”„ Clearing with Fedwire / RTP...';
+                submitBtn.innerHTML = '­ƒöä Clearing with Fedwire FTS...';
             }
 
             try {
@@ -276,14 +276,14 @@
                     counterpartyName,
                     counterpartyIban,
                     amount: parseFloat(amount),
-                    currency: 'USD',
+                    currency: 'AED',
                     description,
                     channel: 'portal'
                 });
 
                 if (res.success) {
                     if (typeof showToast === 'function') {
-                        showToast(`Wire transfer of USD ${parseFloat(amount).toLocaleString()} settled via Federal Reserve Fedwire! Ref: ${res.transaction.transaction_ref}`, 'Payment Cleared', 'success', 5000);
+                        showToast(`Wire transfer of AED ${parseFloat(amount).toLocaleString()} settled via Central Bank FTS! Ref: ${res.transaction.transaction_ref}`, 'Payment Cleared', 'success', 5000);
                     }
 
                     // Reset form fields
@@ -320,4 +320,3 @@
 
     window.LiveBanking = LiveBanking;
 })();
-

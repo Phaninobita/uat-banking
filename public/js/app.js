@@ -1,9 +1,9 @@
-﻿/**
- * First National Bank Corporate Account Portal â€” Main Application Logic
+/**
+ * First National Bank Corporate Account Portal ÔÇö Main Application Logic
  * Comprehensive state management, non-destructive navigation, OCR extraction, and multi-step persistence.
  */
 
-// â”€â”€ GLOBAL APPLICATION STATE â”€â”€
+// ÔöÇÔöÇ GLOBAL APPLICATION STATE ÔöÇÔöÇ
 let currentStep = 1;
 const totalSteps = 7;
 const stepProgress = [0, 14, 28, 43, 57, 71, 86, 100];
@@ -19,25 +19,25 @@ let cachedOwnershipRows = [];
 let cachedRoleSelections = null;
 let cachedTaxSelections = null;
 
-// â”€â”€ TOAST NOTIFICATION SYSTEM â”€â”€
+// ÔöÇÔöÇ TOAST NOTIFICATION SYSTEM ÔöÇÔöÇ
 function showToast(message, title = 'Notification', type = 'info', duration = 4000) {
     const container = document.getElementById('toastContainer');
     if (!container) return null;
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     const icons = {
-        success: 'âœ…',
-        error: 'âŒ',
-        warning: 'âš ï¸',
-        info: 'â„¹ï¸'
+        success: 'Ô£à',
+        error: 'ÔØî',
+        warning: 'ÔÜá´©Å',
+        info: 'Ôä╣´©Å'
     };
     toast.innerHTML = `
-        <div class="toast-icon" aria-hidden="true">${icons[type] || 'â„¹ï¸'}</div>
+        <div class="toast-icon" aria-hidden="true">${icons[type] || 'Ôä╣´©Å'}</div>
         <div class="toast-content">
             <span class="toast-title">${title}</span>
             <span class="toast-message">${message}</span>
         </div>
-        <button class="toast-close" onclick="this.closest('.toast').classList.add('removing');setTimeout(()=>this.closest('.toast').remove(),300)" aria-label="Dismiss notification">âœ•</button>
+        <button class="toast-close" onclick="this.closest('.toast').classList.add('removing');setTimeout(()=>this.closest('.toast').remove(),300)" aria-label="Dismiss notification">Ô£ò</button>
     `;
     container.appendChild(toast);
     setTimeout(() => {
@@ -49,7 +49,7 @@ function showToast(message, title = 'Notification', type = 'info', duration = 40
     return toast;
 }
 
-// â”€â”€ NETWORK STATUS DETECTION â”€â”€
+// ÔöÇÔöÇ NETWORK STATUS DETECTION ÔöÇÔöÇ
 function updateNetworkStatus() {
     const status = document.getElementById('networkStatus');
     const icon = document.getElementById('networkIcon');
@@ -58,14 +58,14 @@ function updateNetworkStatus() {
     if (navigator.onLine) {
         status.className = 'online';
         status.style.display = 'flex';
-        icon.textContent = 'â—';
+        icon.textContent = 'ÔùÅ';
         text.textContent = 'Online';
         status.style.color = 'var(--toast-success)';
     } else {
         status.className = 'offline';
         status.style.display = 'flex';
-        icon.textContent = 'â—';
-        text.textContent = 'Offline â€” Working locally';
+        icon.textContent = 'ÔùÅ';
+        text.textContent = 'Offline ÔÇö Working locally';
         status.style.color = 'var(--toast-error)';
         showToast('You are offline. Application changes will sync when reconnected.', 'Offline Mode', 'warning', 5000);
     }
@@ -73,7 +73,7 @@ function updateNetworkStatus() {
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
 
-// â”€â”€ FLOATING PARTICLES â”€â”€
+// ÔöÇÔöÇ FLOATING PARTICLES ÔöÇÔöÇ
 function initParticles() {
     const container = document.getElementById('particleContainer');
     if (!container) return;
@@ -91,7 +91,7 @@ function initParticles() {
     }
 }
 
-// â”€â”€ THEME INITIALIZATION â”€â”€
+// ÔöÇÔöÇ THEME INITIALIZATION ÔöÇÔöÇ
 const stepTitles = [
     "",
     "Documents & Verification",
@@ -109,11 +109,11 @@ function initTheme() {
     if (stored === 'light') {
         document.body.classList.remove('dark');
         document.body.classList.add('light');
-        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">ðŸŒ™</span><span class="tt-label">Dark</span>';
+        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">­ƒîÖ</span><span class="tt-label">Dark</span>';
     } else {
         document.body.classList.add('dark');
         document.body.classList.remove('light');
-        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">â˜€ï¸</span><span class="tt-label">Light</span>';
+        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">ÔÿÇ´©Å</span><span class="tt-label">Light</span>';
     }
 }
 
@@ -124,18 +124,18 @@ function toggleTheme() {
         document.body.classList.remove('light');
         document.body.classList.add('dark');
         localStorage.setItem('vb-theme', 'dark');
-        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">â˜€ï¸</span><span class="tt-label">Light</span>';
+        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">ÔÿÇ´©Å</span><span class="tt-label">Light</span>';
     } else {
         document.body.classList.add('light');
         document.body.classList.remove('dark');
         localStorage.setItem('vb-theme', 'light');
-        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">ðŸŒ™</span><span class="tt-label">Dark</span>';
+        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">­ƒîÖ</span><span class="tt-label">Dark</span>';
     }
 }
 
-// â”€â”€ REWORK MODE STATE â”€â”€
+// ÔöÇÔöÇ REWORK MODE STATE ÔöÇÔöÇ
 const reworkDocLabels = [
-    "Updated Business License (valid until 2027)",
+    "Updated Trade Licence (valid until 2027)",
     "Proof of Funds / Bank Statement",
     "Updated Certificate of Incorporation",
     "Passport Copy of New UBO"
@@ -148,9 +148,9 @@ function toggleReworkMode() {
     const submitBtn = document.getElementById('finalSubmitBtn');
 
     if (isReworkMode) {
-        if (btn) { btn.classList.add('active'); btn.innerHTML = 'ðŸ” <span class="tt-label">Exit Rework</span>'; }
+        if (btn) { btn.classList.add('active'); btn.innerHTML = '­ƒöü <span class="tt-label">Exit Rework</span>'; }
         if (banner) banner.classList.add('active');
-        if (submitBtn) submitBtn.textContent = 'âœ“ Resubmit for Review';
+        if (submitBtn) submitBtn.textContent = 'Ô£ô Resubmit for Review';
 
         document.querySelectorAll('.step-pill').forEach((el, i) => {
             if (i + 1 !== 4 && i + 1 !== 7) el.classList.add('rework-disabled');
@@ -164,9 +164,9 @@ function toggleReworkMode() {
         if (currentStep !== 4 && currentStep !== 7) goTo(4);
         else if (currentStep === 4) renderOwnershipErrors();
     } else {
-        if (btn) { btn.classList.remove('active'); btn.innerHTML = 'ðŸ” <span class="tt-label">Simulate Rework</span>'; }
+        if (btn) { btn.classList.remove('active'); btn.innerHTML = '­ƒöü <span class="tt-label">Simulate Rework</span>'; }
         if (banner) banner.classList.remove('active');
-        if (submitBtn) submitBtn.textContent = 'âœ“ Submit Application';
+        if (submitBtn) submitBtn.textContent = 'Ô£ô Submit Application';
 
         document.querySelectorAll('.step-pill').forEach(el => el.classList.remove('rework-disabled'));
         document.querySelectorAll('.rework-error').forEach(el => el.classList.remove('rework-error'));
@@ -188,13 +188,13 @@ function renderOwnershipErrors() {
             const parent = inputs[0].parentElement;
             const error = document.createElement('div');
             error.className = 'error-note';
-            error.innerHTML = 'âŒ RM Note: Ownership percentage must not exceed 60% for Corporate entities.';
+            error.innerHTML = 'ÔØî RM Note: Ownership percentage must not exceed 60% for Corporate entities.';
             parent.appendChild(error);
         }
     }
 }
 
-// â”€â”€ NAVIGATION & STEPPER (FAST & NON-DESTRUCTIVE) â”€â”€
+// ÔöÇÔöÇ NAVIGATION & STEPPER (FAST & NON-DESTRUCTIVE) ÔöÇÔöÇ
 function goTo(step) {
     if (step < 1 || step > totalSteps) return;
     if (isReworkMode && step !== 4 && step !== 7) {
@@ -260,7 +260,7 @@ function goTo(step) {
     }, 150);
 }
 
-// â”€â”€ STATE CACHING ON STEP EXIT â”€â”€
+// ÔöÇÔöÇ STATE CACHING ON STEP EXIT ÔöÇÔöÇ
 function captureCurrentStepState(step) {
     if (step === 4) {
         // Cache ownership rows
@@ -310,7 +310,7 @@ function captureCurrentStepState(step) {
     }
 }
 
-// â”€â”€ STEP 1: DOCUMENT UPLOADS â”€â”€
+// ÔöÇÔöÇ STEP 1: DOCUMENT UPLOADS ÔöÇÔöÇ
 function triggerUpload(id) {
     const el = document.getElementById(id);
     if (el) el.click();
@@ -360,8 +360,8 @@ function markUploaded(cardId, input) {
         if (statusEl) {
             statusEl.innerHTML = `
                 <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-                    <div>âœ“ <strong>${file.name}</strong> (${sizeFormatted})</div>
-                    <span class="db-status-chip">ðŸŸ¢ Saved in DB (Base64)</span>
+                    <div>Ô£ô <strong>${file.name}</strong> (${sizeFormatted})</div>
+                    <span class="db-status-chip">­ƒƒó Saved in DB (Base64)</span>
                 </div>
             `;
         }
@@ -385,7 +385,7 @@ function markUploaded(cardId, input) {
         } else {
             thumbContainer.innerHTML = `
                 <div class="uc-pdf-badge">
-                    <span style="font-size:26px;">ðŸ“„</span>
+                    <span style="font-size:26px;">­ƒôä</span>
                     <span style="font-weight:700;letter-spacing:0.02em;color:#e2e8f0;">PDF Document</span>
                     <span style="font-size:11px;color:#38bdf8;font-weight:600;">${sizeFormatted}</span>
                 </div>
@@ -402,13 +402,13 @@ function markUploaded(cardId, input) {
 
         actionBar.innerHTML = `
             <button type="button" class="btn-uc-action btn-uc-preview" onclick="event.stopPropagation(); openDocPreview('${cardId}')">
-                ðŸ‘ï¸ Preview
+                ­ƒæü´©Å Preview
             </button>
             <button type="button" class="btn-uc-action" onclick="event.stopPropagation(); downloadDocFromCache('${cardId}')">
-                â¬‡ï¸ Download
+                Ô¼ç´©Å Download
             </button>
             <button type="button" class="btn-uc-action btn-uc-delete" onclick="event.stopPropagation(); removeUploadedDoc('${cardId}')">
-                ðŸ—‘ï¸ Remove
+                ­ƒùæ´©Å Remove
             </button>
         `;
 
@@ -459,7 +459,7 @@ function markUploaded(cardId, input) {
     reader.readAsDataURL(file);
 }
 
-// â”€â”€ Document Preview & Actions â”€â”€
+// ÔöÇÔöÇ Document Preview & Actions ÔöÇÔöÇ
 let currentPreviewCardId = null;
 
 function openDocPreview(cardId) {
@@ -482,7 +482,7 @@ function openDocPreview(cardId) {
         metaEl.innerHTML = `
             <span>Type: <strong>${doc.fileType}</strong></span> &bull; 
             <span>Size: <strong>${Math.round(doc.fileSize / 1024)} KB</strong></span> &bull; 
-            <span style="color:#34d399;font-weight:700;">ðŸŸ¢ Stored in DB (Base64)</span>
+            <span style="color:#34d399;font-weight:700;">­ƒƒó Stored in DB (Base64)</span>
         `;
     }
 
@@ -551,7 +551,7 @@ async function removeUploadedDoc(cardId) {
     updateReviewSection();
 }
 
-// â”€â”€ Restore Saved Documents on Load â”€â”€
+// ÔöÇÔöÇ Restore Saved Documents on Load ÔöÇÔöÇ
 async function loadSavedDocuments() {
     try {
         const appRef = (ApexApi.getApplicationRef && ApexApi.getApplicationRef()) || currentAppRef || 'AB-2026-DEMO01';
@@ -581,8 +581,8 @@ async function loadSavedDocuments() {
                 if (statusEl) {
                     statusEl.innerHTML = `
                         <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-                            <div>âœ“ <strong>${doc.file_name}</strong> (${sizeFormatted})</div>
-                            <span class="db-status-chip">ðŸŸ¢ Stored in DB (Base64)</span>
+                            <div>Ô£ô <strong>${doc.file_name}</strong> (${sizeFormatted})</div>
+                            <span class="db-status-chip">­ƒƒó Stored in DB (Base64)</span>
                         </div>
                     `;
                 }
@@ -606,7 +606,7 @@ async function loadSavedDocuments() {
                 } else {
                     thumbContainer.innerHTML = `
                         <div class="uc-pdf-badge">
-                            <span style="font-size:26px;">ðŸ“„</span>
+                            <span style="font-size:26px;">­ƒôä</span>
                             <span style="font-weight:700;letter-spacing:0.02em;color:#e2e8f0;">PDF Document</span>
                             <span style="font-size:11px;color:#38bdf8;font-weight:600;">${sizeFormatted}</span>
                         </div>
@@ -622,13 +622,13 @@ async function loadSavedDocuments() {
                 }
                 actionBar.innerHTML = `
                     <button type="button" class="btn-uc-action btn-uc-preview" onclick="event.stopPropagation(); openDocPreview('${cardId}')">
-                        ðŸ‘ï¸ Preview
+                        ­ƒæü´©Å Preview
                     </button>
                     <button type="button" class="btn-uc-action" onclick="event.stopPropagation(); downloadDocFromCache('${cardId}')">
-                        â¬‡ï¸ Download
+                        Ô¼ç´©Å Download
                     </button>
                     <button type="button" class="btn-uc-action btn-uc-delete" onclick="event.stopPropagation(); removeUploadedDoc('${cardId}')">
-                        ðŸ—‘ï¸ Remove
+                        ­ƒùæ´©Å Remove
                     </button>
                 `;
 
@@ -642,7 +642,7 @@ async function loadSavedDocuments() {
                     base64Data: doc.file_data_base64
                 };
             });
-            console.log(`ðŸ“‘ [DOCUMENTS] Restored ${res.documents.length} Base64 documents from database.`);
+            console.log(`­ƒôæ [DOCUMENTS] Restored ${res.documents.length} Base64 documents from database.`);
         }
     } catch (err) {
         console.warn('[DOCUMENTS] Failed to auto-restore saved documents:', err);
@@ -650,7 +650,7 @@ async function loadSavedDocuments() {
 }
 window.loadSavedDocuments = loadSavedDocuments;
 
-// â”€â”€ STEP 2: COMPANY INFO TABS & TOGGLES â”€â”€
+// ÔöÇÔöÇ STEP 2: COMPANY INFO TABS & TOGGLES ÔöÇÔöÇ
 function switchTab(id) {
     document.querySelectorAll('.sub-nav-item').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.sub-pane').forEach(p => p.classList.remove('active'));
@@ -679,17 +679,17 @@ function addOpsRow() {
     row.className = 'g2';
     row.style.cssText = 'align-items:end;margin-bottom:10px;';
     row.innerHTML = `
-        <div class="field"><label>Country of Operation</label><input type="text" placeholder="e.g. Canada"></div>
+        <div class="field"><label>Country of Operation</label><input type="text" placeholder="e.g. Saudi Arabia"></div>
         <div class="field" style="display:flex;gap:8px;align-items:flex-end;">
-            <div style="flex:1;"><label>Estimated Annual Turnover (USD)</label><input type="text" placeholder="e.g. 10,000,000"></div>
-            <button class="btn btn-danger btn-sm" onclick="this.closest('.g2').remove();triggerAutoSave()" style="margin-bottom:1px;padding:9px 12px;" aria-label="Remove country">âœ•</button>
+            <div style="flex:1;"><label>Estimated Annual Turnover (AED)</label><input type="text" placeholder="e.g. 10,000,000"></div>
+            <button class="btn btn-danger btn-sm" onclick="this.closest('.g2').remove();triggerAutoSave()" style="margin-bottom:1px;padding:9px 12px;" aria-label="Remove country">Ô£ò</button>
         </div>
     `;
     list.appendChild(row);
     triggerAutoSave();
 }
 
-// â”€â”€ STEP 3: UBO DETAILS & SERVER-SIDE OCR â”€â”€
+// ÔöÇÔöÇ STEP 3: UBO DETAILS & SERVER-SIDE OCR ÔöÇÔöÇ
 function addUploadBox(type) {
     uploadBoxCount++;
     const container = document.getElementById('ubo-passport-boxes');
@@ -701,9 +701,9 @@ function addUploadBox(type) {
     box.style.padding = '32px 20px';
     box.onclick = () => triggerUpload('f-upbox-' + uploadBoxCount);
     if (type === 'individual') {
-        box.innerHTML = `<input type="file" id="f-upbox-${uploadBoxCount}" accept=".pdf,.jpg,.png" onchange="handleDocUpload(${uploadBoxCount}, this)" aria-label="Upload individual passport"><div style="font-size:28px;margin-bottom:8px;" aria-hidden="true">ðŸ›‚</div><strong>Upload Passport</strong><small>For individual UBOs</small>`;
+        box.innerHTML = `<input type="file" id="f-upbox-${uploadBoxCount}" accept=".pdf,.jpg,.png" onchange="handleDocUpload(${uploadBoxCount}, this)" aria-label="Upload individual passport"><div style="font-size:28px;margin-bottom:8px;" aria-hidden="true">­ƒøé</div><strong>Upload Passport</strong><small>For individual UBOs</small>`;
     } else {
-        box.innerHTML = `<input type="file" id="f-upbox-${uploadBoxCount}" accept=".pdf,.jpg,.png" onchange="handleDocUpload(${uploadBoxCount}, this)" aria-label="Upload corporate certificate"><div style="font-size:28px;margin-bottom:8px;" aria-hidden="true">ðŸ¢</div><strong>Upload Articles / Certificate</strong><small>For corporate owners</small>`;
+        box.innerHTML = `<input type="file" id="f-upbox-${uploadBoxCount}" accept=".pdf,.jpg,.png" onchange="handleDocUpload(${uploadBoxCount}, this)" aria-label="Upload corporate trade licence"><div style="font-size:28px;margin-bottom:8px;" aria-hidden="true">­ƒÅó</div><strong>Upload Trade Licence</strong><small>For corporate owners</small>`;
     }
     container.appendChild(box);
 }
@@ -715,7 +715,7 @@ function handleDocUpload(boxIdNum, input) {
         card.style.borderColor = 'var(--success)';
         const strongEl = card.querySelector('strong');
         if (strongEl) {
-            strongEl.textContent = 'âœ“ ' + input.files[0].name;
+            strongEl.textContent = 'Ô£ô ' + input.files[0].name;
             strongEl.style.color = 'var(--success-dark)';
         }
         const extractBtn = document.getElementById('btn-extract-ubos');
@@ -890,7 +890,7 @@ function parseClientPassportText(text, fileName = '') {
     
     // 2. Parse Visual Inspection Zone if MRZ was missing fields
     if (!data.fullName) {
-        const givenMatch = text.match(/(?:Given\s*Name[s]?|Forename[s]?|First\s*Name|Pr[eÃ©]noms?)\s*[:.]?\s*([A-Za-z\s\-]+)/i);
+        const givenMatch = text.match(/(?:Given\s*Name[s]?|Forename[s]?|First\s*Name|Pr[e├®]noms?)\s*[:.]?\s*([A-Za-z\s\-]+)/i);
         const surMatch = text.match(/(?:Surname|Nom|Family\s*Name|Last\s*Name)\s*[:.]?\s*([A-Za-z\s\-]+)/i);
         if (givenMatch && surMatch) {
             data.fullName = `${givenMatch[1].trim()} ${surMatch[1].trim()}`;
@@ -999,9 +999,9 @@ async function extractUboData() {
 
             if (type === 'individual') {
                 const name = data.fullName || (file ? file.name.replace(/\.[^/.]+$/, "") : 'Owner / Shareholder');
-                const nat = data.nationality || 'American';
+                const nat = data.nationality || 'Emirati';
                 const dob = data.dob || '1985-06-15';
-                const pass = data.passportNumber || (file ? 'P' + Math.floor(10000000 + Math.random() * 90000000) : 'US9081245');
+                const pass = data.passportNumber || (file ? 'P' + Math.floor(10000000 + Math.random() * 90000000) : 'AE9081245');
                 const exp = data.expiry || '2032-06-14';
                 const gender = data.gender || 'Male';
                 generatePrefilledIndividualCard(name, nat, dob, pass, exp, gender);
@@ -1009,7 +1009,7 @@ async function extractUboData() {
             } else {
                 const name = data.fullName || (file ? file.name.replace(/\.[^/.]+$/, "") : 'Corporate Shareholder LLC');
                 const reg = data.registrationNumber || 'CRN-509077205';
-                const auth = data.issuingAuthority || 'Delaware Division of Corporations';
+                const auth = data.issuingAuthority || 'Abu Dhabi Global Market (ADGM)';
                 const incorp = data.dob || '2019-09-20';
                 const exp = data.expiry || '2028-09-19';
                 generatePrefilledCorpCard(name, reg, auth, incorp, exp);
@@ -1031,7 +1031,7 @@ async function extractUboData() {
     }
 }
 
-// â”€â”€ ROBUST DATE EXPIRY VALIDATION ENGINE â”€â”€
+// ÔöÇÔöÇ ROBUST DATE EXPIRY VALIDATION ENGINE ÔöÇÔöÇ
 function parseDateFlexible(dateVal) {
     if (!dateVal) return null;
     dateVal = String(dateVal).trim();
@@ -1065,13 +1065,13 @@ function evaluateDateInputExpiry(inputEl) {
         inputEl.classList.add('date-expired');
         if (badge) {
             badge.className = 'auto-badge badge-expired';
-            badge.innerHTML = `âš ï¸ Expired (${inputEl.value || 'Past Date'})`;
+            badge.innerHTML = `ÔÜá´©Å Expired (${inputEl.value || 'Past Date'})`;
         }
     } else {
         inputEl.classList.remove('date-expired');
         if (badge) {
             badge.className = 'auto-badge';
-            badge.innerHTML = `âš¡ Verified`;
+            badge.innerHTML = `ÔÜí Verified`;
         }
     }
     triggerAutoSave();
@@ -1101,22 +1101,22 @@ function generatePrefilledIndividualCard(name, nat, dob, pass, expiry, gender) {
 
     card.innerHTML = `
         <div class="ubo-card-hdr">
-            <span class="ubo-n">ðŸ‘¤ UBO ${uboCount} â€” ${name}</span>
-            <button class="ubo-remove" onclick="this.closest('.ubo-card').remove();uboCount--;updateUboCountText();triggerAutoSave();" aria-label="Remove this UBO">âœ• Remove</button>
+            <span class="ubo-n">­ƒæñ UBO ${uboCount} ÔÇö ${name}</span>
+            <button class="ubo-remove" onclick="this.closest('.ubo-card').remove();uboCount--;updateUboCountText();triggerAutoSave();" aria-label="Remove this UBO">Ô£ò Remove</button>
         </div>
         <div class="ubo-card-body">
             <div class="g2" style="margin-bottom:14px;">
-                <div class="field"><label>Full Legal Name</label><input type="text" value="${name}" class="auto-filled"><span class="auto-badge">âš¡ Verified</span></div>
+                <div class="field"><label>Full Legal Name</label><input type="text" value="${name}" class="auto-filled"><span class="auto-badge">ÔÜí Verified</span></div>
                 <div class="field"><label>Nationality</label>
                     <select class="auto-filled">
                         ${natOptions}
                     </select>
-                    <span class="auto-badge">âš¡ Verified</span>
+                    <span class="auto-badge">ÔÜí Verified</span>
                 </div>
-                <div class="field"><label>Date of Birth</label><input type="date" value="${dob}" class="auto-filled"><span class="auto-badge">âš¡ Verified</span></div>
-                <div class="field"><label>Passport Number</label><input type="text" value="${pass}" class="auto-filled"><span class="auto-badge">âš¡ Verified</span></div>
-                <div class="field"><label>Passport Expiry</label><input type="date" value="${expiry}" class="auto-filled ${expExpired ? 'date-expired' : ''}" oninput="evaluateDateInputExpiry(this)" onchange="evaluateDateInputExpiry(this)"><span class="auto-badge ${expExpired ? 'badge-expired' : ''}">${expExpired ? `âš ï¸ Expired (${expiry})` : 'âš¡ Verified'}</span></div>
-                <div class="field"><label>Gender</label><select class="auto-filled"><option ${gender === 'Male' ? 'selected' : ''}>Male</option><option ${gender === 'Female' ? 'selected' : ''}>Female</option></select><span class="auto-badge">âš¡ Verified</span></div>
+                <div class="field"><label>Date of Birth</label><input type="date" value="${dob}" class="auto-filled"><span class="auto-badge">ÔÜí Verified</span></div>
+                <div class="field"><label>Passport Number</label><input type="text" value="${pass}" class="auto-filled"><span class="auto-badge">ÔÜí Verified</span></div>
+                <div class="field"><label>Passport Expiry</label><input type="date" value="${expiry}" class="auto-filled ${expExpired ? 'date-expired' : ''}" oninput="evaluateDateInputExpiry(this)" onchange="evaluateDateInputExpiry(this)"><span class="auto-badge ${expExpired ? 'badge-expired' : ''}">${expExpired ? `ÔÜá´©Å Expired (${expiry})` : 'ÔÜí Verified'}</span></div>
+                <div class="field"><label>Gender</label><select class="auto-filled"><option ${gender === 'Male' ? 'selected' : ''}>Male</option><option ${gender === 'Female' ? 'selected' : ''}>Female</option></select><span class="auto-badge">ÔÜí Verified</span></div>
             </div>
             <span class="tog-label">Is this person a Politically Exposed Person (PEP)?</span>
             <div class="tog-group" role="group"><button class="tog-btn" onclick="tog(this)">Yes</button><button class="tog-btn on" onclick="tog(this)">No</button></div>
@@ -1136,16 +1136,16 @@ function generatePrefilledCorpCard(name, reg, auth, incorp, expiry) {
 
     card.innerHTML = `
         <div class="ubo-card-hdr">
-            <span class="ubo-n">ðŸ¢ Corporate Shareholder ${uboCount} â€” ${name}</span>
-            <button class="ubo-remove" onclick="this.closest('.ubo-card').remove();uboCount--;updateUboCountText();triggerAutoSave();" aria-label="Remove this corporate entity">âœ• Remove</button>
+            <span class="ubo-n">­ƒÅó Corporate Shareholder ${uboCount} ÔÇö ${name}</span>
+            <button class="ubo-remove" onclick="this.closest('.ubo-card').remove();uboCount--;updateUboCountText();triggerAutoSave();" aria-label="Remove this corporate entity">Ô£ò Remove</button>
         </div>
         <div class="ubo-card-body">
             <div class="g2" style="margin-bottom:14px;">
-                <div class="field"><label>Corporate Entity Name</label><input type="text" value="${name}" class="auto-filled"><span class="auto-badge">âš¡ Verified</span></div>
-                <div class="field"><label>Licence / Registration No.</label><input type="text" value="${reg}" class="auto-filled"><span class="auto-badge">âš¡ Verified</span></div>
-                <div class="field"><label>Issuing Authority</label><input type="text" value="${auth}" class="auto-filled"><span class="auto-badge">âš¡ Verified</span></div>
-                <div class="field"><label>Date of Incorporation</label><input type="date" value="${incorp}" class="auto-filled"><span class="auto-badge">âš¡ Verified</span></div>
-                <div class="field"><label>Licence Expiry Date</label><input type="date" value="${expiry}" class="auto-filled ${expExpired ? 'date-expired' : ''}" oninput="evaluateDateInputExpiry(this)" onchange="evaluateDateInputExpiry(this)"><span class="auto-badge ${expExpired ? 'badge-expired' : ''}">${expExpired ? `âš ï¸ Expired (${expiry})` : 'âš¡ Verified'}</span></div>
+                <div class="field"><label>Corporate Entity Name</label><input type="text" value="${name}" class="auto-filled"><span class="auto-badge">ÔÜí Verified</span></div>
+                <div class="field"><label>Licence / Registration No.</label><input type="text" value="${reg}" class="auto-filled"><span class="auto-badge">ÔÜí Verified</span></div>
+                <div class="field"><label>Issuing Authority</label><input type="text" value="${auth}" class="auto-filled"><span class="auto-badge">ÔÜí Verified</span></div>
+                <div class="field"><label>Date of Incorporation</label><input type="date" value="${incorp}" class="auto-filled"><span class="auto-badge">ÔÜí Verified</span></div>
+                <div class="field"><label>Licence Expiry Date</label><input type="date" value="${expiry}" class="auto-filled ${expExpired ? 'date-expired' : ''}" oninput="evaluateDateInputExpiry(this)" onchange="evaluateDateInputExpiry(this)"><span class="auto-badge ${expExpired ? 'badge-expired' : ''}">${expExpired ? `ÔÜá´©Å Expired (${expiry})` : 'ÔÜí Verified'}</span></div>
             </div>
         </div>
     `;
@@ -1181,7 +1181,7 @@ function resetUboPhase() {
     showToast('Returned to document upload phase.', 'Reset', 'info');
 }
 
-// â”€â”€ STEP 4: OWNERSHIP STRUCTURE â”€â”€
+// ÔöÇÔöÇ STEP 4: OWNERSHIP STRUCTURE ÔöÇÔöÇ
 function setView(view) {
     const visualView = document.getElementById('viewVisual');
     const listView = document.getElementById('viewList');
@@ -1228,7 +1228,7 @@ function renderVisualView() {
         if (isCorp) card.classList.add('corp');
         card.dataset.entityName = name;
         card.dataset.entityType = isCorp ? 'corporate' : 'individual';
-        card.innerHTML = `<div class="ec-name">${name}</div><div class="ec-type">${isCorp ? 'ðŸ¢ Corporate Entity' : 'ðŸ‘¤ Individual UBO'}</div>`;
+        card.innerHTML = `<div class="ec-name">${name}</div><div class="ec-type">${isCorp ? '­ƒÅó Corporate Entity' : '­ƒæñ Individual UBO'}</div>`;
         container.appendChild(card);
     });
     checkLevels();
@@ -1288,7 +1288,7 @@ function addStructRow(selectedEntity, percentage = '', level = '1', index = null
         </div>
         <div class="field" style="display:flex;gap:8px;align-items:center;">
             <input type="number" id="pct-${idx}" min="1" max="100" placeholder="%" value="${percentage}" oninput="calcTotal()" style="flex:1;">
-            <button type="button" class="btn btn-ghost btn-sm" onclick="this.closest('.struct-row').remove();calcTotal();triggerAutoSave();" title="Delete this entity row" style="color:var(--danger);font-weight:700;font-size:14px;padding:6px 10px;height:38px;border:1px solid rgba(239,68,68,0.3);border-radius:6px;">âœ•</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="this.closest('.struct-row').remove();calcTotal();triggerAutoSave();" title="Delete this entity row" style="color:var(--danger);font-weight:700;font-size:14px;padding:6px 10px;height:38px;border:1px solid rgba(239,68,68,0.3);border-radius:6px;">Ô£ò</button>
         </div>
     `;
     container.appendChild(row);
@@ -1333,7 +1333,7 @@ function calcTotal() {
     }
 }
 
-// â”€â”€ DRAG & DROP FOR VISUAL BUILDER WITH SHAREHOLDING % & CORPORATE-ONLY LEVEL 2 UNLOCK â”€â”€
+// ÔöÇÔöÇ DRAG & DROP FOR VISUAL BUILDER WITH SHAREHOLDING % & CORPORATE-ONLY LEVEL 2 UNLOCK ÔöÇÔöÇ
 function drag(ev) {
     ev.dataTransfer.setData('text/plain', ev.currentTarget.id);
 }
@@ -1373,7 +1373,7 @@ function drop(ev) {
         }
 
         dropZone.innerHTML = `
-            <button type="button" class="dz-delete-box-btn" title="Delete this box" onclick="event.stopPropagation(); deleteDropZone(this)">âœ•</button>
+            <button type="button" class="dz-delete-box-btn" title="Delete this box" onclick="event.stopPropagation(); deleteDropZone(this)">Ô£ò</button>
         `;
 
         // Direct Shareholding % Input inside the Visual Builder card
@@ -1394,7 +1394,7 @@ function drop(ev) {
         dropZone.appendChild(card);
         const removeBtn = document.createElement('button');
         removeBtn.className = 'dz-remove';
-        removeBtn.textContent = 'âœ•';
+        removeBtn.textContent = 'Ô£ò';
         removeBtn.title = 'Remove entity to pool';
         removeBtn.onclick = (e) => { e.stopPropagation(); removeCard(removeBtn); };
         dropZone.appendChild(removeBtn);
@@ -1415,7 +1415,7 @@ function removeCard(btn) {
         poolContainer.appendChild(card);
     }
     zone.innerHTML = `
-        <button type="button" class="dz-delete-box-btn" title="Delete this box" onclick="event.stopPropagation(); deleteDropZone(this)">âœ•</button>
+        <button type="button" class="dz-delete-box-btn" title="Delete this box" onclick="event.stopPropagation(); deleteDropZone(this)">Ô£ò</button>
         <span class="dz-placeholder-text">Drop entity here</span>
     `;
     checkLevels();
@@ -1446,7 +1446,7 @@ function addDropZone(rowId) {
     const zone = document.createElement('div');
     zone.className = 'drop-zone';
     zone.innerHTML = `
-        <button type="button" class="dz-delete-box-btn" title="Delete this box" onclick="event.stopPropagation(); deleteDropZone(this)">âœ•</button>
+        <button type="button" class="dz-delete-box-btn" title="Delete this box" onclick="event.stopPropagation(); deleteDropZone(this)">Ô£ò</button>
         <span class="dz-placeholder-text">Drop entity here</span>
     `;
     zone.ondrop = drop;
@@ -1492,9 +1492,9 @@ function checkLevels() {
                 if (chartWrap) chartWrap.appendChild(lv2Notice);
             }
             lv2Notice.innerHTML = `
-                <span class="lock-icon" aria-hidden="true">ðŸ”’</span>
+                <span class="lock-icon" aria-hidden="true">­ƒöÆ</span>
                 <div>
-                    <strong>Level 2 Locked â€” Unlocks for Corporate Entities Only</strong>
+                    <strong>Level 2 Locked ÔÇö Unlocks for Corporate Entities Only</strong>
                     <p>Underlying subsidiaries and tiered shareholding (Level 2) are only required when a Corporate Shareholder is placed in Level 1. Individual UBOs hold direct parent-level ownership.</p>
                 </div>
             `;
@@ -1593,7 +1593,7 @@ function showDragDemo() {
     }, 900);
 }
 
-// â”€â”€ STEP 5: ROLES & GOVERNANCE â”€â”€
+// ÔöÇÔöÇ STEP 5: ROLES & GOVERNANCE ÔöÇÔöÇ
 function renderRoleTables() {
     const govBody = document.getElementById('govTableBody');
     const sysBody = document.getElementById('sysTableBody');
@@ -1661,8 +1661,8 @@ function populateMakerCheckerRoles() {
     const currentMaker = cachedRoleSelections?.maker || makerSelect.value || (extractedEntities[0] || '');
     const currentChecker = cachedRoleSelections?.checker || checkerSelect.value || (extractedEntities[1] || '');
 
-    makerSelect.innerHTML = '<option value="">â€” Select Maker â€”</option>';
-    checkerSelect.innerHTML = '<option value="">â€” Select Checker â€”</option>';
+    makerSelect.innerHTML = '<option value="">ÔÇö Select Maker ÔÇö</option>';
+    checkerSelect.innerHTML = '<option value="">ÔÇö Select Checker ÔÇö</option>';
 
     extractedEntities.forEach(name => {
         makerSelect.innerHTML += `<option value="${name}" ${name === currentMaker ? 'selected' : ''}>${name}</option>`;
@@ -1712,7 +1712,7 @@ async function extractMakerChecker(input, roleType) {
     }
 }
 
-// â”€â”€ STEP 6: FATCA & CRS â”€â”€
+// ÔöÇÔöÇ STEP 6: FATCA & CRS ÔöÇÔöÇ
 function initFATCA_CRS_States() {
     if (cachedTaxSelections) {
         const usYesBtn = document.querySelector('#fatca-us-person-tog .tog-btn:first-child');
@@ -1777,7 +1777,7 @@ function toggleCRS_FI(btn, isYes) {
     triggerAutoSave();
 }
 
-// â”€â”€ STEP 7: REVIEW SECTION â”€â”€
+// ÔöÇÔöÇ STEP 7: REVIEW SECTION ÔöÇÔöÇ
 function toggleAccordion(id) {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('open');
@@ -1795,7 +1795,7 @@ function updateReviewSection() {
             const fileStatus = card ? card.querySelector('.file-status') : null;
             if (card && card.classList.contains('uploaded')) {
                 const label = labelInput ? labelInput.value : `Document ${i}`;
-                const filename = fileStatus ? fileStatus.textContent.replace('âœ“ ', '') : 'Uploaded';
+                const filename = fileStatus ? fileStatus.textContent.replace('Ô£ô ', '') : 'Uploaded';
                 uploaded.push(`${label} (${filename})`);
             }
         }
@@ -1804,7 +1804,7 @@ function updateReviewSection() {
             if (ra1Count) ra1Count.textContent = '0 uploaded';
         } else {
             ra1Docs.innerHTML = uploaded.map(d =>
-                `<div class="rv-row"><span class="rvl">${d}</span><span class="rvv ok">âœ“ Staged</span></div>`
+                `<div class="rv-row"><span class="rvl">${d}</span><span class="rvv ok">Ô£ô Staged</span></div>`
             ).join('');
             if (ra1Count) ra1Count.textContent = `${uploaded.length} uploaded`;
         }
@@ -1818,13 +1818,13 @@ function updateReviewSection() {
     const legalType = document.getElementById('step2_legal_type')?.value || '';
     const licenceExp = document.getElementById('step2_expiry_date')?.value || '';
     const isLicExpired = isDateExpired(licenceExp);
-    if (ra2Summary) ra2Summary.textContent = (name || 'Company') + ' Â· ' + (crn || 'No CRN');
+    if (ra2Summary) ra2Summary.textContent = (name || 'Company') + ' ┬À ' + (crn || 'No CRN');
     if (ra2Details) {
         ra2Details.innerHTML = `
-            <div class="rv-row"><span class="rvl">Company Name</span><span class="rvv">${name || 'â€”'}</span></div>
-            <div class="rv-row"><span class="rvl">Commercial Reg. No. (CRN)</span><span class="rvv">${crn || 'â€”'}</span></div>
-            <div class="rv-row"><span class="rvl">Legal Type</span><span class="rvv">${legalType || 'â€”'}</span></div>
-            <div class="rv-row"><span class="rvl">Licence Expiry</span><span class="rvv" style="${isLicExpired ? 'color:#f87171;font-weight:700;' : ''}">${isLicExpired ? `âš ï¸ Expired (${licenceExp})` : (licenceExp || 'â€”')}</span></div>
+            <div class="rv-row"><span class="rvl">Company Name</span><span class="rvv">${name || 'ÔÇö'}</span></div>
+            <div class="rv-row"><span class="rvl">Commercial Reg. No. (CRN)</span><span class="rvv">${crn || 'ÔÇö'}</span></div>
+            <div class="rv-row"><span class="rvl">Legal Type</span><span class="rvv">${legalType || 'ÔÇö'}</span></div>
+            <div class="rv-row"><span class="rvl">Licence Expiry</span><span class="rvv" style="${isLicExpired ? 'color:#f87171;font-weight:700;' : ''}">${isLicExpired ? `ÔÜá´©Å Expired (${licenceExp})` : (licenceExp || 'ÔÇö')}</span></div>
         `;
     }
 
@@ -1839,7 +1839,7 @@ function updateReviewSection() {
                 const uboName = c.querySelector('.ubo-n')?.textContent || 'UBO';
                 const expInput = c.querySelector('input[type="date"].date-expired, input.date-expired');
                 const hasExpired = !!expInput;
-                uboRowsHtml += `<div class="rv-row"><span class="rvl">${uboName}</span><span class="rvv" style="${hasExpired ? 'color:#f87171;font-weight:700;' : ''}">${hasExpired ? `âš ï¸ Expired Doc (${expInput.value})` : 'âœ“ Valid'}</span></div>`;
+                uboRowsHtml += `<div class="rv-row"><span class="rvl">${uboName}</span><span class="rvv" style="${hasExpired ? 'color:#f87171;font-weight:700;' : ''}">${hasExpired ? `ÔÜá´©Å Expired Doc (${expInput.value})` : 'Ô£ô Valid'}</span></div>`;
             });
             ra3Body.innerHTML = uboRowsHtml;
         } else {
@@ -1875,7 +1875,7 @@ function updateReviewSection() {
     }
 }
 
-// â”€â”€ COMPREHENSIVE DATA PERSISTENCE: COLLECT ALL 7 STEPS â”€â”€
+// ÔöÇÔöÇ COMPREHENSIVE DATA PERSISTENCE: COLLECT ALL 7 STEPS ÔöÇÔöÇ
 function collectFullFormData() {
     // Step 1: Uploaded documents
     const step1Docs = [];
@@ -1944,7 +1944,7 @@ function collectFullFormData() {
     };
 }
 
-// â”€â”€ COMPREHENSIVE DATA PERSISTENCE: RESTORE ALL 7 STEPS â”€â”€
+// ÔöÇÔöÇ COMPREHENSIVE DATA PERSISTENCE: RESTORE ALL 7 STEPS ÔöÇÔöÇ
 function populateFormData(formData) {
     if (!formData) return;
 
@@ -2020,13 +2020,13 @@ function populateFormData(formData) {
     updateReviewSection();
 }
 
-// â”€â”€ AUTOSAVE WITH VISUAL INDICATOR & BACKEND SYNC â”€â”€
+// ÔöÇÔöÇ AUTOSAVE WITH VISUAL INDICATOR & BACKEND SYNC ÔöÇÔöÇ
 function triggerAutoSave() {
     const el = document.getElementById('autosave');
     if (el) {
         const now = new Date();
-        const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        el.textContent = `âœ“ Progress saved at ${time}`;
+        const time = now.toLocaleTimeString('en-AE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        el.textContent = `Ô£ô Progress saved at ${time}`;
         el.classList.add('visible');
         clearTimeout(autoSaveTimer);
         autoSaveTimer = setTimeout(() => el.classList.remove('visible'), 2500);
@@ -2039,7 +2039,7 @@ function triggerAutoSave() {
     }
 }
 
-// â”€â”€ AUTHENTICATION & LOGIN WORKFLOW â”€â”€
+// ÔöÇÔöÇ AUTHENTICATION & LOGIN WORKFLOW ÔöÇÔöÇ
 async function handleLoginStep1() {
     const crnInput = document.getElementById('crnInput');
     const emailInput = document.getElementById('emailInput');
@@ -2076,7 +2076,7 @@ async function handleLoginStep1() {
                 id: 'otp_' + Date.now(),
                 from: '"First National Bank" <onboarding@fnb-us.com>',
                 to: email,
-                subject: `First National Bank â€” Your Access Code: ${otpCode}`,
+                subject: `First National Bank ÔÇö Your Access Code: ${otpCode}`,
                 code: otpCode,
                 type: 'otp',
                 timestamp: new Date().toISOString(),
@@ -2195,12 +2195,12 @@ function showLoginError(err, customTitle = null) {
 
     if ((err && err.code === 'RM_INVITATION_NOT_FOUND') || errMsg.includes('Relationship Manager (RM) Database') || errMsg.includes('Access Restricted')) {
         isRmInviteError = true;
-        title = 'ðŸ”’ Access Restricted';
+        title = '­ƒöÆ Access Restricted';
         const displayCrn = currentLoginCrn || (err && err.crn) || 'entered CRN';
         const displayEmail = currentLoginEmail || (err && err.email) || 'entered Email';
         detail = `CRN <code>${displayCrn}</code> and Email <code>${displayEmail}</code> are not registered in the RM onboarding database. Only corporate applicants with an invitation issued by their Relationship Manager can log in.`;
     } else if (errMsg.includes('OTP') || errMsg.includes('verification code') || errMsg.includes('code are required')) {
-        title = 'ðŸ”‘ Verification Notice';
+        title = '­ƒöæ Verification Notice';
         detail = errMsg;
     } else {
         detail = errMsg;
@@ -2215,7 +2215,7 @@ function showLoginError(err, customTitle = null) {
         ${isRmInviteError ? `
         <div class="login-alert-actions">
             <span style="font-size:11px;color:#cbd5e1;">Need access? Contact your banker or:</span>
-            <a href="/rm" target="_blank" class="login-alert-link">ðŸ‘” Open RM Executive Portal &rarr;</a>
+            <a href="/rm" target="_blank" class="login-alert-link">­ƒæö Open RM Executive Portal &rarr;</a>
         </div>` : ''}
     `;
     el.classList.add('show');
@@ -2226,7 +2226,7 @@ function hideLoginError() {
     if (el) el.classList.remove('show');
 }
 
-// â”€â”€ Corporate Client Identity Display (Displays company name e.g. test99 on top) â”€â”€
+// ÔöÇÔöÇ Corporate Client Identity Display (Displays company name e.g. test99 on top) ÔöÇÔöÇ
 function displayClientNameOnTop(companyName, crn) {
     const capsule = document.getElementById('hdrCompanyCapsule');
     const nameEl = document.getElementById('hdrCompanyName');
@@ -2256,7 +2256,7 @@ function displayClientNameOnTop(companyName, crn) {
     }
 }
 
-// â”€â”€ FINAL APPLICATION SUBMISSION â”€â”€
+// ÔöÇÔöÇ FINAL APPLICATION SUBMISSION ÔöÇÔöÇ
 async function finalizeApp() {
     if (isReworkMode) {
         showToast('Application resubmitted for relationship manager review!', 'Resubmitted', 'success');
@@ -2277,8 +2277,8 @@ async function finalizeApp() {
     receiveSimulatedEmail({
         id: 'app_' + Date.now(),
         from: '"First National Bank Corporate Onboarding" <onboarding@fnb-us.com>',
-        to: currentLoginEmail || 'admin@corporate.com',
-        subject: `First National Bank â€” Corporate Application Received (${appRef})`,
+        to: currentLoginEmail || 'admin@apexholdings.ae',
+        subject: `First National Bank ÔÇö Corporate Application Received (${appRef})`,
         type: 'application_submitted',
         timestamp: new Date().toISOString(),
         html: `
@@ -2294,7 +2294,7 @@ async function finalizeApp() {
                     <span style="font-size: 11px; color: #166534; font-weight: 700; text-transform: uppercase;">Application Reference</span><br>
                     <span style="font-size: 24px; font-weight: 800; color: #15803d; font-family: monospace;">${appRef}</span>
                 </div>
-                <p style="color: #475569; font-size: 13px;">Our onboarding desk will complete the verification within 1â€“2 business days. Your assigned Relationship Manager is <strong>Michael Vance</strong> (m.vance@fnb-us.com &bull; +1 212 555 0199).</p>
+                <p style="color: #475569; font-size: 13px;">Our onboarding desk will complete the verification within 1ÔÇô2 business days. Your assigned Relationship Manager is <strong>Sarah Al-Qassimi</strong> (s.alqassimi@fnb-us.com &bull; +971 2 555 1234).</p>
             </div>
         `
     });
@@ -2314,12 +2314,12 @@ async function finalizeApp() {
     showToast('Corporate account application submitted successfully!', 'Congratulations', 'success', 6000);
 }
 
-// â”€â”€ UTILITY MODALS & HELPERS â”€â”€
+// ÔöÇÔöÇ UTILITY MODALS & HELPERS ÔöÇÔöÇ
 function showSaveModal() {
     triggerAutoSave();
     const modal = document.getElementById('saveModal');
     const appRef = currentAppRef || 'AB-2026-001245';
-    const email = currentLoginEmail || 'admin@corporate.com';
+    const email = currentLoginEmail || 'admin@apexholdings.ae';
     const crn = currentLoginCrn || '509077205';
 
     if (modal) {
@@ -2344,7 +2344,7 @@ function showSaveModal() {
         id: 'save_' + Date.now(),
         from: '"First National Bank Onboarding" <onboarding@fnb-us.com>',
         to: email,
-        subject: `First National Bank â€” Resume Your Application (${appRef})`,
+        subject: `First National Bank ÔÇö Resume Your Application (${appRef})`,
         type: 'resume',
         timestamp: new Date().toISOString(),
         html: `
@@ -2431,7 +2431,7 @@ function sendInvite() {
                 </div>
                 <p style="color: #334155; font-size: 14px;">You have been nominated as an Ultimate Beneficial Owner (UBO) for an First National Bank corporate account application.</p>
                 <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; margin: 16px 0; text-align: center;">
-                    <button type="button" style="background: #0284c7; color: #ffffff; border: none; font-weight: 700; font-size: 13px; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Upload Identity Documents â†’</button>
+                    <button type="button" style="background: #0284c7; color: #ffffff; border: none; font-weight: 700; font-size: 13px; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Upload Identity Documents ÔåÆ</button>
                 </div>
             </div>
         `
@@ -2444,18 +2444,18 @@ function triggerDocuSign() {
     const statusItems = document.getElementById('docusign-status-items');
     const alertBox = document.getElementById('docusign-alert');
 
-    if (btn) { btn.innerHTML = 'âŒ› Dispatching Invitesâ€¦'; btn.style.opacity = '0.8'; btn.style.pointerEvents = 'none'; }
+    if (btn) { btn.innerHTML = 'Ôîø Dispatching InvitesÔÇª'; btn.style.opacity = '0.8'; btn.style.pointerEvents = 'none'; }
     setTimeout(() => {
         if (actionArea) {
-            actionArea.innerHTML = `<div style="display:flex; align-items:center; gap:8px; color: #6ee7b7; font-weight: 700; font-size: 14px; width: 100%;"><span style="font-size:18px;" aria-hidden="true">âœ…</span> Invites successfully dispatched to all signatories!</div>`;
+            actionArea.innerHTML = `<div style="display:flex; align-items:center; gap:8px; color: #6ee7b7; font-weight: 700; font-size: 14px; width: 100%;"><span style="font-size:18px;" aria-hidden="true">Ô£à</span> Invites successfully dispatched to all signatories!</div>`;
             actionArea.style.borderColor = '#10b981';
             actionArea.style.background = 'rgba(16, 185, 129, 0.18)';
         }
         if (statusItems) {
             statusItems.innerHTML = `
-                <div class="timeline-item"><span style="font-weight:600;color:#34d399;">âœ“</span><span style="color:#f1f5f9;">DocuSign invitations sent to signatories</span></div>
-                <div class="timeline-item"><span style="font-weight:600;color:#fbbf24;">â³</span><span style="color:#f1f5f9;">Awaiting document review and signatures</span></div>
-                <div class="timeline-item"><span style="font-weight:600;color:#fbbf24;">â³</span><span style="color:#f1f5f9;">Estimated completion: 24â€“72 hours</span></div>
+                <div class="timeline-item"><span style="font-weight:600;color:#34d399;">Ô£ô</span><span style="color:#f1f5f9;">DocuSign invitations sent to signatories</span></div>
+                <div class="timeline-item"><span style="font-weight:600;color:#fbbf24;">ÔÅ│</span><span style="color:#f1f5f9;">Awaiting document review and signatures</span></div>
+                <div class="timeline-item"><span style="font-weight:600;color:#fbbf24;">ÔÅ│</span><span style="color:#f1f5f9;">Estimated completion: 24ÔÇô72 hours</span></div>
             `;
         }
         if (alertBox) alertBox.style.display = 'block';
@@ -2466,7 +2466,7 @@ function triggerDocuSign() {
         receiveSimulatedEmail({
             id: 'docu_' + Date.now(),
             from: '"DocuSign via First National Bank" <documents@docusign.net>',
-            to: currentLoginEmail || 'admin@corporate.com',
+            to: currentLoginEmail || 'admin@apexholdings.ae',
             subject: 'DocuSign: Please Sign Your First National Bank Corporate Account Client Agreement',
             type: 'docusign',
             timestamp: new Date().toISOString(),
@@ -2480,9 +2480,9 @@ function triggerDocuSign() {
                     <p style="color: #1e293b; font-size: 14px;">Hello Authorized Signatory,</p>
                     <p style="color: #334155; font-size: 14px; line-height: 1.5;">First National Bank has prepared your Corporate Banking Master Agreement and Authorized Signatory Mandate for digital signature.</p>
                     <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 18px; margin: 18px 0; text-align: center;">
-                        <button type="button" onclick="simulateDocuSignSign()" style="background: #ffbe00; color: #111827; border: none; font-weight: 800; font-size: 14px; padding: 12px 26px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(255,190,0,0.3);">âœï¸ Review & Sign Document</button>
+                        <button type="button" onclick="simulateDocuSignSign()" style="background: #ffbe00; color: #111827; border: none; font-weight: 800; font-size: 14px; padding: 12px 26px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(255,190,0,0.3);">Ô£ì´©Å Review & Sign Document</button>
                     </div>
-                    <p style="color: #64748b; font-size: 12px;">This envelope is secured with 256-bit AES encryption compliant with US Electronic Signatures in Global and National Commerce Act (E-SIGN) and UETA.</p>
+                    <p style="color: #64748b; font-size: 12px;">This envelope is secured with 256-bit AES encryption compliant with UAE Federal Law No. 1 of 2006 on Electronic Commerce and Transactions.</p>
                 </div>
             `
         });
@@ -2491,18 +2491,10 @@ function triggerDocuSign() {
 
 function downloadReceipt() {
     const appRef = currentAppRef || 'AB-2026-DEMO';
-    const company = document.getElementById('step2_name')?.value || 'Apex Global Holdings Inc';
+    const company = document.getElementById('step2_name')?.value || 'Apex Global Holdings Ltd';
     const crn = document.getElementById('step2_crn')?.value || currentLoginCrn || '509077205';
 
-    const txt = `First National Bank CORPORATE ONBOARDING RECEIPT\n==========================================\nApplication Ref: ${appRef}\nSubmitted: ${new Date().toLocaleDateString('en-US', { day: '2-digit', month: 'long', year: 'numeric' })}\nCompany: ${company}\nCRN: ${crn}\n\nNEXT STEPS:\n1. Download First National Bank Mobile App\n2. Sign in with your registered email\n3. Complete biometric identity verification\n4. Sign digital documents via DocuSign\n5. Final onboarding review: 2-3 business days\n\nRELATIONSHIP MANAGER:\nMichael Vance | Corporate Banking\nEmail: m.vance@fnb-us.com | Support: support@fnb-us.com\n`;
-
-    const a = Object.assign(document.createElement('a'), {
-        href: URL.createObjectURL(new Blob([txt], { type: 'text/plain' })),
-        download: `ApexBank_Application_${appRef}.txt`
-    });
-    a.click();
-    showToast('Onboarding receipt downloaded.', 'Download Complete', 'success');
-}
+    const txt = `First National Bank CORPORATE ONBOARDING RECEIPT\n==========================================\nApplication Ref: ${appRef}\nSubmitted: ${new Date().toLocaleDateString('en-AE', { day: '2-digit', month: 'long', year: 'numeric' })}\nCompany: ${company}\nCRN: ${crn}\n\nNEXT STEPS:\n1. Download First National Bank Mobile App\n2. Sign in with your registered email\n3. Complete biometric identity verification\n4. Sign digital documents via DocuSign\n5. Final onboarding review: 2-3 business days\n\nRELATIONSHIP MANAGER:\nSarah Al-Qassimi | Corporate Banking\nEmail: s.alqassimi@fnb-us.com | Support: support@fnb-us.com\n`;
 
     const a = Object.assign(document.createElement('a'), {
         href: URL.createObjectURL(new Blob([txt], { type: 'text/plain' })),
@@ -2547,7 +2539,7 @@ function fireConfetti() {
     render();
 }
 
-// â”€â”€ KEYBOARD SHORTCUTS & MODAL DISMISSAL â”€â”€
+// ÔöÇÔöÇ KEYBOARD SHORTCUTS & MODAL DISMISSAL ÔöÇÔöÇ
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
@@ -2567,9 +2559,9 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
     m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
 });
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// â”€â”€ REAL-TIME EMAIL SIMULATOR (IN-BROWSER VIRTUAL INBOX) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+// ÔöÇÔöÇ REAL-TIME EMAIL SIMULATOR (IN-BROWSER VIRTUAL INBOX) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+// ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
 window.liveSimulatedEmails = [];
 let unreadEmailCount = 0;
 let selectedEmailId = null;
@@ -2625,7 +2617,7 @@ function receiveSimulatedEmail(emailItem, suppressAlert = false) {
     const item = {
         id: emailItem.id || 'eml_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
         from: emailItem.from || '"First National Bank" <onboarding@fnb-us.com>',
-        to: emailItem.to || currentLoginEmail || 'applicant@corporate.com',
+        to: emailItem.to || currentLoginEmail || 'applicant@corporate.ae',
         subject: emailItem.subject || 'First National Bank Notification',
         html: emailItem.html || '<p>Notification from First National Bank</p>',
         text: emailItem.text || '',
@@ -2669,7 +2661,7 @@ function showIncomingEmailAlert(email) {
         sender.textContent = `From: ${email.from.replace(/<.*>/, '').replace(/"/g, '')}`;
         if (snippet) {
             snippet.innerHTML = email.code
-                ? `ðŸ”‘ Access Code: <strong>${email.code}</strong> &bull; Click to view &amp; auto-fill`
+                ? `­ƒöæ Access Code: <strong>${email.code}</strong> &bull; Click to view &amp; auto-fill`
                 : 'Click to open and read incoming email';
         }
         alertBox.style.display = 'flex';
@@ -2723,7 +2715,7 @@ function renderMailboxList() {
     if (window.liveSimulatedEmails.length === 0) {
         listContainer.innerHTML = `
             <div class="mb-empty-state">
-                <div class="empty-icon" aria-hidden="true">ðŸ“­</div>
+                <div class="empty-icon" aria-hidden="true">­ƒô¡</div>
                 <div class="empty-title">Simulated Inbox Ready</div>
                 <div class="empty-desc">Request an OTP code, trigger DocuSign, or submit an application to see emails arrive here instantly.</div>
             </div>
@@ -2797,17 +2789,17 @@ function openEmailInReader(id) {
             actionBanner.style.display = 'flex';
             actionBanner.innerHTML = `
                 <div style="font-size:12px; color:#166534; font-weight:600;">
-                    ðŸ’¡ Access Code: <strong style="font-size:16px; font-family:monospace; color:#0284c7;">${email.code}</strong>
+                    ­ƒÆí Access Code: <strong style="font-size:16px; font-family:monospace; color:#0284c7;">${email.code}</strong>
                 </div>
                 <button type="button" class="btn-autofill-email-code" onclick="autoFillOtpFromEmail('${email.code}')">
-                    âš¡ Auto-Fill Code into Login
+                    ÔÜí Auto-Fill Code into Login
                 </button>
             `;
         } else if (email.type === 'docusign') {
             actionBanner.style.display = 'flex';
             actionBanner.innerHTML = `
                 <div style="font-size:12px; color:#92400e; font-weight:600;">
-                    âœï¸ E-Signature Required on Client Agreement
+                    Ô£ì´©Å E-Signature Required on Client Agreement
                 </div>
                 <button type="button" class="btn-autofill-email-code" style="background:#ffbe00; color:#111827;" onclick="simulateDocuSignSign()">
                     Sign Documents Now
@@ -2817,7 +2809,7 @@ function openEmailInReader(id) {
             actionBanner.style.display = 'flex';
             actionBanner.innerHTML = `
                 <div style="font-size:12px; color:#1e40af; font-weight:600;">
-                    ðŸ’¾ Direct Application Resume Link
+                    ­ƒÆ¥ Direct Application Resume Link
                 </div>
                 <button type="button" class="btn-autofill-email-code" onclick="showToast('Resume link copied!', 'Resume', 'info'); closeModal('saveModal');">
                     Continue Application
@@ -2869,14 +2861,14 @@ function simulateDocuSignSign() {
     const statusItems = document.getElementById('docusign-status-items');
     if (statusItems) {
         statusItems.innerHTML = `
-            <div class="timeline-item"><span style="font-weight:600;color:var(--success);">âœ“</span><span>DocuSign invitations dispatched</span></div>
-            <div class="timeline-item"><span style="font-weight:600;color:var(--success);">âœ“</span><span>All signatories digitally executed agreements</span></div>
-            <div class="timeline-item"><span style="font-weight:600;color:var(--success);">âœ“</span><span>Compliance audit trail verified</span></div>
+            <div class="timeline-item"><span style="font-weight:600;color:var(--success);">Ô£ô</span><span>DocuSign invitations dispatched</span></div>
+            <div class="timeline-item"><span style="font-weight:600;color:var(--success);">Ô£ô</span><span>All signatories digitally executed agreements</span></div>
+            <div class="timeline-item"><span style="font-weight:600;color:var(--success);">Ô£ô</span><span>Compliance audit trail verified</span></div>
         `;
     }
     const alertBox = document.getElementById('docusign-alert');
     if (alertBox) {
-        alertBox.innerHTML = `<strong>âœ… Complete:</strong> All authorized signatories have signed. Ready for final review.`;
+        alertBox.innerHTML = `<strong>Ô£à Complete:</strong> All authorized signatories have signed. Ready for final review.`;
         alertBox.style.background = '#f0fdf4';
         alertBox.style.borderColor = '#86efac';
         alertBox.style.color = '#166534';
@@ -2884,7 +2876,7 @@ function simulateDocuSignSign() {
     backToInboxList();
 }
 
-// â”€â”€ LIVE FORM INPUT LISTENERS: AUTOMATIC INSTANT DATABASE SYNC â”€â”€
+// ÔöÇÔöÇ LIVE FORM INPUT LISTENERS: AUTOMATIC INSTANT DATABASE SYNC ÔöÇÔöÇ
 let liveAutoSaveDebounce = null;
 document.addEventListener('input', (e) => {
     if (!e.target || e.target.closest('#loginOverlay') || e.target.closest('#demoMailboxWidget')) return;
@@ -2899,7 +2891,7 @@ document.addEventListener('change', (e) => {
     triggerAutoSave();
 });
 
-// â”€â”€ INITIALIZATION & SESSION REHYDRATION ON DOM READY â”€â”€
+// ÔöÇÔöÇ INITIALIZATION & SESSION REHYDRATION ON DOM READY ÔöÇÔöÇ
 window.addEventListener('DOMContentLoaded', async () => {
     initTheme();
     initParticles();
@@ -2955,7 +2947,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 if (window.LiveBanking) window.LiveBanking.init();
                 if (window.MobileApp) window.MobileApp.init();
 
-                console.log('âœ… [SESSION] Successfully rehydrated session for Application:', currentAppRef);
+                console.log('Ô£à [SESSION] Successfully rehydrated session for Application:', currentAppRef);
             }
         } catch (err) {
             console.warn('Session expired or invalid, please sign in:', err.message);
@@ -2986,7 +2978,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 const banner = document.createElement('div');
                 banner.id = 'rm-invite-banner';
                 banner.style.cssText = 'margin-bottom:16px; padding:12px 16px; background:rgba(245,158,11,0.15); border:1.5px solid #f59e0b; border-radius:10px; font-size:12.5px; color:#fef08a; text-align:left; animation:fadeUp 0.3s ease;';
-                banner.innerHTML = `<strong style="color:#ffffff; font-size:13px;">ðŸ‘” Relationship Manager Invitation</strong><br>Welcome to First National Bank! You are accessing your onboarding journey with CRN <strong>${inviteCrn || ''}</strong>. Click Request OTP to begin.`;
+                banner.innerHTML = `<strong style="color:#ffffff; font-size:13px;">­ƒæö Relationship Manager Invitation</strong><br>Welcome to First National Bank! You are accessing your onboarding journey with CRN <strong>${inviteCrn || ''}</strong>. Click Request OTP to begin.`;
                 const errorBox = document.getElementById('loginError');
                 if (errorBox) {
                     errorBox.parentNode.insertBefore(banner, errorBox.nextSibling);
@@ -3013,7 +3005,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (window.MobileApp) window.MobileApp.init();
 });
 
-// â”€â”€ ONBOARDING CONTROLLER HELPERS â”€â”€
+// ÔöÇÔöÇ ONBOARDING CONTROLLER HELPERS ÔöÇÔöÇ
 function switchPortalMode(mode) {
     const onboardingView = document.getElementById('onboardingPortalView');
     if (onboardingView) onboardingView.style.display = 'block';
@@ -3026,6 +3018,5 @@ function toggleMobileSimulator(forceState) {
 
 window.switchPortalMode = switchPortalMode;
 window.toggleMobileSimulator = toggleMobileSimulator;
-
 
 

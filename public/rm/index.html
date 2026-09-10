@@ -3,143 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>First National Bank â€” Relationship Manager Executive Suite</title>
-    <link rel="stylesheet" href="/rm/rm.css?v=20260910_01">
+    <title>First National Bank &mdash; Relationship Manager Executive Suite</title>
+    <link rel="stylesheet" href="/rm/rm.css?v=20260910_02">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-
-    <!-- Toast Notifications -->
     <div id="rmToastContainer" class="rm-toast-container"></div>
-
-    <!-- â”€â”€ 1. RM EXECUTIVE LOGIN SCREEN â”€â”€ -->
     <div id="rmLoginView" class="rm-login-wrap">
         <div class="rm-login-card">
             <div class="rm-login-header">
                 <div class="rm-logo-shield">
-                    <div class="rm-logo-mark">AB</div>
-                    <span class="rm-secure-badge">ðŸ”’ BANK INTRANET</span>
+                    <div class="rm-logo-mark">FNB</div>
+                    <span class="rm-secure-badge">&#x1F512; BANK INTRANET</span>
                 </div>
                 <h1 class="rm-login-title">Executive RM Suite</h1>
                 <p class="rm-login-sub">Institutional &amp; Corporate Banking Portal</p>
             </div>
-
             <div id="rmLoginAlert" class="rm-alert-box" style="display:none;"></div>
-
             <form id="rmLoginForm" onsubmit="handleRmLoginSubmit(event)">
                 <div class="rm-form-group">
                     <label for="rmStaffId">Relationship Manager Staff ID / Username</label>
                     <input type="text" id="rmStaffId" class="rm-input" value="" placeholder="Enter staff username (e.g. phanee)" required autofocus>
                 </div>
-
                 <div class="rm-form-group">
                     <label for="rmPassword">Executive Security Passkey</label>
                     <input type="password" id="rmPassword" class="rm-input" value="" placeholder="Enter secure passkey" required>
                 </div>
-
                 <button type="submit" class="rm-btn rm-btn-primary rm-btn-block">
-                    ðŸ” Access Relationship Manager Suite
+                    &#x1F511; Access Relationship Manager Suite
                 </button>
             </form>
-
             <div class="rm-login-footer">
-                <p>Enterprise 256-Bit Encrypted Â· Internal Bank Intranet Only</p>
-                <p>Â© 2026 First National Bank NA. Member FDIC. Regulated by the Federal Reserve &amp; OCC.</p>
+                <p>Enterprise 256-Bit Encrypted &middot; Internal Bank Intranet Only</p>
+                <p>&copy; 2026 First National Bank NA. Member FDIC. Regulated by the Federal Reserve &amp; OCC.</p>
             </div>
         </div>
     </div>
-
-    <!-- â”€â”€ 2. RM COMMAND CENTER & PIPELINE DASHBOARD â”€â”€ -->
     <div id="rmDashboardView" class="rm-dashboard-wrap" style="display:none;">
-        
-        <!-- Top Navigation Bar -->
         <header class="rm-navbar">
             <div class="rm-nav-left">
-                <div class="rm-logo-mark-sm">AB</div>
+                <div class="rm-logo-mark-sm">FNB</div>
                 <div>
                     <span class="rm-nav-brand">First National Bank</span>
                     <span class="rm-nav-dept">RM Executive Command Center</span>
                 </div>
             </div>
-
             <div class="rm-nav-right">
                 <div class="rm-user-badge">
-                    <div class="rm-avatar">ðŸ‘”</div>
+                    <div class="rm-avatar">&#x1F464;</div>
                     <div class="rm-user-info">
                         <span class="rm-user-name" id="rmTopName">Phanee</span>
-                        <span class="rm-user-title" id="rmTopRole">Senior Relationship Manager Â· Corporate Banking</span>
+                        <span class="rm-user-title" id="rmTopRole">Senior Relationship Manager &middot; Corporate Banking</span>
                     </div>
                 </div>
                 <div class="rm-branch-badge">
-                    <span>ðŸ“ New York Financial Center</span>
+                    <span>&#x1F3E6; New York Financial Center</span>
                 </div>
                 <a href="/" target="_blank" class="rm-btn-nav" title="Launch Customer Portal in new window">
-                    ðŸŒ Open Customer Portal
+                    &#x1F310; Open Customer Portal
                 </a>
                 <button class="rm-btn-signout" onclick="handleRmSignOut()">
-                    ðŸšª Sign Out
+                    &#x1F6AA; Sign Out
                 </button>
             </div>
         </header>
-
-        <!-- Main Workspace -->
         <main class="rm-content">
-            
-            <!-- Welcome Header & Quick Action -->
             <div class="rm-page-header">
                 <div>
                     <h1 class="rm-page-title">Corporate Customer Onboarding Dispatcher</h1>
                     <p class="rm-page-sub">Issue tailored customer onboarding links with automated CRN and Email validation.</p>
                 </div>
                 <div class="rm-header-actions">
-                    <button class="rm-btn rm-btn-primary" onclick="focusInviteForm()">
-                        + Dispatch New Customer Journey
-                    </button>
+                    <button class="rm-btn rm-btn-primary" onclick="focusInviteForm()">+ Dispatch New Customer Journey</button>
                 </div>
             </div>
-
-            <!-- KPI Metric Counters -->
             <section class="rm-metrics-grid">
                 <div class="rm-metric-card">
-                    <div class="rm-metric-icon" style="background:rgba(56,189,248,0.15); color:#38bdf8;">ðŸ“¤</div>
-                    <div>
-                        <div class="rm-metric-num" id="metricTotalInvited">0</div>
-                        <div class="rm-metric-label">Total Invitations Sent</div>
-                    </div>
+                    <div class="rm-metric-icon" style="background:rgba(56,189,248,0.15); color:#38bdf8;">&#x1F4E4;</div>
+                    <div><div class="rm-metric-num" id="metricTotalInvited">0</div><div class="rm-metric-label">Total Invitations Sent</div></div>
                 </div>
-
                 <div class="rm-metric-card">
-                    <div class="rm-metric-icon" style="background:rgba(245,158,11,0.15); color:#f59e0b;">â³</div>
-                    <div>
-                        <div class="rm-metric-num" id="metricInProgress">0</div>
-                        <div class="rm-metric-label">Onboardings In Progress</div>
-                    </div>
+                    <div class="rm-metric-icon" style="background:rgba(245,158,11,0.15); color:#f59e0b;">&#x23F3;</div>
+                    <div><div class="rm-metric-num" id="metricInProgress">0</div><div class="rm-metric-label">Onboardings In Progress</div></div>
                 </div>
-
                 <div class="rm-metric-card">
-                    <div class="rm-metric-icon" style="background:rgba(168,85,247,0.15); color:#a855f7;">ðŸ“‹</div>
-                    <div>
-                        <div class="rm-metric-num" id="metricInReview">0</div>
-                        <div class="rm-metric-label">Compliance / KYC Review</div>
-                    </div>
+                    <div class="rm-metric-icon" style="background:rgba(168,85,247,0.15); color:#a855f7;">&#x1F4CB;</div>
+                    <div><div class="rm-metric-num" id="metricInReview">0</div><div class="rm-metric-label">Compliance / KYC Review</div></div>
                 </div>
-
                 <div class="rm-metric-card">
-                    <div class="rm-metric-icon" style="background:rgba(16,185,129,0.15); color:#10b981;">ðŸŽ‰</div>
-                    <div>
-                        <div class="rm-metric-num" id="metricActivated">0</div>
-                        <div class="rm-metric-label">Accounts Activated</div>
-                    </div>
+                    <div class="rm-metric-icon" style="background:rgba(16,185,129,0.15); color:#10b981;">&#x2705;</div>
+                    <div><div class="rm-metric-num" id="metricActivated">0</div><div class="rm-metric-label">Accounts Activated</div></div>
                 </div>
             </section>
-
-            <!-- Dispatch Customer Journey Form Panel -->
             <section class="rm-card rm-dispatch-card" id="dispatchSection">
                 <div class="rm-card-hdr">
                     <div class="rm-card-title-group">
-                        <span class="rm-card-icon">âœ‰ï¸</span>
+                        <span class="rm-card-icon">&#x1F4E7;</span>
                         <div>
                             <h2 class="rm-card-title">Dispatch Customer Onboarding Link</h2>
                             <p class="rm-card-sub">Enter the customer's CRN and Email to generate their dedicated access link.</p>
@@ -147,7 +108,6 @@
                     </div>
                     <span class="rm-pill-key">Primary Composite Key: (CRN, Email)</span>
                 </div>
-
                 <form id="rmInviteForm" onsubmit="handleDispatchInvite(event)" class="rm-dispatch-form">
                     <div class="rm-grid-2">
                         <div class="rm-form-group">
@@ -155,65 +115,49 @@
                             <input type="text" id="inviteCrn" class="rm-input" placeholder="e.g. 10029481 or CRN-509077205" required>
                             <small class="rm-hint">Primary identification key for corporate verification</small>
                         </div>
-
                         <div class="rm-form-group">
                             <label for="inviteEmail">Customer Corporate Email <span class="rm-req">*</span></label>
-                            <input type="email" id="inviteEmail" class="rm-input" placeholder="e.g. finance@apexenterprise.com" required>
+                            <input type="email" id="inviteEmail" class="rm-input" placeholder="e.g. finance@enterprise.com" required>
                             <small class="rm-hint">Onboarding link and security notifications will be dispatched here</small>
                         </div>
                     </div>
-
                     <div class="rm-grid-2">
                         <div class="rm-form-group">
                             <label for="inviteCompany">Company Legal Name <span class="rm-req">*</span></label>
-                            <input type="text" id="inviteCompany" class="rm-input" placeholder="e.g. Apex Global Holdings Inc." required>
+                            <input type="text" id="inviteCompany" class="rm-input" placeholder="e.g. Global Holdings Inc." required>
                         </div>
-
                         <div class="rm-form-group">
                             <label for="inviteContact">Authorized Signatory / Contact Person</label>
                             <input type="text" id="inviteContact" class="rm-input" placeholder="e.g. Michael Vance">
                         </div>
                     </div>
-
                     <div class="rm-grid-2">
                         <div class="rm-form-group">
                             <label for="invitePhone">Direct Contact Phone</label>
                             <input type="tel" id="invitePhone" class="rm-input" placeholder="e.g. +1 212 555 0199">
                         </div>
-
                         <div class="rm-form-group">
                             <label for="inviteNotes">Internal RM Relationship Notes / Tier</label>
                             <input type="text" id="inviteNotes" class="rm-input" placeholder="e.g. Tier 1 Conglomerate, priority onboarding VIP fast-track">
                         </div>
                     </div>
-
                     <div class="rm-form-actions">
-                        <button type="button" class="rm-btn rm-btn-ghost" onclick="resetInviteForm()">
-                            Clear Form
-                        </button>
+                        <button type="button" class="rm-btn rm-btn-ghost" onclick="resetInviteForm()">Clear Form</button>
                         <button type="submit" class="rm-btn rm-btn-primary" id="btnDispatchInvite">
-                            ðŸš€ Dispatch Customer Invitation &amp; Generate Magic Link
+                            &#x1F680; Dispatch Customer Invitation &amp; Generate Magic Link
                         </button>
                     </div>
                 </form>
-
-                <!-- Generated Magic Link Notification Card -->
                 <div id="inviteSuccessCard" class="rm-success-box" style="display:none;">
                     <div class="rm-success-hdr">
-                        <span class="rm-success-badge">âœ… Invitation Generated &amp; Dispatched</span>
+                        <span class="rm-success-badge">&#x2705; Invitation Generated &amp; Dispatched</span>
                         <span class="rm-success-time" id="inviteGeneratedTime">Just now</span>
                     </div>
-                    <p class="rm-success-msg">
-                        A corporate invitation email has been dispatched. You can also directly copy and send the personalized link below to your customer:
-                    </p>
+                    <p class="rm-success-msg">A corporate invitation email has been dispatched. You can also directly copy and send the personalized link below to your customer:</p>
                     <div class="rm-link-wrap">
                         <input type="text" id="generatedLinkInput" class="rm-link-input" readonly>
-                        <button class="rm-btn rm-btn-copy" onclick="copyGeneratedLink()">
-                            ðŸ“‹ Copy Link
-                        </button>
-                        <a id="btnTestCustomerLink" href="#" target="_blank" class="rm-btn rm-btn-launch">
-                            ðŸš€ Open in Customer Portal
-                        </a>
+                        <button class="rm-btn rm-btn-copy" onclick="copyGeneratedLink()">&#x1F4CB; Copy Link</button>
+                        <a id="btnTestCustomerLink" href="#" target="_blank" class="rm-btn rm-btn-launch">&#x1F680; Open in Customer Portal</a>
                     </div>
                     <div class="rm-success-chips">
                         <span>CRN: <strong id="chipCrn"></strong></span>
@@ -222,26 +166,20 @@
                     </div>
                 </div>
             </section>
-
-            <!-- Customer Pipeline & Applications Tracker -->
             <section class="rm-card">
                 <div class="rm-card-hdr">
                     <div class="rm-card-title-group">
-                        <span class="rm-card-icon">ðŸ“Š</span>
+                        <span class="rm-card-icon">&#x1F4CA;</span>
                         <div>
                             <h2 class="rm-card-title">Customer Onboarding Pipeline</h2>
                             <p class="rm-card-sub">Live status of customer journeys issued by the Relationship Management team.</p>
                         </div>
                     </div>
-
                     <div class="rm-table-tools">
-                        <input type="text" id="pipelineSearch" class="rm-search-input" placeholder="ðŸ” Search by CRN, Email or Company..." oninput="filterPipelineTable()">
-                        <button class="rm-btn rm-btn-ghost rm-btn-sm" onclick="fetchInvitations()">
-                            ðŸ”„ Refresh Pipeline
-                        </button>
+                        <input type="text" id="pipelineSearch" class="rm-search-input" placeholder="&#x1F50D; Search by CRN, Email or Company..." oninput="filterPipelineTable()">
+                        <button class="rm-btn rm-btn-ghost rm-btn-sm" onclick="fetchInvitations()">&#x1F504; Refresh Pipeline</button>
                     </div>
                 </div>
-
                 <div class="rm-table-wrap">
                     <table class="rm-table">
                         <thead>
@@ -256,33 +194,22 @@
                             </tr>
                         </thead>
                         <tbody id="pipelineTableBody">
-                            <tr>
-                                <td colspan="7" style="text-align:center; padding:32px; color:var(--rm-text-muted);">
-                                    Loading pipeline records...
-                                </td>
-                            </tr>
+                            <tr><td colspan="7" style="text-align:center; padding:32px; color:var(--rm-text-muted);">Loading pipeline records...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </section>
-
         </main>
     </div>
-
-    <!-- Modal: Simulated Email Preview -->
     <div id="emailPreviewModal" class="rm-modal-backdrop" style="display:none;" onclick="closeEmailPreview(event)">
         <div class="rm-modal-card" onclick="event.stopPropagation()">
             <div class="rm-modal-hdr">
-                <h3>âœ‰ï¸ Customer Invitation Email Preview</h3>
-                <button class="rm-modal-close" onclick="closeEmailPreview()">âœ•</button>
+                <h3>&#x2709; Customer Invitation Email Preview</h3>
+                <button class="rm-modal-close" onclick="closeEmailPreview()">&#x2715;</button>
             </div>
-            <div class="rm-modal-body" id="emailPreviewBody">
-                <!-- Injected email content -->
-            </div>
+            <div class="rm-modal-body" id="emailPreviewBody"></div>
         </div>
     </div>
-
-    <script src="/rm/rm.js?v=20260910_01"></script>
+    <script src="/rm/rm.js?v=20260910_02"></script>
 </body>
 </html>
-

@@ -1,5 +1,5 @@
-﻿/**
- * First National Bank Platform â€” Microservices API Client Module
+/**
+ * First National Bank Platform ÔÇö Microservices API Client Module
  * Communicates with the API Gateway (/api/v1/...) across all microservices:
  *   - Auth Service
  *   - Document & Base64 Vault Service
@@ -92,7 +92,7 @@
             return data;
         },
 
-        // â”€â”€ AUTH SERVICE â”€â”€
+        // ÔöÇÔöÇ AUTH SERVICE ÔöÇÔöÇ
         async requestOtp(crn, email) {
             return this._fetch('/api/v1/auth/request-otp', {
                 method: 'POST',
@@ -128,7 +128,7 @@
             return result;
         },
 
-        // â”€â”€ APPLICATION SERVICE â”€â”€
+        // ÔöÇÔöÇ APPLICATION SERVICE ÔöÇÔöÇ
         async getCurrentApplication() {
             return this._fetch('/api/v1/applications/current', {
                 method: 'GET'
@@ -146,7 +146,7 @@
             });
         },
 
-        // â”€â”€ DOCUMENT SERVICE (BASE64 DB STORAGE) â”€â”€
+        // ÔöÇÔöÇ DOCUMENT SERVICE (BASE64 DB STORAGE) ÔöÇÔöÇ
         async uploadDocumentBase64({ docType, fileName, fileType, fileSize, base64Data, applicationRef }) {
             const appRef = applicationRef || this.getApplicationRef();
             return this._fetch('/api/v1/documents/upload', {
@@ -190,7 +190,7 @@
             });
         },
 
-        // â”€â”€ CORE BANKING & FX SERVICE â”€â”€
+        // ÔöÇÔöÇ CORE BANKING & FX SERVICE ÔöÇÔöÇ
         async getAccounts() {
             return this._fetch('/api/v1/banking/accounts', {
                 method: 'GET'
@@ -222,7 +222,7 @@
             });
         },
 
-        // â”€â”€ NOTIFICATION SERVICE â”€â”€
+        // ÔöÇÔöÇ NOTIFICATION SERVICE ÔöÇÔöÇ
         async getSimulatedEmails(email) {
             const query = email ? `?email=${encodeURIComponent(email)}` : '';
             return this._fetch(`/api/v1/notifications/emails${query}`, {
@@ -243,7 +243,7 @@
             });
         },
 
-        // â”€â”€ GATEWAY HEALTH & MESH MONITOR â”€â”€
+        // ÔöÇÔöÇ GATEWAY HEALTH & MESH MONITOR ÔöÇÔöÇ
         async getMeshHealth() {
             return this._fetch('/api/v1/gateway/health', {
                 method: 'GET'
@@ -254,4 +254,3 @@
     window.ApexApi = ApexApi;
     window.VBApi = ApexApi; // Aliased for complete backward compatibility
 })();
-

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * First National Bank API Gateway & Microservices Orchestrator (Port 3000)
  * Unified reverse proxy, rate limiter, security shield, and service mesh orchestrator.
  * Routes traffic to:
@@ -64,7 +64,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// â”€â”€ Microservices Mesh Status & Health Registry â”€â”€
+// ÔöÇÔöÇ Microservices Mesh Status & Health Registry ÔöÇÔöÇ
 app.get("/api/v1/gateway/health", (req, res) => {
   const uptimeSeconds = Math.floor(process.uptime());
   const hours = Math.floor(uptimeSeconds / 3600);
@@ -136,7 +136,7 @@ app.get("/api/v1/gateway/health", (req, res) => {
   });
 });
 
-// â”€â”€ Microservice Routing Mounts (v1 API) â”€â”€
+// ÔöÇÔöÇ Microservice Routing Mounts (v1 API) ÔöÇÔöÇ
 app.use("/api/v1/auth", authService.router);
 app.use("/api/v1/documents", docService.router);
 app.use("/api/v1/applications", appService.router);
@@ -145,7 +145,7 @@ app.use("/api/v1/mobile", bankService.router); // Mobile summary & quick routes
 app.use("/api/v1/notifications", notifService.router);
 app.use("/api/v1/rm", rmService.router);
 
-// â”€â”€ Legacy Forwarding Routers (100% Backward Compatibility) â”€â”€
+// ÔöÇÔöÇ Legacy Forwarding Routers (100% Backward Compatibility) ÔöÇÔöÇ
 app.use("/api/auth", authService.router);
 app.use("/api/application", appService.router);
 app.use("/api/documents", docService.router);
@@ -168,4 +168,3 @@ app.get("*", (req, res, next) => {
 });
 
 module.exports = app;
-
