@@ -185,34 +185,26 @@ router.post("/upload", requireAuth, async (req, res) => {
 
   try {
     let savedDocument = null;
+    await db.ready();
 
     if (db.isConnected()) {
-      // Check if document of same type already exists for this application and replace, or insert new
-      const existing = await db.query(
-        "SELECT id FROM application_documents WHERE application_ref = $1 AND document_type = $2 LIMIT 1",
-        [activeAppRef, document_type]
-      );
-
-      if (existing.rows.length > 0) {
-        const updateRes = await db.query(
-          `UPDATE application_documents
-           SET file_name = $1, file_type = $2, file_size = $3, file_data_base64 = $4, company_uid = $5, updated_at = NOW()
-           WHERE id = $6
-           RETURNING id, application_ref, company_uid, document_type, file_name, file_type, file_size, ocr_status, created_at, updated_at`,
-          [file_name, file_type || "application/pdf", file_size || 0, file_data_base64, companyUid, existing.rows[0].id]
-        );
-        savedDocument = updateRes.rows[0];
-      } else {
-        const insertRes = await db.query(
-          `INSERT INTO application_documents (
-             application_ref, company_uid, document_type, file_name, file_type, file_size, file_data_base64, ocr_status
-           ) VALUES ($1, $2, $3, $4, $5, $6, $7, 'stored')
-           RETURNING id, application_ref, company_uid, document_type, file_name, file_type, file_size, ocr_status, created_at, updated_at`,
-          [activeAppRef, companyUid, document_type, file_name, file_type || "application/pdf", file_size || 0, file_data_base64]
-        );
-        savedDocument = insertRes.rows[0];
+      try {
+        savedDocument = await db.saveDocument({
+          application_ref: activeAppRef,
+          company_uid: companyUid,
+          document_type,
+          file_name,
+          file_type: file_type || "application/pdf",
+          file_size: file_size || 0,
+          file_data_base64,
+          ocr_status: "stored"
+        });
+      } catch (saveErr) {
+        console.warn("[DOCUMENT SERVICE] Cloud save warning:", saveErr.message);
       }
-    } else {
+    }
+
+    if (!savedDocument) {
       // In-Memory Base64 Document Vault
       const docId = memStore.nextDocId++;
       savedDocument = {
@@ -277,17 +269,16 @@ router.get("/list/:applicationRef?", requireAuth, async (req, res) => {
 
   try {
     let docs = [];
+    await db.ready();
 
     if (db.isConnected()) {
-      const result = await db.query(
-        `SELECT id, application_ref, company_uid, document_type, file_name, file_type, file_size, file_data_base64, ocr_status, created_at, updated_at
-         FROM application_documents
-         WHERE application_ref = $1
-         ORDER BY id ASC`,
-        [activeAppRef]
-      );
-      docs = result.rows;
-    } else {
+      try {
+        docs = await db.listDocuments(activeAppRef);
+      } catch (err) {
+        console.warn("[DOCUMENT SERVICE] DB list warning:", err.message);
+      }
+    }
+    if (!docs || docs.length === 0) {
       docs = Array.from(memStore.documents.values()).filter(d => d.application_ref === activeAppRef);
     }
 
@@ -295,7 +286,7 @@ router.get("/list/:applicationRef?", requireAuth, async (req, res) => {
       success: true,
       count: docs.length,
       documents: docs,
-      storageEngine: db.isConnected() ? "PostgreSQL (application_documents)" : "In-Memory Base64 Store",
+      storageEngine: db.isConnected() ? "Supabase Cloud Database (application_documents)" : "In-Memory Base64 Store",
       service: "document-service"
     });
   } catch (err) {
@@ -311,14 +302,16 @@ router.get("/download/:id", async (req, res) => {
 
   try {
     let doc = null;
+    await db.ready();
 
     if (db.isConnected()) {
-      const result = await db.query(
-        "SELECT * FROM application_documents WHERE id = $1 LIMIT 1",
-        [docId]
-      );
-      if (result.rows.length > 0) doc = result.rows[0];
-    } else {
+      try {
+        doc = await db.getDocument(docId);
+      } catch (err) {
+        console.warn("[DOCUMENT SERVICE] DB get doc warning:", err.message);
+      }
+    }
+    if (!doc) {
       doc = memStore.documents.get(parseInt(docId, 10)) || null;
     }
 
@@ -347,14 +340,15 @@ router.delete("/:id", requireAuth, async (req, res) => {
   const docId = req.params.id;
 
   try {
+    await db.ready();
     if (db.isConnected()) {
-      await db.query("DELETE FROM application_documents WHERE id = $1 AND application_ref = $2", [
-        docId,
-        req.user.application_ref
-      ]);
-    } else {
-      memStore.documents.delete(parseInt(docId, 10));
+      try {
+        await db.deleteDocument(docId, req.user.application_ref);
+      } catch (err) {
+        console.warn("[DOCUMENT SERVICE] DB delete doc warning:", err.message);
+      }
     }
+    memStore.documents.delete(parseInt(docId, 10));
 
     return res.json({
       success: true,

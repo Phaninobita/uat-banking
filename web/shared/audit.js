@@ -95,66 +95,14 @@ async function logAuditEvent({
   // 1. Save in high-speed in-memory store
   memStore.recordAuditLog(auditRecord);
 
-  // 2. Persist in PostgreSQL corporate_audit_logs & mobile_audit_logs if connected
-  if (db.isConnected()) {
-    try {
-      await db.query(
-        `INSERT INTO corporate_audit_logs (
-           id, company_uid, action_type, actor_id, actor_name, actor_role,
-           target_crn, target_email, target_company, details, status,
-           device_info, ip_address, channel, created_at
-         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW())
-         ON CONFLICT (id) DO NOTHING`,
-        [
-          auditRecord.id,
-          auditRecord.company_uid,
-          auditRecord.action_type,
-          auditRecord.actor_id,
-          auditRecord.actor_name,
-          auditRecord.actor_role,
-          auditRecord.target_crn,
-          auditRecord.target_email,
-          auditRecord.target_company,
-          auditRecord.details,
-          auditRecord.status,
-          auditRecord.device_info,
-          auditRecord.ip_address,
-          auditRecord.channel
-        ]
-      );
-    } catch (dbErr) {
-      console.warn("[AUDIT SYSTEM] DB log notice:", dbErr.message);
+  // 2. Persist in Supabase / PostgreSQL corporate_audit_logs & mobile_audit_logs
+  try {
+    await db.ready();
+    if (db.isConnected()) {
+      await db.logAudit(auditRecord);
     }
-
-    // Also mirror to mobile_audit_logs for mobile backwards compatibility
-    try {
-      await db.query(
-        `INSERT INTO mobile_audit_logs (
-           id, company_uid, action_type, actor_id, actor_name, actor_role,
-           target_crn, target_email, target_company, details, status,
-           device_info, ip_address, channel, created_at
-         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW())
-         ON CONFLICT (id) DO NOTHING`,
-        [
-          auditRecord.id,
-          auditRecord.company_uid,
-          auditRecord.action_type,
-          auditRecord.actor_id,
-          auditRecord.actor_name,
-          auditRecord.actor_role,
-          auditRecord.target_crn,
-          auditRecord.target_email,
-          auditRecord.target_company,
-          auditRecord.details,
-          auditRecord.status,
-          auditRecord.device_info,
-          auditRecord.ip_address,
-          auditRecord.channel
-        ]
-      );
-    } catch (e) {
-      // ignore
-    }
+  } catch (dbErr) {
+    console.warn("[AUDIT SYSTEM] DB log notice:", dbErr.message);
   }
 
   return auditRecord;
@@ -167,21 +115,16 @@ async function getAuditTrail({ company_uid, crn, limit = 100 }) {
   const resolvedCompanyUid = resolveCompanyUid(company_uid, crn);
   const cleanCrn = crn ? crn.trim() : null;
 
-  if (db.isConnected()) {
-    try {
-      const res = await db.query(
-        `SELECT * FROM corporate_audit_logs
-         WHERE company_uid = $1 OR ($2::text IS NOT NULL AND target_crn = $2)
-         ORDER BY created_at DESC
-         LIMIT $3`,
-        [resolvedCompanyUid, cleanCrn, limit]
-      );
-      if (res.rows && res.rows.length > 0) {
-        return res.rows;
+  try {
+    await db.ready();
+    if (db.isConnected()) {
+      const logs = await db.getAuditLogs(resolvedCompanyUid, cleanCrn, limit);
+      if (logs && logs.length > 0) {
+        return logs;
       }
-    } catch (e) {
-      console.warn("[AUDIT SYSTEM] Query error:", e.message);
     }
+  } catch (e) {
+    console.warn("[AUDIT SYSTEM] Query error:", e.message);
   }
 
   // Fallback to in-memory store

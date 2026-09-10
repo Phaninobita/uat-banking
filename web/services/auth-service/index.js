@@ -40,18 +40,14 @@ async function getRmCustomerInvitation(crn, email) {
   const cleanEmail = (email || "").trim().toLowerCase();
   if (!cleanCrn || !cleanEmail) return null;
 
-  if (db.isConnected()) {
-    try {
-      const res = await db.query(
-        "SELECT * FROM rm_customer_invitations WHERE UPPER(TRIM(crn)) = $1 AND LOWER(TRIM(email)) = $2 LIMIT 1",
-        [cleanCrn, cleanEmail]
-      );
-      if (res.rows && res.rows.length > 0) {
-        return res.rows[0];
-      }
-    } catch (err) {
-      console.warn("[AUTH SERVICE] DB lookup for RM invite notice:", err.message);
+  try {
+    await db.ready();
+    if (db.isConnected()) {
+      const invite = await db.getInvitation(cleanCrn, cleanEmail);
+      if (invite) return invite;
     }
+  } catch (err) {
+    console.warn("[AUTH SERVICE] DB lookup for RM invite notice:", err.message);
   }
 
   return memStore.getRmInvitation(cleanCrn, cleanEmail);
@@ -194,27 +190,21 @@ router.post("/verify-otp", async (req, res) => {
   const company_uid = resolveCompanyUid(rmInvite.company_uid, cleanCrn);
 
   try {
-    let applicationRecord = null;
     let isNew = false;
-
+    await db.ready();
     if (db.isConnected()) {
-      const existing = await db.query(
-        "SELECT * FROM corporate_onboarding_applications WHERE crn = $1 AND LOWER(registered_email) = LOWER($2) LIMIT 1",
-        [cleanCrn, cleanEmail]
-      );
-      if (existing.rows.length > 0) {
-        applicationRecord = existing.rows[0];
+      const existingApp = await db.getApplicationByCrnAndEmail(cleanCrn, cleanEmail);
+      if (existingApp) {
+        applicationRecord = existingApp;
         // Ensure company name and company_uid are synced
         if (!applicationRecord.company_uid || !applicationRecord.company_name || applicationRecord.company_name === "First National Holdings Inc" || applicationRecord.company_name !== companyNameFromRm) {
-          const updated = await db.query(
-            `UPDATE corporate_onboarding_applications
-             SET company_name = $1, trade_name = $1, company_uid = COALESCE(company_uid, $2), updated_at = NOW()
-             WHERE application_ref = $3
-             RETURNING *`,
-            [companyNameFromRm, company_uid, applicationRecord.application_ref]
-          );
-          if (updated.rows && updated.rows.length > 0) {
-            applicationRecord = updated.rows[0];
+          const updated = await db.updateApplication(applicationRecord.application_ref, {
+            company_name: companyNameFromRm,
+            trade_name: companyNameFromRm,
+            company_uid: applicationRecord.company_uid || company_uid
+          });
+          if (updated) {
+            applicationRecord = updated;
           }
         }
       } else {
@@ -231,13 +221,19 @@ router.post("/verify-otp", async (req, res) => {
             phone: phoneFromRm
           }
         };
-        const newRecord = await db.query(
-          `INSERT INTO corporate_onboarding_applications (
-             application_ref, crn, company_uid, registered_email, current_step, status, form_data, legal_type, company_name, trade_name
-           ) VALUES ($1, $2, $3, $4, 1, 'draft', $5::jsonb, $6, $7, $8) RETURNING *`,
-          [appRef, cleanCrn, company_uid, cleanEmail, JSON.stringify(initialFormData), "Limited Liability Company (LLC)", companyNameFromRm, companyNameFromRm]
-        );
-        applicationRecord = newRecord.rows[0];
+        const newRecord = await db.saveApplication({
+          application_ref: appRef,
+          crn: cleanCrn,
+          company_uid,
+          registered_email: cleanEmail,
+          current_step: 1,
+          status: "draft",
+          form_data: initialFormData,
+          legal_type: "Limited Liability Company (LLC)",
+          company_name: companyNameFromRm,
+          trade_name: companyNameFromRm
+        });
+        applicationRecord = newRecord;
         isNew = true;
       }
     } else {

@@ -82,9 +82,13 @@ app.get("/api/v1/gateway/health", (req, res) => {
       environment: config.NODE_ENV
     },
     database: {
-      engine: db.isConnected() ? "PostgreSQL / Supabase" : "In-Memory High-Speed Store",
+      status: db.isConnected() ? "connected" : "in_memory_fallback",
+      engine: db.engineType === "supabase_rest"
+        ? "Supabase Database (Cloud REST Engine)"
+        : (db.engineType === "postgres" ? "PostgreSQL Database (TCP Pool)" : "In-Memory High-Speed Store"),
+      cloudProject: "uvfdokzjdwwjpsxuuyey",
       base64VaultActive: true,
-      tables: ["corporate_onboarding_applications", "application_documents", "corporate_accounts", "account_transactions"]
+      tables: ["corporate_onboarding_applications", "application_documents", "rm_customer_invitations", "corporate_audit_logs", "corporate_accounts", "account_transactions"]
     },
     services: [
       {

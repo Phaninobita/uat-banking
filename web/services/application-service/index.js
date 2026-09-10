@@ -20,15 +20,11 @@ router.get("/current", requireAuth, async (req, res) => {
 
   try {
     let applicationRecord = null;
+    await db.ready();
     if (db.isConnected()) {
-      const result = await db.query(
-        "SELECT * FROM corporate_onboarding_applications WHERE application_ref = $1 LIMIT 1",
-        [application_ref]
-      );
-      if (result.rows.length > 0) {
-        applicationRecord = result.rows[0];
-      }
-    } else {
+      applicationRecord = await db.getApplication(application_ref);
+    }
+    if (!applicationRecord) {
       applicationRecord = memStore.applications.get(application_ref) || null;
     }
 
@@ -88,20 +84,15 @@ router.post("/save", requireAuth, async (req, res) => {
 
   try {
     let existingRecord = null;
+    await db.ready();
     if (db.isConnected()) {
-      const fetchRes = await db.query(
-        "SELECT * FROM corporate_onboarding_applications WHERE application_ref = $1 LIMIT 1",
-        [application_ref]
-      );
-      if (fetchRes.rows.length === 0) {
-        return res.status(404).json({ error: "Application record not found." });
-      }
-      existingRecord = fetchRes.rows[0];
-    } else {
+      existingRecord = await db.getApplication(application_ref);
+    }
+    if (!existingRecord) {
       existingRecord = memStore.applications.get(application_ref);
-      if (!existingRecord) {
-        return res.status(404).json({ error: "Application record not found." });
-      }
+    }
+    if (!existingRecord) {
+      return res.status(404).json({ error: "Application record not found." });
     }
 
     let resolvedStatus = existingRecord.status;
@@ -123,64 +114,42 @@ router.post("/save", requireAuth, async (req, res) => {
     }
 
     let updatedRecord = null;
-    if (db.isConnected()) {
-      const s2 = mergedFormData.step2 || {};
-      const companyName = s2.company_name || s2.companyName || null;
-      const tradeName = s2.trade_name || s2.tradeName || null;
-      const legalType = s2.legal_type || s2.legalType || null;
-      const issueDate = s2.issue_date || s2.issueDate || null;
-      const expiryDate = s2.expiry_date || s2.expiryDate || null;
-      const issuedBy = s2.issued_by || s2.issuedBy || null;
-      const vatTrn = s2.vat_trn || s2.vatTrn || null;
-      const contactPerson = s2.contact_person || s2.contactPerson || null;
-      const phone = s2.phone || null;
-      const address = s2.address || null;
+    const s2 = mergedFormData.step2 || {};
+    const payload = {
+      application_ref,
+      company_uid: resolvedCompanyUid,
+      crn: existingRecord.crn,
+      registered_email: existingRecord.registered_email,
+      current_step: resolvedStep,
+      status: resolvedStatus,
+      form_data: mergedFormData,
+      company_name: s2.company_name || s2.companyName || existingRecord.company_name || null,
+      trade_name: s2.trade_name || s2.tradeName || existingRecord.trade_name || null,
+      legal_type: s2.legal_type || s2.legalType || existingRecord.legal_type || null,
+      licence_issue_date: s2.issue_date || s2.issueDate || existingRecord.licence_issue_date || null,
+      licence_expiry_date: s2.expiry_date || s2.expiryDate || existingRecord.licence_expiry_date || null,
+      licence_issued_by: s2.issued_by || s2.issuedBy || existingRecord.licence_issued_by || null,
+      vat_trn: s2.vat_trn || s2.vatTrn || existingRecord.vat_trn || null,
+      contact_person: s2.contact_person || s2.contactPerson || existingRecord.contact_person || null,
+      phone: s2.phone || existingRecord.phone || null,
+      address: s2.address || existingRecord.address || null
+    };
 
-      const result = await db.query(
-        `UPDATE corporate_onboarding_applications
-         SET current_step = $2, status = $3, form_data = $4::jsonb,
-             company_name = COALESCE($5, company_name),
-             trade_name = COALESCE($6, trade_name),
-             legal_type = COALESCE($7, legal_type),
-             licence_issue_date = COALESCE($8, licence_issue_date),
-             licence_expiry_date = COALESCE($9, licence_expiry_date),
-             licence_issued_by = COALESCE($10, licence_issued_by),
-             vat_trn = COALESCE($11, vat_trn),
-             contact_person = COALESCE($12, contact_person),
-             phone = COALESCE($13, phone),
-             address = COALESCE($14, address),
-             company_uid = COALESCE($15, company_uid),
-             updated_at = NOW()
-         WHERE application_ref = $1
-         RETURNING *`,
-        [
-          application_ref, resolvedStep, resolvedStatus, JSON.stringify(mergedFormData),
-          companyName, tradeName, legalType, issueDate, expiryDate, issuedBy, vatTrn,
-          contactPerson, phone, address, resolvedCompanyUid
-        ]
-      );
-      updatedRecord = result.rows[0];
-    } else {
-      const s2 = mergedFormData.step2 || {};
-      existingRecord.company_uid = resolvedCompanyUid;
-      existingRecord.current_step = resolvedStep;
-      existingRecord.status = resolvedStatus;
-      existingRecord.company_name = s2.company_name || s2.companyName || existingRecord.company_name;
-      existingRecord.trade_name = s2.trade_name || s2.tradeName || existingRecord.trade_name;
-      existingRecord.legal_type = s2.legal_type || s2.legalType || existingRecord.legal_type;
-      existingRecord.licence_issue_date = s2.issue_date || s2.issueDate || existingRecord.licence_issue_date;
-      existingRecord.licence_expiry_date = s2.expiry_date || s2.expiryDate || existingRecord.licence_expiry_date;
-      existingRecord.licence_issued_by = s2.issued_by || s2.issuedBy || existingRecord.licence_issued_by;
-      existingRecord.vat_trn = s2.vat_trn || s2.vatTrn || existingRecord.vat_trn;
-      existingRecord.contact_person = s2.contact_person || s2.contactPerson || existingRecord.contact_person;
-      existingRecord.phone = s2.phone || existingRecord.phone;
-      existingRecord.address = s2.address || existingRecord.address;
-      existingRecord.form_data = mergedFormData;
-      existingRecord.updated_at = new Date().toISOString();
-      updatedRecord = existingRecord;
-      memStore.applications.set(application_ref, existingRecord);
-      memStore.companyUidIndex.set(resolvedCompanyUid, application_ref);
+    if (db.isConnected()) {
+      try {
+        updatedRecord = await db.saveApplication(payload);
+      } catch (saveErr) {
+        console.warn("[APPLICATION SERVICE] Cloud save warning:", saveErr.message);
+      }
     }
+
+    if (!updatedRecord) {
+      updatedRecord = { ...existingRecord, ...payload, updated_at: new Date().toISOString() };
+    }
+
+    // Always mirror to in-memory store
+    memStore.applications.set(application_ref, updatedRecord);
+    memStore.companyUidIndex.set(resolvedCompanyUid, application_ref);
 
     if (!updatedRecord.company_uid) {
       updatedRecord.company_uid = resolvedCompanyUid;

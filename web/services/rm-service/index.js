@@ -154,34 +154,11 @@ router.post("/users", async (req, res) => {
 router.get("/invitations", async (req, res) => {
   try {
     let invitations = [];
+    await db.ready();
 
     if (db.isConnected()) {
       try {
-        const queryRes = await db.query(`
-          SELECT 
-            i.crn,
-            i.email,
-            i.company_uid,
-            i.company_name,
-            i.contact_person,
-            i.phone,
-            i.rm_name,
-            i.rm_id,
-            i.invite_token,
-            i.status,
-            i.invite_link,
-            i.notes,
-            i.created_at,
-            i.updated_at,
-            a.current_step,
-            a.application_ref,
-            a.status as app_status
-          FROM rm_customer_invitations i
-          LEFT JOIN corporate_onboarding_applications a 
-            ON (UPPER(TRIM(i.crn)) = UPPER(TRIM(a.crn)) AND LOWER(TRIM(i.email)) = LOWER(TRIM(a.registered_email)))
-          ORDER BY i.created_at DESC
-        `);
-        invitations = queryRes.rows;
+        invitations = await db.listInvitations();
       } catch (dbErr) {
         console.warn("[RM-SERVICE] DB Query error, using memory fallback:", dbErr.message);
         invitations = memStore.listRmInvitations();
@@ -297,37 +274,11 @@ router.post("/invite", async (req, res) => {
       updated_at: new Date().toISOString()
     };
 
-    // Save to PostgreSQL table rm_customer_invitations (Composite Key: crn, email)
+    // Save to Supabase Cloud Database table rm_customer_invitations (Composite Key: crn, email)
+    await db.ready();
     if (db.isConnected()) {
       try {
-        await db.query(`
-          INSERT INTO rm_customer_invitations (
-            crn, email, company_uid, company_name, contact_person, phone, rm_name, rm_id, invite_token, status, invite_link, notes, created_at, updated_at
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
-          ON CONFLICT (crn, email) DO UPDATE SET
-            company_uid = EXCLUDED.company_uid,
-            company_name = EXCLUDED.company_name,
-            contact_person = EXCLUDED.contact_person,
-            phone = EXCLUDED.phone,
-            invite_token = EXCLUDED.invite_token,
-            invite_link = EXCLUDED.invite_link,
-            notes = EXCLUDED.notes,
-            status = 'invited',
-            updated_at = NOW()
-        `, [
-          inviteRecord.crn,
-          inviteRecord.email,
-          inviteRecord.company_uid,
-          inviteRecord.company_name,
-          inviteRecord.contact_person,
-          inviteRecord.phone,
-          inviteRecord.rm_name,
-          inviteRecord.rm_id,
-          inviteRecord.invite_token,
-          inviteRecord.status,
-          inviteRecord.invite_link,
-          inviteRecord.notes
-        ]);
+        await db.saveInvitation(inviteRecord);
       } catch (dbErr) {
         console.warn("[RM-SERVICE] DB Insert warning, saving in memory store:", dbErr.message);
       }
@@ -459,9 +410,10 @@ router.delete("/invitations/:crn/:email", async (req, res) => {
     const cleanCrn = crn.trim().toUpperCase();
     const cleanEmail = email.trim().toLowerCase();
 
+    await db.ready();
     if (db.isConnected()) {
       try {
-        await db.query("DELETE FROM rm_customer_invitations WHERE UPPER(TRIM(crn)) = $1 AND LOWER(TRIM(email)) = $2", [cleanCrn, cleanEmail]);
+        await db.deleteInvitation(cleanCrn, cleanEmail);
       } catch (e) {
         console.warn("[RM-SERVICE] DB Delete error:", e.message);
       }
@@ -489,16 +441,16 @@ router.get("/verify-invite", async (req, res) => {
       return res.status(400).json({ valid: false, error: "CRN and Email required" });
     }
 
-    let invite = memStore.getRmInvitation(crn, email);
-
-    if (!invite && db.isConnected()) {
+    let invite = null;
+    await db.ready();
+    if (db.isConnected()) {
       try {
-        const r = await db.query(
-          "SELECT * FROM rm_customer_invitations WHERE UPPER(TRIM(crn)) = $1 AND LOWER(TRIM(email)) = $2",
-          [crn.trim().toUpperCase(), email.trim().toLowerCase()]
-        );
-        if (r.rows.length > 0) invite = r.rows[0];
+        invite = await db.getInvitation(crn, email);
       } catch (e) {}
+    }
+
+    if (!invite) {
+      invite = memStore.getRmInvitation(crn, email);
     }
 
     if (invite) {

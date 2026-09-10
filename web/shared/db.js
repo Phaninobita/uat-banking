@@ -1,7 +1,9 @@
 /**
- * First National Bank Database Layer
- * Connects to PostgreSQL / Supabase, executes auto-migrations for applications & Base64 document tables,
- * and seamlessly provides fallback to the shared in-memory repository.
+ * First National Bank — Resilient Dual-Engine Database Layer
+ * Supports:
+ *   1. Direct PostgreSQL TCP Pool (when valid DATABASE_URL is reachable)
+ *   2. Supabase Cloud Database REST Engine (active HTTPS connection with Supabase Cloud)
+ *   3. Synchronous in-memory mirror for sub-millisecond local caching & resilience
  */
 
 const fs = require("fs");
@@ -9,68 +11,393 @@ const path = require("path");
 const { Pool } = require("pg");
 const config = require("./config");
 const memStore = require("./memStore");
+const supabaseClient = require("./supabaseClient");
 
 let pool = null;
 let useDatabase = false;
+let engineType = "none"; // 'postgres' | 'supabase_rest' | 'in_memory'
 
 async function initDb() {
-  if (!config.DATABASE_URL || config.DATABASE_URL.trim() === "") {
-    console.log("ℹ️  [DATABASE] No DATABASE_URL configured. Running with in-memory application & Base64 document vault.");
-    useDatabase = false;
-    return;
+  // ── Engine 1: Try Direct PostgreSQL TCP Connection ──
+  if (config.DATABASE_URL && config.DATABASE_URL.trim() !== "") {
+    try {
+      const isLocalhost = config.DATABASE_URL.includes("localhost") || config.DATABASE_URL.includes("127.0.0.1");
+      const tempPool = new Pool({
+        connectionString: config.DATABASE_URL,
+        ssl: isLocalhost ? false : { rejectUnauthorized: false },
+        connectionTimeoutMillis: 4000
+      });
+
+      tempPool.on("error", (err) => {
+        console.error("[DATABASE] Unexpected pg pool client error:", err.message);
+      });
+
+      await tempPool.query("SELECT NOW()");
+
+      pool = tempPool;
+      useDatabase = true;
+      engineType = "postgres";
+
+      // Auto-migrate schema.sql if exists
+      const schemaFile = path.join(__dirname, "../db/schema.sql");
+      if (fs.existsSync(schemaFile)) {
+        try {
+          const schemaSql = fs.readFileSync(schemaFile, "utf8");
+          await pool.query(schemaSql);
+        } catch (mErr) {
+          console.warn("[DATABASE] Schema sync note:", mErr.message);
+        }
+      }
+
+      console.log("✅ [DATABASE] Connected to PostgreSQL TCP Pool (engine: postgres)");
+      return;
+    } catch (tcpErr) {
+      console.warn(`ℹ️  [DATABASE] Direct PostgreSQL TCP inactive (${tcpErr.message}).`);
+    }
   }
 
+  // ── Engine 2: Activate Supabase Cloud REST Engine ──
   try {
-    const isLocalhost = config.DATABASE_URL.includes("localhost") || config.DATABASE_URL.includes("127.0.0.1");
-    pool = new Pool({
-      connectionString: config.DATABASE_URL,
-      ssl: isLocalhost ? false : { rejectUnauthorized: false }
-    });
-
-    pool.on("error", (err) => {
-      console.error("[DATABASE] Unexpected client error:", err.message);
-    });
-
-    // Test connection
-    await pool.query("SELECT NOW()");
-
-    // Execute schema.sql to ensure company_uid, corporate_audit_logs, rm_users, and indexes exist
-    const schemaFile = path.join(__dirname, "../db/schema.sql");
-    if (fs.existsSync(schemaFile)) {
-      const schemaSql = fs.readFileSync(schemaFile, "utf8");
-      await pool.query(schemaSql);
+    const isSupabaseLive = await supabaseClient.ping();
+    if (isSupabaseLive) {
+      useDatabase = true;
+      engineType = "supabase_rest";
+      console.log("✅ [DATABASE] Connected to Supabase Cloud Database via REST Engine (tables: rm_customer_invitations, corporate_onboarding_applications, application_documents, corporate_audit_logs)");
+      return;
     }
-
-    useDatabase = true;
-    console.log("✅ [DATABASE] Successfully connected & synchronized schema (company_uid, corporate_audit_logs, rm_users) with PostgreSQL / Supabase");
-  } catch (err) {
-    console.warn("⚠️  [DATABASE] PostgreSQL connection inactive (" + err.message + ").");
-    console.log("ℹ️  [DATABASE] Active fallback: High-speed in-memory repository with full Base64 document persistence enabled.");
-    useDatabase = false;
-    if (pool) {
-      try {
-        pool.end().catch(() => {});
-      } catch (e) {}
-      pool = null;
-    }
+  } catch (restErr) {
+    console.warn("[DATABASE] Supabase REST check warning:", restErr.message);
   }
+
+  // ── Engine 3: Local In-Memory Fallback ──
+  console.log("ℹ️  [DATABASE] Running with high-speed in-memory repository.");
+  useDatabase = false;
+  engineType = "in_memory";
 }
 
+// Initialize asynchronously on boot
+const initPromise = initDb();
 
-// Fire and forget or await
-initDb();
+/**
+ * Intelligent SQL-to-Supabase REST routing for legacy db.query calls
+ */
+async function handleSupabaseRestQuery(text, params = []) {
+  const sql = text.replace(/\s+/g, " ").trim();
+  const sqlUpper = sql.toUpperCase();
 
-module.exports = {
+  // 1. rm_customer_invitations queries
+  if (sqlUpper.includes("FROM RM_CUSTOMER_INVITATIONS")) {
+    if (sqlUpper.startsWith("SELECT") && sqlUpper.includes("CRN =") && sqlUpper.includes("EMAIL =")) {
+      const crn = params[0];
+      const email = params[1];
+      const invite = await supabaseClient.getInvitation(crn, email);
+      return { rows: invite ? [invite] : [] };
+    }
+    if (sqlUpper.startsWith("SELECT") && sqlUpper.includes("CRN =") && sqlUpper.includes("COMPANY_UID")) {
+      const crn = params[0];
+      const invite = await supabaseClient.getInvitationByCrn(crn);
+      return { rows: invite && invite.company_uid ? [{ company_uid: invite.company_uid }] : [] };
+    }
+    if (sqlUpper.startsWith("SELECT")) {
+      const list = await supabaseClient.listInvitations();
+      return { rows: list };
+    }
+  }
+
+  if (sqlUpper.startsWith("INSERT INTO RM_CUSTOMER_INVITATIONS")) {
+    // Parameterized insert from rm-service
+    // [crn, email, company_uid, company_name, contact_person, phone, rm_name, rm_id, invite_token, status, invite_link, notes]
+    const inviteRecord = {
+      crn: params[0],
+      email: params[1],
+      company_uid: params[2],
+      company_name: params[3],
+      contact_person: params[4],
+      phone: params[5],
+      rm_name: params[6],
+      rm_id: params[7],
+      invite_token: params[8],
+      status: params[9] || "invited",
+      invite_link: params[10],
+      notes: params[11] || ""
+    };
+    const saved = await supabaseClient.saveInvitation(inviteRecord);
+    return { rows: [saved] };
+  }
+
+  if (sqlUpper.startsWith("DELETE FROM RM_CUSTOMER_INVITATIONS")) {
+    const crn = params[0];
+    const email = params[1];
+    await supabaseClient.deleteInvitation(crn, email);
+    return { rows: [] };
+  }
+
+  // 2. corporate_onboarding_applications queries
+  if (sqlUpper.includes("FROM CORPORATE_ONBOARDING_APPLICATIONS")) {
+    if (sqlUpper.startsWith("SELECT") && sqlUpper.includes("APPLICATION_REF =")) {
+      const app = await supabaseClient.getApplication(params[0]);
+      return { rows: app ? [app] : [] };
+    }
+    if (sqlUpper.startsWith("SELECT") && sqlUpper.includes("CRN =") && sqlUpper.includes("REGISTERED_EMAIL")) {
+      const app = await supabaseClient.getApplicationByCrnAndEmail(params[0], params[1]);
+      return { rows: app ? [app] : [] };
+    }
+    if (sqlUpper.startsWith("SELECT") && sqlUpper.includes("COMPANY_UID =")) {
+      const app = await supabaseClient.getApplicationByUid(params[0]);
+      return { rows: app ? [app] : [] };
+    }
+    if (sqlUpper.startsWith("SELECT") && sqlUpper.includes("CURRENT_STEP >=")) {
+      const list = await supabaseClient.listApplications({ current_step_gte: 6 });
+      return { rows: list };
+    }
+    if (sqlUpper.startsWith("SELECT")) {
+      const list = await supabaseClient.listApplications();
+      return { rows: list };
+    }
+  }
+
+  if (sqlUpper.startsWith("INSERT INTO CORPORATE_ONBOARDING_APPLICATIONS")) {
+    // [appRef, cleanCrn, company_uid, cleanEmail, formDataStr, legalType, companyName, tradeName]
+    const formData = typeof params[4] === "string" ? JSON.parse(params[4] || "{}") : (params[4] || {});
+    const appRecord = {
+      application_ref: params[0],
+      crn: params[1],
+      company_uid: params[2],
+      registered_email: params[3],
+      form_data: formData,
+      legal_type: params[5],
+      company_name: params[6],
+      trade_name: params[7] || params[6],
+      status: "draft",
+      current_step: 1
+    };
+    const saved = await supabaseClient.saveApplication(appRecord);
+    return { rows: [saved] };
+  }
+
+  if (sqlUpper.startsWith("UPDATE CORPORATE_ONBOARDING_APPLICATIONS")) {
+    // Parameters in application-service save:
+    // [application_ref, resolvedStep, resolvedStatus, formDataStr, companyName, tradeName, legalType, issueDate, expiryDate, issuedBy, vatTrn, contactPerson, phone, address, resolvedCompanyUid]
+    const appRef = params[0];
+    const formData = typeof params[3] === "string" ? JSON.parse(params[3] || "{}") : (params[3] || {});
+    const updates = {
+      current_step: params[1],
+      status: params[2],
+      form_data: formData,
+      company_name: params[4] || undefined,
+      trade_name: params[5] || undefined,
+      legal_type: params[6] || undefined,
+      licence_issue_date: params[7] || undefined,
+      licence_expiry_date: params[8] || undefined,
+      licence_issued_by: params[9] || undefined,
+      vat_trn: params[10] || undefined,
+      contact_person: params[11] || undefined,
+      phone: params[12] || undefined,
+      address: params[13] || undefined,
+      company_uid: params[14] || undefined
+    };
+    // Filter out undefined
+    Object.keys(updates).forEach(k => updates[k] === undefined && delete updates[k]);
+
+    const updated = await supabaseClient.updateApplication(appRef, updates);
+    return { rows: updated ? [updated] : [] };
+  }
+
+  // 3. application_documents queries
+  if (sqlUpper.includes("FROM APPLICATION_DOCUMENTS")) {
+    if (sqlUpper.startsWith("SELECT ID FROM APPLICATION_DOCUMENTS") && sqlUpper.includes("DOCUMENT_TYPE =")) {
+      const appRef = params[0];
+      const docType = params[1];
+      const docs = await supabaseClient.listDocuments(appRef);
+      const matched = docs.find(d => d.document_type === docType);
+      return { rows: matched ? [{ id: matched.id }] : [] };
+    }
+    if (sqlUpper.startsWith("SELECT") && sqlUpper.includes("APPLICATION_REF =") && sqlUpper.includes("ID =")) {
+      const doc = await supabaseClient.getDocument(params[0], params[1]);
+      return { rows: doc ? [doc] : [] };
+    }
+    if (sqlUpper.startsWith("SELECT") && sqlUpper.includes("APPLICATION_REF =")) {
+      const docs = await supabaseClient.listDocuments(params[0]);
+      return { rows: docs };
+    }
+  }
+
+  if (sqlUpper.startsWith("INSERT INTO APPLICATION_DOCUMENTS")) {
+    // [activeAppRef, companyUid, document_type, file_name, file_type, file_size, file_data_base64]
+    const docRecord = {
+      application_ref: params[0],
+      company_uid: params[1],
+      document_type: params[2],
+      file_name: params[3],
+      file_type: params[4],
+      file_size: params[5],
+      file_data_base64: params[6]
+    };
+    const saved = await supabaseClient.saveDocument(docRecord);
+    return { rows: [saved] };
+  }
+
+  if (sqlUpper.startsWith("UPDATE APPLICATION_DOCUMENTS")) {
+    // [file_name, file_type, file_size, file_data_base64, companyUid, existing.rows[0].id]
+    const saved = await supabaseClient.saveDocument({
+      id: params[5],
+      file_name: params[0],
+      file_type: params[1],
+      file_size: params[2],
+      file_data_base64: params[3],
+      company_uid: params[4]
+    });
+    return { rows: [saved] };
+  }
+
+  if (sqlUpper.startsWith("DELETE FROM APPLICATION_DOCUMENTS")) {
+    const docId = params[0];
+    const appRef = params[1];
+    await supabaseClient.deleteDocument(docId, appRef);
+    return { rows: [] };
+  }
+
+  // 4. corporate_audit_logs queries
+  if (sqlUpper.startsWith("INSERT INTO CORPORATE_AUDIT_LOGS") || sqlUpper.startsWith("INSERT INTO MOBILE_AUDIT_LOGS")) {
+    const record = {
+      id: params[0],
+      company_uid: params[1],
+      action_type: params[2],
+      actor_id: params[3],
+      actor_name: params[4],
+      actor_role: params[5],
+      target_crn: params[6],
+      target_email: params[7],
+      target_company: params[8],
+      details: params[9],
+      status: params[10],
+      device_info: params[11],
+      ip_address: params[12],
+      channel: params[13]
+    };
+    const saved = await supabaseClient.logAudit(record);
+    return { rows: [saved] };
+  }
+
+  if (sqlUpper.includes("FROM CORPORATE_AUDIT_LOGS")) {
+    const companyUid = params[0];
+    const crn = params[1];
+    const limit = params[2] || 100;
+    const logs = await supabaseClient.getAuditLogs(companyUid, crn, limit);
+    return { rows: logs };
+  }
+
+  // 5. rm_users queries
+  if (sqlUpper.includes("FROM RM_USERS")) {
+    const cleanUser = (params[0] || "").trim().toLowerCase();
+    const memUser = memStore.getRmUser(cleanUser);
+    return { rows: memUser ? [memUser] : [] };
+  }
+
+  // 6. corporate_accounts & account_transactions
+  if (sqlUpper.includes("FROM CORPORATE_ACCOUNTS")) {
+    const accounts = await supabaseClient.getAccounts(params[0]);
+    return { rows: accounts };
+  }
+  if (sqlUpper.includes("FROM ACCOUNT_TRANSACTIONS")) {
+    const txs = await supabaseClient.getTransactions(params[0]);
+    return { rows: txs };
+  }
+
+  console.warn(`[SUPABASE ROUTER] Unhandled query pattern: "${text.substring(0, 80)}..."`);
+  return { rows: [] };
+}
+
+const db = {
   get pool() {
     return pool;
+  },
+  get engineType() {
+    return engineType;
+  },
+  ready() {
+    return initPromise;
   },
   isConnected() {
     return useDatabase;
   },
-  async query(text, params) {
-    if (useDatabase && pool) {
-      return pool.query(text, params);
+  async query(text, params = []) {
+    await initPromise;
+    if (useDatabase) {
+      if (engineType === "postgres" && pool) {
+        return pool.query(text, params);
+      }
+      if (engineType === "supabase_rest") {
+        return handleSupabaseRestQuery(text, params);
+      }
     }
     throw new Error("Database not connected, use memory store fallback");
+  },
+
+  // ── High-Level Entity Helpers ──
+  async saveInvitation(invite) {
+    await initPromise;
+    return supabaseClient.saveInvitation(invite);
+  },
+  async getInvitation(crn, email) {
+    await initPromise;
+    return supabaseClient.getInvitation(crn, email);
+  },
+  async listInvitations() {
+    await initPromise;
+    return supabaseClient.listInvitations();
+  },
+  async deleteInvitation(crn, email) {
+    await initPromise;
+    return supabaseClient.deleteInvitation(crn, email);
+  },
+
+  async saveApplication(app) {
+    await initPromise;
+    return supabaseClient.saveApplication(app);
+  },
+  async updateApplication(ref, updates) {
+    await initPromise;
+    return supabaseClient.updateApplication(ref, updates);
+  },
+  async getApplication(ref) {
+    await initPromise;
+    return supabaseClient.getApplication(ref);
+  },
+  async getApplicationByCrnAndEmail(crn, email) {
+    await initPromise;
+    return supabaseClient.getApplicationByCrnAndEmail(crn, email);
+  },
+  async getApplicationByUid(uid) {
+    await initPromise;
+    return supabaseClient.getApplicationByUid(uid);
+  },
+
+  async saveDocument(doc) {
+    await initPromise;
+    return supabaseClient.saveDocument(doc);
+  },
+  async getDocument(id, appRef) {
+    await initPromise;
+    return supabaseClient.getDocument(id, appRef);
+  },
+  async listDocuments(appRef) {
+    await initPromise;
+    return supabaseClient.listDocuments(appRef);
+  },
+  async deleteDocument(id, appRef) {
+    await initPromise;
+    return supabaseClient.deleteDocument(id, appRef);
+  },
+
+  async logAudit(record) {
+    await initPromise;
+    return supabaseClient.logAudit(record);
+  },
+  async getAuditLogs(uid, crn, limit) {
+    await initPromise;
+    return supabaseClient.getAuditLogs(uid, crn, limit);
   }
 };
+
+module.exports = db;
