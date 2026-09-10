@@ -340,7 +340,7 @@ class SupabaseClient {
     if (!application_ref) return [];
     const cleanRef = encodeURIComponent(application_ref.trim());
     const res = await this.request(
-      `application_documents?application_ref=eq.${cleanRef}&select=id,application_ref,company_uid,document_type,file_name,file_type,file_size,ocr_status,created_at,updated_at&order=created_at.desc`
+      `application_documents?application_ref=eq.${cleanRef}&select=*&order=created_at.desc`
     );
     return Array.isArray(res.data) ? res.data : [];
   }
