@@ -103,6 +103,24 @@ async function initDb() {
 
     useDatabase = true;
     console.log("✅ [DATABASE] Successfully connected & synchronized schema (Base64 vault active) with PostgreSQL / Supabase");
+
+    // Check if corporate_accounts is empty and auto-seed initial demo data
+    try {
+      const accCountRes = await pool.query("SELECT COUNT(*) FROM corporate_accounts");
+      if (parseInt(accCountRes.rows[0].count, 10) === 0) {
+        console.log("🌱 [DATABASE] Empty tables detected. Auto-seeding initial banking records...");
+        const fs = require("fs");
+        const path = require("path");
+        const seedSqlPath = path.join(__dirname, "../db/seed.sql");
+        if (fs.existsSync(seedSqlPath)) {
+          const seedSql = fs.readFileSync(seedSqlPath, "utf8");
+          await pool.query(seedSql);
+          console.log("✅ [DATABASE] Initial banking data seeded successfully.");
+        }
+      }
+    } catch (seedErr) {
+      console.warn("⚠️  [DATABASE] Auto-seeding check notice:", seedErr.message);
+    }
   } catch (err) {
     console.warn("⚠️  [DATABASE] PostgreSQL connection inactive (" + err.message + ").");
     console.log("ℹ️  [DATABASE] Active fallback: High-speed in-memory repository with full Base64 document persistence enabled.");

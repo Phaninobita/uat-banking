@@ -28,14 +28,15 @@ function parseDocumentText(text) {
   const data = {};
   if (!text || typeof text !== "string") return data;
 
-  const lines = text.split("\n").map((l) => l.trim());
-  const mrzLines = lines.filter((l) => l.length > 28 && l.includes("<"));
+  const cleanText = text.trim();
+  const lines = cleanText.split(/[\r\n]+/).map((l) => l.trim()).filter(Boolean);
+  const mrzLines = lines.filter((l) => (l.match(/</g) || []).length >= 5 || /^P[<A-Z0-9]{28,}/i.test(l.replace(/\s+/g, "")));
 
   if (mrzLines.length >= 2) {
-    const line1 = mrzLines[0].replace(/\s/g, "");
-    const line2 = mrzLines[1].replace(/\s/g, "");
+    const line1 = mrzLines[0].replace(/\s/g, "").toUpperCase();
+    const line2 = mrzLines[1].replace(/\s/g, "").toUpperCase();
 
-    const line1NoHeader = line1.replace(/^P<[A-Z]{3}/, "");
+    const line1NoHeader = line1.replace(/^P<([A-Z]{3})?/, "");
     const nameParts = line1NoHeader.split("<<");
     if (nameParts.length >= 2) {
       const surname = nameParts[0].replace(/</g, " ").trim();
@@ -45,7 +46,7 @@ function parseDocumentText(text) {
       data.givenNames = givenNames;
     }
 
-    const natMatch = line1.match(/P<([A-Z]{3})/);
+    const natMatch = line1.match(/^P<([A-Z]{3})/);
     if (natMatch) {
       const code = natMatch[1];
       data.nationality = countryMap[code] || code;
@@ -61,7 +62,7 @@ function parseDocumentText(text) {
         const year = parseInt(dobRaw.substring(0, 2), 10);
         const month = dobRaw.substring(2, 4);
         const day = dobRaw.substring(4, 6);
-        const fullYear = year < 70 ? 2000 + year : 1900 + year;
+        const fullYear = year < 50 ? 2000 + year : 1900 + year;
         data.dob = `${fullYear}-${month}-${day}`;
       }
     }
@@ -83,20 +84,73 @@ function parseDocumentText(text) {
         data.expiry = `${fullYear}-${month}-${day}`;
       }
     }
-    return data;
   }
 
-  const nameMatch = text.match(/(?:Company Name|Trade Name|Business Name|Entity Name)\s*:?\s*([^\n\r]+)/i);
-  if (nameMatch) {
-    data.fullName = nameMatch[1].trim();
+  // Visual Passport Inspection labels (useful if MRZ was blurry or cropped)
+  if (!data.fullName) {
+    const givenMatch = cleanText.match(/(?:Given\s*Name[s]?|Forename[s]?|First\s*Name|Pr[eé]noms?)\s*[:.]?\s*([A-Za-z\s\-]+)/i);
+    const surMatch = cleanText.match(/(?:Surname|Nom|Family\s*Name|Last\s*Name)\s*[:.]?\s*([A-Za-z\s\-]+)/i);
+    if (givenMatch && surMatch) {
+      data.fullName = `${givenMatch[1].trim()} ${surMatch[1].trim()}`;
+    } else {
+      const nameMatch = cleanText.match(/(?:Name|Full\s*Name|Nom\s*Complet|Holder|Bearer)\s*[:.]?\s*([A-Za-z\s\-]{3,40})/i);
+      if (nameMatch && !nameMatch[1].toLowerCase().includes("passport")) {
+        data.fullName = nameMatch[1].trim();
+      }
+    }
   }
 
-  const licenceMatch = text.match(/(?:License No|Registration No|TRN|Licence No|License Number)\s*[:.]?\s*([A-Z0-9\s\-]{4,25})/i);
+  if (!data.passportNumber) {
+    const passMatch = cleanText.match(/(?:Passport\s*(?:No|Number|Nummer|Nr\.?)|Doc(?:ument)?\s*No)\s*[:.]?\s*([A-Z0-9<]{7,12})/i);
+    if (passMatch) {
+      data.passportNumber = passMatch[1].replace(/</g, "").trim();
+    }
+  }
+
+  if (!data.nationality) {
+    for (const [code, country] of Object.entries(countryMap)) {
+      const regex = new RegExp(`\\b(${country}|${code})\\b`, "i");
+      if (regex.test(cleanText)) {
+        data.nationality = country;
+        break;
+      }
+    }
+  }
+
+  if (!data.gender) {
+    const sexMatch = cleanText.match(/(?:Sex|Sexe|Gender)\s*[:.]?\s*([MF]|Male|Female)\b/i);
+    if (sexMatch) {
+      const s = sexMatch[1].toUpperCase();
+      data.gender = (s === "F" || s === "FEMALE") ? "Female" : "Male";
+    }
+  }
+
+  if (!data.dob) {
+    const dobMatch = cleanText.match(/(?:Date\s*of\s*Birth|DOB|Birth\s*Date|Date\s*de\s*naissance)\s*[:.]?\s*([0-9]{1,2}[\/\-\.][0-9]{1,2}[\/\-\.][0-9]{2,4})/i);
+    if (dobMatch) {
+      data.dob = dobMatch[1].replace(/[\/\.]/g, "-");
+    }
+  }
+
+  if (!data.expiry) {
+    const expMatch = cleanText.match(/(?:Date\s*of\s*Expiry|Expiry\s*Date|Expiration|Date\s*d'expiration)\s*[:.]?\s*([0-9]{1,2}[\/\-\.][0-9]{1,2}[\/\-\.][0-9]{2,4})/i);
+    if (expMatch) {
+      data.expiry = expMatch[1].replace(/[\/\.]/g, "-");
+    }
+  }
+
+  // Corporate document fields
+  const corpNameMatch = cleanText.match(/(?:Company Name|Trade Name|Business Name|Entity Name)\s*:?\s*([^\n\r]+)/i);
+  if (corpNameMatch) {
+    data.fullName = corpNameMatch[1].trim();
+  }
+
+  const licenceMatch = cleanText.match(/(?:License No|Registration No|TRN|Licence No|License Number)\s*[:.]?\s*([A-Z0-9\s\-]{4,25})/i);
   if (licenceMatch) {
     data.registrationNumber = licenceMatch[1].replace(/\s/g, "").trim();
   }
 
-  const authorityMatch = text.match(/(?:Government of|Free Zone Authority|Department of Economic Development|Ministry of Economy|ADGM|DIFC)\s*([A-Za-z\s]{2,40})/i);
+  const authorityMatch = cleanText.match(/(?:Government of|Free Zone Authority|Department of Economic Development|Ministry of Economy|ADGM|DIFC)\s*([A-Za-z\s]{2,40})/i);
   if (authorityMatch) {
     data.issuingAuthority = authorityMatch[0].trim();
   }
@@ -292,16 +346,16 @@ router.delete("/:id", requireAuth, async (req, res) => {
 // 5. Document OCR
 router.post("/ocr", requireAuth, async (req, res) => {
   memStore.metrics.serviceRequests.documents++;
-  const { imageBase64, docType } = req.body;
+  const { imageBase64, docType, clientText } = req.body;
 
-  if (!imageBase64) {
-    return res.status(400).json({ error: "Image base64 content is required." });
+  if (!imageBase64 && !clientText) {
+    return res.status(400).json({ error: "Image base64 content or extracted text is required." });
   }
 
   try {
-    let extractedText = "";
+    let extractedText = clientText ? clientText.trim() : "";
 
-    if (config.GOOGLE_VISION_API_KEY) {
+    if (!extractedText && config.GOOGLE_VISION_API_KEY && imageBase64) {
       try {
         const gResponse = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${config.GOOGLE_VISION_API_KEY}`, {
           method: "POST",
@@ -327,7 +381,8 @@ router.post("/ocr", requireAuth, async (req, res) => {
 
     const parsedData = parseDocumentText(extractedText);
 
-    if (!parsedData.fullName) {
+    // Only provide fallback demo data if ABSOLUTELY no text was extracted and no real data found
+    if (!extractedText && !parsedData.fullName && !parsedData.passportNumber) {
       if (docType === "corporate") {
         parsedData.fullName = "Apex Global Holdings Ltd";
         parsedData.registrationNumber = "CRN-8849201";

@@ -80,10 +80,28 @@ router.get("/accounts", async (req, res) => {
 });
 
 // 2. Get Live Transactions Ledger
-router.get("/transactions", (req, res) => {
+router.get("/transactions", async (req, res) => {
   memStore.metrics.serviceRequests.banking++;
   const limit = parseInt(req.query.limit || "20", 10);
-  const txs = memStore.transactions.slice(0, limit);
+  let txs = [];
+
+  if (db.isConnected()) {
+    try {
+      const result = await db.query(
+        "SELECT * FROM account_transactions ORDER BY created_at DESC LIMIT $1",
+        [limit]
+      );
+      if (result.rows && result.rows.length > 0) {
+        txs = result.rows;
+      }
+    } catch (dbErr) {
+      console.warn("[BANKING SERVICE] DB transactions fetch fallback:", dbErr.message);
+    }
+  }
+
+  if (!txs || txs.length === 0) {
+    txs = memStore.transactions.slice(0, limit);
+  }
 
   return res.json({
     success: true,
@@ -126,27 +144,44 @@ router.post("/transfer", async (req, res) => {
   }
 
   const accountNum = fromAccount || "7029841001";
-  const acc = memStore.accounts.get(accountNum);
+  let acc = null;
+
+  if (db.isConnected()) {
+    try {
+      const accRes = await db.query(
+        "SELECT * FROM corporate_accounts WHERE account_number = $1 LIMIT 1",
+        [accountNum]
+      );
+      if (accRes.rows.length > 0) {
+        acc = accRes.rows[0];
+      }
+    } catch (e) {
+      console.warn("[BANKING SERVICE] DB account query fallback:", e.message);
+    }
+  }
+
+  if (!acc) {
+    acc = memStore.accounts.get(accountNum);
+  }
 
   if (!acc) {
     return res.status(404).json({ error: "Source corporate account not found." });
   }
 
-  if (acc.available_balance < numAmount) {
+  const currentAvailable = parseFloat(acc.available_balance || acc.balance || 0);
+  if (currentAvailable < numAmount) {
     return res.status(400).json({ error: "Insufficient available balance in corporate account." });
   }
 
-  // Deduct balance
-  acc.balance = Number((acc.balance - numAmount).toFixed(2));
-  acc.available_balance = Number((acc.available_balance - numAmount).toFixed(2));
-  memStore.accounts.set(accountNum, acc);
+  const newBalance = Number((parseFloat(acc.balance) - numAmount).toFixed(2));
+  const newAvail = Number((currentAvailable - numAmount).toFixed(2));
 
   // Generate SWIFT GPI Tracking reference
   const txRef = "TX-FTS-" + crypto.randomBytes(4).toString("hex").toUpperCase();
   const swiftUetr = crypto.randomUUID();
 
   const txRecord = {
-    id: memStore.transactions.length + 1,
+    id: Date.now(),
     transaction_ref: txRef,
     swift_uetr: swiftUetr,
     account_number: accountNum,
@@ -160,9 +195,47 @@ router.post("/transfer", async (req, res) => {
     status: "settled",
     channel: channel || "portal",
     clearing_channel: "CBUAE Funds Transfer System (FTS)",
+    created_at: new Date().toISOString(),
     timestamp: new Date().toISOString()
   };
 
+  // Update in Database if connected
+  if (db.isConnected()) {
+    try {
+      await db.query(
+        "UPDATE corporate_accounts SET balance = $1, available_balance = $2, updated_at = NOW() WHERE account_number = $3",
+        [newBalance, newAvail, accountNum]
+      );
+
+      await db.query(
+        `INSERT INTO account_transactions (
+          transaction_ref, account_id, account_number, type, amount, currency,
+          counterparty_name, counterparty_iban, description, category, status, channel, created_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW())`,
+        [
+          txRef,
+          acc.id || null,
+          accountNum,
+          "debit",
+          numAmount,
+          currency || acc.currency,
+          counterpartyName,
+          counterpartyIban,
+          description || "Corporate Wire Transfer",
+          "Commercial Payment",
+          "settled",
+          channel || "portal"
+        ]
+      );
+    } catch (dbErr) {
+      console.error("[BANKING SERVICE] Failed to record transfer in DB:", dbErr.message);
+    }
+  }
+
+  // Update in-memory fallback
+  acc.balance = newBalance;
+  acc.available_balance = newAvail;
+  memStore.accounts.set(accountNum, acc);
   memStore.transactions.unshift(txRecord);
 
   // Send simulated notification

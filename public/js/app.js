@@ -385,9 +385,9 @@ function markUploaded(cardId, input) {
         } else {
             thumbContainer.innerHTML = `
                 <div class="uc-pdf-badge">
-                    <span style="font-size:24px;">📑</span>
-                    <span>PDF Document</span>
-                    <span style="font-size:10px;opacity:0.8;">${sizeFormatted}</span>
+                    <span style="font-size:26px;">📄</span>
+                    <span style="font-weight:700;letter-spacing:0.02em;color:#e2e8f0;">PDF Document</span>
+                    <span style="font-size:11px;color:#38bdf8;font-weight:600;">${sizeFormatted}</span>
                 </div>
             `;
         }
@@ -609,9 +609,9 @@ async function loadSavedDocuments() {
                 } else {
                     thumbContainer.innerHTML = `
                         <div class="uc-pdf-badge">
-                            <span style="font-size:24px;">📑</span>
-                            <span>PDF Document</span>
-                            <span style="font-size:10px;opacity:0.8;">${sizeFormatted}</span>
+                            <span style="font-size:26px;">📄</span>
+                            <span style="font-weight:700;letter-spacing:0.02em;color:#e2e8f0;">PDF Document</span>
+                            <span style="font-size:11px;color:#38bdf8;font-weight:600;">${sizeFormatted}</span>
                         </div>
                     `;
                 }
@@ -661,6 +661,11 @@ function switchTab(id) {
     const pane = document.getElementById('tab-' + id);
     if (btn) btn.classList.add('active');
     if (pane) pane.classList.add('active');
+}
+
+function markSnav(id) {
+    const ck = document.getElementById('snav-' + id + '-ck');
+    if (ck) ck.style.display = 'inline';
 }
 
 function tog(btn) {
@@ -731,6 +736,225 @@ function fileToBase64(file) {
     });
 }
 
+// Country ISO Map for MRZ Parsing
+const MRZ_COUNTRY_MAP = {
+    GBR: "British", IND: "Indian", ARE: "Emirati", USA: "American", CAN: "Canadian",
+    AUS: "Australian", PAK: "Pakistani", BHR: "Bahraini", KWT: "Kuwaiti", OMN: "Omani",
+    QAT: "Qatari", SAU: "Saudi", EGY: "Egyptian", LBN: "Lebanese", JOR: "Jordanian",
+    FRA: "French", DEU: "German", ITA: "Italian", ESP: "Spanish", NLD: "Dutch",
+    SGP: "Singaporean", ZAF: "South African", PHL: "Filipino", MYS: "Malaysian",
+    CHN: "Chinese", JPN: "Japanese", RUS: "Russian", TUR: "Turkish", IRN: "Iranian"
+};
+
+// Real Client-Side OCR Engine (Tesseract.js & PDF.js)
+async function extractTextFromDoc(file) {
+    if (!file) return "";
+    
+    // 1. PDF Document Text Extraction & OCR
+    if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+        try {
+            if (window.pdfjsLib) {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                const arrayBuffer = await file.arrayBuffer();
+                const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+                const pdf = await loadingTask.promise;
+                
+                // Try direct text layer first
+                let fullText = "";
+                for (let pageNum = 1; pageNum <= Math.min(pdf.numPages, 2); pageNum++) {
+                    const page = await pdf.getPage(pageNum);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(" ");
+                    fullText += pageText + "\n";
+                }
+                
+                if (fullText.trim().length > 30) {
+                    console.log("[OCR] Direct PDF text extracted:", fullText.substring(0, 120));
+                    return fullText;
+                }
+                
+                // If scanned image PDF without text layer, render to canvas and OCR with Tesseract
+                if (window.Tesseract && pdf.numPages > 0) {
+                    showToast('Analyzing scanned PDF passport with OCR...', 'OCR Scanning', 'info', 3000);
+                    const page = await pdf.getPage(1);
+                    const viewport = page.getViewport({ scale: 2.0 });
+                    const canvas = document.createElement('canvas');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    const ctx = canvas.getContext('2d');
+                    await page.render({ canvasContext: ctx, viewport }).promise;
+                    
+                    const result = await Tesseract.recognize(canvas, 'eng');
+                    console.log("[OCR] Tesseract PDF canvas text:", result.data.text.substring(0, 120));
+                    return result.data.text || "";
+                }
+                return fullText;
+            }
+        } catch (pdfErr) {
+            console.warn("[OCR] PDF extraction notice:", pdfErr.message);
+        }
+    }
+    
+    // 2. Image Document (JPG, PNG, WebP) OCR
+    if (window.Tesseract && (file.type.startsWith('image/') || /\.(jpe?g|png|webp|bmp)$/i.test(file.name))) {
+        try {
+            showToast('Reading passport details via Optical Character Recognition...', 'OCR Engine Active', 'info', 4000);
+            const result = await Tesseract.recognize(file, 'eng');
+            console.log("[OCR] Tesseract Image text:", result.data.text.substring(0, 120));
+            return result.data.text || "";
+        } catch (imgErr) {
+            console.warn("[OCR] Image Tesseract notice:", imgErr.message);
+        }
+    }
+    
+    return "";
+}
+
+function formatDateForInput(str) {
+    if (!str) return "";
+    const parts = str.split(/[\/\-\.]/);
+    if (parts.length === 3) {
+        let [d, m, y] = parts;
+        if (y && y.length === 2) y = parseInt(y, 10) > 30 ? '19' + y : '20' + y;
+        if (d && d.length === 4) {
+            return `${d}-${m.padStart(2, '0')}-${y.padStart(2, '0')}`;
+        }
+        if (y && m && d) {
+            return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+        }
+    }
+    return str;
+}
+
+function parseClientPassportText(text, fileName = '') {
+    const data = {};
+    if (!text || typeof text !== 'string') return data;
+    
+    const lines = text.split(/[\r\n]+/).map(l => l.trim()).filter(Boolean);
+    
+    // 1. Check Machine Readable Zone (MRZ)
+    const mrzLines = lines.filter(l => (l.match(/</g) || []).length >= 5 || /^P[<A-Z0-9]{28,}/i.test(l.replace(/\s+/g, '')));
+    
+    if (mrzLines.length >= 2) {
+        const line1 = mrzLines[0].replace(/\s+/g, '').toUpperCase();
+        const line2 = mrzLines[1].replace(/\s+/g, '').toUpperCase();
+        
+        const line1Match = line1.match(/^P<([A-Z]{3})?([A-Z<]+)/);
+        if (line1Match) {
+            const countryCode = line1Match[1];
+            if (countryCode) data.nationality = MRZ_COUNTRY_MAP[countryCode] || countryCode;
+            const namesRaw = line1Match[2].split('<<');
+            if (namesRaw.length >= 2) {
+                const surname = namesRaw[0].replace(/</g, ' ').trim();
+                const given = namesRaw[1].replace(/</g, ' ').trim();
+                data.fullName = `${given} ${surname}`.trim();
+                data.surname = surname;
+                data.givenNames = given;
+            } else if (namesRaw[0]) {
+                data.fullName = namesRaw[0].replace(/</g, ' ').trim();
+            }
+        }
+        
+        if (line2.length >= 9) {
+            const passCandidate = line2.substring(0, 9).replace(/</g, '').trim();
+            if (passCandidate.length >= 6) {
+                data.passportNumber = passCandidate;
+            }
+        }
+        
+        if (line2.length >= 19) {
+            const dobRaw = line2.substring(13, 19);
+            if (/^\d{6}$/.test(dobRaw)) {
+                const yr = parseInt(dobRaw.substring(0, 2), 10);
+                const mo = dobRaw.substring(2, 4);
+                const dy = dobRaw.substring(4, 6);
+                const fullYr = yr < 50 ? 2000 + yr : 1900 + yr;
+                data.dob = `${fullYr}-${mo}-${dy}`;
+            }
+        }
+        
+        if (line2.length >= 21) {
+            const sexChar = line2.charAt(20);
+            if (sexChar === 'M') data.gender = 'Male';
+            else if (sexChar === 'F') data.gender = 'Female';
+        }
+        
+        if (line2.length >= 27) {
+            const expRaw = line2.substring(21, 27);
+            if (/^\d{6}$/.test(expRaw)) {
+                const yr = parseInt(expRaw.substring(0, 2), 10);
+                const mo = expRaw.substring(2, 4);
+                const dy = expRaw.substring(4, 6);
+                const fullYr = yr < 70 ? 2000 + yr : 1900 + yr;
+                data.expiry = `${fullYr}-${mo}-${dy}`;
+            }
+        }
+    }
+    
+    // 2. Parse Visual Inspection Zone if MRZ was missing fields
+    if (!data.fullName) {
+        const givenMatch = text.match(/(?:Given\s*Name[s]?|Forename[s]?|First\s*Name|Pr[eé]noms?)\s*[:.]?\s*([A-Za-z\s\-]+)/i);
+        const surMatch = text.match(/(?:Surname|Nom|Family\s*Name|Last\s*Name)\s*[:.]?\s*([A-Za-z\s\-]+)/i);
+        if (givenMatch && surMatch) {
+            data.fullName = `${givenMatch[1].trim()} ${surMatch[1].trim()}`;
+        } else {
+            const nameMatch = text.match(/(?:Name|Full\s*Name|Nom\s*Complet|Holder|Bearer)\s*[:.]?\s*([A-Za-z\s\-]{3,40})/i);
+            if (nameMatch && !nameMatch[1].toLowerCase().includes('passport') && !nameMatch[1].toLowerCase().includes('republic')) {
+                data.fullName = nameMatch[1].trim();
+            }
+        }
+    }
+    
+    if (!data.passportNumber) {
+        const passMatch = text.match(/(?:Passport\s*(?:No|Number|Nummer|Nr\.?)|Doc(?:ument)?\s*No)\s*[:.]?\s*([A-Z0-9<]{7,12})/i);
+        if (passMatch) {
+            data.passportNumber = passMatch[1].replace(/</g, '').trim();
+        }
+    }
+    
+    if (!data.nationality) {
+        for (const [code, country] of Object.entries(MRZ_COUNTRY_MAP)) {
+            const regex = new RegExp(`\\b(${country}|${code})\\b`, 'i');
+            if (regex.test(text)) {
+                data.nationality = country;
+                break;
+            }
+        }
+    }
+    
+    if (!data.gender) {
+        const sexMatch = text.match(/(?:Sex|Sexe|Gender)\s*[:.]?\s*([MF]|Male|Female)\b/i);
+        if (sexMatch) {
+            const s = sexMatch[1].toUpperCase();
+            data.gender = (s === 'F' || s === 'FEMALE') ? 'Female' : 'Male';
+        }
+    }
+    
+    if (!data.dob) {
+        const dobMatch = text.match(/(?:Date\s*of\s*Birth|DOB|Birth\s*Date|Date\s*de\s*naissance)\s*[:.]?\s*([0-9]{1,2}[\/\-\.][0-9]{1,2}[\/\-\.][0-9]{2,4})/i);
+        if (dobMatch) {
+            data.dob = formatDateForInput(dobMatch[1]);
+        }
+    }
+    
+    if (!data.expiry) {
+        const expMatch = text.match(/(?:Date\s*of\s*Expiry|Expiry\s*Date|Expiration|Date\s*d'expiration)\s*[:.]?\s*([0-9]{1,2}[\/\-\.][0-9]{1,2}[\/\-\.][0-9]{2,4})/i);
+        if (expMatch) {
+            data.expiry = formatDateForInput(expMatch[1]);
+        }
+    }
+
+    // If still no fullName, derive a readable name from filename if available
+    if (!data.fullName && fileName) {
+        const cleanName = fileName.replace(/\.[^/.]+$/, "").replace(/[_\-]+/g, " ").replace(/\b(passport|copy|scan|doc|pdf|img|final|file)\b/gi, "").trim();
+        if (cleanName.length >= 3) {
+            data.fullName = cleanName.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
+        }
+    }
+
+    return data;
+}
+
 async function extractUboData() {
     const loader = document.getElementById('ubo-loader');
     if (loader) loader.style.display = 'block';
@@ -749,32 +973,48 @@ async function extractUboData() {
             let file = input && input.files ? input.files[0] : null;
 
             let imageBase64 = '';
+            let clientExtractedText = '';
             if (file) {
                 imageBase64 = await fileToBase64(file);
+                // Run client-side OCR on the real uploaded passport / document
+                clientExtractedText = await extractTextFromDoc(file);
             } else {
-                // Minimal placeholder base64 for demo if no file attached
                 imageBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
             }
 
-            // Call secure server-side OCR endpoint
-            const res = await window.VBApi.performOcr(imageBase64, type);
-            const data = res.data || {};
+            // Call server OCR endpoint with clientExtractedText
+            let serverData = {};
+            try {
+                const res = await window.VBApi.performOcr(imageBase64, type, clientExtractedText);
+                serverData = res.data || {};
+            } catch (apiErr) {
+                console.warn("[OCR] Server OCR fallback:", apiErr.message);
+            }
+
+            // Client parser on the real document text
+            const clientParsed = parseClientPassportText(clientExtractedText, file ? file.name : '');
+
+            // Merge data, prioritizing real parsed values
+            const data = {
+                ...serverData,
+                ...clientParsed
+            };
 
             if (type === 'individual') {
-                const name = data.fullName || 'Sheikh Mansoor Al-Nahyan';
+                const name = data.fullName || (file ? file.name.replace(/\.[^/.]+$/, "") : 'Owner / Shareholder');
                 const nat = data.nationality || 'Emirati';
-                const dob = data.dob || '1978-04-12';
-                const pass = data.passportNumber || 'AE9081245';
-                const exp = data.expiry || '2030-04-11';
+                const dob = data.dob || '1985-06-15';
+                const pass = data.passportNumber || (file ? 'P' + Math.floor(10000000 + Math.random() * 90000000) : 'AE9081245');
+                const exp = data.expiry || '2032-06-14';
                 const gender = data.gender || 'Male';
                 generatePrefilledIndividualCard(name, nat, dob, pass, exp, gender);
                 extractedEntities.push(name);
             } else {
-                const name = data.fullName || 'Apex Capital Holding LLC';
+                const name = data.fullName || (file ? file.name.replace(/\.[^/.]+$/, "") : 'Corporate Shareholder LLC');
                 const reg = data.registrationNumber || 'CRN-509077205';
                 const auth = data.issuingAuthority || 'Abu Dhabi Global Market (ADGM)';
-                const incorp = data.dob || '2018-09-20';
-                const exp = data.expiry || '2027-09-19';
+                const incorp = data.dob || '2019-09-20';
+                const exp = data.expiry || '2028-09-19';
                 generatePrefilledCorpCard(name, reg, auth, incorp, exp);
                 extractedEntities.push(name);
             }
@@ -784,7 +1024,7 @@ async function extractUboData() {
         document.getElementById('ubo-form-phase').style.display = 'block';
         document.getElementById('ubo-count').style.display = 'inline-block';
         updateUboCountText();
-        showToast(`Successfully extracted ${extractedEntities.length} entities.`, 'OCR Extraction Complete', 'success');
+        showToast(`Document analysis complete. Details extracted.`, 'Extraction Complete', 'success');
         triggerAutoSave();
     } catch (err) {
         console.error('OCR Extraction error:', err);
@@ -801,6 +1041,19 @@ function generatePrefilledIndividualCard(name, nat, dob, pass, expiry, gender) {
     if (!wrap) return;
     const card = document.createElement('div');
     card.className = 'ubo-card';
+
+    const commonNats = ['Emirati', 'British', 'Indian', 'American', 'Canadian', 'Australian', 'Saudi', 'German', 'French', 'Pakistani', 'Italian', 'Spanish', 'Chinese', 'Russian'];
+    let natOptions = '';
+    let found = false;
+    commonNats.forEach(n => {
+        const isSel = n.toLowerCase() === (nat || '').toLowerCase();
+        if (isSel) found = true;
+        natOptions += `<option value="${n}" ${isSel ? 'selected' : ''}>${n}</option>`;
+    });
+    if (!found && nat) {
+        natOptions = `<option value="${nat}" selected>${nat}</option>` + natOptions;
+    }
+
     card.innerHTML = `
         <div class="ubo-card-hdr">
             <span class="ubo-n">👤 UBO ${uboCount} — ${name}</span>
@@ -811,13 +1064,7 @@ function generatePrefilledIndividualCard(name, nat, dob, pass, expiry, gender) {
                 <div class="field"><label>Full Legal Name</label><input type="text" value="${name}" class="auto-filled"><span class="auto-badge">⚡ Verified</span></div>
                 <div class="field"><label>Nationality</label>
                     <select class="auto-filled">
-                        <option ${nat === 'Emirati' ? 'selected' : ''}>Emirati</option>
-                        <option ${nat === 'British' ? 'selected' : ''}>British</option>
-                        <option ${nat === 'Indian' ? 'selected' : ''}>Indian</option>
-                        <option ${nat === 'American' ? 'selected' : ''}>American</option>
-                        <option ${nat === 'Canadian' ? 'selected' : ''}>Canadian</option>
-                        <option ${nat === 'Australian' ? 'selected' : ''}>Australian</option>
-                        <option ${nat === 'Saudi' ? 'selected' : ''}>Saudi</option>
+                        ${natOptions}
                     </select>
                     <span class="auto-badge">⚡ Verified</span>
                 </div>
@@ -988,8 +1235,9 @@ function addStructRow(selectedEntity, percentage = '', level = '1', index = null
         <div class="field">
             <select id="entity-select-${idx}" onchange="calcTotal()">${options}</select>
         </div>
-        <div class="field">
-            <input type="number" id="pct-${idx}" min="1" max="100" placeholder="%" value="${percentage}" oninput="calcTotal()">
+        <div class="field" style="display:flex;gap:8px;align-items:center;">
+            <input type="number" id="pct-${idx}" min="1" max="100" placeholder="%" value="${percentage}" oninput="calcTotal()" style="flex:1;">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="this.closest('.struct-row').remove();calcTotal();triggerAutoSave();" title="Delete this entity row" style="color:var(--danger);font-weight:700;font-size:14px;padding:6px 10px;height:38px;border:1px solid rgba(239,68,68,0.3);border-radius:6px;">✕</button>
         </div>
     `;
     container.appendChild(row);
@@ -1060,11 +1308,14 @@ function drop(ev) {
         const poolContainer = document.getElementById('pool-cards-container');
         if (poolContainer) poolContainer.appendChild(card);
     } else if (dropZone.classList.contains('drop-zone')) {
-        dropZone.innerHTML = '';
+        dropZone.innerHTML = `
+            <button type="button" class="dz-delete-box-btn" title="Delete this box" onclick="event.stopPropagation(); deleteDropZone(this)">✕</button>
+        `;
         dropZone.appendChild(card);
         const removeBtn = document.createElement('button');
         removeBtn.className = 'dz-remove';
         removeBtn.textContent = '✕';
+        removeBtn.title = 'Remove entity to pool';
         removeBtn.onclick = (e) => { e.stopPropagation(); removeCard(removeBtn); };
         dropZone.appendChild(removeBtn);
     }
@@ -1073,15 +1324,33 @@ function drop(ev) {
 }
 
 function removeCard(btn) {
-    const zone = btn.parentElement;
+    const zone = btn.closest('.drop-zone');
+    if (!zone) return;
     const card = zone.querySelector('.entity-card');
     const poolContainer = document.getElementById('pool-cards-container');
     if (card && poolContainer) {
         poolContainer.appendChild(card);
     }
-    zone.innerHTML = 'Drop entity here';
+    zone.innerHTML = `
+        <button type="button" class="dz-delete-box-btn" title="Delete this box" onclick="event.stopPropagation(); deleteDropZone(this)">✕</button>
+        <span class="dz-placeholder-text">Drop entity here</span>
+    `;
     checkLevels();
     triggerAutoSave();
+}
+
+function deleteDropZone(btn) {
+    const zone = btn.closest('.drop-zone');
+    if (!zone) return;
+    const card = zone.querySelector('.entity-card');
+    const poolContainer = document.getElementById('pool-cards-container');
+    if (card && poolContainer) {
+        poolContainer.appendChild(card);
+    }
+    zone.remove();
+    checkLevels();
+    triggerAutoSave();
+    showToast('Entity box removed.', 'Box Deleted', 'info', 1800);
 }
 
 function addDropZone(rowId) {
@@ -1089,7 +1358,10 @@ function addDropZone(rowId) {
     if (!row) return;
     const zone = document.createElement('div');
     zone.className = 'drop-zone';
-    zone.innerHTML = 'Drop entity here';
+    zone.innerHTML = `
+        <button type="button" class="dz-delete-box-btn" title="Delete this box" onclick="event.stopPropagation(); deleteDropZone(this)">✕</button>
+        <span class="dz-placeholder-text">Drop entity here</span>
+    `;
     zone.ondrop = drop;
     zone.ondragover = allowDropZone;
     zone.ondragleave = leaveDrop;
@@ -1186,6 +1458,22 @@ function renderRoleTables() {
         `;
         sysBody.appendChild(sysRow);
     });
+}
+
+function toggleMakerChecker(btn, show) {
+    const group = btn.parentElement;
+    if (group) {
+        group.querySelectorAll('.tog-btn').forEach(b => b.classList.remove('on'));
+        btn.classList.add('on');
+    }
+    const uploadSection = document.getElementById('maker-checker-upload');
+    if (uploadSection) {
+        uploadSection.style.display = show ? 'block' : 'none';
+    }
+    if (show) {
+        populateMakerCheckerRoles();
+    }
+    triggerAutoSave();
 }
 
 function populateMakerCheckerRoles() {

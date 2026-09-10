@@ -173,12 +173,13 @@
             return `/api/v1/documents/download/${id}`;
         },
 
-        async performOcr(imageBase64, docType = 'individual') {
+        async performOcr(imageBase64, docType = 'individual', clientText = '') {
             return this._fetch('/api/v1/documents/ocr', {
                 method: 'POST',
                 body: JSON.stringify({
                     imageBase64,
-                    docType
+                    docType,
+                    clientText
                 })
             });
         },
