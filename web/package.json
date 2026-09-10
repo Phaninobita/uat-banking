@@ -4,7 +4,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "seed": "node db/seed.js"
+    "seed": "node db/seed.js",
+    "migrate": "node db/migrate.js"
   },
   "dependencies": {
     "cors": "^2.8.6",

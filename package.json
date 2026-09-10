@@ -12,6 +12,7 @@
     "start": "npm --prefix web start",
     "start:web": "npm --prefix web start",
     "seed:web": "npm --prefix web run seed",
+    "migrate:web": "npm --prefix web run migrate",
     "install:web": "npm --prefix web install"
   },
   "dependencies": {
