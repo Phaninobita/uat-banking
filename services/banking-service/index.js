@@ -291,7 +291,7 @@ router.get(["/mobile/summary", "/summary"], (req, res) => {
     {
       cardId: "card_corp_02",
       cardNumber: "•••• •••• •••• 3129",
-      cardholder: "APEX GLOBAL HOLDINGS",
+      cardholder: "FIRST NATIONAL HOLDINGS",
       expiry: "11/30",
       type: "Visa Infinite Commercial",
       gradient: "linear-gradient(135deg, #064e3b 0%, #059669 50%, #10b981 100%)",
@@ -306,7 +306,7 @@ router.get(["/mobile/summary", "/summary"], (req, res) => {
     mobileAppVersion: "2.4.0 (Mobile Banking Suite)",
     client: {
       name: "Alexander J. Vance",
-      company: "Apex Global Holdings Ltd",
+      company: "First National Holdings Inc",
       accountTier: "Corporate VIP"
     },
     primaryBalance: {

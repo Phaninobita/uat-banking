@@ -182,7 +182,7 @@ router.post("/verify-otp", async (req, res) => {
       if (existing.rows.length > 0) {
         applicationRecord = existing.rows[0];
         // Ensure company name is synced from RM record
-        if (!applicationRecord.company_name || applicationRecord.company_name === "Apex Global Holdings Ltd" || applicationRecord.company_name !== companyNameFromRm) {
+        if (!applicationRecord.company_name || applicationRecord.company_name === "First National Holdings Inc" || applicationRecord.company_name !== companyNameFromRm) {
           const updated = await db.query(
             `UPDATE corporate_onboarding_applications
              SET company_name = $1, trade_name = $1, updated_at = NOW()
@@ -314,11 +314,11 @@ router.post("/mobile/biometric", async (req, res) => {
     token,
     user: {
       name: "Alexander J. Vance",
-      company: "Apex Global Holdings Ltd",
+      company: "First National Holdings Inc",
       crn: activeCrn,
       email: activeEmail,
       application_ref: appRef,
-      tier: "Apex Corporate Gold"
+      tier: "FNB Corporate Gold"
     },
     service: "auth-service"
   });

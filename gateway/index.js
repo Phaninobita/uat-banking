@@ -64,7 +64,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// ÔöÇÔöÇ Microservices Mesh Status & Health Registry ÔöÇÔöÇ
+// ── Microservices Mesh Status & Health Registry ──
 app.get("/api/v1/gateway/health", (req, res) => {
   const uptimeSeconds = Math.floor(process.uptime());
   const hours = Math.floor(uptimeSeconds / 3600);
@@ -136,7 +136,7 @@ app.get("/api/v1/gateway/health", (req, res) => {
   });
 });
 
-// ÔöÇÔöÇ Microservice Routing Mounts (v1 API) ÔöÇÔöÇ
+// ── Microservice Routing Mounts (v1 API) ──
 app.use("/api/v1/auth", authService.router);
 app.use("/api/v1/documents", docService.router);
 app.use("/api/v1/applications", appService.router);
@@ -145,7 +145,7 @@ app.use("/api/v1/mobile", bankService.router); // Mobile summary & quick routes
 app.use("/api/v1/notifications", notifService.router);
 app.use("/api/v1/rm", rmService.router);
 
-// ÔöÇÔöÇ Legacy Forwarding Routers (100% Backward Compatibility) ÔöÇÔöÇ
+// ── Legacy Forwarding Routers (100% Backward Compatibility) ──
 app.use("/api/auth", authService.router);
 app.use("/api/application", appService.router);
 app.use("/api/documents", docService.router);

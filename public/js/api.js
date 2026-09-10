@@ -1,5 +1,5 @@
 /**
- * First National Bank Platform ÔÇö Microservices API Client Module
+ * First National Bank Platform — Microservices API Client Module
  * Communicates with the API Gateway (/api/v1/...) across all microservices:
  *   - Auth Service
  *   - Document & Base64 Vault Service
@@ -92,7 +92,7 @@
             return data;
         },
 
-        // ÔöÇÔöÇ AUTH SERVICE ÔöÇÔöÇ
+        // ── AUTH SERVICE ──
         async requestOtp(crn, email) {
             return this._fetch('/api/v1/auth/request-otp', {
                 method: 'POST',
@@ -128,7 +128,7 @@
             return result;
         },
 
-        // ÔöÇÔöÇ APPLICATION SERVICE ÔöÇÔöÇ
+        // ── APPLICATION SERVICE ──
         async getCurrentApplication() {
             return this._fetch('/api/v1/applications/current', {
                 method: 'GET'
@@ -146,7 +146,7 @@
             });
         },
 
-        // ÔöÇÔöÇ DOCUMENT SERVICE (BASE64 DB STORAGE) ÔöÇÔöÇ
+        // ── DOCUMENT SERVICE (BASE64 DB STORAGE) ──
         async uploadDocumentBase64({ docType, fileName, fileType, fileSize, base64Data, applicationRef }) {
             const appRef = applicationRef || this.getApplicationRef();
             return this._fetch('/api/v1/documents/upload', {
@@ -190,7 +190,7 @@
             });
         },
 
-        // ÔöÇÔöÇ CORE BANKING & FX SERVICE ÔöÇÔöÇ
+        // ── CORE BANKING & FX SERVICE ──
         async getAccounts() {
             return this._fetch('/api/v1/banking/accounts', {
                 method: 'GET'
@@ -222,7 +222,7 @@
             });
         },
 
-        // ÔöÇÔöÇ NOTIFICATION SERVICE ÔöÇÔöÇ
+        // ── NOTIFICATION SERVICE ──
         async getSimulatedEmails(email) {
             const query = email ? `?email=${encodeURIComponent(email)}` : '';
             return this._fetch(`/api/v1/notifications/emails${query}`, {
@@ -243,7 +243,7 @@
             });
         },
 
-        // ÔöÇÔöÇ GATEWAY HEALTH & MESH MONITOR ÔöÇÔöÇ
+        // ── GATEWAY HEALTH & MESH MONITOR ──
         async getMeshHealth() {
             return this._fetch('/api/v1/gateway/health', {
                 method: 'GET'

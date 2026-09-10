@@ -1,4 +1,4 @@
-﻿/**
+/**
  * First National Bank Relationship Manager (RM) Service
  * Microservice handling RM executive authentication, customer invitation dispatch,
  * magic link generation with composite key (CRN, Email), and real-time pipeline telemetry.
@@ -75,7 +75,7 @@ router.post("/login", async (req, res) => {
     rm_id: "RM-" + userRecord.username.toUpperCase(),
     username: userRecord.username,
     name: userRecord.full_name || "Phanee",
-    role: userRecord.role || "Senior Relationship Manager Â· Corporate Banking",
+    role: userRecord.role || "Senior Relationship Manager · Corporate Banking",
     department: "Institutional Clients Group",
     branch: userRecord.branch || "New York Financial Center",
     email: userRecord.email
@@ -102,7 +102,7 @@ router.post("/users", async (req, res) => {
 
     const cleanUser = username.trim().toLowerCase();
     const cleanEmail = email.trim().toLowerCase();
-    const cleanRole = role ? role.trim() : "Senior Relationship Manager Â· Corporate Banking";
+    const cleanRole = role ? role.trim() : "Senior Relationship Manager · Corporate Banking";
     const cleanBranch = branch ? branch.trim() : "New York Financial Center";
 
     let created = null;
@@ -298,7 +298,7 @@ router.post("/invite", async (req, res) => {
     const emailSubject = `Invitation to Onboard: First National Bank Corporate Banking Package for ${inviteRecord.company_name}`;
     memStore.recordSimulatedEmail({
       to: cleanEmail,
-      from: '"Michael Vance â€” First National Bank Corporate Banking" <m.vance@fnb-us.com>',
+      from: '"Michael Vance — First National Bank Corporate Banking" <m.vance@fnb-us.com>',
       subject: emailSubject,
       type: "rm_invitation",
       metadata: { crn: cleanCrn, email: cleanEmail, inviteLink },
@@ -319,7 +319,7 @@ router.post("/invite", async (req, res) => {
               <div style="font-size: 14px; color: #1e293b; margin-bottom: 4px;"><strong>Commercial Reg. No. (CRN):</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${cleanCrn}</code></div>
               <div style="font-size: 14px; color: #1e293b; margin-bottom: 16px;"><strong>Registered Email:</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${cleanEmail}</code></div>
               <a href="${inviteLink}" style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 700; font-size: 14px; text-decoration: none; padding: 12px 28px; border-radius: 8px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
-                ðŸš€ Launch Direct Customer Onboarding Portal
+                🚀 Launch Direct Customer Onboarding Portal
               </a>
             </div>
             <p style="color: #64748b; font-size: 12px; line-height: 1.6;">
@@ -330,8 +330,8 @@ router.post("/invite", async (req, res) => {
             <div style="display: flex; align-items: center; gap: 14px;">
               <div>
                 <strong style="color: #0f172a; font-size: 13px;">Michael Vance</strong><br>
-                <span style="font-size: 12px; color: #64748b;">Senior Vice President â€” Institutional & Corporate Banking</span><br>
-                <span style="font-size: 11px; color: #94a3b8;">ðŸ“ž +1 212 555 0199 Â· âœ‰ï¸ m.vance@fnb-us.com</span>
+                <span style="font-size: 12px; color: #64748b;">Senior Vice President — Institutional & Corporate Banking</span><br>
+                <span style="font-size: 11px; color: #94a3b8;">📞 +1 212 555 0199 · ✉️ m.vance@fnb-us.com</span>
               </div>
             </div>
           </div>
@@ -365,7 +365,7 @@ router.post("/resend/:crn/:email", async (req, res) => {
 
     memStore.recordSimulatedEmail({
       to: invite.email,
-      from: '"Michael Vance â€” First National Bank" <m.vance@fnb-us.com>',
+      from: '"Michael Vance — First National Bank" <m.vance@fnb-us.com>',
       subject: `Reminder: Complete Your First National Bank Onboarding for ${invite.company_name}`,
       type: "rm_invitation_reminder",
       metadata: { crn: invite.crn, email: invite.email, inviteLink: invite.invite_link },

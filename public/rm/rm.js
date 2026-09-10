@@ -1,5 +1,5 @@
 /**
- * First National Bank ÔÇö Relationship Manager (RM) Executive Suite Client Logic
+ * First National Bank — Relationship Manager (RM) Executive Suite Client Logic
  * Handles executive authentication, customer invitation dispatch,
  * magic link generation, pipeline tracking, and email previews.
  */
@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (pwdInput) pwdInput.addEventListener("input", hideAlert);
 });
 
-// ÔöÇÔöÇ TOAST NOTIFICATIONS ÔöÇÔöÇ
+// ── TOAST NOTIFICATIONS ──
 function showRmToast(message, type = "success") {
     const container = document.getElementById("rmToastContainer");
     if (!container) return;
@@ -42,7 +42,7 @@ function showRmToast(message, type = "success") {
     }, 4000);
 }
 
-// ÔöÇÔöÇ AUTHENTICATION ÔöÇÔöÇ
+// ── AUTHENTICATION ──
 function checkRmAuthSession() {
     if (currentRmToken) {
         try {
@@ -131,7 +131,7 @@ function handleRmSignOut() {
     showRmToast("RM Executive Session terminated.", "info");
 }
 
-// ÔöÇÔöÇ CUSTOMER INVITATION DISPATCH ÔöÇÔöÇ
+// ── CUSTOMER INVITATION DISPATCH ──
 async function handleDispatchInvite(ev) {
     ev.preventDefault();
 
@@ -227,7 +227,7 @@ function focusInviteForm() {
     if (crnInput) crnInput.focus();
 }
 
-// ÔöÇÔöÇ PIPELINE & INVITATIONS TABLE ÔöÇÔöÇ
+// ── PIPELINE & INVITATIONS TABLE ──
 async function fetchInvitations() {
     const tbody = document.getElementById("pipelineTableBody");
     try {

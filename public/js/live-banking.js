@@ -1,5 +1,5 @@
 /**
- * First National Bank Platform ÔÇö Live Core Banking & FX Controller
+ * First National Bank Platform — Live Core Banking & FX Controller
  * Manages real-time corporate balances, live FX rate feeds, instant wire transfers,
  * and SWIFT GPI transaction ledger.
  */
@@ -67,7 +67,7 @@
 
             if (!container) return;
 
-            const currencySymbols = { AED: 'Ï».ÏÑ', USD: '$', EUR: 'Ôé¼', GBP: '┬ú' };
+            const currencySymbols = { AED: 'AED', USD: '$', EUR: '€', GBP: '£' };
             const cardThemes = {
                 AED: { cardClass: 'corp-card-indigo', grad: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%)' },
                 USD: { cardClass: 'corp-card-emerald', grad: 'linear-gradient(135deg, #064e3b 0%, #065f46 40%, #059669 100%)' },
@@ -114,7 +114,7 @@
 
             select.innerHTML = accounts.map(acc => `
                 <option value="${acc.account_number}">
-                    ${acc.currency} ÔÇö ${acc.account_name} (${acc.currency} ${Number(acc.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })})
+                    ${acc.currency} — ${acc.account_name} (${acc.currency} ${Number(acc.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })})
                 </option>
             `).join('');
         },
@@ -193,7 +193,7 @@
                             </span>
                         </td>
                         <td>
-                            <span style="font-size:11px;color:#34d399;font-weight:700;">ÔùÅ Settled</span>
+                            <span style="font-size:11px;color:#34d399;font-weight:700;">● Settled</span>
                             <div style="font-size:10px;color:var(--text-muted);">${dateStr}</div>
                         </td>
                     </tr>
@@ -234,7 +234,7 @@
                     <span class="fx-pair-symbol">${r.pair}</span>
                     <span class="fx-pair-rate">${r.rate.toFixed(4)}</span>
                     <span class="${r.change24h.startsWith('-') ? 'fx-down' : 'fx-up'}">
-                        ${r.change24h.startsWith('-') ? 'Ôû╝' : 'Ôû▓'} ${r.change24h}
+                        ${r.change24h.startsWith('-') ? '▼' : '▲'} ${r.change24h}
                     </span>
                 </span>
             `).join('');
@@ -263,11 +263,11 @@
             }
 
             const submitBtn = document.querySelector('#liveBankingHub form button[type="submit"]') || document.getElementById('btnSubmitTransfer');
-            const originalText = submitBtn ? submitBtn.innerHTML : 'ÔÜí Authorize & Execute Wire';
+            const originalText = submitBtn ? submitBtn.innerHTML : '⚡ Authorize & Execute Wire';
 
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '­ƒöä Clearing with Fedwire FTS...';
+                submitBtn.innerHTML = '🔄 Clearing with Fedwire FTS...';
             }
 
             try {

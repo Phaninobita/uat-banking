@@ -1,5 +1,5 @@
 /**
- * First National Bank Corporate Account Portal ÔÇö Main Application Logic
+ * First National Bank Corporate Account Portal — Main Application Logic
  * Comprehensive state management, non-destructive navigation, OCR extraction, and multi-step persistence.
  */
 
@@ -361,7 +361,7 @@ function markUploaded(cardId, input) {
             statusEl.innerHTML = `
                 <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
                     <div>&#x2705; <strong>${file.name}</strong> (${sizeFormatted})</div>
-                    <span class="db-status-chip">­ƒƒó Saved in DB (Base64)</span>
+                    <span class="db-status-chip">🟢 Saved in DB (Base64)</span>
                 </div>
             `;
         }
@@ -402,13 +402,13 @@ function markUploaded(cardId, input) {
 
         actionBar.innerHTML = `
             <button type="button" class="btn-uc-action btn-uc-preview" onclick="event.stopPropagation(); openDocPreview('${cardId}')">
-                ­ƒæü´©Å Preview
+                👁️ Preview
             </button>
             <button type="button" class="btn-uc-action" onclick="event.stopPropagation(); downloadDocFromCache('${cardId}')">
-                Ô¼ç´©Å Download
+                📥 Download
             </button>
             <button type="button" class="btn-uc-action btn-uc-delete" onclick="event.stopPropagation(); removeUploadedDoc('${cardId}')">
-                ­ƒùæ´©Å Remove
+                🗑️ Remove
             </button>
         `;
 
@@ -482,7 +482,7 @@ function openDocPreview(cardId) {
         metaEl.innerHTML = `
             <span>Type: <strong>${doc.fileType}</strong></span> &bull; 
             <span>Size: <strong>${Math.round(doc.fileSize / 1024)} KB</strong></span> &bull; 
-            <span style="color:#34d399;font-weight:700;">­ƒƒó Stored in DB (Base64)</span>
+            <span style="color:#34d399;font-weight:700;">🟢 Stored in DB (Base64)</span>
         `;
     }
 
@@ -582,7 +582,7 @@ async function loadSavedDocuments() {
                     statusEl.innerHTML = `
                         <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
                             <div>&#x2705; <strong>${doc.file_name}</strong> (${sizeFormatted})</div>
-                            <span class="db-status-chip">­ƒƒó Stored in DB (Base64)</span>
+                            <span class="db-status-chip">🟢 Stored in DB (Base64)</span>
                         </div>
                     `;
                 }
@@ -622,13 +622,13 @@ async function loadSavedDocuments() {
                 }
                 actionBar.innerHTML = `
                     <button type="button" class="btn-uc-action btn-uc-preview" onclick="event.stopPropagation(); openDocPreview('${cardId}')">
-                        ­ƒæü´©Å Preview
+                        👁️ Preview
                     </button>
                     <button type="button" class="btn-uc-action" onclick="event.stopPropagation(); downloadDocFromCache('${cardId}')">
-                        Ô¼ç´©Å Download
+                        📥 Download
                     </button>
                     <button type="button" class="btn-uc-action btn-uc-delete" onclick="event.stopPropagation(); removeUploadedDoc('${cardId}')">
-                        ­ƒùæ´©Å Remove
+                        🗑️ Remove
                     </button>
                 `;
 
@@ -642,7 +642,7 @@ async function loadSavedDocuments() {
                     base64Data: doc.file_data_base64
                 };
             });
-            console.log(`­ƒôæ [DOCUMENTS] Restored ${res.documents.length} Base64 documents from database.`);
+            console.log(`📑 [DOCUMENTS] Restored ${res.documents.length} Base64 documents from database.`);
         }
     } catch (err) {
         console.warn('[DOCUMENTS] Failed to auto-restore saved documents:', err);
@@ -701,9 +701,9 @@ function addUploadBox(type) {
     box.style.padding = '32px 20px';
     box.onclick = () => triggerUpload('f-upbox-' + uploadBoxCount);
     if (type === 'individual') {
-        box.innerHTML = `<input type="file" id="f-upbox-${uploadBoxCount}" accept=".pdf,.jpg,.png" onchange="handleDocUpload(${uploadBoxCount}, this)" aria-label="Upload individual passport"><div style="font-size:28px;margin-bottom:8px;" aria-hidden="true">­ƒøé</div><strong>Upload Passport</strong><small>For individual UBOs</small>`;
+        box.innerHTML = `<input type="file" id="f-upbox-${uploadBoxCount}" accept=".pdf,.jpg,.png" onchange="handleDocUpload(${uploadBoxCount}, this)" aria-label="Upload individual passport"><div style="font-size:28px;margin-bottom:8px;" aria-hidden="true">👤</div><strong>Upload Passport</strong><small>For individual UBOs</small>`;
     } else {
-        box.innerHTML = `<input type="file" id="f-upbox-${uploadBoxCount}" accept=".pdf,.jpg,.png" onchange="handleDocUpload(${uploadBoxCount}, this)" aria-label="Upload corporate trade licence"><div style="font-size:28px;margin-bottom:8px;" aria-hidden="true">­ƒÅó</div><strong>Upload Trade Licence</strong><small>For corporate owners</small>`;
+        box.innerHTML = `<input type="file" id="f-upbox-${uploadBoxCount}" accept=".pdf,.jpg,.png" onchange="handleDocUpload(${uploadBoxCount}, this)" aria-label="Upload corporate trade licence"><div style="font-size:28px;margin-bottom:8px;" aria-hidden="true">🏢</div><strong>Upload Trade Licence</strong><small>For corporate owners</small>`;
     }
     container.appendChild(box);
 }
@@ -890,7 +890,7 @@ function parseClientPassportText(text, fileName = '') {
     
     // 2. Parse Visual Inspection Zone if MRZ was missing fields
     if (!data.fullName) {
-        const givenMatch = text.match(/(?:Given\s*Name[s]?|Forename[s]?|First\s*Name|Pr[e├®]noms?)\s*[:.]?\s*([A-Za-z\s\-]+)/i);
+        const givenMatch = text.match(/(?:Given\s*Name[s]?|Forename[s]?|First\s*Name|Pr[eé]noms?)\s*[:.]?\s*([A-Za-z\s\-]+)/i);
         const surMatch = text.match(/(?:Surname|Nom|Family\s*Name|Last\s*Name)\s*[:.]?\s*([A-Za-z\s\-]+)/i);
         if (givenMatch && surMatch) {
             data.fullName = `${givenMatch[1].trim()} ${surMatch[1].trim()}`;
@@ -1009,7 +1009,7 @@ async function extractUboData() {
             } else {
                 const name = data.fullName || (file ? file.name.replace(/\.[^/.]+$/, "") : 'Corporate Shareholder LLC');
                 const reg = data.registrationNumber || 'CRN-509077205';
-                const auth = data.issuingAuthority || 'Abu Dhabi Global Market (ADGM)';
+                const auth = data.issuingAuthority || 'Delaware Division of Corporations';
                 const incorp = data.dob || '2019-09-20';
                 const exp = data.expiry || '2028-09-19';
                 generatePrefilledCorpCard(name, reg, auth, incorp, exp);
@@ -1071,7 +1071,7 @@ function evaluateDateInputExpiry(inputEl) {
         inputEl.classList.remove('date-expired');
         if (badge) {
             badge.className = 'auto-badge';
-            badge.innerHTML = `ÔÜí Verified`;
+            badge.innerHTML = `⚡ Verified`;
         }
     }
     triggerAutoSave();
@@ -1101,22 +1101,22 @@ function generatePrefilledIndividualCard(name, nat, dob, pass, expiry, gender) {
 
     card.innerHTML = `
         <div class="ubo-card-hdr">
-            <span class="ubo-n">&#x1F464; UBO ${uboCount} ÔÇö ${name}</span>
+            <span class="ubo-n">&#x1F464; UBO ${uboCount} — ${name}</span>
             <button class="ubo-remove" onclick="this.closest('.ubo-card').remove();uboCount--;updateUboCountText();triggerAutoSave();" aria-label="Remove this UBO">&#x2715; Remove</button>
         </div>
         <div class="ubo-card-body">
             <div class="g2" style="margin-bottom:14px;">
-                <div class="field"><label>Full Legal Name</label><input type="text" value="${name}" class="auto-filled"><span class="auto-badge">ÔÜí Verified</span></div>
+                <div class="field"><label>Full Legal Name</label><input type="text" value="${name}" class="auto-filled"><span class="auto-badge">⚡ Verified</span></div>
                 <div class="field"><label>Nationality</label>
                     <select class="auto-filled">
                         ${natOptions}
                     </select>
-                    <span class="auto-badge">ÔÜí Verified</span>
+                    <span class="auto-badge">⚡ Verified</span>
                 </div>
-                <div class="field"><label>Date of Birth</label><input type="date" value="${dob}" class="auto-filled"><span class="auto-badge">ÔÜí Verified</span></div>
-                <div class="field"><label>Passport Number</label><input type="text" value="${pass}" class="auto-filled"><span class="auto-badge">ÔÜí Verified</span></div>
-                <div class="field"><label>Passport Expiry</label><input type="date" value="${expiry}" class="auto-filled ${expExpired ? 'date-expired' : ''}" oninput="evaluateDateInputExpiry(this)" onchange="evaluateDateInputExpiry(this)"><span class="auto-badge ${expExpired ? 'badge-expired' : ''}">${expExpired ? `&#x26A0; Expired (${expiry})` : 'ÔÜí Verified'}</span></div>
-                <div class="field"><label>Gender</label><select class="auto-filled"><option ${gender === 'Male' ? 'selected' : ''}>Male</option><option ${gender === 'Female' ? 'selected' : ''}>Female</option></select><span class="auto-badge">ÔÜí Verified</span></div>
+                <div class="field"><label>Date of Birth</label><input type="date" value="${dob}" class="auto-filled"><span class="auto-badge">⚡ Verified</span></div>
+                <div class="field"><label>Passport Number</label><input type="text" value="${pass}" class="auto-filled"><span class="auto-badge">⚡ Verified</span></div>
+                <div class="field"><label>Passport Expiry</label><input type="date" value="${expiry}" class="auto-filled ${expExpired ? 'date-expired' : ''}" oninput="evaluateDateInputExpiry(this)" onchange="evaluateDateInputExpiry(this)"><span class="auto-badge ${expExpired ? 'badge-expired' : ''}">${expExpired ? `&#x26A0; Expired (${expiry})` : '⚡ Verified'}</span></div>
+                <div class="field"><label>Gender</label><select class="auto-filled"><option ${gender === 'Male' ? 'selected' : ''}>Male</option><option ${gender === 'Female' ? 'selected' : ''}>Female</option></select><span class="auto-badge">⚡ Verified</span></div>
             </div>
             <span class="tog-label">Is this person a Politically Exposed Person (PEP)?</span>
             <div class="tog-group" role="group"><button class="tog-btn" onclick="tog(this)">Yes</button><button class="tog-btn on" onclick="tog(this)">No</button></div>
@@ -1136,16 +1136,16 @@ function generatePrefilledCorpCard(name, reg, auth, incorp, expiry) {
 
     card.innerHTML = `
         <div class="ubo-card-hdr">
-            <span class="ubo-n">­ƒÅó Corporate Shareholder ${uboCount} ÔÇö ${name}</span>
+            <span class="ubo-n">🏢 Corporate Shareholder ${uboCount} — ${name}</span>
             <button class="ubo-remove" onclick="this.closest('.ubo-card').remove();uboCount--;updateUboCountText();triggerAutoSave();" aria-label="Remove this corporate entity">&#x2715; Remove</button>
         </div>
         <div class="ubo-card-body">
             <div class="g2" style="margin-bottom:14px;">
-                <div class="field"><label>Corporate Entity Name</label><input type="text" value="${name}" class="auto-filled"><span class="auto-badge">ÔÜí Verified</span></div>
-                <div class="field"><label>Licence / Registration No.</label><input type="text" value="${reg}" class="auto-filled"><span class="auto-badge">ÔÜí Verified</span></div>
-                <div class="field"><label>Issuing Authority</label><input type="text" value="${auth}" class="auto-filled"><span class="auto-badge">ÔÜí Verified</span></div>
-                <div class="field"><label>Date of Incorporation</label><input type="date" value="${incorp}" class="auto-filled"><span class="auto-badge">ÔÜí Verified</span></div>
-                <div class="field"><label>Licence Expiry Date</label><input type="date" value="${expiry}" class="auto-filled ${expExpired ? 'date-expired' : ''}" oninput="evaluateDateInputExpiry(this)" onchange="evaluateDateInputExpiry(this)"><span class="auto-badge ${expExpired ? 'badge-expired' : ''}">${expExpired ? `&#x26A0; Expired (${expiry})` : 'ÔÜí Verified'}</span></div>
+                <div class="field"><label>Corporate Entity Name</label><input type="text" value="${name}" class="auto-filled"><span class="auto-badge">⚡ Verified</span></div>
+                <div class="field"><label>Licence / Registration No.</label><input type="text" value="${reg}" class="auto-filled"><span class="auto-badge">⚡ Verified</span></div>
+                <div class="field"><label>Issuing Authority</label><input type="text" value="${auth}" class="auto-filled"><span class="auto-badge">⚡ Verified</span></div>
+                <div class="field"><label>Date of Incorporation</label><input type="date" value="${incorp}" class="auto-filled"><span class="auto-badge">⚡ Verified</span></div>
+                <div class="field"><label>Licence Expiry Date</label><input type="date" value="${expiry}" class="auto-filled ${expExpired ? 'date-expired' : ''}" oninput="evaluateDateInputExpiry(this)" onchange="evaluateDateInputExpiry(this)"><span class="auto-badge ${expExpired ? 'badge-expired' : ''}">${expExpired ? `&#x26A0; Expired (${expiry})` : '⚡ Verified'}</span></div>
             </div>
         </div>
     `;
@@ -1205,7 +1205,7 @@ function setView(view) {
 function renderStep4() {
     // If no entities yet, provide standard initial entities so ownership is never empty
     if (extractedEntities.length === 0) {
-        extractedEntities = ['Sheikh Mansoor Al-Nahyan', 'Apex Capital Holding LLC'];
+        extractedEntities = ['Robert J. Harrison', 'Acme Capital Holdings LLC'];
         uboCount = 2;
         updateUboCountText();
     }
@@ -1228,7 +1228,7 @@ function renderVisualView() {
         if (isCorp) card.classList.add('corp');
         card.dataset.entityName = name;
         card.dataset.entityType = isCorp ? 'corporate' : 'individual';
-        card.innerHTML = `<div class="ec-name">${name}</div><div class="ec-type">${isCorp ? '­ƒÅó Corporate Entity' : '&#x1F464; Individual UBO'}</div>`;
+        card.innerHTML = `<div class="ec-name">${name}</div><div class="ec-type">${isCorp ? '🏢 Corporate Entity' : '&#x1F464; Individual UBO'}</div>`;
         container.appendChild(card);
     });
     checkLevels();
@@ -1492,9 +1492,9 @@ function checkLevels() {
                 if (chartWrap) chartWrap.appendChild(lv2Notice);
             }
             lv2Notice.innerHTML = `
-                <span class="lock-icon" aria-hidden="true">­ƒöÆ</span>
+                <span class="lock-icon" aria-hidden="true">🔒</span>
                 <div>
-                    <strong>Level 2 Locked ÔÇö Unlocks for Corporate Entities Only</strong>
+                    <strong>Level 2 Locked — Unlocks for Corporate Entities Only</strong>
                     <p>Underlying subsidiaries and tiered shareholding (Level 2) are only required when a Corporate Shareholder is placed in Level 1. Individual UBOs hold direct parent-level ownership.</p>
                 </div>
             `;
@@ -1661,8 +1661,8 @@ function populateMakerCheckerRoles() {
     const currentMaker = cachedRoleSelections?.maker || makerSelect.value || (extractedEntities[0] || '');
     const currentChecker = cachedRoleSelections?.checker || checkerSelect.value || (extractedEntities[1] || '');
 
-    makerSelect.innerHTML = '<option value="">ÔÇö Select Maker ÔÇö</option>';
-    checkerSelect.innerHTML = '<option value="">ÔÇö Select Checker ÔÇö</option>';
+    makerSelect.innerHTML = '<option value="">— Select Maker —</option>';
+    checkerSelect.innerHTML = '<option value="">— Select Checker —</option>';
 
     extractedEntities.forEach(name => {
         makerSelect.innerHTML += `<option value="${name}" ${name === currentMaker ? 'selected' : ''}>${name}</option>`;
@@ -1818,13 +1818,13 @@ function updateReviewSection() {
     const legalType = document.getElementById('step2_legal_type')?.value || '';
     const licenceExp = document.getElementById('step2_expiry_date')?.value || '';
     const isLicExpired = isDateExpired(licenceExp);
-    if (ra2Summary) ra2Summary.textContent = (name || 'Company') + ' ┬À ' + (crn || 'No CRN');
+    if (ra2Summary) ra2Summary.textContent = (name || 'Company') + ' · ' + (crn || 'No CRN');
     if (ra2Details) {
         ra2Details.innerHTML = `
-            <div class="rv-row"><span class="rvl">Company Name</span><span class="rvv">${name || 'ÔÇö'}</span></div>
-            <div class="rv-row"><span class="rvl">Commercial Reg. No. (CRN)</span><span class="rvv">${crn || 'ÔÇö'}</span></div>
-            <div class="rv-row"><span class="rvl">Legal Type</span><span class="rvv">${legalType || 'ÔÇö'}</span></div>
-            <div class="rv-row"><span class="rvl">Licence Expiry</span><span class="rvv" style="${isLicExpired ? 'color:#f87171;font-weight:700;' : ''}">${isLicExpired ? `&#x26A0; Expired (${licenceExp})` : (licenceExp || 'ÔÇö')}</span></div>
+            <div class="rv-row"><span class="rvl">Company Name</span><span class="rvv">${name || '—'}</span></div>
+            <div class="rv-row"><span class="rvl">Commercial Reg. No. (CRN)</span><span class="rvv">${crn || '—'}</span></div>
+            <div class="rv-row"><span class="rvl">Legal Type</span><span class="rvv">${legalType || '—'}</span></div>
+            <div class="rv-row"><span class="rvl">Licence Expiry</span><span class="rvv" style="${isLicExpired ? 'color:#f87171;font-weight:700;' : ''}">${isLicExpired ? `&#x26A0; Expired (${licenceExp})` : (licenceExp || '—')}</span></div>
         `;
     }
 
@@ -2076,7 +2076,7 @@ async function handleLoginStep1() {
                 id: 'otp_' + Date.now(),
                 from: '"First National Bank" <onboarding@fnb-us.com>',
                 to: email,
-                subject: `First National Bank ÔÇö Your Access Code: ${otpCode}`,
+                subject: `First National Bank — Your Access Code: ${otpCode}`,
                 code: otpCode,
                 type: 'otp',
                 timestamp: new Date().toISOString(),
@@ -2195,12 +2195,12 @@ function showLoginError(err, customTitle = null) {
 
     if ((err && err.code === 'RM_INVITATION_NOT_FOUND') || errMsg.includes('Relationship Manager (RM) Database') || errMsg.includes('Access Restricted')) {
         isRmInviteError = true;
-        title = '­ƒöÆ Access Restricted';
+        title = '&#x26D4; Access Restricted';
         const displayCrn = currentLoginCrn || (err && err.crn) || 'entered CRN';
         const displayEmail = currentLoginEmail || (err && err.email) || 'entered Email';
         detail = `CRN <code>${displayCrn}</code> and Email <code>${displayEmail}</code> are not registered in the RM onboarding database. Only corporate applicants with an invitation issued by their Relationship Manager can log in.`;
     } else if (errMsg.includes('OTP') || errMsg.includes('verification code') || errMsg.includes('code are required')) {
-        title = '­ƒöæ Verification Notice';
+        title = '&#x1F511; Verification Notice';
         detail = errMsg;
     } else {
         detail = errMsg;
@@ -2215,7 +2215,7 @@ function showLoginError(err, customTitle = null) {
         ${isRmInviteError ? `
         <div class="login-alert-actions">
             <span style="font-size:11px;color:#cbd5e1;">Need access? Contact your banker or:</span>
-            <a href="/rm" target="_blank" class="login-alert-link">­ƒæö Open RM Executive Portal &rarr;</a>
+            <a href="/rm" target="_blank" class="login-alert-link">&#x1F517; Open RM Executive Portal &rarr;</a>
         </div>` : ''}
     `;
     el.classList.add('show');
@@ -2243,11 +2243,11 @@ function displayClientNameOnTop(companyName, crn) {
 
     // Auto-fill Step 2 company fields
     const s2Name = document.getElementById('step2_name');
-    if (s2Name && (!s2Name.value || s2Name.value === 'Apex Global Holdings Ltd')) {
+    if (s2Name && (!s2Name.value || s2Name.value === 'First National Holdings Inc')) {
         s2Name.value = resolvedName;
     }
     const s2Trade = document.getElementById('trade_name');
-    if (s2Trade && (!s2Trade.value || s2Trade.value === 'Apex Global Holdings Ltd')) {
+    if (s2Trade && (!s2Trade.value || s2Trade.value === 'First National Holdings Inc')) {
         s2Trade.value = resolvedName;
     }
     const s2Crn = document.getElementById('step2_crn');
@@ -2277,8 +2277,8 @@ async function finalizeApp() {
     receiveSimulatedEmail({
         id: 'app_' + Date.now(),
         from: '"First National Bank Corporate Onboarding" <onboarding@fnb-us.com>',
-        to: currentLoginEmail || 'admin@apexholdings.ae',
-        subject: `First National Bank ÔÇö Corporate Application Received (${appRef})`,
+        to: currentLoginEmail || 'admin@company.com',
+        subject: `First National Bank — Corporate Application Received (${appRef})`,
         type: 'application_submitted',
         timestamp: new Date().toISOString(),
         html: `
@@ -2294,7 +2294,7 @@ async function finalizeApp() {
                     <span style="font-size: 11px; color: #166534; font-weight: 700; text-transform: uppercase;">Application Reference</span><br>
                     <span style="font-size: 24px; font-weight: 800; color: #15803d; font-family: monospace;">${appRef}</span>
                 </div>
-                <p style="color: #475569; font-size: 13px;">Our onboarding desk will complete the verification within 1ÔÇô2 business days. Your assigned Relationship Manager is <strong>Michael Vance</strong> (m.vance@fnb-us.com &bull; +1 212 555 0190).</p>
+                <p style="color: #475569; font-size: 13px;">Our onboarding desk will complete the verification within 1–2 business days. Your assigned Relationship Manager is <strong>Michael Vance</strong> (m.vance@fnb-us.com &bull; +1 212 555 0190).</p>
             </div>
         `
     });
@@ -2319,7 +2319,7 @@ function showSaveModal() {
     triggerAutoSave();
     const modal = document.getElementById('saveModal');
     const appRef = currentAppRef || 'AB-2026-001245';
-    const email = currentLoginEmail || 'admin@apexholdings.ae';
+    const email = currentLoginEmail || 'admin@company.com';
     const crn = currentLoginCrn || '509077205';
 
     if (modal) {
@@ -2344,7 +2344,7 @@ function showSaveModal() {
         id: 'save_' + Date.now(),
         from: '"First National Bank Onboarding" <onboarding@fnb-us.com>',
         to: email,
-        subject: `First National Bank ÔÇö Resume Your Application (${appRef})`,
+        subject: `First National Bank — Resume Your Application (${appRef})`,
         type: 'resume',
         timestamp: new Date().toISOString(),
         html: `
@@ -2431,7 +2431,7 @@ function sendInvite() {
                 </div>
                 <p style="color: #334155; font-size: 14px;">You have been nominated as an Ultimate Beneficial Owner (UBO) for an First National Bank corporate account application.</p>
                 <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; margin: 16px 0; text-align: center;">
-                    <button type="button" style="background: #0284c7; color: #ffffff; border: none; font-weight: 700; font-size: 13px; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Upload Identity Documents ÔåÆ</button>
+                    <button type="button" style="background: #0284c7; color: #ffffff; border: none; font-weight: 700; font-size: 13px; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Upload Identity Documents →</button>
                 </div>
             </div>
         `
@@ -2444,7 +2444,7 @@ function triggerDocuSign() {
     const statusItems = document.getElementById('docusign-status-items');
     const alertBox = document.getElementById('docusign-alert');
 
-    if (btn) { btn.innerHTML = 'Ôîø Dispatching Invites&hellip;'; btn.style.opacity = '0.8'; btn.style.pointerEvents = 'none'; }
+    if (btn) { btn.innerHTML = '⏳ Dispatching Invites&hellip;'; btn.style.opacity = '0.8'; btn.style.pointerEvents = 'none'; }
     setTimeout(() => {
         if (actionArea) {
             actionArea.innerHTML = `<div style="display:flex; align-items:center; gap:8px; color: #6ee7b7; font-weight: 700; font-size: 14px; width: 100%;"><span style="font-size:18px;" aria-hidden="true">&#x2705;</span> Invites successfully dispatched to all signatories!</div>`;
@@ -2454,8 +2454,8 @@ function triggerDocuSign() {
         if (statusItems) {
             statusItems.innerHTML = `
                 <div class="timeline-item"><span style="font-weight:600;color:#34d399;">&#x2705;</span><span style="color:#f1f5f9;">DocuSign invitations sent to signatories</span></div>
-                <div class="timeline-item"><span style="font-weight:600;color:#fbbf24;">ÔÅ│</span><span style="color:#f1f5f9;">Awaiting document review and signatures</span></div>
-                <div class="timeline-item"><span style="font-weight:600;color:#fbbf24;">ÔÅ│</span><span style="color:#f1f5f9;">Estimated completion: 24ÔÇô72 hours</span></div>
+                <div class="timeline-item"><span style="font-weight:600;color:#fbbf24;">⏳</span><span style="color:#f1f5f9;">Awaiting document review and signatures</span></div>
+                <div class="timeline-item"><span style="font-weight:600;color:#fbbf24;">⏳</span><span style="color:#f1f5f9;">Estimated completion: 24–72 hours</span></div>
             `;
         }
         if (alertBox) alertBox.style.display = 'block';
@@ -2466,7 +2466,7 @@ function triggerDocuSign() {
         receiveSimulatedEmail({
             id: 'docu_' + Date.now(),
             from: '"DocuSign via First National Bank" <documents@docusign.net>',
-            to: currentLoginEmail || 'admin@apexholdings.ae',
+            to: currentLoginEmail || 'admin@company.com',
             subject: 'DocuSign: Please Sign Your First National Bank Corporate Account Client Agreement',
             type: 'docusign',
             timestamp: new Date().toISOString(),
@@ -2480,9 +2480,9 @@ function triggerDocuSign() {
                     <p style="color: #1e293b; font-size: 14px;">Hello Authorized Signatory,</p>
                     <p style="color: #334155; font-size: 14px; line-height: 1.5;">First National Bank has prepared your Corporate Banking Master Agreement and Authorized Signatory Mandate for digital signature.</p>
                     <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 18px; margin: 18px 0; text-align: center;">
-                        <button type="button" onclick="simulateDocuSignSign()" style="background: #ffbe00; color: #111827; border: none; font-weight: 800; font-size: 14px; padding: 12px 26px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(255,190,0,0.3);">Ô£ì´©Å Review & Sign Document</button>
+                        <button type="button" onclick="simulateDocuSignSign()" style="background: #ffbe00; color: #111827; border: none; font-weight: 800; font-size: 14px; padding: 12px 26px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(255,190,0,0.3);">✍️ Review &amp; Sign Document</button>
                     </div>
-                    <p style="color: #64748b; font-size: 12px;">This envelope is secured with 256-bit AES encryption compliant with UAE Federal Law No. 1 of 2006 on Electronic Commerce and Transactions.</p>
+                    <p style="color: #64748b; font-size: 12px;">This envelope is secured with 256-bit AES encryption compliant with the US Electronic Signatures in Global and National Commerce Act (E-SIGN Act).</p>
                 </div>
             `
         });
@@ -2491,14 +2491,14 @@ function triggerDocuSign() {
 
 function downloadReceipt() {
     const appRef = currentAppRef || 'AB-2026-DEMO';
-    const company = document.getElementById('step2_name')?.value || 'Apex Global Holdings Ltd';
+    const company = document.getElementById('step2_name')?.value || 'First National Holdings Inc';
     const crn = document.getElementById('step2_crn')?.value || currentLoginCrn || '509077205';
 
     const txt = `First National Bank CORPORATE ONBOARDING RECEIPT\n==========================================\nApplication Ref: ${appRef}\nSubmitted: ${new Date().toLocaleDateString('en-AE', { day: '2-digit', month: 'long', year: 'numeric' })}\nCompany: ${company}\nCRN: ${crn}\n\nNEXT STEPS:\n1. Download First National Bank Mobile App\n2. Sign in with your registered email\n3. Complete biometric identity verification\n4. Sign digital documents via DocuSign\n5. Final onboarding review: 2-3 business days\n\nRELATIONSHIP MANAGER:\nMichael Vance | Corporate Banking\nEmail: m.vance@fnb-us.com | Support: support@fnb-us.com\n`;
 
     const a = Object.assign(document.createElement('a'), {
         href: URL.createObjectURL(new Blob([txt], { type: 'text/plain' })),
-        download: `ApexBank_Application_${appRef}.txt`
+        download: `FNB_Application_${appRef}.txt`
     });
     a.click();
     showToast('Onboarding receipt downloaded.', 'Download Complete', 'success');
@@ -2559,9 +2559,9 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
     m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
 });
 
-// ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+// ==============================================================================
 // &#x1F6C7;&#x1F6C7; REAL-TIME EMAIL SIMULATOR (IN-BROWSER VIRTUAL INBOX) &#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;&#x1F6C7;
-// ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+// ==============================================================================
 window.liveSimulatedEmails = [];
 let unreadEmailCount = 0;
 let selectedEmailId = null;
@@ -2661,7 +2661,7 @@ function showIncomingEmailAlert(email) {
         sender.textContent = `From: ${email.from.replace(/<.*>/, '').replace(/"/g, '')}`;
         if (snippet) {
             snippet.innerHTML = email.code
-                ? `­ƒöæ Access Code: <strong>${email.code}</strong> &bull; Click to view &amp; auto-fill`
+                ? `🔑 Access Code: <strong>${email.code}</strong> &bull; Click to view &amp; auto-fill`
                 : 'Click to open and read incoming email';
         }
         alertBox.style.display = 'flex';
@@ -2715,7 +2715,7 @@ function renderMailboxList() {
     if (window.liveSimulatedEmails.length === 0) {
         listContainer.innerHTML = `
             <div class="mb-empty-state">
-                <div class="empty-icon" aria-hidden="true">­ƒô¡</div>
+                <div class="empty-icon" aria-hidden="true">📭</div>
                 <div class="empty-title">Simulated Inbox Ready</div>
                 <div class="empty-desc">Request an OTP code, trigger DocuSign, or submit an application to see emails arrive here instantly.</div>
             </div>
@@ -2789,17 +2789,17 @@ function openEmailInReader(id) {
             actionBanner.style.display = 'flex';
             actionBanner.innerHTML = `
                 <div style="font-size:12px; color:#166534; font-weight:600;">
-                    ­ƒÆí Access Code: <strong style="font-size:16px; font-family:monospace; color:#0284c7;">${email.code}</strong>
+                    💡 Access Code: <strong style="font-size:16px; font-family:monospace; color:#0284c7;">${email.code}</strong>
                 </div>
                 <button type="button" class="btn-autofill-email-code" onclick="autoFillOtpFromEmail('${email.code}')">
-                    ÔÜí Auto-Fill Code into Login
+                    ⚡ Auto-Fill Code into Login
                 </button>
             `;
         } else if (email.type === 'docusign') {
             actionBanner.style.display = 'flex';
             actionBanner.innerHTML = `
                 <div style="font-size:12px; color:#92400e; font-weight:600;">
-                    Ô£ì´©Å E-Signature Required on Client Agreement
+                    ✍️ E-Signature Required on Client Agreement
                 </div>
                 <button type="button" class="btn-autofill-email-code" style="background:#ffbe00; color:#111827;" onclick="simulateDocuSignSign()">
                     Sign Documents Now
@@ -2809,7 +2809,7 @@ function openEmailInReader(id) {
             actionBanner.style.display = 'flex';
             actionBanner.innerHTML = `
                 <div style="font-size:12px; color:#1e40af; font-weight:600;">
-                    ­ƒÆ¥ Direct Application Resume Link
+                    💾 Direct Application Resume Link
                 </div>
                 <button type="button" class="btn-autofill-email-code" onclick="showToast('Resume link copied!', 'Resume', 'info'); closeModal('saveModal');">
                     Continue Application
@@ -2978,7 +2978,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 const banner = document.createElement('div');
                 banner.id = 'rm-invite-banner';
                 banner.style.cssText = 'margin-bottom:16px; padding:12px 16px; background:rgba(245,158,11,0.15); border:1.5px solid #f59e0b; border-radius:10px; font-size:12.5px; color:#fef08a; text-align:left; animation:fadeUp 0.3s ease;';
-                banner.innerHTML = `<strong style="color:#ffffff; font-size:13px;">­ƒæö Relationship Manager Invitation</strong><br>Welcome to First National Bank! You are accessing your onboarding journey with CRN <strong>${inviteCrn || ''}</strong>. Click Request OTP to begin.`;
+                banner.innerHTML = `<strong style="color:#ffffff; font-size:13px;">&#x1F4CB; Relationship Manager Invitation</strong><br>Welcome to First National Bank! You are accessing your onboarding journey with CRN <strong>${inviteCrn || ''}</strong>. Click Request OTP to begin.`;
                 const errorBox = document.getElementById('loginError');
                 if (errorBox) {
                     errorBox.parentNode.insertBefore(banner, errorBox.nextSibling);

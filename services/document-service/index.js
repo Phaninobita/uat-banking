@@ -384,9 +384,9 @@ router.post("/ocr", requireAuth, async (req, res) => {
     // Only provide fallback demo data if ABSOLUTELY no text was extracted and no real data found
     if (!extractedText && !parsedData.fullName && !parsedData.passportNumber) {
       if (docType === "corporate") {
-        parsedData.fullName = "Apex Global Holdings Ltd";
+        parsedData.fullName = "First National Holdings Inc";
         parsedData.registrationNumber = "CRN-8849201";
-        parsedData.issuingAuthority = "Dubai Economy & Tourism (DET)";
+        parsedData.issuingAuthority = "Delaware Division of Corporations";
         parsedData.expiry = "2028-11-30";
       } else {
         parsedData.fullName = "Alexander James Vance";
