@@ -19,25 +19,25 @@ let cachedOwnershipRows = [];
 let cachedRoleSelections = null;
 let cachedTaxSelections = null;
 
-// ÔöÇÔöÇ TOAST NOTIFICATION SYSTEM ÔöÇÔöÇ
+// &#8212;&#8212; TOAST NOTIFICATION SYSTEM &#8212;&#8212;
 function showToast(message, title = 'Notification', type = 'info', duration = 4000) {
     const container = document.getElementById('toastContainer');
     if (!container) return null;
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     const icons = {
-        success: 'Ô£à',
-        error: 'ÔØî',
-        warning: 'ÔÜá´©Å',
-        info: 'Ôä╣´©Å'
+        success: '&#x2705;',
+        error: '&#x274C;',
+        warning: '&#x26A0;',
+        info: '&#x2139;'
     };
     toast.innerHTML = `
-        <div class="toast-icon" aria-hidden="true">${icons[type] || 'Ôä╣´©Å'}</div>
+        <div class="toast-icon" aria-hidden="true">${icons[type] || '&#x2139;'}</div>
         <div class="toast-content">
             <span class="toast-title">${title}</span>
             <span class="toast-message">${message}</span>
         </div>
-        <button class="toast-close" onclick="this.closest('.toast').classList.add('removing');setTimeout(()=>this.closest('.toast').remove(),300)" aria-label="Dismiss notification">Ô£ò</button>
+        <button class="toast-close" onclick="this.closest('.toast').classList.add('removing');setTimeout(()=>this.closest('.toast').remove(),300)" aria-label="Dismiss notification">&#x2715;</button>
     `;
     container.appendChild(toast);
     setTimeout(() => {
@@ -49,7 +49,7 @@ function showToast(message, title = 'Notification', type = 'info', duration = 40
     return toast;
 }
 
-// ÔöÇÔöÇ NETWORK STATUS DETECTION ÔöÇÔöÇ
+// &#8212;&#8212; NETWORK STATUS DETECTION &#8212;&#8212;
 function updateNetworkStatus() {
     const status = document.getElementById('networkStatus');
     const icon = document.getElementById('networkIcon');
@@ -58,14 +58,14 @@ function updateNetworkStatus() {
     if (navigator.onLine) {
         status.className = 'online';
         status.style.display = 'flex';
-        icon.textContent = 'ÔùÅ';
+        icon.textContent = '&#x1F7E2;';
         text.textContent = 'Online';
         status.style.color = 'var(--toast-success)';
     } else {
         status.className = 'offline';
         status.style.display = 'flex';
-        icon.textContent = 'ÔùÅ';
-        text.textContent = 'Offline ÔÇö Working locally';
+        icon.textContent = '&#x1F534;';
+        text.textContent = 'Offline &#8212; Working locally';
         status.style.color = 'var(--toast-error)';
         showToast('You are offline. Application changes will sync when reconnected.', 'Offline Mode', 'warning', 5000);
     }
@@ -73,7 +73,7 @@ function updateNetworkStatus() {
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
 
-// ÔöÇÔöÇ FLOATING PARTICLES ÔöÇÔöÇ
+// &#8212;&#8212; FLOATING PARTICLES &#8212;&#8212;
 function initParticles() {
     const container = document.getElementById('particleContainer');
     if (!container) return;
@@ -91,7 +91,7 @@ function initParticles() {
     }
 }
 
-// ÔöÇÔöÇ THEME INITIALIZATION ÔöÇÔöÇ
+// &#8212;&#8212; THEME INITIALIZATION &#8212;&#8212;
 const stepTitles = [
     "",
     "Documents & Verification",
@@ -109,11 +109,11 @@ function initTheme() {
     if (stored === 'light') {
         document.body.classList.remove('dark');
         document.body.classList.add('light');
-        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">­ƒîÖ</span><span class="tt-label">Dark</span>';
+        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">&#x1F319;</span><span class="tt-label">Dark</span>';
     } else {
         document.body.classList.add('dark');
         document.body.classList.remove('light');
-        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">ÔÿÇ´©Å</span><span class="tt-label">Light</span>';
+        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">&#x2600;</span><span class="tt-label">Light</span>';
     }
 }
 
@@ -124,16 +124,16 @@ function toggleTheme() {
         document.body.classList.remove('light');
         document.body.classList.add('dark');
         localStorage.setItem('vb-theme', 'dark');
-        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">ÔÿÇ´©Å</span><span class="tt-label">Light</span>';
+        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">&#x2600;</span><span class="tt-label">Light</span>';
     } else {
         document.body.classList.add('light');
         document.body.classList.remove('dark');
         localStorage.setItem('vb-theme', 'light');
-        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">­ƒîÖ</span><span class="tt-label">Dark</span>';
+        if (themeBtn) themeBtn.innerHTML = '<span id="themeIcon" aria-hidden="true">&#x1F319;</span><span class="tt-label">Dark</span>';
     }
 }
 
-// ÔöÇÔöÇ REWORK MODE STATE ÔöÇÔöÇ
+// &#8212;&#8212; REWORK MODE STATE &#8212;&#8212;
 const reworkDocLabels = [
     "Updated Trade Licence (valid until 2027)",
     "Proof of Funds / Bank Statement",
@@ -148,9 +148,9 @@ function toggleReworkMode() {
     const submitBtn = document.getElementById('finalSubmitBtn');
 
     if (isReworkMode) {
-        if (btn) { btn.classList.add('active'); btn.innerHTML = '­ƒöü <span class="tt-label">Exit Rework</span>'; }
+        if (btn) { btn.classList.add('active'); btn.innerHTML = '&#x1F527; <span class="tt-label">Exit Rework</span>'; }
         if (banner) banner.classList.add('active');
-        if (submitBtn) submitBtn.textContent = 'Ô£ô Resubmit for Review';
+        if (submitBtn) submitBtn.textContent = '&#x2705; Resubmit for Review';
 
         document.querySelectorAll('.step-pill').forEach((el, i) => {
             if (i + 1 !== 4 && i + 1 !== 7) el.classList.add('rework-disabled');
@@ -164,9 +164,9 @@ function toggleReworkMode() {
         if (currentStep !== 4 && currentStep !== 7) goTo(4);
         else if (currentStep === 4) renderOwnershipErrors();
     } else {
-        if (btn) { btn.classList.remove('active'); btn.innerHTML = '­ƒöü <span class="tt-label">Simulate Rework</span>'; }
+        if (btn) { btn.classList.remove('active'); btn.innerHTML = '&#x1F527; <span class="tt-label">Simulate Rework</span>'; }
         if (banner) banner.classList.remove('active');
-        if (submitBtn) submitBtn.textContent = 'Ô£ô Submit Application';
+        if (submitBtn) submitBtn.textContent = '&#x2705; Submit Application';
 
         document.querySelectorAll('.step-pill').forEach(el => el.classList.remove('rework-disabled'));
         document.querySelectorAll('.rework-error').forEach(el => el.classList.remove('rework-error'));
@@ -682,7 +682,7 @@ function addOpsRow() {
         <div class="field"><label>Country of Operation</label><input type="text" placeholder="e.g. Saudi Arabia"></div>
         <div class="field" style="display:flex;gap:8px;align-items:flex-end;">
             <div style="flex:1;"><label>Estimated Annual Turnover (AED)</label><input type="text" placeholder="e.g. 10,000,000"></div>
-            <button class="btn btn-danger btn-sm" onclick="this.closest('.g2').remove();triggerAutoSave()" style="margin-bottom:1px;padding:9px 12px;" aria-label="Remove country">Ô£ò</button>
+            <button class="btn btn-danger btn-sm" onclick="this.closest('.g2').remove();triggerAutoSave()" style="margin-bottom:1px;padding:9px 12px;" aria-label="Remove country">&#x2715;</button>
         </div>
     `;
     list.appendChild(row);
@@ -1288,7 +1288,7 @@ function addStructRow(selectedEntity, percentage = '', level = '1', index = null
         </div>
         <div class="field" style="display:flex;gap:8px;align-items:center;">
             <input type="number" id="pct-${idx}" min="1" max="100" placeholder="%" value="${percentage}" oninput="calcTotal()" style="flex:1;">
-            <button type="button" class="btn btn-ghost btn-sm" onclick="this.closest('.struct-row').remove();calcTotal();triggerAutoSave();" title="Delete this entity row" style="color:var(--danger);font-weight:700;font-size:14px;padding:6px 10px;height:38px;border:1px solid rgba(239,68,68,0.3);border-radius:6px;">Ô£ò</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="this.closest('.struct-row').remove();calcTotal();triggerAutoSave();" title="Delete this entity row" style="color:var(--danger);font-weight:700;font-size:14px;padding:6px 10px;height:38px;border:1px solid rgba(239,68,68,0.3);border-radius:6px;">&#x2715;</button>
         </div>
     `;
     container.appendChild(row);
@@ -1373,7 +1373,7 @@ function drop(ev) {
         }
 
         dropZone.innerHTML = `
-            <button type="button" class="dz-delete-box-btn" title="Delete this box" onclick="event.stopPropagation(); deleteDropZone(this)">Ô£ò</button>
+            <button type="button" class="dz-delete-box-btn" title="Delete this box" onclick="event.stopPropagation(); deleteDropZone(this)">&#x2715;</button>
         `;
 
         // Direct Shareholding % Input inside the Visual Builder card
@@ -1415,7 +1415,7 @@ function removeCard(btn) {
         poolContainer.appendChild(card);
     }
     zone.innerHTML = `
-        <button type="button" class="dz-delete-box-btn" title="Delete this box" onclick="event.stopPropagation(); deleteDropZone(this)">Ô£ò</button>
+        <button type="button" class="dz-delete-box-btn" title="Delete this box" onclick="event.stopPropagation(); deleteDropZone(this)">&#x2715;</button>
         <span class="dz-placeholder-text">Drop entity here</span>
     `;
     checkLevels();
@@ -1446,7 +1446,7 @@ function addDropZone(rowId) {
     const zone = document.createElement('div');
     zone.className = 'drop-zone';
     zone.innerHTML = `
-        <button type="button" class="dz-delete-box-btn" title="Delete this box" onclick="event.stopPropagation(); deleteDropZone(this)">Ô£ò</button>
+        <button type="button" class="dz-delete-box-btn" title="Delete this box" onclick="event.stopPropagation(); deleteDropZone(this)">&#x2715;</button>
         <span class="dz-placeholder-text">Drop entity here</span>
     `;
     zone.ondrop = drop;
