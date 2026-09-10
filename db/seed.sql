@@ -1,5 +1,5 @@
--- ============================================================================
--- Apex Bank — Clean Database Seed
+﻿-- ============================================================================
+-- First National Bank â€” Clean Database Seed
 -- Dedicated Table: rm_users (Relationship Manager Executives & Staff)
 -- ============================================================================
 
@@ -9,8 +9,8 @@ CREATE TABLE IF NOT EXISTS rm_users (
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(128) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    role VARCHAR(128) NOT NULL DEFAULT 'Senior Relationship Manager · Corporate Banking',
-    branch VARCHAR(128) DEFAULT 'ADGM Financial Center',
+    role VARCHAR(128) NOT NULL DEFAULT 'Senior Relationship Manager Â· Corporate Banking',
+    branch VARCHAR(128) DEFAULT 'New York Financial Center',
     status VARCHAR(32) NOT NULL DEFAULT 'active',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -24,12 +24,13 @@ VALUES (
     'phanee',
     'Visionbank@324',
     'Phanee',
-    'phanee@apexbank.ae',
-    'Senior Relationship Manager · Corporate Banking',
-    'ADGM Financial Center',
+    'phanee@fnb-us.com',
+    'Senior Relationship Manager Â· Corporate Banking',
+    'New York Financial Center',
     'active'
 )
 ON CONFLICT (username) DO UPDATE SET
     password_hash = EXCLUDED.password_hash,
     full_name = EXCLUDED.full_name,
     email = EXCLUDED.email;
+

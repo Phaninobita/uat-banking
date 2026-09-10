@@ -1,5 +1,5 @@
 /**
- * Apex Bank Microservice: Document & Base64 Vault Service (Port 3002)
+ * First National Bank Microservice: Document & Base64 Vault Service (Port 3002)
  * Handles Base64 document persistence in PostgreSQL (application_documents table),
  * document retrieval, thumbnail streaming, full-screen previews, file downloads,
  * and OCR text extraction.
@@ -150,7 +150,7 @@ function parseDocumentText(text) {
     data.registrationNumber = licenceMatch[1].replace(/\s/g, "").trim();
   }
 
-  const authorityMatch = cleanText.match(/(?:Government of|Free Zone Authority|Department of Economic Development|Ministry of Economy|ADGM|DIFC)\s*([A-Za-z\s]{2,40})/i);
+  const authorityMatch = cleanText.match(/(?:Government of|Secretary of State|Department of Financial Institutions|State Banking Department|FDIC|Federal Reserve|OCC|FinCEN)\s*([A-Za-z\s]{2,40})/i);
   if (authorityMatch) {
     data.issuingAuthority = authorityMatch[0].trim();
   }

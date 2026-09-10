@@ -1,5 +1,5 @@
 /**
- * Apex Bank Microservice: Notification & Mailbox Service (Port 3005)
+ * First National Bank Microservice: Notification & Mailbox Service (Port 3005)
  * Handles simulated real-time in-browser emails, real SMTP email dispatch,
  * SMS OTP verification alerts, and mobile push notification delivery.
  */
@@ -59,11 +59,11 @@ router.post("/simulate", async (req, res) => {
   const { to, subject, html, text, type, metadata, code } = req.body;
 
   const emailItem = memStore.recordSimulatedEmail({
-    to: to || "admin@apexholdings.ae",
-    from: '"Apex Bank" <onboarding@apexbank.ae>',
-    subject: subject || "Apex Bank Corporate Update",
-    html: html || "<p>Notification from Apex Bank</p>",
-    text: text || "Notification from Apex Bank",
+    to: to || "admin@corporate.com",
+    from: '"First National Bank" <onboarding@fnb-us.com>',
+    subject: subject || "First National Bank Corporate Update",
+    html: html || "<p>Notification from First National Bank</p>",
+    text: text || "Notification from First National Bank",
     code: code || null,
     type: type || "system",
     metadata: metadata || {}
@@ -96,10 +96,10 @@ router.post("/push", (req, res) => {
 
   const pushPayload = {
     id: "push_" + Date.now(),
-    title: title || "Apex Bank Alert",
+    title: title || "First National Bank Alert",
     body: body || "Your corporate account has a new update.",
     deviceToken: deviceToken || "token_ios_simulator_01",
-    deepLink: deepLink || "apexbank://accounts",
+    deepLink: deepLink || "fnb://accounts",
     deliveredAt: new Date().toISOString()
   };
 

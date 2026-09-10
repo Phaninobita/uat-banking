@@ -1,5 +1,5 @@
 /**
- * Apex Bank Microservice: Auth & Identity Service (Port 3001)
+ * First National Bank Microservice: Auth & Identity Service (Port 3001)
  * Handles Commercial Registration Number (CRN) validation, OTP issuance, JWT token signing,
  * and Mobile Biometric FaceID/Fingerprint authentication for the upcoming mobile bank app.
  */
@@ -96,8 +96,8 @@ router.post("/request-otp", async (req, res) => {
   // Record into simulated email buffer
   const emailItem = memStore.recordSimulatedEmail({
     to: cleanEmail,
-    from: '"Apex Bank Auth Service" <onboarding@apexbank.ae>',
-    subject: `Apex Bank — Verification Code for ${companyTitle}: ${randomCode}`,
+    from: '"First National Bank Auth Service" <onboarding@fnb-us.com>',
+    subject: `First National Bank — Verification Code for ${companyTitle}: ${randomCode}`,
     text: `Your verification code for ${companyTitle} (CRN ${cleanCrn}) is: ${randomCode}`,
     code: randomCode,
     type: "otp",
@@ -106,7 +106,7 @@ router.post("/request-otp", async (req, res) => {
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; color: #0f172a;">
         <div style="text-align: center; margin-bottom: 20px;">
           <div style="display: inline-block; background: linear-gradient(135deg, #0ea5e9, #4f46e5); color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; box-shadow: 0 4px 12px rgba(14,165,233,0.3);">AB</div>
-          <h2 style="color: #0f172a; margin: 12px 0 2px; font-size: 20px; font-weight: 700;">Apex Bank Authentication Mesh</h2>
+          <h2 style="color: #0f172a; margin: 12px 0 2px; font-size: 20px; font-weight: 700;">First National Bank Identity Verification</h2>
           <p style="color: #64748b; font-size: 13px; margin: 0;">Identity Verification for <strong>${companyTitle}</strong></p>
         </div>
         <p style="color: #334155; font-size: 14px; line-height: 1.5;">Hello,</p>
@@ -166,7 +166,7 @@ router.post("/verify-otp", async (req, res) => {
 
   memStore.otpStore.delete(key);
 
-  const companyNameFromRm = (rmInvite.company_name || "").trim() || "Apex Corporate Client";
+  const companyNameFromRm = (rmInvite.company_name || "").trim() || "Corporate Client";
   const contactPersonFromRm = (rmInvite.contact_person || "").trim();
   const phoneFromRm = (rmInvite.phone || "").trim();
 
@@ -202,7 +202,7 @@ router.post("/verify-otp", async (req, res) => {
             company_name: companyNameFromRm,
             trade_name: companyNameFromRm,
             legal_type: "Limited Liability Company (LLC)",
-            issued_by: "Abu Dhabi Global Market (ADGM)",
+            issued_by: "Delaware Division of Corporations (US)",
             contact_person: contactPersonFromRm,
             phone: phoneFromRm
           }
@@ -244,7 +244,7 @@ router.post("/verify-otp", async (req, res) => {
               company_name: companyNameFromRm,
               trade_name: companyNameFromRm,
               legal_type: "Limited Liability Company (LLC)",
-              issued_by: "Abu Dhabi Global Market (ADGM)",
+              issued_by: "Delaware Division of Corporations (US)",
               contact_person: contactPersonFromRm,
               phone: phoneFromRm
             }
@@ -292,7 +292,7 @@ router.post("/mobile/biometric", async (req, res) => {
   memStore.metrics.serviceRequests.auth++;
   const { biometricSignature, deviceId, crn } = req.body;
   const activeCrn = crn ? crn.trim() : "509077205";
-  const activeEmail = "admin@apexholdings.ae";
+  const activeEmail = "admin@corporate.com";
   const appRef = "AB-2026-DEMO01";
 
   const token = jwt.sign(

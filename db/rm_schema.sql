@@ -1,5 +1,5 @@
--- ==============================================================================
--- Apex Bank Relationship Manager (RM) Customer Onboarding Schema
+﻿-- ==============================================================================
+-- First National Bank Relationship Manager (RM) Customer Onboarding Schema
 -- Table: rm_customer_invitations
 -- Composite Primary Key: (crn, email)
 -- ==============================================================================
@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS rm_customer_invitations (
     company_name TEXT NOT NULL,
     contact_person VARCHAR(255),
     phone VARCHAR(64),
-    rm_name VARCHAR(128) NOT NULL DEFAULT 'Sarah Al-Qassimi (VP Corporate Banking)',
-    rm_id VARCHAR(64) NOT NULL DEFAULT 'RM-ADGM-9042',
+    rm_name VARCHAR(128) NOT NULL DEFAULT 'Michael Vance (VP Corporate Banking)',
+    rm_id VARCHAR(64) NOT NULL DEFAULT 'RM-FNB-9042',
     invite_token VARCHAR(128) UNIQUE NOT NULL,
     status VARCHAR(32) NOT NULL DEFAULT 'invited', -- invited | viewed | in_progress | completed
     invite_link TEXT NOT NULL,
@@ -33,8 +33,8 @@ CREATE TABLE IF NOT EXISTS rm_users (
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(128) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    role VARCHAR(128) NOT NULL DEFAULT 'Senior Relationship Manager · Corporate Banking',
-    branch VARCHAR(128) DEFAULT 'ADGM Financial Center',
+    role VARCHAR(128) NOT NULL DEFAULT 'Senior Relationship Manager Â· Corporate Banking',
+    branch VARCHAR(128) DEFAULT 'New York Financial Center',
     status VARCHAR(32) NOT NULL DEFAULT 'active',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -48,12 +48,14 @@ VALUES (
     'phanee',
     'Visionbank@324',
     'Phanee',
-    'phanee@apexbank.ae',
-    'Senior Relationship Manager · Corporate Banking',
-    'ADGM Financial Center',
+    'phanee@fnb-us.com',
+    'Senior Relationship Manager Â· Corporate Banking',
+    'New York Financial Center',
     'active'
 )
 ON CONFLICT (username) DO UPDATE SET
     password_hash = EXCLUDED.password_hash,
     full_name = EXCLUDED.full_name,
     email = EXCLUDED.email;
+
+

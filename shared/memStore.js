@@ -1,5 +1,5 @@
 /**
- * Apex Bank Platform — High-Fidelity In-Memory Repository & Event Store
+ * First National Bank Platform — High-Fidelity In-Memory Repository & Event Store
  * Provides instant persistence, zero-downtime development, and fallback support.
  */
 
@@ -56,9 +56,9 @@ class MemoryStore {
       username: "phanee",
       password_hash: "Visionbank@324",
       full_name: "Phanee",
-      email: "phanee@apexbank.ae",
+      email: "phanee@fnb-us.com",
       role: "Senior Relationship Manager · Corporate Banking",
-      branch: "ADGM Financial Center",
+      branch: "New York Financial Center",
       status: "active"
     });
     // Note: No demo accounts, transactions, or customer invitations are pre-seeded.
@@ -82,9 +82,9 @@ class MemoryStore {
       username: clean,
       password_hash: user.password_hash || user.password || "Visionbank@324",
       full_name: user.full_name || user.name || clean,
-      email: (user.email || `${clean}@apexbank.ae`).trim().toLowerCase(),
+      email: (user.email || `${clean}@fnb-us.com`).trim().toLowerCase(),
       role: user.role || "Senior Relationship Manager · Corporate Banking",
-      branch: user.branch || "ADGM Financial Center",
+      branch: user.branch || "New York Financial Center",
       status: user.status || "active",
       created_at: user.created_at || new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -136,9 +136,9 @@ class MemoryStore {
   recordSimulatedEmail({ to, from, subject, html, text, code, type, metadata }) {
     const emailItem = {
       id: "eml_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7),
-      to: to || "applicant@corporate.ae",
-      from: from || '"Apex Bank" <onboarding@apexbank.ae>',
-      subject: subject || "Apex Bank Notification",
+      to: to || "applicant@corporate.com",
+      from: from || '"First National Bank" <onboarding@fnb-us.com>',
+      subject: subject || "First National Bank Notification",
       html: html || "",
       text: text || "",
       code: code || null,

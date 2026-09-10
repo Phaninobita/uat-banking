@@ -1,10 +1,10 @@
 /**
- * Apex Bank — Relationship Manager (RM) Executive Suite Client Logic
+ * First National Bank — Relationship Manager (RM) Executive Suite Client Logic
  * Handles executive authentication, customer invitation dispatch,
  * magic link generation, pipeline tracking, and email previews.
  */
 
-let currentRmToken = localStorage.getItem("apex_rm_token");
+let currentRmToken = localStorage.getItem("fnb_rm_token");
 let currentRmProfile = null;
 let pipelineData = [];
 
@@ -100,7 +100,7 @@ async function handleRmLoginSubmit(ev) {
 
         currentRmToken = data.token;
         currentRmProfile = data.profile;
-        localStorage.setItem("apex_rm_token", currentRmToken);
+        localStorage.setItem("fnb_rm_token", currentRmToken);
         localStorage.setItem("apex_rm_profile", JSON.stringify(currentRmProfile));
 
         showRmToast(`Executive session authenticated. Welcome back, ${currentRmProfile.name || 'Phanee'}.`, "success");
@@ -123,7 +123,7 @@ async function handleRmLoginSubmit(ev) {
 }
 
 function handleRmSignOut() {
-    localStorage.removeItem("apex_rm_token");
+    localStorage.removeItem("fnb_rm_token");
     localStorage.removeItem("apex_rm_profile");
     currentRmToken = null;
     currentRmProfile = null;

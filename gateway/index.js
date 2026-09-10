@@ -1,5 +1,5 @@
-/**
- * Apex Bank API Gateway & Microservices Orchestrator (Port 3000)
+﻿/**
+ * First National Bank API Gateway & Microservices Orchestrator (Port 3000)
  * Unified reverse proxy, rate limiter, security shield, and service mesh orchestrator.
  * Routes traffic to:
  *   - Auth Service (3001)
@@ -64,7 +64,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// ── Microservices Mesh Status & Health Registry ──
+// â”€â”€ Microservices Mesh Status & Health Registry â”€â”€
 app.get("/api/v1/gateway/health", (req, res) => {
   const uptimeSeconds = Math.floor(process.uptime());
   const hours = Math.floor(uptimeSeconds / 3600);
@@ -74,7 +74,7 @@ app.get("/api/v1/gateway/health", (req, res) => {
   res.json({
     status: "healthy",
     gateway: {
-      name: "Apex Bank API Gateway",
+      name: "First National Bank API Gateway",
       version: "2.4.0",
       port: config.PORT,
       uptime: `${hours}h ${minutes}m ${seconds}s`,
@@ -136,7 +136,7 @@ app.get("/api/v1/gateway/health", (req, res) => {
   });
 });
 
-// ── Microservice Routing Mounts (v1 API) ──
+// â”€â”€ Microservice Routing Mounts (v1 API) â”€â”€
 app.use("/api/v1/auth", authService.router);
 app.use("/api/v1/documents", docService.router);
 app.use("/api/v1/applications", appService.router);
@@ -145,7 +145,7 @@ app.use("/api/v1/mobile", bankService.router); // Mobile summary & quick routes
 app.use("/api/v1/notifications", notifService.router);
 app.use("/api/v1/rm", rmService.router);
 
-// ── Legacy Forwarding Routers (100% Backward Compatibility) ──
+// â”€â”€ Legacy Forwarding Routers (100% Backward Compatibility) â”€â”€
 app.use("/api/auth", authService.router);
 app.use("/api/application", appService.router);
 app.use("/api/documents", docService.router);
@@ -168,3 +168,4 @@ app.get("*", (req, res, next) => {
 });
 
 module.exports = app;
+

@@ -1,5 +1,5 @@
-/**
- * Apex Bank Platform — Interactive Mobile Banking App Simulator (iPhone 16 Pro)
+﻿/**
+ * First National Bank Platform â€” Interactive Mobile Banking App Simulator (iPhone 16 Pro)
  * Powers the interactive smartphone preview, mobile FaceID biometric login,
  * virtual card carousel, mobile Base64 document camera scanner, and mobile wire transfers.
  */
@@ -25,7 +25,7 @@
                 <!-- Slide-down iOS Push Notification -->
                 <div id="mobilePushToast" class="mobile-push-toast">
                     <div class="m-push-hdr">
-                        <span id="mPushTitle" class="m-push-title">Apex Bank Security</span>
+                        <span id="mPushTitle" class="m-push-title">First National Bank Security</span>
                         <span id="mPushTime" class="m-push-time">now</span>
                     </div>
                     <div id="mPushBody" class="m-push-body">Welcome to Apex Mobile Banking.</div>
@@ -38,11 +38,11 @@
                     <p style="color:#94a3b8;font-size:12px;margin:0 0 16px;">Corporate Treasury &amp; Clearing</p>
                     
                     <div id="mobileFaceIdRadar" class="faceid-radar">
-                        <span style="font-size:36px;">👤</span>
+                        <span style="font-size:36px;">ðŸ‘¤</span>
                     </div>
 
                     <button type="button" id="mobileUnlockBioBtn" class="btn btn-primary" style="width:100%;border-radius:24px;padding:12px;font-weight:700;font-size:13px;" onclick="MobileApp.handleBiometricUnlock()">
-                        👁️ Unlock with FaceID
+                        ðŸ‘ï¸ Unlock with FaceID
                     </button>
                     <div style="font-size:10px;color:#64748b;margin-top:14px;text-align:center;">
                         Simulated Biometric Authentication Endpoint &bull; Token Verified
@@ -60,7 +60,7 @@
                         </div>
                         <div style="display:flex;align-items:center;gap:6px;">
                             <span style="background:rgba(16,185,129,0.2);color:#34d399;font-size:9px;padding:2px 6px;border-radius:10px;font-weight:800;">VIP GOLD</span>
-                            <button type="button" class="btn-m-card-action" onclick="MobileApp.lockApp()" title="Lock phone" style="padding:2px 6px;">🔒</button>
+                            <button type="button" class="btn-m-card-action" onclick="MobileApp.lockApp()" title="Lock phone" style="padding:2px 6px;">ðŸ”’</button>
                         </div>
                     </div>
 
@@ -70,8 +70,8 @@
                         <div class="mobile-balance-card">
                             <div class="mbc-shimmer"></div>
                             <div style="font-size:10px;color:rgba(255,255,255,0.8);font-weight:700;text-transform:uppercase;">Primary Treasury Account</div>
-                            <div id="mPrimaryBalance" style="font-size:24px;font-weight:800;margin:6px 0;letter-spacing:-0.5px;">AED 3,420,850.00</div>
-                            <div id="mPrimaryIban" style="font-size:10px;color:rgba(255,255,255,0.85);font-family:monospace;">AE29033000007029841001</div>
+                            <div id="mPrimaryBalance" style="font-size:24px;font-weight:800;margin:6px 0;letter-spacing:-0.5px;">USD 3,420,850.00</div>
+                            <div id="mPrimaryIban" style="font-size:10px;color:rgba(255,255,255,0.85);font-family:monospace;">US89APEX00007029841001</div>
                         </div>
 
                         <!-- Virtual Cards Carousel -->
@@ -81,12 +81,12 @@
                             </div>
                             <div class="m-card-controls">
                                 <div style="display:flex;gap:4px;">
-                                    <button type="button" class="btn-m-card-action" onclick="MobileApp.revealCardDetails()">👁️ Details</button>
-                                    <button type="button" class="btn-m-card-action" onclick="MobileApp.toggleFreezeCard()">❄️ Freeze</button>
+                                    <button type="button" class="btn-m-card-action" onclick="MobileApp.revealCardDetails()">ðŸ‘ï¸ Details</button>
+                                    <button type="button" class="btn-m-card-action" onclick="MobileApp.toggleFreezeCard()">â„ï¸ Freeze</button>
                                 </div>
                                 <div style="display:flex;gap:4px;">
-                                    <button type="button" class="btn-m-card-action" onclick="MobileApp.prevCard()">◀</button>
-                                    <button type="button" class="btn-m-card-action" onclick="MobileApp.nextCard()">▶</button>
+                                    <button type="button" class="btn-m-card-action" onclick="MobileApp.prevCard()">â—€</button>
+                                    <button type="button" class="btn-m-card-action" onclick="MobileApp.nextCard()">â–¶</button>
                                 </div>
                             </div>
                         </div>
@@ -94,19 +94,19 @@
                         <!-- Quick Actions -->
                         <div class="mobile-quick-actions">
                             <button type="button" class="mq-btn" onclick="MobileApp.switchSubView('transfer')">
-                                <span style="font-size:16px;">⚡</span>
+                                <span style="font-size:16px;">âš¡</span>
                                 <span>Send</span>
                             </button>
                             <button type="button" class="mq-btn" onclick="MobileApp.switchSubView('scanner')">
-                                <span style="font-size:16px;">📷</span>
+                                <span style="font-size:16px;">ðŸ“·</span>
                                 <span>KYC Scan</span>
                             </button>
                             <button type="button" class="mq-btn" onclick="MobileApp.switchSubView('fx')">
-                                <span style="font-size:16px;">💱</span>
+                                <span style="font-size:16px;">ðŸ’±</span>
                                 <span>Live FX</span>
                             </button>
                             <button type="button" class="mq-btn" onclick="MobileApp.showMobilePushNotification('E-Statement', 'March 2026 Audit Statement exported to PDF.')">
-                                <span style="font-size:16px;">📑</span>
+                                <span style="font-size:16px;">ðŸ“‘</span>
                                 <span>Report</span>
                             </button>
                         </div>
@@ -121,18 +121,18 @@
                     <!-- SUBVIEW: TRANSFER -->
                     <div id="mSub_transfer" class="m-subview">
                         <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-                            <button type="button" class="btn-m-card-action" onclick="MobileApp.switchSubView('home')">← Back</button>
+                            <button type="button" class="btn-m-card-action" onclick="MobileApp.switchSubView('home')">â† Back</button>
                             <h4 style="margin:0;font-size:14px;color:#f8fafc;">Instant Mobile Wire</h4>
                         </div>
 
                         <form id="mTransferForm" onsubmit="MobileApp.handleMobileTransfer(event)">
                             <div class="field" style="margin-bottom:10px;">
                                 <label style="font-size:10px;">Beneficiary Name</label>
-                                <input type="text" id="mTransferBeneficiary" placeholder="DP World Logistics" style="padding:8px;font-size:12px;" required>
+                                <input type="text" id="mTransferBeneficiary" placeholder="Apex Technologies Corp" style="padding:8px;font-size:12px;" required>
                             </div>
                             <div class="field" style="margin-bottom:10px;">
-                                <label style="font-size:10px;">IBAN</label>
-                                <input type="text" id="mTransferIbanInput" placeholder="AE44033000008892100412" style="padding:8px;font-size:12px;" required>
+                                <label style="font-size:10px;">Account / Routing / IBAN</label>
+                                <input type="text" id="mTransferIbanInput" placeholder="US44033000008892100412" style="padding:8px;font-size:12px;" required>
                             </div>
                             <div class="g2" style="margin-bottom:12px;gap:8px;">
                                 <div class="field">
@@ -142,13 +142,14 @@
                                 <div class="field">
                                     <label style="font-size:10px;">Currency</label>
                                     <select id="mTransferCurrencyInput" style="padding:8px;font-size:12px;">
-                                        <option value="AED">AED</option>
-                                        <option value="USD">USD</option>
+                                        <option value="USD" selected>USD</option>
+                                        <option value="EUR">EUR</option>
+                                        <option value="GBP">GBP</option>
                                     </select>
                                 </div>
                             </div>
                             <button type="submit" id="btnMobileSend" class="btn btn-primary" style="width:100%;border-radius:16px;padding:10px;font-weight:700;font-size:13px;justify-content:center;">
-                                ⚡ Send Wire Payment
+                                âš¡ Send Wire Payment
                             </button>
                         </form>
                     </div>
@@ -156,14 +157,14 @@
                     <!-- SUBVIEW: SCANNER -->
                     <div id="mSub_scanner" class="m-subview">
                         <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-                            <button type="button" class="btn-m-card-action" onclick="MobileApp.switchSubView('home')">← Back</button>
+                            <button type="button" class="btn-m-card-action" onclick="MobileApp.switchSubView('home')">â† Back</button>
                             <h4 style="margin:0;font-size:14px;color:#f8fafc;">KYC Document Scanner</h4>
                         </div>
                         <p style="font-size:11px;color:#94a3b8;margin:0 0 12px;">Capture corporate documents and persist in PostgreSQL Base64 database table.</p>
 
                         <div style="display:flex;gap:6px;margin-bottom:10px;">
-                            <button type="button" class="btn-m-card-action" style="flex:1;padding:6px 4px;font-size:10px;" onclick="MobileApp.handleMobileScannerUpload('passport')">📸 Scan Passport</button>
-                            <button type="button" class="btn-m-card-action" style="flex:1;padding:6px 4px;font-size:10px;" onclick="MobileApp.handleMobileScannerUpload('licence')">📑 Scan Licence</button>
+                            <button type="button" class="btn-m-card-action" style="flex:1;padding:6px 4px;font-size:10px;" onclick="MobileApp.handleMobileScannerUpload('passport')">ðŸ“¸ Scan Passport</button>
+                            <button type="button" class="btn-m-card-action" style="flex:1;padding:6px 4px;font-size:10px;" onclick="MobileApp.handleMobileScannerUpload('licence')">ðŸ“‘ Scan Certificate</button>
                         </div>
 
                         <div class="field" style="margin-bottom:10px;">
@@ -179,34 +180,34 @@
                     <!-- SUBVIEW: FX -->
                     <div id="mSub_fx" class="m-subview">
                         <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-                            <button type="button" class="btn-m-card-action" onclick="MobileApp.switchSubView('home')">← Back</button>
+                            <button type="button" class="btn-m-card-action" onclick="MobileApp.switchSubView('home')">â† Back</button>
                             <h4 style="margin:0;font-size:14px;color:#f8fafc;">Live FX Rates Feed</h4>
                         </div>
                         <div style="display:flex;flex-direction:column;gap:8px;">
-                            <div class="mtx-item"><span>USD/AED</span> <strong style="color:#10b981;">3.6725</strong></div>
-                            <div class="mtx-item"><span>EUR/AED</span> <strong style="color:#10b981;">4.0210</strong></div>
-                            <div class="mtx-item"><span>GBP/AED</span> <strong style="color:#f43f5e;">4.7180</strong></div>
-                            <div class="mtx-item"><span>SAR/AED</span> <strong style="color:#10b981;">0.9790</strong></div>
-                            <div class="mtx-item"><span>EUR/USD</span> <strong style="color:#10b981;">1.0945</strong></div>
+                            <div class="mtx-item"><span>EUR/USD</span> <strong style="color:#10b981;">1.0850</strong></div>
+                            <div class="mtx-item"><span>GBP/USD</span> <strong style="color:#10b981;">1.2720</strong></div>
+                            <div class="mtx-item"><span>USD/CAD</span> <strong style="color:#f43f5e;">1.3540</strong></div>
+                            <div class="mtx-item"><span>USD/JPY</span> <strong style="color:#10b981;">151.20</strong></div>
+                            <div class="mtx-item"><span>USD/CHF</span> <strong style="color:#10b981;">0.8840</strong></div>
                         </div>
                     </div>
 
                     <!-- Bottom Nav Bar -->
                     <div class="m-bottom-nav" style="margin-top:auto;">
                         <button type="button" class="m-nav-btn active" data-view="home" onclick="MobileApp.switchSubView('home')">
-                            <span>🏠</span>
+                            <span>ðŸ </span>
                             <span>Home</span>
                         </button>
                         <button type="button" class="m-nav-btn" data-view="transfer" onclick="MobileApp.switchSubView('transfer')">
-                            <span>⚡</span>
+                            <span>âš¡</span>
                             <span>Send</span>
                         </button>
                         <button type="button" class="m-nav-btn" data-view="scanner" onclick="MobileApp.switchSubView('scanner')">
-                            <span>📷</span>
+                            <span>ðŸ“·</span>
                             <span>Scan</span>
                         </button>
                         <button type="button" class="m-nav-btn" data-view="fx" onclick="MobileApp.switchSubView('fx')">
-                            <span>💱</span>
+                            <span>ðŸ’±</span>
                             <span>FX</span>
                         </button>
                     </div>
@@ -236,7 +237,7 @@
             const clientEl = document.getElementById('mClientName');
 
             if (balEl && data.primaryBalance) {
-                balEl.textContent = 'AED ' + Number(data.primaryBalance.balance).toLocaleString(undefined, {
+                balEl.textContent = 'USD ' + Number(data.primaryBalance.balance).toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                 });
@@ -260,7 +261,7 @@
                 <div class="m-card-item ${idx === this.activeCardIndex ? 'active' : ''}" style="background: ${card.gradient};" id="mCard_${idx}">
                     <div class="m-card-header">
                         <span class="m-card-badge">${card.type}</span>
-                        <span class="m-card-chip">💳</span>
+                        <span class="m-card-chip">ðŸ’³</span>
                     </div>
                     <div class="m-card-number" id="mCardNum_${idx}">${card.cardNumber}</div>
                     <div class="m-card-footer">
@@ -300,14 +301,14 @@
             if (!numEl) return;
 
             if (numEl.dataset.revealed === 'true') {
-                numEl.textContent = '•••• •••• •••• 8842';
+                numEl.textContent = 'â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ 8842';
                 numEl.dataset.revealed = 'false';
             } else {
                 numEl.textContent = '4532 8901 2294 8842';
                 numEl.dataset.revealed = 'true';
                 setTimeout(() => {
                     if (numEl.dataset.revealed === 'true') {
-                        numEl.textContent = '•••• •••• •••• 8842';
+                        numEl.textContent = 'â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ 8842';
                         numEl.dataset.revealed = 'false';
                     }
                 }, 8000);
@@ -413,12 +414,12 @@
         async handleMobileTransfer(e) {
             if (e) e.preventDefault();
             const btn = document.getElementById('btnMobileSend');
-            const originalText = btn ? btn.innerHTML : '⚡ Send Wire Payment';
+            const originalText = btn ? btn.innerHTML : 'âš¡ Send Wire Payment';
 
             const counterpartyName = document.getElementById('mTransferBeneficiary')?.value?.trim();
             const counterpartyIban = document.getElementById('mTransferIbanInput')?.value?.trim();
             const amount = document.getElementById('mTransferAmountInput')?.value;
-            const currency = document.getElementById('mTransferCurrencyInput')?.value || 'AED';
+            const currency = document.getElementById('mTransferCurrencyInput')?.value || 'USD';
 
             if (!counterpartyName || !counterpartyIban || !amount) {
                 alert('Please enter Beneficiary Name, IBAN, and Amount');
@@ -427,7 +428,7 @@
 
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = 'Clearing via Central Bank...';
+                btn.innerHTML = 'Clearing via Fedwire...';
             }
 
             try {
@@ -442,7 +443,7 @@
 
                 if (res.success) {
                     this.showMobilePushNotification(
-                        '⚡ Payment Sent Successfully',
+                        'âš¡ Payment Sent Successfully',
                         `${currency} ${parseFloat(amount).toLocaleString()} sent to ${counterpartyName}. Ref: ${res.transaction.transaction_ref}`
                     );
 
@@ -470,7 +471,7 @@
             const previewContainer = document.getElementById('mScannerPreview');
             const statusEl = document.getElementById('mScannerStatus');
 
-            if (statusEl) statusEl.innerHTML = '<span style="color:#38bdf8;font-size:11px;">🔄 Processing &amp; Base64 Encoding...</span>';
+            if (statusEl) statusEl.innerHTML = '<span style="color:#38bdf8;font-size:11px;">ðŸ”„ Processing &amp; Base64 Encoding...</span>';
 
             if (fileOrPreset instanceof File) {
                 const file = fileOrPreset;
@@ -480,11 +481,11 @@
                 };
                 reader.readAsDataURL(file);
             } else if (fileOrPreset === 'passport') {
-                const base64Data = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="260" viewBox="0 0 400 260"><rect width="400" height="260" fill="%231e293b" rx="12"/><rect x="15" y="15" width="370" height="230" fill="%230f172a" rx="8" stroke="%2338bdf8" stroke-width="2"/><text x="35" y="45" fill="%2338bdf8" font-family="sans-serif" font-weight="bold" font-size="16">PASSPORT / TRAVEL DOCUMENT</text><circle cx="65" cy="115" r="35" fill="%23334155"/><text x="65" y="122" fill="%2394a3b8" font-size="28" text-anchor="middle">👤</text><text x="120" y="90" fill="%23f8fafc" font-family="sans-serif" font-size="14">Name: VANCE, ALEXANDER J</text><text x="120" y="115" fill="%23f8fafc" font-family="sans-serif" font-size="14">Nat: BRITISH (GBR)</text><text x="120" y="140" fill="%23f8fafc" font-family="sans-serif" font-size="14">Doc No: P98421054</text><rect x="30" y="180" width="340" height="45" fill="%23020617" rx="4"/><text x="40" y="200" fill="%2310b981" font-family="monospace" font-size="12">P&lt;GBRVANCE&lt;&lt;ALEXANDER&lt;JAMES&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</text><text x="40" y="215" fill="%2310b981" font-family="monospace" font-size="12">P984210547GBR8406152M3106148&lt;&lt;&lt;&lt;&lt;&lt;&lt;02</text></svg>';
+                const base64Data = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="260" viewBox="0 0 400 260"><rect width="400" height="260" fill="%231e293b" rx="12"/><rect x="15" y="15" width="370" height="230" fill="%230f172a" rx="8" stroke="%2338bdf8" stroke-width="2"/><text x="35" y="45" fill="%2338bdf8" font-family="sans-serif" font-weight="bold" font-size="16">PASSPORT / TRAVEL DOCUMENT</text><circle cx="65" cy="115" r="35" fill="%23334155"/><text x="65" y="122" fill="%2394a3b8" font-size="28" text-anchor="middle">ðŸ‘¤</text><text x="120" y="90" fill="%23f8fafc" font-family="sans-serif" font-size="14">Name: VANCE, ALEXANDER J</text><text x="120" y="115" fill="%23f8fafc" font-family="sans-serif" font-size="14">Nat: UNITED STATES (USA)</text><text x="120" y="140" fill="%23f8fafc" font-family="sans-serif" font-size="14">Doc No: P98421054</text><rect x="30" y="180" width="340" height="45" fill="%23020617" rx="4"/><text x="40" y="200" fill="%2310b981" font-family="monospace" font-size="12">P&lt;USAVANCE&lt;&lt;ALEXANDER&lt;JAMES&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</text><text x="40" y="215" fill="%2310b981" font-family="monospace" font-size="12">P984210547USA8406152M3106148&lt;&lt;&lt;&lt;&lt;&lt;&lt;02</text></svg>';
                 await this.persistMobileDoc(base64Data, 'Executive_Passport_Scan.jpg', 'passport_scan');
             } else if (fileOrPreset === 'licence') {
-                const base64Data = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="260" viewBox="0 0 400 260"><rect width="400" height="260" fill="%23064e3b" rx="12"/><rect x="15" y="15" width="370" height="230" fill="%23022c22" rx="8" stroke="%2310b981" stroke-width="2"/><text x="35" y="45" fill="%2334d399" font-family="sans-serif" font-weight="bold" font-size="16">COMMERCIAL TRADE LICENCE</text><text x="35" y="90" fill="%23f8fafc" font-family="sans-serif" font-size="14">Entity: Apex Global Holdings Ltd</text><text x="35" y="115" fill="%23f8fafc" font-family="sans-serif" font-size="14">CRN: 509077205 &bull; Det: Active</text><text x="35" y="140" fill="%23f8fafc" font-family="sans-serif" font-size="14">Authority: Abu Dhabi Global Market (ADGM)</text><text x="35" y="165" fill="%23f8fafc" font-family="sans-serif" font-size="14">Status: Verified &bull; Expiry: 2028-11-30</text></svg>';
-                await this.persistMobileDoc(base64Data, 'Corporate_Trade_Licence.jpg', 'trade_licence');
+                const base64Data = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="260" viewBox="0 0 400 260"><rect width="400" height="260" fill="%23064e3b" rx="12"/><rect x="15" y="15" width="370" height="230" fill="%23022c22" rx="8" stroke="%2310b981" stroke-width="2"/><text x="35" y="45" fill="%2334d399" font-family="sans-serif" font-weight="bold" font-size="16">CERTIFICATE OF INCORPORATION</text><text x="35" y="90" fill="%23f8fafc" font-family="sans-serif" font-size="14">Entity: Apex Global Holdings Inc</text><text x="35" y="115" fill="%23f8fafc" font-family="sans-serif" font-size="14">EIN: 12-3456789 &bull; Det: Active</text><text x="35" y="140" fill="%23f8fafc" font-family="sans-serif" font-size="14">Authority: Delaware Division of Corporations</text><text x="35" y="165" fill="%23f8fafc" font-family="sans-serif" font-size="14">Status: Verified &bull; Expiry: 2028-11-30</text></svg>';
+                await this.persistMobileDoc(base64Data, 'Certificate_Of_Incorporation.jpg', 'corporate_document');
             }
         },
 
@@ -509,7 +510,7 @@
                     if (statusEl) {
                         statusEl.innerHTML = `
                             <div style="background:rgba(16,185,129,0.2);border:1px solid #10b981;border-radius:6px;padding:6px;margin-top:6px;text-align:center;">
-                                <strong style="color:#10b981;font-size:11px;">🟢 Stored in DB (Base64)</strong>
+                                <strong style="color:#10b981;font-size:11px;">ðŸŸ¢ Stored in DB (Base64)</strong>
                                 <div style="font-size:9px;color:#e2e8f0;margin-top:2px;">Table: application_documents (ID: ${res.document.id})</div>
                             </div>
                         `;
@@ -544,3 +545,4 @@
 
     window.MobileApp = MobileApp;
 })();
+

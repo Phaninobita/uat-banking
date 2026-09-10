@@ -1,7 +1,7 @@
 /**
- * Apex Bank Microservice: Live Core Banking & FX Service (Port 3004)
+ * First National Bank Microservice: Live Core Banking & FX Service (Port 3004)
  * Powers real-time corporate accounts, multi-currency balances, live FX rate feeds,
- * instant wire transfers (SWIFT GPI & UAE Central Bank FTS simulator),
+ * instant wire transfers (SWIFT GPI & Federal Reserve Fedwire simulator),
  * and mobile banking APIs for the mobile bank application.
  */
 
@@ -70,7 +70,7 @@ router.get("/accounts", async (req, res) => {
       count: accounts.length,
       accounts,
       totalLiquidityAED: totalLiquidityAED.toFixed(2),
-      clearingNetwork: "CBUAE Instant Payment Platform (IPP) & SWIFT GPI",
+      clearingNetwork: "Fedwire Funds Service & SWIFT GPI",
       service: "banking-service"
     });
   } catch (err) {
@@ -194,7 +194,7 @@ router.post("/transfer", async (req, res) => {
     category: "Commercial Payment",
     status: "settled",
     channel: channel || "portal",
-    clearing_channel: "CBUAE Funds Transfer System (FTS)",
+    clearing_channel: "Fedwire Funds Service (FRB)",
     created_at: new Date().toISOString(),
     timestamp: new Date().toISOString()
   };
@@ -240,8 +240,8 @@ router.post("/transfer", async (req, res) => {
 
   // Send simulated notification
   memStore.recordSimulatedEmail({
-    to: "finance@apexholdings.ae",
-    from: '"Apex Bank Operations Desk" <operations@apexbank.ae>',
+    to: "finance@corporate.com",
+    from: '"First National Bank Operations Desk" <operations@fnb-us.com>',
     subject: `Transfer Executed: ${txRecord.currency} ${txRecord.amount.toLocaleString()} to ${counterpartyName}`,
     type: "transfer_executed",
     metadata: { txRef, amount: numAmount },

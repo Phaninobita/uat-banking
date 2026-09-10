@@ -1,5 +1,5 @@
 /**
- * Apex Bank Microservice: Corporate Onboarding Service (Port 3003)
+ * First National Bank Microservice: Corporate Onboarding Service (Port 3003)
  * Manages the 7-step corporate onboarding lifecycle, auto-save state machine,
  * validation, and compliance verification submission.
  */
@@ -133,18 +133,18 @@ router.post("/save", requireAuth, async (req, res) => {
     }
 
     if (resolvedStatus === "submitted") {
-      const recipientEmail = (existingRecord && existingRecord.registered_email) || (req.user && req.user.email) || "admin@apexholdings.ae";
+      const recipientEmail = (existingRecord && existingRecord.registered_email) || (req.user && req.user.email) || "admin@corporate.com";
       memStore.recordSimulatedEmail({
         to: recipientEmail,
-        from: '"Apex Bank Corporate Onboarding" <onboarding@apexbank.ae>',
-        subject: `Apex Bank — Corporate Application Received (${application_ref})`,
+        from: '"First National Bank Corporate Onboarding" <onboarding@fnb-us.com>',
+        subject: `First National Bank — Corporate Application Received (${application_ref})`,
         type: "application_submitted",
         metadata: { application_ref },
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; color: #0f172a;">
             <div style="text-align: center; margin-bottom: 20px;">
               <div style="display: inline-block; background: linear-gradient(135deg, #10b981, #0ea5e9); color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">AB</div>
-              <h2 style="color: #0f172a; margin: 12px 0 2px; font-size: 20px; font-weight: 700;">Apex Bank Corporate Portal</h2>
+              <h2 style="color: #0f172a; margin: 12px 0 2px; font-size: 20px; font-weight: 700;">First National Bank Corporate Portal</h2>
               <p style="color: #64748b; font-size: 13px; margin: 0;">Application Submission Confirmation</p>
             </div>
             <p style="color: #334155; font-size: 14px; line-height: 1.5;">Dear Corporate Customer,</p>
@@ -153,10 +153,10 @@ router.post("/save", requireAuth, async (req, res) => {
               <span style="font-size: 11px; color: #166534; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;">Application Reference</span><br>
               <span style="font-size: 24px; font-weight: 800; color: #15803d; letter-spacing: 1px; font-family: monospace;">${application_ref}</span>
             </div>
-            <p style="color: #475569; font-size: 13px; line-height: 1.5;">Our compliance and onboarding desk will complete the verification within 1–2 business days. Your assigned Relationship Manager is <strong>Sarah Al-Qassimi</strong> (s.alqassimi@apexbank.ae &bull; +971 2 555 1234).</p>
+            <p style="color: #475569; font-size: 13px; line-height: 1.5;">Our compliance and onboarding desk will complete the verification within 1–2 business days. Your assigned Relationship Manager is <strong>Michael Vance</strong> (m.vance@fnb-us.com &bull; +1 212 555 0190).</p>
           </div>
         `,
-        text: `Apex Bank: Application ${application_ref} received successfully.`
+        text: `First National Bank: Application ${application_ref} received successfully.`
       });
     }
 

@@ -1,5 +1,5 @@
 /**
- * Apex Bank Database Layer
+ * First National Bank Database Layer
  * Connects to PostgreSQL / Supabase, executes auto-migrations for applications & Base64 document tables,
  * and seamlessly provides fallback to the shared in-memory repository.
  */
@@ -106,8 +106,8 @@ async function initDb() {
           company_name TEXT NOT NULL,
           contact_person VARCHAR(255),
           phone VARCHAR(64),
-          rm_name VARCHAR(128) NOT NULL DEFAULT 'Sarah Al-Qassimi (VP Corporate Banking)',
-          rm_id VARCHAR(64) NOT NULL DEFAULT 'RM-ADGM-9042',
+          rm_name VARCHAR(128) NOT NULL DEFAULT 'Michael Vance (VP Corporate Banking)',
+          rm_id VARCHAR(64) NOT NULL DEFAULT 'RM-FNB-9042',
           invite_token VARCHAR(128) UNIQUE NOT NULL,
           status VARCHAR(32) NOT NULL DEFAULT 'invited',
           invite_link TEXT NOT NULL,
@@ -124,7 +124,7 @@ async function initDb() {
           full_name VARCHAR(128) NOT NULL,
           email VARCHAR(255) UNIQUE NOT NULL,
           role VARCHAR(128) NOT NULL DEFAULT 'Senior Relationship Manager · Corporate Banking',
-          branch VARCHAR(128) DEFAULT 'ADGM Financial Center',
+          branch VARCHAR(128) DEFAULT 'New York Financial Center',
           status VARCHAR(32) NOT NULL DEFAULT 'active',
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -138,9 +138,9 @@ async function initDb() {
           'phanee',
           'Visionbank@324',
           'Phanee',
-          'phanee@apexbank.ae',
+          'phanee@fnb-us.com',
           'Senior Relationship Manager · Corporate Banking',
-          'ADGM Financial Center',
+          'New York Financial Center',
           'active'
       )
       ON CONFLICT (username) DO UPDATE SET

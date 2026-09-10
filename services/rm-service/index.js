@@ -1,5 +1,5 @@
-/**
- * Apex Bank Relationship Manager (RM) Service
+﻿/**
+ * First National Bank Relationship Manager (RM) Service
  * Microservice handling RM executive authentication, customer invitation dispatch,
  * magic link generation with composite key (CRN, Email), and real-time pipeline telemetry.
  */
@@ -75,11 +75,10 @@ router.post("/login", async (req, res) => {
     rm_id: "RM-" + userRecord.username.toUpperCase(),
     username: userRecord.username,
     name: userRecord.full_name || "Phanee",
-    role: userRecord.role || "Senior Relationship Manager · Corporate Banking",
+    role: userRecord.role || "Senior Relationship Manager Â· Corporate Banking",
     department: "Institutional Clients Group",
-    branch: userRecord.branch || "Abu Dhabi Global Market (ADGM) Financial Center",
-    email: userRecord.email,
-    clearanceLevel: "Level 4 Senior Executive Banker"
+    branch: userRecord.branch || "New York Financial Center",
+    email: userRecord.email
   };
 
   return res.json({
@@ -103,8 +102,8 @@ router.post("/users", async (req, res) => {
 
     const cleanUser = username.trim().toLowerCase();
     const cleanEmail = email.trim().toLowerCase();
-    const cleanRole = role ? role.trim() : "Senior Relationship Manager · Corporate Banking";
-    const cleanBranch = branch ? branch.trim() : "ADGM Financial Center";
+    const cleanRole = role ? role.trim() : "Senior Relationship Manager Â· Corporate Banking";
+    const cleanBranch = branch ? branch.trim() : "New York Financial Center";
 
     let created = null;
     if (db.isConnected()) {
@@ -296,10 +295,10 @@ router.post("/invite", async (req, res) => {
     memStore.saveRmInvitation(inviteRecord);
 
     // Dispatch simulated VIP corporate invitation email
-    const emailSubject = `Invitation to Onboard: Apex Bank Corporate Banking Package for ${inviteRecord.company_name}`;
+    const emailSubject = `Invitation to Onboard: First National Bank Corporate Banking Package for ${inviteRecord.company_name}`;
     memStore.recordSimulatedEmail({
       to: cleanEmail,
-      from: '"Sarah Al-Qassimi — Apex Bank Corporate Banking" <s.alqassimi@apexbank.ae>',
+      from: '"Michael Vance â€” First National Bank Corporate Banking" <m.vance@fnb-us.com>',
       subject: emailSubject,
       type: "rm_invitation",
       metadata: { crn: cleanCrn, email: cleanEmail, inviteLink },
@@ -307,20 +306,20 @@ router.post("/invite", async (req, res) => {
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
           <div style="background: linear-gradient(135deg, #090e17 0%, #1e293b 100%); padding: 32px 28px; text-align: center; border-bottom: 2px solid #f59e0b;">
             <div style="display: inline-block; background: #f59e0b; color: #090e17; font-weight: 800; font-size: 18px; width: 48px; height: 48px; line-height: 48px; border-radius: 10px; margin-bottom: 12px;">AB</div>
-            <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.02em;">Apex Bank Institutional Banking</h1>
+            <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.02em;">First National Bank Institutional Banking</h1>
             <p style="color: #cbd5e1; font-size: 13px; margin: 6px 0 0;">Dedicated Relationship Manager Executive Service</p>
           </div>
           <div style="padding: 32px 28px;">
             <h2 style="color: #0f172a; font-size: 18px; margin-top: 0;">Dear ${inviteRecord.contact_person},</h2>
             <p style="color: #334155; font-size: 14px; line-height: 1.6;">
-              On behalf of Apex Bank Corporate Banking, it is our pleasure to invite <strong>${inviteRecord.company_name}</strong> (CRN: ${cleanCrn}) to complete digital onboarding for our multi-currency corporate banking accounts and treasury solutions.
+              On behalf of First National Bank Corporate Banking, it is our pleasure to invite <strong>${inviteRecord.company_name}</strong> (CRN: ${cleanCrn}) to complete digital onboarding for our multi-currency corporate banking accounts and treasury solutions.
             </p>
             <div style="background: #f8fafc; border: 1.5px dashed #f59e0b; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center;">
               <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #92400e; margin-bottom: 8px;">Your Unique Corporate Access Details</div>
               <div style="font-size: 14px; color: #1e293b; margin-bottom: 4px;"><strong>Commercial Reg. No. (CRN):</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${cleanCrn}</code></div>
               <div style="font-size: 14px; color: #1e293b; margin-bottom: 16px;"><strong>Registered Email:</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${cleanEmail}</code></div>
               <a href="${inviteLink}" style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 700; font-size: 14px; text-decoration: none; padding: 12px 28px; border-radius: 8px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
-                🚀 Launch Direct Customer Onboarding Portal
+                ðŸš€ Launch Direct Customer Onboarding Portal
               </a>
             </div>
             <p style="color: #64748b; font-size: 12px; line-height: 1.6;">
@@ -330,9 +329,9 @@ router.post("/invite", async (req, res) => {
             <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;">
             <div style="display: flex; align-items: center; gap: 14px;">
               <div>
-                <strong style="color: #0f172a; font-size: 13px;">Sarah Al-Qassimi</strong><br>
-                <span style="font-size: 12px; color: #64748b;">Senior Vice President — Institutional & Corporate Banking</span><br>
-                <span style="font-size: 11px; color: #94a3b8;">📞 +971 2 555 1234 · ✉️ s.alqassimi@apexbank.ae</span>
+                <strong style="color: #0f172a; font-size: 13px;">Michael Vance</strong><br>
+                <span style="font-size: 12px; color: #64748b;">Senior Vice President â€” Institutional & Corporate Banking</span><br>
+                <span style="font-size: 11px; color: #94a3b8;">ðŸ“ž +1 212 555 0199 Â· âœ‰ï¸ m.vance@fnb-us.com</span>
               </div>
             </div>
           </div>
@@ -366,8 +365,8 @@ router.post("/resend/:crn/:email", async (req, res) => {
 
     memStore.recordSimulatedEmail({
       to: invite.email,
-      from: '"Sarah Al-Qassimi — Apex Bank" <s.alqassimi@apexbank.ae>',
-      subject: `Reminder: Complete Your Apex Bank Onboarding for ${invite.company_name}`,
+      from: '"Michael Vance â€” First National Bank" <m.vance@fnb-us.com>',
+      subject: `Reminder: Complete Your First National Bank Onboarding for ${invite.company_name}`,
       type: "rm_invitation_reminder",
       metadata: { crn: invite.crn, email: invite.email, inviteLink: invite.invite_link },
       html: `
@@ -470,3 +469,4 @@ router.get("/verify-invite", async (req, res) => {
 module.exports = {
   router
 };
+

@@ -1,5 +1,5 @@
 /**
- * Apex Bank Platform — Microservices Mesh & Orchestration Bootloader
+ * First National Bank Platform — Microservices Mesh & Orchestration Bootloader
  * Starts the unified API Gateway and initializes the Microservices Mesh:
  *   - Gateway: Port 3000
  *   - Microservice Mesh: Auth (3001), Documents (3002), Applications (3003), Banking (3004), Notifications (3005)
@@ -13,7 +13,7 @@ const PORT = config.PORT || 3000;
 
 const server = gatewayApp.listen(PORT, "0.0.0.0", () => {
   console.log("==========================================================");
-  console.log("🏦 APEX BANK — LIVE CORE BANKING & ONBOARDING PLATFORM");
+  console.log("🏦 FIRST NATIONAL BANK — LIVE CORE BANKING & ONBOARDING PLATFORM");
   console.log("==========================================================");
   console.log(`🚀 API Gateway active on: http://localhost:${PORT}`);
   console.log(`⚡ Microservices Mesh Status:`);
@@ -28,7 +28,7 @@ const server = gatewayApp.listen(PORT, "0.0.0.0", () => {
 
 // Graceful shutdown handler
 function handleShutdown(signal) {
-  console.log(`\n🛑 [${signal}] Gracefully terminating Apex Banking Mesh...`);
+  console.log(`\n🛑 [${signal}] Gracefully terminating First National Bank Mesh...`);
   server.close(() => {
     if (db.pool) {
       db.pool.end();

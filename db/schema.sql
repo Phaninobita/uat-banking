@@ -1,4 +1,4 @@
--- Apex Bank Corporate Account Portal & Core Banking Mesh
+﻿-- First National Bank Corporate Account Portal & Core Banking Mesh
 -- Database Schema for PostgreSQL / Supabase
 
 -- 1. Corporate Onboarding Applications Table
@@ -107,3 +107,5 @@ CREATE TRIGGER trg_app_docs_updated_at
 BEFORE UPDATE ON application_documents
 FOR EACH ROW
 EXECUTE FUNCTION update_modified_column();
+
+

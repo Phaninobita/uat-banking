@@ -1,12 +1,12 @@
 /**
- * Apex Bank Platform Configuration
+ * First National Bank Platform Configuration
  */
 require("dotenv").config();
 
 module.exports = {
   PORT: parseInt(process.env.PORT || "3000", 10),
   NODE_ENV: process.env.NODE_ENV || "development",
-  JWT_SECRET: process.env.JWT_SECRET || "apex-bank-jwt-secret-dev-2026",
+  JWT_SECRET: process.env.JWT_SECRET || "fnb-jwt-secret-dev-2026",
   DATABASE_URL: process.env.DATABASE_URL || "",
   GOOGLE_VISION_API_KEY: process.env.GOOGLE_VISION_API_KEY || "",
   SMTP: {
@@ -15,7 +15,7 @@ module.exports = {
     SECURE: process.env.SMTP_SECURE === "true",
     USER: process.env.SMTP_USER || "",
     PASS: process.env.SMTP_PASS || "",
-    FROM: process.env.EMAIL_FROM || '"Apex Bank" <onboarding@apexbank.ae>'
+    FROM: process.env.EMAIL_FROM || '"First National Bank" <onboarding@fnb-us.com>'
   },
   MICROSERVICES: {
     GATEWAY: { port: 3000, name: "API Gateway" },

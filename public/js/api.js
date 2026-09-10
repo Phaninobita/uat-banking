@@ -1,5 +1,5 @@
-/**
- * Apex Bank Platform — Microservices API Client Module
+﻿/**
+ * First National Bank Platform â€” Microservices API Client Module
  * Communicates with the API Gateway (/api/v1/...) across all microservices:
  *   - Auth Service
  *   - Document & Base64 Vault Service
@@ -92,7 +92,7 @@
             return data;
         },
 
-        // ── AUTH SERVICE ──
+        // â”€â”€ AUTH SERVICE â”€â”€
         async requestOtp(crn, email) {
             return this._fetch('/api/v1/auth/request-otp', {
                 method: 'POST',
@@ -128,7 +128,7 @@
             return result;
         },
 
-        // ── APPLICATION SERVICE ──
+        // â”€â”€ APPLICATION SERVICE â”€â”€
         async getCurrentApplication() {
             return this._fetch('/api/v1/applications/current', {
                 method: 'GET'
@@ -146,7 +146,7 @@
             });
         },
 
-        // ── DOCUMENT SERVICE (BASE64 DB STORAGE) ──
+        // â”€â”€ DOCUMENT SERVICE (BASE64 DB STORAGE) â”€â”€
         async uploadDocumentBase64({ docType, fileName, fileType, fileSize, base64Data, applicationRef }) {
             const appRef = applicationRef || this.getApplicationRef();
             return this._fetch('/api/v1/documents/upload', {
@@ -190,7 +190,7 @@
             });
         },
 
-        // ── CORE BANKING & FX SERVICE ──
+        // â”€â”€ CORE BANKING & FX SERVICE â”€â”€
         async getAccounts() {
             return this._fetch('/api/v1/banking/accounts', {
                 method: 'GET'
@@ -222,7 +222,7 @@
             });
         },
 
-        // ── NOTIFICATION SERVICE ──
+        // â”€â”€ NOTIFICATION SERVICE â”€â”€
         async getSimulatedEmails(email) {
             const query = email ? `?email=${encodeURIComponent(email)}` : '';
             return this._fetch(`/api/v1/notifications/emails${query}`, {
@@ -243,7 +243,7 @@
             });
         },
 
-        // ── GATEWAY HEALTH & MESH MONITOR ──
+        // â”€â”€ GATEWAY HEALTH & MESH MONITOR â”€â”€
         async getMeshHealth() {
             return this._fetch('/api/v1/gateway/health', {
                 method: 'GET'
@@ -254,3 +254,4 @@
     window.ApexApi = ApexApi;
     window.VBApi = ApexApi; // Aliased for complete backward compatibility
 })();
+
