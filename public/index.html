@@ -67,7 +67,11 @@
                 <button class="btn-login" onclick="handleOtpSubmit()">Verify &amp; Login</button>
                 <div class="resend-text">Didn't get the code? <a onclick="resendOtp()" role="button" tabindex="0">Resend OTP</a></div>
             </div>
-            <div class="footer-text">By continuing, you agree to Apex Bank's <a href="#">Terms of Use</a> and <a href="#">Privacy Policy</a>.<br>© 2026 Apex Bank. All rights reserved.</div>
+            <div class="footer-text">By continuing, you agree to Apex Bank's <a href="#">Terms of Use</a> and <a href="#">Privacy Policy</a>.<br>© 2026 Apex Bank. All rights reserved.
+                <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.1);">
+                    <a href="/rm" style="color: #fbbf24; font-size: 11.5px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">👔 Relationship Manager (RM) Executive Portal &rarr;</a>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -102,6 +106,7 @@
             </div>
 
             <div class="hdr-right">
+                <a href="/rm" target="_blank" class="btn btn-ghost btn-sm" style="color: #f59e0b; border-color: rgba(245, 158, 11, 0.4); text-decoration: none;" title="Open Relationship Manager Portal">👔 RM Portal</a>
                 <button class="btn-rework" id="reworkToggle" onclick="toggleReworkMode()" aria-label="Toggle rework simulation mode" title="Simulate compliance return for correction">🔁 <span class="tt-label">Simulate Rework</span></button>
                 <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode"><span id="themeIcon" aria-hidden="true">🌙</span><span class="tt-label">Dark</span></button>
                 <button class="btn btn-ghost btn-sm btn-hdr-save" onclick="showSaveModal()" aria-label="Save progress">💾 Save Draft</button>
@@ -291,8 +296,8 @@
                                 </div>
                                 <div class="field">
                                     <label>Licence Expiry Date</label>
-                                    <input type="date" id="step2_expiry_date" class="auto-filled">
-                                    <span class="auto-badge">⚡ Auto-filled</span>
+                                    <input type="date" id="step2_expiry_date" class="auto-filled" oninput="evaluateDateInputExpiry(this)" onchange="evaluateDateInputExpiry(this)">
+                                    <span class="auto-badge" id="step2_expiry_badge">⚡ Auto-filled</span>
                                 </div>
                                 <div class="field span2">
                                     <label>Licence Issued By</label>
@@ -471,6 +476,14 @@
                         </button>
                     </div>
                     
+                    <div class="vis-progress-container" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; padding:12px 18px; background:rgba(15,23,42,0.7); border:1px solid rgba(255,255,255,0.08); border-radius:10px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:12px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.04em;">📊 Visual Structure Allocation:</span>
+                            <span id="vis-pct-badge" style="font-size:13px; font-weight:700; color:#38bdf8;">100% Allocated</span>
+                        </div>
+                        <span style="font-size:11px; color:#94a3b8;">💡 Drag entities into boxes &amp; adjust % shareholding directly</span>
+                    </div>
+
                     <div class="structure-layout">
                         <div class="entity-pool" id="pool" ondrop="drop(event)" ondragover="allowDrop(event)">
                             <p style="font-size:13px;font-weight:700;color:var(--text-primary);margin:0 0 16px;letter-spacing:0.02em;">Verified Entities</p>
@@ -488,8 +501,18 @@
                                 <button class="btn btn-ghost btn-sm" onclick="addDropZone('lv1-row')" style="margin-top:12px;">+ Add Entity Box</button>
                             </div>
                             <div class="connector-line" id="conn-line" style="display:none;"></div>
+                            
+                            <!-- Level 2 Corporate Governance Lock Notice -->
+                            <div id="lv2-lock-notice" class="lv2-lock-banner" style="display:none;">
+                                <span class="lock-icon" aria-hidden="true">🔒</span>
+                                <div>
+                                    <strong>Level 2 Locked — Unlocks for Corporate Entities Only</strong>
+                                    <p>Tiered shareholding and underlying subsidiaries (Level 2) are only applicable when a Corporate Shareholder is placed in Level 1. Individual UBOs hold direct parent-level ownership.</p>
+                                </div>
+                            </div>
+
                             <div id="lv2-wrap" style="display:none;width:100%;">
-                                <div class="level-label">LEVEL 2 (Subsidiaries / UBOs)</div>
+                                <div class="level-label">LEVEL 2 (Subsidiaries / Underlying UBOs)</div>
                                 <div class="level-row" id="lv2-row">
                                     <div class="drop-zone" ondrop="drop(event)" ondragover="allowDropZone(event)" ondragleave="leaveDrop(event)">
                                         <button type="button" class="dz-delete-box-btn" title="Delete this box" onclick="event.stopPropagation(); deleteDropZone(this)">✕</button>

@@ -24,6 +24,10 @@ class MemoryStore {
     // Real-Time Simulated Email Buffer
     this.simulatedEmails = [];
 
+    // Relationship Manager (RM) Customer Invitations Repository
+    // Key: `${crn.trim().toUpperCase()}:${email.trim().toLowerCase()}` -> invitation record
+    this.rmInvitations = new Map();
+
     // Microservice Telemetry & Health metrics
     this.metrics = {
       startTime: Date.now(),
@@ -34,7 +38,8 @@ class MemoryStore {
         documents: 0,
         applications: 0,
         banking: 0,
-        notifications: 0
+        notifications: 0,
+        rm: 0
       }
     };
 
@@ -132,6 +137,81 @@ class MemoryStore {
         timestamp: new Date(Date.now() - 3600 * 1000 * 28).toISOString()
       }
     ];
+
+    // Seed initial RM invitations
+    const initialInvites = [
+      {
+        crn: "509077205",
+        email: "sarah.director@innovateholding.ae",
+        company_name: "Innovate Holding Global PJSC",
+        contact_person: "Sarah Jenkins",
+        phone: "+971 50 123 4567",
+        rm_name: "Sarah Al-Qassimi (VP Corporate Banking)",
+        rm_id: "RM-ADGM-9042",
+        invite_token: "inv_tok_demo_509077205",
+        status: "in_progress",
+        invite_link: "http://localhost:3000/?crn=509077205&email=sarah.director%40innovateholding.ae",
+        notes: "Strategic ADGM multinational corporate client. Accelerated VIP onboarding.",
+        created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+        updated_at: new Date(Date.now() - 3600000 * 5).toISOString()
+      },
+      {
+        crn: "10029481",
+        email: "client@apex.ae",
+        company_name: "Al-Futtaim Global Holdings LLC",
+        contact_person: "Tariq Al-Mansoor",
+        phone: "+971 4 800 9000",
+        rm_name: "Sarah Al-Qassimi (VP Corporate Banking)",
+        rm_id: "RM-ADGM-9042",
+        invite_token: "inv_tok_demo_10029481",
+        status: "invited",
+        invite_link: "http://localhost:3000/?crn=10029481&email=client%40apex.ae",
+        notes: "Tier 1 Conglomerate. Multi-currency treasury and trade finance facilities required.",
+        created_at: new Date(Date.now() - 86400000).toISOString(),
+        updated_at: new Date(Date.now() - 86400000).toISOString()
+      }
+    ];
+
+    initialInvites.forEach(inv => {
+      const key = `${inv.crn.trim().toUpperCase()}:${inv.email.trim().toLowerCase()}`;
+      this.rmInvitations.set(key, inv);
+    });
+  }
+
+  saveRmInvitation(invite) {
+    const crn = (invite.crn || "").trim().toUpperCase();
+    const email = (invite.email || "").trim().toLowerCase();
+    const key = `${crn}:${email}`;
+    const existing = this.rmInvitations.get(key) || {};
+    const record = {
+      ...existing,
+      ...invite,
+      crn,
+      email,
+      updated_at: new Date().toISOString()
+    };
+    if (!record.created_at) {
+      record.created_at = new Date().toISOString();
+    }
+    this.rmInvitations.set(key, record);
+    return record;
+  }
+
+  getRmInvitation(crn, email) {
+    if (!crn || !email) return null;
+    const key = `${crn.trim().toUpperCase()}:${email.trim().toLowerCase()}`;
+    return this.rmInvitations.get(key) || null;
+  }
+
+  listRmInvitations() {
+    return Array.from(this.rmInvitations.values()).sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
+  }
+
+  deleteRmInvitation(crn, email) {
+    const key = `${crn.trim().toUpperCase()}:${email.trim().toLowerCase()}`;
+    return this.rmInvitations.delete(key);
   }
 
   recordSimulatedEmail({ to, from, subject, html, text, code, type, metadata }) {

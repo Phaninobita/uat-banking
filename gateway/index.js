@@ -24,6 +24,7 @@ const docService = require("../services/document-service");
 const appService = require("../services/application-service");
 const bankService = require("../services/banking-service");
 const notifService = require("../services/notification-service");
+const rmService = require("../services/rm-service");
 
 const app = express();
 app.set("trust proxy", 1);
@@ -142,6 +143,7 @@ app.use("/api/v1/applications", appService.router);
 app.use("/api/v1/banking", bankService.router);
 app.use("/api/v1/mobile", bankService.router); // Mobile summary & quick routes
 app.use("/api/v1/notifications", notifService.router);
+app.use("/api/v1/rm", rmService.router);
 
 // ── Legacy Forwarding Routers (100% Backward Compatibility) ──
 app.use("/api/auth", authService.router);
@@ -152,7 +154,12 @@ app.use("/api/emails", notifService.router);
 // Static Web Assets
 app.use(express.static(path.join(__dirname, "..", "public")));
 
-// Fallback for SPA or root
+// Route /rm and /rm/* specifically to Relationship Manager (RM) Executive Portal
+app.get(["/rm", "/rm/*"], (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public", "rm", "index.html"));
+});
+
+// Fallback for Customer Portal SPA or root
 app.get("*", (req, res, next) => {
   if (req.path.startsWith("/api/")) {
     return res.status(404).json({ error: "API endpoint not found on Gateway." });

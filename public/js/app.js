@@ -1034,6 +1034,52 @@ async function extractUboData() {
     }
 }
 
+// ── ROBUST DATE EXPIRY VALIDATION ENGINE ──
+function parseDateFlexible(dateVal) {
+    if (!dateVal) return null;
+    dateVal = String(dateVal).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
+        const [y, m, d] = dateVal.split('-').map(Number);
+        return new Date(y, m - 1, d);
+    }
+    if (/^\d{1,2}[-\/]\d{1,2}[-\/]\d{4}$/.test(dateVal)) {
+        const parts = dateVal.split(/[-\/]/).map(Number);
+        return new Date(parts[2], parts[1] - 1, parts[0]);
+    }
+    const d = new Date(dateVal);
+    return isNaN(d.getTime()) ? null : d;
+}
+
+function isDateExpired(dateVal) {
+    const d = parseDateFlexible(dateVal);
+    if (!d) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return d < today;
+}
+
+function evaluateDateInputExpiry(inputEl) {
+    if (!inputEl) return;
+    const isExpired = isDateExpired(inputEl.value);
+    const parentField = inputEl.closest('.field');
+    const badge = parentField ? parentField.querySelector('.auto-badge') : null;
+
+    if (isExpired) {
+        inputEl.classList.add('date-expired');
+        if (badge) {
+            badge.className = 'auto-badge badge-expired';
+            badge.innerHTML = `⚠️ Expired (${inputEl.value || 'Past Date'})`;
+        }
+    } else {
+        inputEl.classList.remove('date-expired');
+        if (badge) {
+            badge.className = 'auto-badge';
+            badge.innerHTML = `⚡ Verified`;
+        }
+    }
+    triggerAutoSave();
+}
+
 function generatePrefilledIndividualCard(name, nat, dob, pass, expiry, gender) {
     uboCount++;
     updateUboCountText();
@@ -1054,6 +1100,8 @@ function generatePrefilledIndividualCard(name, nat, dob, pass, expiry, gender) {
         natOptions = `<option value="${nat}" selected>${nat}</option>` + natOptions;
     }
 
+    const expExpired = isDateExpired(expiry);
+
     card.innerHTML = `
         <div class="ubo-card-hdr">
             <span class="ubo-n">👤 UBO ${uboCount} — ${name}</span>
@@ -1070,7 +1118,7 @@ function generatePrefilledIndividualCard(name, nat, dob, pass, expiry, gender) {
                 </div>
                 <div class="field"><label>Date of Birth</label><input type="date" value="${dob}" class="auto-filled"><span class="auto-badge">⚡ Verified</span></div>
                 <div class="field"><label>Passport Number</label><input type="text" value="${pass}" class="auto-filled"><span class="auto-badge">⚡ Verified</span></div>
-                <div class="field"><label>Passport Expiry</label><input type="date" value="${expiry}" class="auto-filled"><span class="auto-badge">⚡ Verified</span></div>
+                <div class="field"><label>Passport Expiry</label><input type="date" value="${expiry}" class="auto-filled ${expExpired ? 'date-expired' : ''}" oninput="evaluateDateInputExpiry(this)" onchange="evaluateDateInputExpiry(this)"><span class="auto-badge ${expExpired ? 'badge-expired' : ''}">${expExpired ? `⚠️ Expired (${expiry})` : '⚡ Verified'}</span></div>
                 <div class="field"><label>Gender</label><select class="auto-filled"><option ${gender === 'Male' ? 'selected' : ''}>Male</option><option ${gender === 'Female' ? 'selected' : ''}>Female</option></select><span class="auto-badge">⚡ Verified</span></div>
             </div>
             <span class="tog-label">Is this person a Politically Exposed Person (PEP)?</span>
@@ -1087,6 +1135,8 @@ function generatePrefilledCorpCard(name, reg, auth, incorp, expiry) {
     if (!wrap) return;
     const card = document.createElement('div');
     card.className = 'ubo-card';
+    const expExpired = isDateExpired(expiry);
+
     card.innerHTML = `
         <div class="ubo-card-hdr">
             <span class="ubo-n">🏢 Corporate Shareholder ${uboCount} — ${name}</span>
@@ -1098,7 +1148,7 @@ function generatePrefilledCorpCard(name, reg, auth, incorp, expiry) {
                 <div class="field"><label>Licence / Registration No.</label><input type="text" value="${reg}" class="auto-filled"><span class="auto-badge">⚡ Verified</span></div>
                 <div class="field"><label>Issuing Authority</label><input type="text" value="${auth}" class="auto-filled"><span class="auto-badge">⚡ Verified</span></div>
                 <div class="field"><label>Date of Incorporation</label><input type="date" value="${incorp}" class="auto-filled"><span class="auto-badge">⚡ Verified</span></div>
-                <div class="field"><label>Licence Expiry Date</label><input type="date" value="${expiry}" class="auto-filled"><span class="auto-badge">⚡ Verified</span></div>
+                <div class="field"><label>Licence Expiry Date</label><input type="date" value="${expiry}" class="auto-filled ${expExpired ? 'date-expired' : ''}" oninput="evaluateDateInputExpiry(this)" onchange="evaluateDateInputExpiry(this)"><span class="auto-badge ${expExpired ? 'badge-expired' : ''}">${expExpired ? `⚠️ Expired (${expiry})` : '⚡ Verified'}</span></div>
             </div>
         </div>
     `;
@@ -1177,11 +1227,15 @@ function renderVisualView() {
         card.draggable = true;
         card.ondragstart = drag;
         card.id = 'pool-card-' + idx;
-        const isCorp = name.includes('LLC') || name.includes('PLC') || name.includes('Capital') || name.includes('Holding');
+        const isCorp = name.includes('LLC') || name.includes('PLC') || name.includes('Capital') || name.includes('Holding') || name.includes('Corp') || name.includes('Ltd');
         if (isCorp) card.classList.add('corp');
+        card.dataset.entityName = name;
+        card.dataset.entityType = isCorp ? 'corporate' : 'individual';
         card.innerHTML = `<div class="ec-name">${name}</div><div class="ec-type">${isCorp ? '🏢 Corporate Entity' : '👤 Individual UBO'}</div>`;
         container.appendChild(card);
     });
+    checkLevels();
+    syncVisualShare();
 }
 
 function renderListView() {
@@ -1282,7 +1336,7 @@ function calcTotal() {
     }
 }
 
-// ── DRAG & DROP FOR VISUAL BUILDER ──
+// ── DRAG & DROP FOR VISUAL BUILDER WITH SHAREHOLDING % & CORPORATE-ONLY LEVEL 2 UNLOCK ──
 function drag(ev) {
     ev.dataTransfer.setData('text/plain', ev.currentTarget.id);
 }
@@ -1306,11 +1360,40 @@ function drop(ev) {
 
     if (dropZone.id === 'pool') {
         const poolContainer = document.getElementById('pool-cards-container');
-        if (poolContainer) poolContainer.appendChild(card);
+        if (poolContainer) {
+            const shareWrap = card.querySelector('.dz-share-wrap');
+            if (shareWrap) shareWrap.remove();
+            poolContainer.appendChild(card);
+        }
     } else if (dropZone.classList.contains('drop-zone')) {
+        // If there's an existing card in this dropZone, move it back to pool
+        const existingCard = dropZone.querySelector('.entity-card');
+        if (existingCard && existingCard !== card) {
+            const poolContainer = document.getElementById('pool-cards-container');
+            const oldShare = existingCard.querySelector('.dz-share-wrap');
+            if (oldShare) oldShare.remove();
+            if (poolContainer) poolContainer.appendChild(existingCard);
+        }
+
         dropZone.innerHTML = `
             <button type="button" class="dz-delete-box-btn" title="Delete this box" onclick="event.stopPropagation(); deleteDropZone(this)">✕</button>
         `;
+
+        // Direct Shareholding % Input inside the Visual Builder card
+        let shareWrap = card.querySelector('.dz-share-wrap');
+        if (!shareWrap) {
+            shareWrap = document.createElement('div');
+            shareWrap.className = 'dz-share-wrap';
+            const isLv1 = !!dropZone.closest('#lv1-row');
+            const defaultPct = isLv1 ? '100' : '50';
+            shareWrap.innerHTML = `
+                <span class="dz-share-label">Equity:</span>
+                <input type="number" min="1" max="100" class="dz-share-input" value="${defaultPct}" placeholder="%" oninput="syncVisualShare()" onchange="syncVisualShare()" onclick="event.stopPropagation()">
+                <span class="dz-share-unit">%</span>
+            `;
+            card.appendChild(shareWrap);
+        }
+
         dropZone.appendChild(card);
         const removeBtn = document.createElement('button');
         removeBtn.className = 'dz-remove';
@@ -1320,6 +1403,7 @@ function drop(ev) {
         dropZone.appendChild(removeBtn);
     }
     checkLevels();
+    syncVisualShare();
     triggerAutoSave();
 }
 
@@ -1329,6 +1413,8 @@ function removeCard(btn) {
     const card = zone.querySelector('.entity-card');
     const poolContainer = document.getElementById('pool-cards-container');
     if (card && poolContainer) {
+        const shareWrap = card.querySelector('.dz-share-wrap');
+        if (shareWrap) shareWrap.remove();
         poolContainer.appendChild(card);
     }
     zone.innerHTML = `
@@ -1336,6 +1422,7 @@ function removeCard(btn) {
         <span class="dz-placeholder-text">Drop entity here</span>
     `;
     checkLevels();
+    syncVisualShare();
     triggerAutoSave();
 }
 
@@ -1345,10 +1432,13 @@ function deleteDropZone(btn) {
     const card = zone.querySelector('.entity-card');
     const poolContainer = document.getElementById('pool-cards-container');
     if (card && poolContainer) {
+        const shareWrap = card.querySelector('.dz-share-wrap');
+        if (shareWrap) shareWrap.remove();
         poolContainer.appendChild(card);
     }
     zone.remove();
     checkLevels();
+    syncVisualShare();
     triggerAutoSave();
     showToast('Entity box removed.', 'Box Deleted', 'info', 1800);
 }
@@ -1372,10 +1462,100 @@ function checkLevels() {
     const lv1Cards = document.querySelectorAll('#lv1-row .entity-card');
     const connLine = document.getElementById('conn-line');
     const lv2Wrap = document.getElementById('lv2-wrap');
-    if (lv1Cards.length > 0) {
+    let lv2Notice = document.getElementById('lv2-lock-notice');
+
+    // RULE: Level 2 unlocks ONLY if a Corporate entity is present in Level 1
+    let hasCorporateInLv1 = false;
+    lv1Cards.forEach(c => {
+        const name = c.dataset.entityName || c.querySelector('.ec-name')?.textContent || '';
+        const isCorp = c.classList.contains('corp') || c.dataset.entityType === 'corporate' || name.includes('LLC') || name.includes('PLC') || name.includes('Capital') || name.includes('Holding') || name.includes('Corp') || name.includes('Ltd');
+        if (isCorp) {
+            hasCorporateInLv1 = true;
+        }
+    });
+
+    if (hasCorporateInLv1) {
         if (connLine) connLine.style.display = 'block';
-        if (lv2Wrap) lv2Wrap.style.display = 'block';
+        if (lv2Wrap) {
+            lv2Wrap.style.display = 'block';
+            lv2Wrap.style.animation = 'fadeUp 0.4s ease';
+        }
+        if (lv2Notice) lv2Notice.style.display = 'none';
+    } else {
+        if (connLine) connLine.style.display = 'none';
+        if (lv2Wrap) lv2Wrap.style.display = 'none';
+
+        // If there are cards in Level 1 (individual UBOs only)
+        if (lv1Cards.length > 0) {
+            if (!lv2Notice) {
+                lv2Notice = document.createElement('div');
+                lv2Notice.id = 'lv2-lock-notice';
+                lv2Notice.className = 'lv2-lock-banner';
+                const chartWrap = document.querySelector('.chart-wrap');
+                if (chartWrap) chartWrap.appendChild(lv2Notice);
+            }
+            lv2Notice.innerHTML = `
+                <span class="lock-icon" aria-hidden="true">🔒</span>
+                <div>
+                    <strong>Level 2 Locked — Unlocks for Corporate Entities Only</strong>
+                    <p>Underlying subsidiaries and tiered shareholding (Level 2) are only required when a Corporate Shareholder is placed in Level 1. Individual UBOs hold direct parent-level ownership.</p>
+                </div>
+            `;
+            lv2Notice.style.display = 'flex';
+        } else {
+            if (lv2Notice) lv2Notice.style.display = 'none';
+        }
     }
+}
+
+function syncVisualShare() {
+    let total = 0;
+    const inputs = document.querySelectorAll('.drop-zone .dz-share-input');
+    inputs.forEach(inp => {
+        total += Number(inp.value) || 0;
+    });
+
+    const visPctBadge = document.getElementById('vis-pct-badge');
+    const totalText = document.getElementById('pct-total-text');
+    const fillBar = document.getElementById('pct-fill-bar');
+
+    if (visPctBadge) {
+        visPctBadge.textContent = `${total}% Allocated`;
+        visPctBadge.style.color = total === 100 ? '#34d399' : (total > 100 ? '#f87171' : '#38bdf8');
+    }
+
+    if (totalText && fillBar) {
+        totalText.textContent = `${total}% / 100%`;
+        fillBar.style.width = Math.min(total, 100) + '%';
+        if (total === 100) {
+            totalText.style.color = 'var(--success-dark)';
+            fillBar.style.background = 'var(--success)';
+        } else if (total > 100) {
+            totalText.style.color = 'var(--danger)';
+            fillBar.style.background = 'var(--danger)';
+        } else {
+            totalText.style.color = 'var(--warning)';
+            fillBar.style.background = 'var(--warning)';
+        }
+    }
+
+    // Synchronize to List View row inputs
+    document.querySelectorAll('.drop-zone .entity-card').forEach(card => {
+        const name = card.dataset.entityName || card.querySelector('.ec-name')?.textContent;
+        const pctInput = card.querySelector('.dz-share-input');
+        if (name && pctInput) {
+            const listRow = Array.from(document.querySelectorAll('#struct-rows .struct-row')).find(row => {
+                const sel = row.querySelector('select[id^="entity-select"]');
+                return sel && sel.value === name;
+            });
+            if (listRow) {
+                const listPct = listRow.querySelector('input[type="number"]');
+                if (listPct && listPct.value !== pctInput.value) {
+                    listPct.value = pctInput.value;
+                }
+            }
+        }
+    });
 }
 
 function showDragDemo() {
@@ -1639,12 +1819,15 @@ function updateReviewSection() {
     const name = document.getElementById('step2_name')?.value || '';
     const crn = document.getElementById('step2_crn')?.value || '';
     const legalType = document.getElementById('step2_legal_type')?.value || '';
+    const licenceExp = document.getElementById('step2_expiry_date')?.value || '';
+    const isLicExpired = isDateExpired(licenceExp);
     if (ra2Summary) ra2Summary.textContent = (name || 'Company') + ' · ' + (crn || 'No CRN');
     if (ra2Details) {
         ra2Details.innerHTML = `
             <div class="rv-row"><span class="rvl">Company Name</span><span class="rvv">${name || '—'}</span></div>
             <div class="rv-row"><span class="rvl">Commercial Reg. No. (CRN)</span><span class="rvv">${crn || '—'}</span></div>
             <div class="rv-row"><span class="rvl">Legal Type</span><span class="rvv">${legalType || '—'}</span></div>
+            <div class="rv-row"><span class="rvl">Licence Expiry</span><span class="rvv" style="${isLicExpired ? 'color:#f87171;font-weight:700;' : ''}">${isLicExpired ? `⚠️ Expired (${licenceExp})` : (licenceExp || '—')}</span></div>
         `;
     }
 
@@ -1652,9 +1835,21 @@ function updateReviewSection() {
     const ra3Body = document.getElementById('ra3');
     const ra3Count = document.getElementById('ra3-count');
     if (ra3Body && extractedEntities.length > 0) {
-        ra3Body.innerHTML = extractedEntities.map(e =>
-            `<div class="rv-row"><span class="rvl">Beneficial Owner</span><span class="rvv">${e}</span></div>`
-        ).join('');
+        const uboCards = document.querySelectorAll('#uboCardsWrap .ubo-card');
+        let uboRowsHtml = '';
+        if (uboCards.length > 0) {
+            uboCards.forEach(c => {
+                const uboName = c.querySelector('.ubo-n')?.textContent || 'UBO';
+                const expInput = c.querySelector('input[type="date"].date-expired, input.date-expired');
+                const hasExpired = !!expInput;
+                uboRowsHtml += `<div class="rv-row"><span class="rvl">${uboName}</span><span class="rvv" style="${hasExpired ? 'color:#f87171;font-weight:700;' : ''}">${hasExpired ? `⚠️ Expired Doc (${expInput.value})` : '✓ Valid'}</span></div>`;
+            });
+            ra3Body.innerHTML = uboRowsHtml;
+        } else {
+            ra3Body.innerHTML = extractedEntities.map(e =>
+                `<div class="rv-row"><span class="rvl">Beneficial Owner</span><span class="rvv">${e}</span></div>`
+            ).join('');
+        }
         if (ra3Count) ra3Count.textContent = `${extractedEntities.length} entities`;
     }
 
@@ -2187,15 +2382,15 @@ function triggerDocuSign() {
     if (btn) { btn.innerHTML = '⌛ Dispatching Invites…'; btn.style.opacity = '0.8'; btn.style.pointerEvents = 'none'; }
     setTimeout(() => {
         if (actionArea) {
-            actionArea.innerHTML = `<div style="display:flex; align-items:center; gap:8px; color: var(--success-dark); font-weight: 700; font-size: 14px; width: 100%;"><span style="font-size:18px;" aria-hidden="true">✅</span> Invites successfully dispatched to all signatories!</div>`;
-            actionArea.style.borderColor = 'var(--success)';
-            actionArea.style.background = 'var(--success-bg)';
+            actionArea.innerHTML = `<div style="display:flex; align-items:center; gap:8px; color: #6ee7b7; font-weight: 700; font-size: 14px; width: 100%;"><span style="font-size:18px;" aria-hidden="true">✅</span> Invites successfully dispatched to all signatories!</div>`;
+            actionArea.style.borderColor = '#10b981';
+            actionArea.style.background = 'rgba(16, 185, 129, 0.18)';
         }
         if (statusItems) {
             statusItems.innerHTML = `
-                <div class="timeline-item"><span style="font-weight:600;color:var(--success);">✓</span><span>DocuSign invitations sent to signatories</span></div>
-                <div class="timeline-item"><span style="font-weight:600;color:var(--warning);">⏳</span><span>Awaiting document review and signatures</span></div>
-                <div class="timeline-item"><span style="font-weight:600;color:var(--warning);">⏳</span><span>Estimated completion: 24–72 hours</span></div>
+                <div class="timeline-item"><span style="font-weight:600;color:#34d399;">✓</span><span style="color:#f1f5f9;">DocuSign invitations sent to signatories</span></div>
+                <div class="timeline-item"><span style="font-weight:600;color:#fbbf24;">⏳</span><span style="color:#f1f5f9;">Awaiting document review and signatures</span></div>
+                <div class="timeline-item"><span style="font-weight:600;color:#fbbf24;">⏳</span><span style="color:#f1f5f9;">Estimated completion: 24–72 hours</span></div>
             `;
         }
         if (alertBox) alertBox.style.display = 'block';
@@ -2695,6 +2890,36 @@ window.addEventListener('DOMContentLoaded', async () => {
         // Show login overlay
         const overlay = document.getElementById('loginOverlay');
         if (overlay) overlay.classList.remove('hidden');
+    }
+
+    // Check for RM customer magic invite URL params (?crn=...&email=...)
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const inviteCrn = urlParams.get('crn');
+        const inviteEmail = urlParams.get('email');
+        if (inviteCrn || inviteEmail) {
+            const crnInput = document.getElementById('crnInput');
+            const emailInput = document.getElementById('emailInput');
+            if (inviteCrn && crnInput) crnInput.value = inviteCrn;
+            if (inviteEmail && emailInput) emailInput.value = inviteEmail;
+
+            // Display VIP Relationship Manager Invitation Banner on login card
+            const loginBox = document.querySelector('.login-box');
+            if (loginBox && !document.getElementById('rm-invite-banner')) {
+                const banner = document.createElement('div');
+                banner.id = 'rm-invite-banner';
+                banner.style.cssText = 'margin-bottom:16px; padding:12px 16px; background:rgba(245,158,11,0.15); border:1.5px solid #f59e0b; border-radius:10px; font-size:12.5px; color:#fef08a; text-align:left; animation:fadeUp 0.3s ease;';
+                banner.innerHTML = `<strong style="color:#ffffff; font-size:13px;">👔 Relationship Manager Invitation</strong><br>Welcome to Apex Bank! You are accessing your onboarding journey with CRN <strong>${inviteCrn || ''}</strong>. Click Request OTP to begin.`;
+                const errorBox = document.getElementById('loginError');
+                if (errorBox) {
+                    errorBox.parentNode.insertBefore(banner, errorBox.nextSibling);
+                } else {
+                    loginBox.prepend(banner);
+                }
+            }
+        }
+    } catch (paramErr) {
+        console.warn('[ROUTING] URL params parse notice:', paramErr.message);
     }
 
     // Always initialize Live Banking ticker & accounts in background
