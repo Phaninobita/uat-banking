@@ -281,6 +281,8 @@ router.post("/verify-otp", async (req, res) => {
         memStore.companyUidIndex.set(company_uid, appRef);
         isNew = true;
       }
+    }
+
     const resolvedCompanyUid = applicationRecord.company_uid || company_uid;
 
     // Always mirror to memStore so RM pipeline has instant real-time lookup
