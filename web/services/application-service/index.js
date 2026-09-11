@@ -66,16 +66,27 @@ router.get("/current", requireAuth, async (req, res) => {
       applicationRecord.form_data.step2.company_uid = applicationRecord.company_uid;
     }
 
-    // Augment with normalized 7-stage domain data
+    // Augment with normalized 7-step domain data
     const cuid = applicationRecord.company_uid;
+    const s1Docs = memStore.getStep1Documents(cuid);
     applicationRecord.stages = {
-      stage1_documents: memStore.documents ? Array.from(memStore.documents.values()).filter(d => d.company_uid === cuid || d.application_ref === application_ref) : [],
-      stage2_profile: memStore.getCompanyProfile(cuid),
-      stage3_ubos: memStore.getUbosSignatories(cuid),
-      stage4_ownership: memStore.getOwnershipStructure(cuid),
-      stage5_mandates: memStore.getGovernanceMandates(cuid),
-      stage6_tax_compliance: memStore.getTaxCompliance(cuid),
-      stage7_declarations: memStore.getDeclarationsSignatures(cuid)
+      // 7 Steps matching UI flow order
+      step1_documents: s1Docs.length > 0 ? s1Docs : (memStore.documents ? Array.from(memStore.documents.values()).filter(d => d.company_uid === cuid || d.application_ref === application_ref) : []),
+      step2_company_info: memStore.getStep2CompanyInfo(cuid),
+      step3_ubo_details: memStore.getStep3UboDetails(cuid),
+      step4_ownership: memStore.getStep4Ownership(cuid),
+      step5_roles: memStore.getStep5Roles(cuid),
+      step6_fatca_crs: memStore.getStep6FatcaCrs(cuid),
+      step7_review_submit: memStore.getStep7ReviewSubmit(cuid),
+
+      // Aliases for backward compatibility
+      stage1_documents: s1Docs.length > 0 ? s1Docs : (memStore.documents ? Array.from(memStore.documents.values()).filter(d => d.company_uid === cuid || d.application_ref === application_ref) : []),
+      stage2_profile: memStore.getStep2CompanyInfo(cuid),
+      stage3_ubos: memStore.getStep3UboDetails(cuid),
+      stage4_ownership: memStore.getStep4Ownership(cuid),
+      stage5_mandates: memStore.getStep5Roles(cuid),
+      stage6_tax_compliance: memStore.getStep6FatcaCrs(cuid),
+      stage7_declarations: memStore.getStep7ReviewSubmit(cuid)
     };
 
     return res.json({
@@ -219,10 +230,10 @@ router.post("/save", requireAuth, async (req, res) => {
     const userAgent = req.headers["user-agent"] || "Web Browser";
     const clientIp = req.ip || req.connection?.remoteAddress || "127.0.0.1";
 
-    // ── 7-Stage Domain Data Synchronization (Anchored on company_uid) ──
+    // ── 7-Step Corporate Onboarding Data Synchronization (Anchored on company_uid) ──
     const cuid = resolvedCompanyUid;
 
-    // Stage 2: Corporate Profile
+    // Step 2: Company Info
     if (mergedFormData.step2) {
       const s2 = mergedFormData.step2;
       const profileData = {
@@ -242,11 +253,11 @@ router.post("/save", requireAuth, async (req, res) => {
         registered_address: s2.registered_address || s2.address || existingRecord.address,
         operating_address: s2.operating_address || s2.registered_address || s2.address || existingRecord.address
       };
-      memStore.saveCompanyProfile(cuid, profileData);
-      supabaseClient.saveCompanyProfile(profileData).catch(() => {});
+      memStore.saveStep2CompanyInfo(cuid, profileData);
+      supabaseClient.saveStep2CompanyInfo(profileData).catch(() => {});
     }
 
-    // Stage 3: UBOs & Signatories Registry
+    // Step 3: UBO Details
     if (mergedFormData.step3 && (mergedFormData.step3.ubos || Array.isArray(mergedFormData.step3))) {
       const ubosList = Array.isArray(mergedFormData.step3) ? mergedFormData.step3 : (mergedFormData.step3.ubos || []);
       const mappedUbos = ubosList.map((u, i) => ({
@@ -263,11 +274,11 @@ router.post("/save", requireAuth, async (req, res) => {
         biometric_status: u.biometric_status || "verified",
         residential_address: u.residential_address || u.address || ""
       }));
-      memStore.saveUbosSignatories(cuid, mappedUbos);
-      supabaseClient.saveUbos(cuid, mappedUbos).catch(() => {});
+      memStore.saveStep3UboDetails(cuid, mappedUbos);
+      supabaseClient.saveStep3UboDetails(cuid, mappedUbos).catch(() => {});
     }
 
-    // Stage 4: Ownership Structure
+    // Step 4: Ownership
     if (mergedFormData.step4) {
       const s4 = mergedFormData.step4;
       const ownershipData = {
@@ -279,11 +290,11 @@ router.post("/save", requireAuth, async (req, res) => {
         total_shares_percentage: parseFloat(s4.total_shares_percentage || 100),
         ownership_hierarchy: s4.hierarchy || s4.shareholders || []
       };
-      memStore.saveOwnershipStructure(cuid, ownershipData);
-      supabaseClient.saveOwnershipStructure(ownershipData).catch(() => {});
+      memStore.saveStep4Ownership(cuid, ownershipData);
+      supabaseClient.saveStep4Ownership(ownershipData).catch(() => {});
     }
 
-    // Stage 5: Governance Mandates & Signing Powers
+    // Step 5: Roles
     if (mergedFormData.step5) {
       const s5 = mergedFormData.step5;
       const mandateData = {
@@ -297,11 +308,11 @@ router.post("/save", requireAuth, async (req, res) => {
         daily_transfer_limit: parseFloat(s5.daily_limit || s5.dailyLimit || 250000),
         single_transaction_limit: parseFloat(s5.single_limit || s5.singleLimit || 100000)
       };
-      memStore.saveGovernanceMandates(cuid, mandateData);
-      supabaseClient.saveGovernanceMandates(mandateData).catch(() => {});
+      memStore.saveStep5Roles(cuid, mandateData);
+      supabaseClient.saveStep5Roles(mandateData).catch(() => {});
     }
 
-    // Stage 6: Tax Compliance (FATCA / CRS)
+    // Step 6: FATCA / CRS
     if (mergedFormData.step6) {
       const s6 = mergedFormData.step6;
       const taxData = {
@@ -317,11 +328,11 @@ router.post("/save", requireAuth, async (req, res) => {
         source_of_funds: s6.source_of_funds || s6.sourceOfFunds || "Operating Account Turnover",
         expected_annual_turnover: parseFloat(s6.annual_turnover || s6.expectedTurnover || 5000000)
       };
-      memStore.saveTaxCompliance(cuid, taxData);
-      supabaseClient.saveTaxCompliance(taxData).catch(() => {});
+      memStore.saveStep6FatcaCrs(cuid, taxData);
+      supabaseClient.saveStep6FatcaCrs(taxData).catch(() => {});
     }
 
-    // Stage 7: Legal Declarations & E-Signatures
+    // Step 7: Review & Submit
     if (mergedFormData.step7 || resolvedStatus === "submitted") {
       const s7 = mergedFormData.step7 || {};
       const declData = {
@@ -338,8 +349,8 @@ router.post("/save", requireAuth, async (req, res) => {
         user_agent: userAgent,
         signed_at: new Date().toISOString()
       };
-      memStore.saveDeclarationsSignatures(cuid, declData);
-      supabaseClient.saveDeclarations(declData).catch(() => {});
+      memStore.saveStep7ReviewSubmit(cuid, declData);
+      supabaseClient.saveStep7ReviewSubmit(declData).catch(() => {});
     }
 
 
@@ -570,38 +581,64 @@ router.get("/stages/:stageName", requireAuth, async (req, res) => {
 
   let data = null;
   switch (stageName.toLowerCase()) {
+    case "step1":
+    case "step1_documents":
     case "documents":
     case "stage1":
-      data = memStore.documents ? Array.from(memStore.documents.values()).filter(d => d.company_uid === cuid || d.application_ref === req.user.application_ref) : [];
+      data = memStore.getStep1Documents(cuid);
+      if (!data || data.length === 0) data = await supabaseClient.getStep1Documents(cuid);
+      if (!data || data.length === 0) data = memStore.documents ? Array.from(memStore.documents.values()).filter(d => d.company_uid === cuid || d.application_ref === req.user.application_ref) : [];
       break;
+    case "step2":
+    case "step2_company_info":
+    case "company_info":
+    case "company-info":
     case "profile":
     case "stage2":
-      data = memStore.getCompanyProfile(cuid) || await supabaseClient.getCompanyProfile(cuid);
+      data = memStore.getStep2CompanyInfo(cuid) || await supabaseClient.getStep2CompanyInfo(cuid);
       break;
+    case "step3":
+    case "step3_ubo_details":
+    case "ubo_details":
+    case "ubo-details":
     case "ubos":
     case "stage3":
-      data = memStore.getUbosSignatories(cuid);
-      if (!data || data.length === 0) data = await supabaseClient.getUbos(cuid);
+      data = memStore.getStep3UboDetails(cuid);
+      if (!data || data.length === 0) data = await supabaseClient.getStep3UboDetails(cuid);
       break;
+    case "step4":
+    case "step4_ownership":
     case "ownership":
     case "stage4":
-      data = memStore.getOwnershipStructure(cuid) || await supabaseClient.getOwnershipStructure(cuid);
+      data = memStore.getStep4Ownership(cuid) || await supabaseClient.getStep4Ownership(cuid);
       break;
+    case "step5":
+    case "step5_roles":
+    case "roles":
     case "mandates":
+    case "governance":
     case "stage5":
-      data = memStore.getGovernanceMandates(cuid) || await supabaseClient.getGovernanceMandates(cuid);
+      data = memStore.getStep5Roles(cuid) || await supabaseClient.getStep5Roles(cuid);
       break;
+    case "step6":
+    case "step6_fatca_crs":
+    case "fatca_crs":
+    case "fatca-crs":
     case "tax":
     case "stage6":
-      data = memStore.getTaxCompliance(cuid) || await supabaseClient.getTaxCompliance(cuid);
+      data = memStore.getStep6FatcaCrs(cuid) || await supabaseClient.getStep6FatcaCrs(cuid);
       break;
+    case "step7":
+    case "step7_review_submit":
+    case "review_submit":
+    case "review-submit":
     case "declarations":
     case "signatures":
     case "stage7":
-      data = memStore.getDeclarationsSignatures(cuid) || await supabaseClient.getDeclarations(cuid);
+      data = memStore.getStep7ReviewSubmit(cuid) || await supabaseClient.getStep7ReviewSubmit(cuid);
       break;
     default:
-      return res.status(404).json({ error: `Unknown stage name '${stageName}'. Valid stages: documents (stage1), profile (stage2), ubos (stage3), ownership (stage4), mandates (stage5), tax (stage6), declarations (stage7).` });
+      return res.status(404).json({ error: `Unknown stage name '${stageName}'. Valid stages: step1_documents, step2_company_info, step3_ubo_details, step4_ownership, step5_roles, step6_fatca_crs, step7_review_submit.` });
   }
 
   return res.json({

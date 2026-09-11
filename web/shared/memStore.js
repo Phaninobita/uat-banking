@@ -41,13 +41,22 @@ class MemoryStore {
     // Key: username (lowercase) -> user record
     this.rmUsers = new Map();
 
-    // ── 7-Stage Domain Stores (Primary Key / Foreign Key: company_uid) ──
-    this.companyProfiles = new Map();        // Stage 2: Corporate Profile
-    this.ubosSignatories = new Map();        // Stage 3: UBO & Signatory Registry
-    this.ownershipStructures = new Map();    // Stage 4: Shareholding & Hierarchy
-    this.governanceMandates = new Map();     // Stage 5: Governance & Signing Mandates
-    this.taxCompliance = new Map();          // Stage 6: FATCA / CRS Tax & Regulatory
-    this.declarationsSignatures = new Map(); // Stage 7: Legal Declarations & E-Signatures
+    // ── 7-Step Corporate Onboarding Domain Stores (Keyed on company_uid) ──
+    this.step1Documents = new Map();         // Step 1: Documents
+    this.step2CompanyInfo = new Map();       // Step 2: Company Info
+    this.step3UboDetails = new Map();        // Step 3: UBO Details
+    this.step4Ownership = new Map();         // Step 4: Ownership
+    this.step5Roles = new Map();             // Step 5: Roles
+    this.step6FatcaCrs = new Map();          // Step 6: FATCA / CRS
+    this.step7ReviewSubmit = new Map();      // Step 7: Review & Submit
+
+    // Backward compatibility aliases
+    this.companyProfiles = this.step2CompanyInfo;
+    this.ubosSignatories = this.step3UboDetails;
+    this.ownershipStructures = this.step4Ownership;
+    this.governanceMandates = this.step5Roles;
+    this.taxCompliance = this.step6FatcaCrs;
+    this.declarationsSignatures = this.step7ReviewSubmit;
 
 
     // Microservice Telemetry & Health metrics
@@ -265,21 +274,54 @@ class MemoryStore {
     return emailItem;
   }
 
-  // ── 7-Stage Domain Methods (Keyed on company_uid) ──
-  saveCompanyProfile(companyUid, data) {
-    if (!companyUid) return null;
+  // ── 7-Step Corporate Onboarding Domain Methods (Keyed on company_uid) ──
+
+  // Step 1: Documents
+  saveStep1Document(companyUid, doc) {
+    if (!companyUid || !doc) return null;
     const uid = companyUid.trim().toUpperCase();
-    const existing = this.companyProfiles.get(uid) || {};
-    const updated = { ...existing, ...data, company_uid: uid, updated_at: new Date().toISOString() };
-    this.companyProfiles.set(uid, updated);
-    return updated;
+    const docList = this.step1Documents.get(uid) || [];
+    const docRecord = {
+      id: doc.id || Date.now(),
+      company_uid: uid,
+      application_ref: doc.application_ref || "",
+      document_type: doc.document_type || "other",
+      file_name: doc.file_name || "document.pdf",
+      file_type: doc.file_type || "application/pdf",
+      file_size: doc.file_size || 0,
+      file_data_base64: doc.file_data_base64 || null,
+      ocr_status: doc.ocr_status || "verified",
+      verification_status: doc.verification_status || "approved",
+      extracted_data: doc.extracted_data || {},
+      created_at: doc.created_at || new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    const filtered = docList.filter(d => d.document_type !== docRecord.document_type);
+    filtered.push(docRecord);
+    this.step1Documents.set(uid, filtered);
+    return docRecord;
   }
-  getCompanyProfile(companyUid) {
-    if (!companyUid) return null;
-    return this.companyProfiles.get(companyUid.trim().toUpperCase()) || null;
+  getStep1Documents(companyUid) {
+    if (!companyUid) return [];
+    return this.step1Documents.get(companyUid.trim().toUpperCase()) || [];
   }
 
-  saveUbosSignatories(companyUid, ubos) {
+  // Step 2: Company Info
+  saveStep2CompanyInfo(companyUid, data) {
+    if (!companyUid) return null;
+    const uid = companyUid.trim().toUpperCase();
+    const existing = this.step2CompanyInfo.get(uid) || {};
+    const updated = { ...existing, ...data, company_uid: uid, updated_at: new Date().toISOString() };
+    this.step2CompanyInfo.set(uid, updated);
+    return updated;
+  }
+  getStep2CompanyInfo(companyUid) {
+    if (!companyUid) return null;
+    return this.step2CompanyInfo.get(companyUid.trim().toUpperCase()) || null;
+  }
+
+  // Step 3: UBO Details
+  saveStep3UboDetails(companyUid, ubos) {
     if (!companyUid) return [];
     const uid = companyUid.trim().toUpperCase();
     const list = Array.isArray(ubos) ? ubos : (ubos ? [ubos] : []);
@@ -289,65 +331,83 @@ class MemoryStore {
       ...u,
       updated_at: new Date().toISOString()
     }));
-    this.ubosSignatories.set(uid, normalized);
+    this.step3UboDetails.set(uid, normalized);
     return normalized;
   }
-  getUbosSignatories(companyUid) {
+  getStep3UboDetails(companyUid) {
     if (!companyUid) return [];
-    return this.ubosSignatories.get(companyUid.trim().toUpperCase()) || [];
+    return this.step3UboDetails.get(companyUid.trim().toUpperCase()) || [];
   }
 
-  saveOwnershipStructure(companyUid, data) {
+  // Step 4: Ownership
+  saveStep4Ownership(companyUid, data) {
     if (!companyUid) return null;
     const uid = companyUid.trim().toUpperCase();
-    const existing = this.ownershipStructures.get(uid) || {};
+    const existing = this.step4Ownership.get(uid) || {};
     const updated = { ...existing, ...data, company_uid: uid, updated_at: new Date().toISOString() };
-    this.ownershipStructures.set(uid, updated);
+    this.step4Ownership.set(uid, updated);
     return updated;
   }
-  getOwnershipStructure(companyUid) {
+  getStep4Ownership(companyUid) {
     if (!companyUid) return null;
-    return this.ownershipStructures.get(companyUid.trim().toUpperCase()) || null;
+    return this.step4Ownership.get(companyUid.trim().toUpperCase()) || null;
   }
 
-  saveGovernanceMandates(companyUid, data) {
+  // Step 5: Roles
+  saveStep5Roles(companyUid, data) {
     if (!companyUid) return null;
     const uid = companyUid.trim().toUpperCase();
-    const existing = this.governanceMandates.get(uid) || {};
+    const existing = this.step5Roles.get(uid) || {};
     const updated = { ...existing, ...data, company_uid: uid, updated_at: new Date().toISOString() };
-    this.governanceMandates.set(uid, updated);
+    this.step5Roles.set(uid, updated);
     return updated;
   }
-  getGovernanceMandates(companyUid) {
+  getStep5Roles(companyUid) {
     if (!companyUid) return null;
-    return this.governanceMandates.get(companyUid.trim().toUpperCase()) || null;
+    return this.step5Roles.get(companyUid.trim().toUpperCase()) || null;
   }
 
-  saveTaxCompliance(companyUid, data) {
+  // Step 6: FATCA / CRS
+  saveStep6FatcaCrs(companyUid, data) {
     if (!companyUid) return null;
     const uid = companyUid.trim().toUpperCase();
-    const existing = this.taxCompliance.get(uid) || {};
+    const existing = this.step6FatcaCrs.get(uid) || {};
     const updated = { ...existing, ...data, company_uid: uid, updated_at: new Date().toISOString() };
-    this.taxCompliance.set(uid, updated);
+    this.step6FatcaCrs.set(uid, updated);
     return updated;
   }
-  getTaxCompliance(companyUid) {
+  getStep6FatcaCrs(companyUid) {
     if (!companyUid) return null;
-    return this.taxCompliance.get(companyUid.trim().toUpperCase()) || null;
+    return this.step6FatcaCrs.get(companyUid.trim().toUpperCase()) || null;
   }
 
-  saveDeclarationsSignatures(companyUid, data) {
+  // Step 7: Review & Submit
+  saveStep7ReviewSubmit(companyUid, data) {
     if (!companyUid) return null;
     const uid = companyUid.trim().toUpperCase();
-    const existing = this.declarationsSignatures.get(uid) || {};
+    const existing = this.step7ReviewSubmit.get(uid) || {};
     const updated = { ...existing, ...data, company_uid: uid, updated_at: new Date().toISOString() };
-    this.declarationsSignatures.set(uid, updated);
+    this.step7ReviewSubmit.set(uid, updated);
     return updated;
   }
-  getDeclarationsSignatures(companyUid) {
+  getStep7ReviewSubmit(companyUid) {
     if (!companyUid) return null;
-    return this.declarationsSignatures.get(companyUid.trim().toUpperCase()) || null;
+    return this.step7ReviewSubmit.get(companyUid.trim().toUpperCase()) || null;
   }
+
+  // ── Backward Compatibility Aliases ──
+  saveCompanyProfile(companyUid, data) { return this.saveStep2CompanyInfo(companyUid, data); }
+  getCompanyProfile(companyUid) { return this.getStep2CompanyInfo(companyUid); }
+  saveUbosSignatories(companyUid, ubos) { return this.saveStep3UboDetails(companyUid, ubos); }
+  getUbosSignatories(companyUid) { return this.getStep3UboDetails(companyUid); }
+  saveOwnershipStructure(companyUid, data) { return this.saveStep4Ownership(companyUid, data); }
+  getOwnershipStructure(companyUid) { return this.getStep4Ownership(companyUid); }
+  saveGovernanceMandates(companyUid, data) { return this.saveStep5Roles(companyUid, data); }
+  getGovernanceMandates(companyUid) { return this.getStep5Roles(companyUid); }
+  saveTaxCompliance(companyUid, data) { return this.saveStep6FatcaCrs(companyUid, data); }
+  getTaxCompliance(companyUid) { return this.getStep6FatcaCrs(companyUid); }
+  saveDeclarationsSignatures(companyUid, data) { return this.saveStep7ReviewSubmit(companyUid, data); }
+  getDeclarationsSignatures(companyUid) { return this.getStep7ReviewSubmit(companyUid); }
 }
 
 const memStore = new MemoryStore();

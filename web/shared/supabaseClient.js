@@ -483,15 +483,48 @@ class SupabaseClient {
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // 7-STAGE NORMALIZED ONBOARDING STAGES (Keyed on company_uid)
+  // 7-STEP CORPORATE ONBOARDING TABLES (Keyed on company_uid)
   // ══════════════════════════════════════════════════════════════════════════
 
-  async saveCompanyProfile(profile) {
-    if (!profile || !profile.company_uid) return null;
-    const cleanUid = profile.company_uid.trim().toUpperCase();
-    const payload = { ...profile, company_uid: cleanUid, updated_at: new Date().toISOString() };
+  // Step 1: Documents
+  async saveStep1Document(doc) {
+    if (!doc || !doc.company_uid) return null;
+    const cleanUid = doc.company_uid.trim().toUpperCase();
+    const payload = {
+      ...doc,
+      company_uid: cleanUid,
+      updated_at: new Date().toISOString()
+    };
     try {
-      const res = await this.request("onboarding_company_profiles?on_conflict=company_uid", {
+      const res = await this.request("step1_documents", {
+        method: "POST",
+        headers: { "Prefer": "return=representation" },
+        body: payload
+      });
+      return Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : payload;
+    } catch (e) {
+      return payload;
+    }
+  }
+
+  async getStep1Documents(companyUid) {
+    if (!companyUid) return [];
+    const cleanUid = encodeURIComponent(companyUid.trim().toUpperCase());
+    try {
+      const res = await this.request(`step1_documents?company_uid=eq.${cleanUid}&select=*&order=created_at.desc`);
+      return Array.isArray(res.data) ? res.data : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // Step 2: Company Info
+  async saveStep2CompanyInfo(info) {
+    if (!info || !info.company_uid) return null;
+    const cleanUid = info.company_uid.trim().toUpperCase();
+    const payload = { ...info, company_uid: cleanUid, updated_at: new Date().toISOString() };
+    try {
+      const res = await this.request("step2_company_info?on_conflict=company_uid", {
         method: "POST",
         headers: { "Prefer": "resolution=merge-duplicates,return=representation" },
         body: payload
@@ -502,18 +535,19 @@ class SupabaseClient {
     }
   }
 
-  async getCompanyProfile(companyUid) {
+  async getStep2CompanyInfo(companyUid) {
     if (!companyUid) return null;
     const cleanUid = encodeURIComponent(companyUid.trim().toUpperCase());
     try {
-      const res = await this.request(`onboarding_company_profiles?company_uid=eq.${cleanUid}&select=*&limit=1`);
+      const res = await this.request(`step2_company_info?company_uid=eq.${cleanUid}&select=*&limit=1`);
       return Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
     } catch (e) {
       return null;
     }
   }
 
-  async saveUbos(companyUid, ubos) {
+  // Step 3: UBO Details
+  async saveStep3UboDetails(companyUid, ubos) {
     if (!companyUid) return [];
     const cleanUid = companyUid.trim().toUpperCase();
     const list = Array.isArray(ubos) ? ubos : (ubos ? [ubos] : []);
@@ -523,7 +557,7 @@ class SupabaseClient {
       updated_at: new Date().toISOString()
     }));
     try {
-      const res = await this.request("onboarding_ubos_signatories", {
+      const res = await this.request("step3_ubo_details", {
         method: "POST",
         headers: { "Prefer": "return=representation" },
         body: payload
@@ -534,23 +568,24 @@ class SupabaseClient {
     }
   }
 
-  async getUbos(companyUid) {
+  async getStep3UboDetails(companyUid) {
     if (!companyUid) return [];
     const cleanUid = encodeURIComponent(companyUid.trim().toUpperCase());
     try {
-      const res = await this.request(`onboarding_ubos_signatories?company_uid=eq.${cleanUid}&select=*`);
+      const res = await this.request(`step3_ubo_details?company_uid=eq.${cleanUid}&select=*`);
       return Array.isArray(res.data) ? res.data : [];
     } catch (e) {
       return [];
     }
   }
 
-  async saveOwnershipStructure(structure) {
-    if (!structure || !structure.company_uid) return null;
-    const cleanUid = structure.company_uid.trim().toUpperCase();
-    const payload = { ...structure, company_uid: cleanUid, updated_at: new Date().toISOString() };
+  // Step 4: Ownership
+  async saveStep4Ownership(ownership) {
+    if (!ownership || !ownership.company_uid) return null;
+    const cleanUid = ownership.company_uid.trim().toUpperCase();
+    const payload = { ...ownership, company_uid: cleanUid, updated_at: new Date().toISOString() };
     try {
-      const res = await this.request("onboarding_ownership_structures?on_conflict=company_uid", {
+      const res = await this.request("step4_ownership?on_conflict=company_uid", {
         method: "POST",
         headers: { "Prefer": "resolution=merge-duplicates,return=representation" },
         body: payload
@@ -561,23 +596,24 @@ class SupabaseClient {
     }
   }
 
-  async getOwnershipStructure(companyUid) {
+  async getStep4Ownership(companyUid) {
     if (!companyUid) return null;
     const cleanUid = encodeURIComponent(companyUid.trim().toUpperCase());
     try {
-      const res = await this.request(`onboarding_ownership_structures?company_uid=eq.${cleanUid}&select=*&limit=1`);
+      const res = await this.request(`step4_ownership?company_uid=eq.${cleanUid}&select=*&limit=1`);
       return Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
     } catch (e) {
       return null;
     }
   }
 
-  async saveGovernanceMandates(mandates) {
-    if (!mandates || !mandates.company_uid) return null;
-    const cleanUid = mandates.company_uid.trim().toUpperCase();
-    const payload = { ...mandates, company_uid: cleanUid, updated_at: new Date().toISOString() };
+  // Step 5: Roles
+  async saveStep5Roles(roles) {
+    if (!roles || !roles.company_uid) return null;
+    const cleanUid = roles.company_uid.trim().toUpperCase();
+    const payload = { ...roles, company_uid: cleanUid, updated_at: new Date().toISOString() };
     try {
-      const res = await this.request("onboarding_governance_mandates?on_conflict=company_uid", {
+      const res = await this.request("step5_roles?on_conflict=company_uid", {
         method: "POST",
         headers: { "Prefer": "resolution=merge-duplicates,return=representation" },
         body: payload
@@ -588,23 +624,24 @@ class SupabaseClient {
     }
   }
 
-  async getGovernanceMandates(companyUid) {
+  async getStep5Roles(companyUid) {
     if (!companyUid) return null;
     const cleanUid = encodeURIComponent(companyUid.trim().toUpperCase());
     try {
-      const res = await this.request(`onboarding_governance_mandates?company_uid=eq.${cleanUid}&select=*&limit=1`);
+      const res = await this.request(`step5_roles?company_uid=eq.${cleanUid}&select=*&limit=1`);
       return Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
     } catch (e) {
       return null;
     }
   }
 
-  async saveTaxCompliance(tax) {
+  // Step 6: FATCA / CRS
+  async saveStep6FatcaCrs(tax) {
     if (!tax || !tax.company_uid) return null;
     const cleanUid = tax.company_uid.trim().toUpperCase();
     const payload = { ...tax, company_uid: cleanUid, updated_at: new Date().toISOString() };
     try {
-      const res = await this.request("onboarding_tax_compliance?on_conflict=company_uid", {
+      const res = await this.request("step6_fatca_crs?on_conflict=company_uid", {
         method: "POST",
         headers: { "Prefer": "resolution=merge-duplicates,return=representation" },
         body: payload
@@ -615,23 +652,24 @@ class SupabaseClient {
     }
   }
 
-  async getTaxCompliance(companyUid) {
+  async getStep6FatcaCrs(companyUid) {
     if (!companyUid) return null;
     const cleanUid = encodeURIComponent(companyUid.trim().toUpperCase());
     try {
-      const res = await this.request(`onboarding_tax_compliance?company_uid=eq.${cleanUid}&select=*&limit=1`);
+      const res = await this.request(`step6_fatca_crs?company_uid=eq.${cleanUid}&select=*&limit=1`);
       return Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
     } catch (e) {
       return null;
     }
   }
 
-  async saveDeclarations(decl) {
+  // Step 7: Review & Submit
+  async saveStep7ReviewSubmit(decl) {
     if (!decl || !decl.company_uid) return null;
     const cleanUid = decl.company_uid.trim().toUpperCase();
     const payload = { ...decl, company_uid: cleanUid, updated_at: new Date().toISOString() };
     try {
-      const res = await this.request("onboarding_declarations_signatures?on_conflict=company_uid", {
+      const res = await this.request("step7_review_submit?on_conflict=company_uid", {
         method: "POST",
         headers: { "Prefer": "resolution=merge-duplicates,return=representation" },
         body: payload
@@ -642,16 +680,30 @@ class SupabaseClient {
     }
   }
 
-  async getDeclarations(companyUid) {
+  async getStep7ReviewSubmit(companyUid) {
     if (!companyUid) return null;
     const cleanUid = encodeURIComponent(companyUid.trim().toUpperCase());
     try {
-      const res = await this.request(`onboarding_declarations_signatures?company_uid=eq.${cleanUid}&select=*&limit=1`);
+      const res = await this.request(`step7_review_submit?company_uid=eq.${cleanUid}&select=*&limit=1`);
       return Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
     } catch (e) {
       return null;
     }
   }
+
+  // ── Backward Compatibility Method Aliases ──
+  async saveCompanyProfile(profile) { return this.saveStep2CompanyInfo(profile); }
+  async getCompanyProfile(companyUid) { return this.getStep2CompanyInfo(companyUid); }
+  async saveUbos(companyUid, ubos) { return this.saveStep3UboDetails(companyUid, ubos); }
+  async getUbos(companyUid) { return this.getStep3UboDetails(companyUid); }
+  async saveOwnershipStructure(s) { return this.saveStep4Ownership(s); }
+  async getOwnershipStructure(companyUid) { return this.getStep4Ownership(companyUid); }
+  async saveGovernanceMandates(m) { return this.saveStep5Roles(m); }
+  async getGovernanceMandates(companyUid) { return this.getStep5Roles(companyUid); }
+  async saveTaxCompliance(t) { return this.saveStep6FatcaCrs(t); }
+  async getTaxCompliance(companyUid) { return this.getStep6FatcaCrs(companyUid); }
+  async saveDeclarations(d) { return this.saveStep7ReviewSubmit(d); }
+  async getDeclarations(companyUid) { return this.getStep7ReviewSubmit(companyUid); }
 }
 
 const supabaseClient = new SupabaseClient();

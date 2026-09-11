@@ -1,11 +1,50 @@
 -- =======================================================
 -- First National Bank — Corporate Onboarding Stage Tables
 -- Migration: 02_create_stage_tables.sql
--- Canonical Primary Key: company_uid (e.g. CUID-509077205)
+-- Exact 1-to-7 Sequential Ordering Matching UI Stepper Flow:
+--   1. step1_documents        (Documents)
+--   2. step2_company_info     (Company Info)
+--   3. step3_ubo_details      (UBO Details)
+--   4. step4_ownership        (Ownership)
+--   5. step5_roles            (Roles)
+--   6. step6_fatca_crs        (FATCA / CRS)
+--   7. step7_review_submit    (Review & Submit)
+-- Primary Corporate Key: company_uid across all stages
 -- =======================================================
 
--- 1. Stage 2: Corporate Profile
-CREATE TABLE IF NOT EXISTS onboarding_company_profiles (
+-- 0. Clean up previous unsorted onboarding_* tables
+DROP TABLE IF EXISTS onboarding_company_profiles CASCADE;
+DROP TABLE IF EXISTS onboarding_ubos_signatories CASCADE;
+DROP TABLE IF EXISTS onboarding_ownership_structures CASCADE;
+DROP TABLE IF EXISTS onboarding_governance_mandates CASCADE;
+DROP TABLE IF EXISTS onboarding_tax_compliance CASCADE;
+DROP TABLE IF EXISTS onboarding_declarations_signatures CASCADE;
+
+-- =======================================================
+-- 1. Step 1: Documents (Document Vault & OCR Verification)
+-- =======================================================
+CREATE TABLE IF NOT EXISTS step1_documents (
+    id BIGSERIAL PRIMARY KEY,
+    company_uid VARCHAR(64) NOT NULL,
+    application_ref VARCHAR(64) NOT NULL,
+    document_type VARCHAR(64) NOT NULL,
+    file_name TEXT NOT NULL,
+    file_type VARCHAR(64) DEFAULT 'application/pdf',
+    file_size BIGINT DEFAULT 0,
+    file_data_base64 TEXT,
+    ocr_status VARCHAR(32) DEFAULT 'verified',
+    verification_status VARCHAR(32) DEFAULT 'approved',
+    extracted_data JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_step1_company_uid ON step1_documents (company_uid);
+CREATE INDEX IF NOT EXISTS idx_step1_app_ref ON step1_documents (application_ref);
+
+-- =======================================================
+-- 2. Step 2: Company Info (Corporate Profile & Licences)
+-- =======================================================
+CREATE TABLE IF NOT EXISTS step2_company_info (
     company_uid VARCHAR(64) PRIMARY KEY,
     application_ref VARCHAR(64) NOT NULL,
     crn VARCHAR(64) NOT NULL,
@@ -24,11 +63,13 @@ CREATE TABLE IF NOT EXISTS onboarding_company_profiles (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS idx_stage2_app_ref ON onboarding_company_profiles (application_ref);
-CREATE INDEX IF NOT EXISTS idx_stage2_crn ON onboarding_company_profiles (crn);
+CREATE INDEX IF NOT EXISTS idx_step2_app_ref ON step2_company_info (application_ref);
+CREATE INDEX IF NOT EXISTS idx_step2_crn ON step2_company_info (crn);
 
--- 2. Stage 3: UBO & Authorized Signatories Registry (1:N)
-CREATE TABLE IF NOT EXISTS onboarding_ubos_signatories (
+-- =======================================================
+-- 3. Step 3: UBO Details (Beneficial Owners & Signatories)
+-- =======================================================
+CREATE TABLE IF NOT EXISTS step3_ubo_details (
     id BIGSERIAL PRIMARY KEY,
     company_uid VARCHAR(64) NOT NULL,
     application_ref VARCHAR(64) NOT NULL,
@@ -45,11 +86,13 @@ CREATE TABLE IF NOT EXISTS onboarding_ubos_signatories (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS idx_stage3_company_uid ON onboarding_ubos_signatories (company_uid);
-CREATE INDEX IF NOT EXISTS idx_stage3_app_ref ON onboarding_ubos_signatories (application_ref);
+CREATE INDEX IF NOT EXISTS idx_step3_company_uid ON step3_ubo_details (company_uid);
+CREATE INDEX IF NOT EXISTS idx_step3_app_ref ON step3_ubo_details (application_ref);
 
--- 3. Stage 4: Corporate Shareholding & Holding Structure
-CREATE TABLE IF NOT EXISTS onboarding_ownership_structures (
+-- =======================================================
+-- 4. Step 4: Ownership (Holding Hierarchy & Entities)
+-- =======================================================
+CREATE TABLE IF NOT EXISTS step4_ownership (
     company_uid VARCHAR(64) PRIMARY KEY,
     application_ref VARCHAR(64) NOT NULL,
     has_holding_company BOOLEAN DEFAULT FALSE,
@@ -60,10 +103,12 @@ CREATE TABLE IF NOT EXISTS onboarding_ownership_structures (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS idx_stage4_app_ref ON onboarding_ownership_structures (application_ref);
+CREATE INDEX IF NOT EXISTS idx_step4_app_ref ON step4_ownership (application_ref);
 
--- 4. Stage 5: Governance Mandates & Signing Powers
-CREATE TABLE IF NOT EXISTS onboarding_governance_mandates (
+-- =======================================================
+-- 5. Step 5: Roles (Signing Powers & Governance Limits)
+-- =======================================================
+CREATE TABLE IF NOT EXISTS step5_roles (
     company_uid VARCHAR(64) PRIMARY KEY,
     application_ref VARCHAR(64) NOT NULL,
     signing_power VARCHAR(64) NOT NULL DEFAULT 'sole',
@@ -76,10 +121,12 @@ CREATE TABLE IF NOT EXISTS onboarding_governance_mandates (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS idx_stage5_app_ref ON onboarding_governance_mandates (application_ref);
+CREATE INDEX IF NOT EXISTS idx_step5_app_ref ON step5_roles (application_ref);
 
--- 5. Stage 6: Tax Compliance (FATCA / CRS & Source of Funds)
-CREATE TABLE IF NOT EXISTS onboarding_tax_compliance (
+-- =======================================================
+-- 6. Step 6: FATCA / CRS (Tax Residency & Source of Wealth)
+-- =======================================================
+CREATE TABLE IF NOT EXISTS step6_fatca_crs (
     company_uid VARCHAR(64) PRIMARY KEY,
     application_ref VARCHAR(64) NOT NULL,
     is_us_person BOOLEAN DEFAULT FALSE,
@@ -94,10 +141,12 @@ CREATE TABLE IF NOT EXISTS onboarding_tax_compliance (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS idx_stage6_app_ref ON onboarding_tax_compliance (application_ref);
+CREATE INDEX IF NOT EXISTS idx_step6_app_ref ON step6_fatca_crs (application_ref);
 
--- 6. Stage 7: Legal Declarations & E-Signatures
-CREATE TABLE IF NOT EXISTS onboarding_declarations_signatures (
+-- =======================================================
+-- 7. Step 7: Review & Submit (E-Signatures & Warranties)
+-- =======================================================
+CREATE TABLE IF NOT EXISTS step7_review_submit (
     company_uid VARCHAR(64) PRIMARY KEY,
     application_ref VARCHAR(64) NOT NULL,
     agreed_terms BOOLEAN NOT NULL DEFAULT TRUE,
@@ -113,14 +162,15 @@ CREATE TABLE IF NOT EXISTS onboarding_declarations_signatures (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS idx_stage7_app_ref ON onboarding_declarations_signatures (application_ref);
+CREATE INDEX IF NOT EXISTS idx_step7_app_ref ON step7_review_submit (application_ref);
 
 -- =======================================================
--- 7. Automated Backfill from corporate_onboarding_applications
+-- 8. Automated Data Backfill from Existing Applications
 -- =======================================================
 DO $$
 DECLARE
     rec RECORD;
+    doc RECORD;
     v_cuid VARCHAR(64);
     v_addr TEXT;
     s2 JSONB;
@@ -129,6 +179,29 @@ DECLARE
     s6 JSONB;
     s7 JSONB;
 BEGIN
+    -- Backfill Step 1 Documents if any exist in legacy table
+    IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'application_documents') THEN
+        FOR doc IN SELECT * FROM application_documents LOOP
+            INSERT INTO step1_documents (
+                company_uid, application_ref, document_type, file_name, file_type,
+                file_size, file_data_base64, ocr_status, verification_status, created_at, updated_at
+            ) VALUES (
+                COALESCE(doc.company_uid::text, 'CUID-CORP'),
+                doc.application_ref::text,
+                doc.document_type::text,
+                doc.file_name::text,
+                COALESCE(doc.file_type::text, 'application/pdf'),
+                COALESCE(doc.file_size, 0),
+                doc.file_data_base64,
+                COALESCE(doc.ocr_status::text, 'verified'),
+                'approved',
+                COALESCE(doc.created_at, NOW()),
+                COALESCE(doc.updated_at, NOW())
+            ) ON CONFLICT DO NOTHING;
+        END LOOP;
+    END IF;
+
+    -- Backfill Steps 2 through 7 from corporate_onboarding_applications
     FOR rec IN SELECT * FROM corporate_onboarding_applications LOOP
         v_cuid := COALESCE(rec.company_uid::text, 'CUID-' || UPPER(REGEXP_REPLACE(rec.crn::text, '[^a-zA-Z0-9]', '', 'g')));
         s2 := COALESCE(rec.form_data->'step2', '{}'::jsonb);
@@ -150,8 +223,8 @@ BEGIN
             v_addr := '100 Wall Street, Suite 2400, New York, NY 10005';
         END IF;
 
-        -- Backfill Stage 2
-        INSERT INTO onboarding_company_profiles (
+        -- Backfill Step 2: Company Info
+        INSERT INTO step2_company_info (
             company_uid, application_ref, crn, company_name, trade_name, legal_type,
             licence_issued_by, licence_issue_date, licence_expiry_date, vat_trn,
             contact_person, registered_email, phone, registered_address, operating_address
@@ -173,13 +246,13 @@ BEGIN
             COALESCE(s2->>'operating_address', v_addr)
         ) ON CONFLICT (company_uid) DO NOTHING;
 
-        -- Backfill Stage 4
-        INSERT INTO onboarding_ownership_structures (
+        -- Backfill Step 4: Ownership
+        INSERT INTO step4_ownership (
             company_uid, application_ref, has_holding_company, parent_company_name,
             parent_company_country, total_shares_percentage, ownership_hierarchy
         ) VALUES (
             v_cuid,
-            rec.application_ref,
+            rec.application_ref::text,
             COALESCE((s4->>'has_holding_company')::boolean, false),
             COALESCE(s4->>'parent_company_name', ''),
             COALESCE(s4->>'parent_company_country', 'US'),
@@ -187,31 +260,31 @@ BEGIN
             COALESCE(s4->'hierarchy', '[]'::jsonb)
         ) ON CONFLICT (company_uid) DO NOTHING;
 
-        -- Backfill Stage 5
-        INSERT INTO onboarding_governance_mandates (
+        -- Backfill Step 5: Roles
+        INSERT INTO step5_roles (
             company_uid, application_ref, signing_power, dual_authorization_threshold,
             maker_checker_enabled, primary_maker_email, primary_checker_email,
             daily_transfer_limit, single_transaction_limit
         ) VALUES (
             v_cuid,
-            rec.application_ref,
+            rec.application_ref::text,
             COALESCE(s5->>'signing_power', 'sole'),
             COALESCE((s5->>'threshold')::numeric, 50000.00),
             true,
-            COALESCE(s5->>'maker_email', rec.registered_email),
+            COALESCE(s5->>'maker_email', rec.registered_email::text),
             COALESCE(s5->>'checker_email', 'compliance@corporate.com'),
             250000.00,
             100000.00
         ) ON CONFLICT (company_uid) DO NOTHING;
 
-        -- Backfill Stage 6
-        INSERT INTO onboarding_tax_compliance (
+        -- Backfill Step 6: FATCA / CRS
+        INSERT INTO step6_fatca_crs (
             company_uid, application_ref, is_us_person, us_tin, giin_number,
             fatca_classification, crs_tax_residency_country, foreign_tin,
             source_of_wealth, source_of_funds, expected_annual_turnover
         ) VALUES (
             v_cuid,
-            rec.application_ref,
+            rec.application_ref::text,
             COALESCE((s6->>'is_us_person')::boolean, false),
             COALESCE(s6->>'us_tin', '98-7654321'),
             COALESCE(s6->>'giin', 'GIIN-994821'),
@@ -223,18 +296,18 @@ BEGIN
             5000000.00
         ) ON CONFLICT (company_uid) DO NOTHING;
 
-        -- Backfill Stage 7
-        INSERT INTO onboarding_declarations_signatures (
+        -- Backfill Step 7: Review & Submit
+        INSERT INTO step7_review_submit (
             company_uid, application_ref, agreed_terms, agreed_accuracy_warranties,
             agreed_data_privacy, signatory_name, signatory_email, docusign_envelope_id
         ) VALUES (
             v_cuid,
-            rec.application_ref,
+            rec.application_ref::text,
             true,
             true,
             true,
-            COALESCE(rec.contact_person, 'Authorized Signatory'),
-            rec.registered_email,
+            COALESCE(rec.contact_person::text, 'Authorized Signatory'),
+            rec.registered_email::text,
             'ENV-' || UPPER(SUBSTRING(MD5(v_cuid) FROM 1 FOR 12))
         ) ON CONFLICT (company_uid) DO NOTHING;
     END LOOP;

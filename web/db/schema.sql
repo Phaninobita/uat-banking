@@ -391,10 +391,37 @@ EXECUTE FUNCTION update_modified_column();
 
 -- =======================================================
 -- 10. Enterprise 7-Stage Domain Tables (Keyed on company_uid)
+-- Ordered 1-to-7 Matching Onboarding UI Stepper Flow:
+--   1. step1_documents        (Documents)
+--   2. step2_company_info     (Company Info)
+--   3. step3_ubo_details      (UBO Details)
+--   4. step4_ownership        (Ownership)
+--   5. step5_roles            (Roles)
+--   6. step6_fatca_crs        (FATCA / CRS)
+--   7. step7_review_submit    (Review & Submit)
 -- =======================================================
 
--- Stage 2: Corporate Profile
-CREATE TABLE IF NOT EXISTS onboarding_company_profiles (
+-- Step 1: Documents (Document Vault & OCR Verification)
+CREATE TABLE IF NOT EXISTS step1_documents (
+    id BIGSERIAL PRIMARY KEY,
+    company_uid VARCHAR(64) NOT NULL,
+    application_ref VARCHAR(64) NOT NULL,
+    document_type VARCHAR(64) NOT NULL,
+    file_name TEXT NOT NULL,
+    file_type VARCHAR(64) DEFAULT 'application/pdf',
+    file_size BIGINT DEFAULT 0,
+    file_data_base64 TEXT,
+    ocr_status VARCHAR(32) DEFAULT 'verified',
+    verification_status VARCHAR(32) DEFAULT 'approved',
+    extracted_data JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_step1_company_uid ON step1_documents (company_uid);
+CREATE INDEX IF NOT EXISTS idx_step1_app_ref ON step1_documents (application_ref);
+
+-- Step 2: Company Info (Corporate Profile & Licences)
+CREATE TABLE IF NOT EXISTS step2_company_info (
     company_uid VARCHAR(64) PRIMARY KEY,
     application_ref VARCHAR(64) NOT NULL,
     crn VARCHAR(64) NOT NULL,
@@ -413,11 +440,11 @@ CREATE TABLE IF NOT EXISTS onboarding_company_profiles (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS idx_stage2_app_ref ON onboarding_company_profiles (application_ref);
-CREATE INDEX IF NOT EXISTS idx_stage2_crn ON onboarding_company_profiles (crn);
+CREATE INDEX IF NOT EXISTS idx_step2_app_ref ON step2_company_info (application_ref);
+CREATE INDEX IF NOT EXISTS idx_step2_crn ON step2_company_info (crn);
 
--- Stage 3: UBO & Authorized Signatories Registry (1:N)
-CREATE TABLE IF NOT EXISTS onboarding_ubos_signatories (
+-- Step 3: UBO Details (Beneficial Owners & Signatories)
+CREATE TABLE IF NOT EXISTS step3_ubo_details (
     id BIGSERIAL PRIMARY KEY,
     company_uid VARCHAR(64) NOT NULL,
     application_ref VARCHAR(64) NOT NULL,
@@ -434,11 +461,11 @@ CREATE TABLE IF NOT EXISTS onboarding_ubos_signatories (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS idx_stage3_company_uid ON onboarding_ubos_signatories (company_uid);
-CREATE INDEX IF NOT EXISTS idx_stage3_app_ref ON onboarding_ubos_signatories (application_ref);
+CREATE INDEX IF NOT EXISTS idx_step3_company_uid ON step3_ubo_details (company_uid);
+CREATE INDEX IF NOT EXISTS idx_step3_app_ref ON step3_ubo_details (application_ref);
 
--- Stage 4: Corporate Shareholding & Holding Structure
-CREATE TABLE IF NOT EXISTS onboarding_ownership_structures (
+-- Step 4: Ownership (Holding Hierarchy & Entities)
+CREATE TABLE IF NOT EXISTS step4_ownership (
     company_uid VARCHAR(64) PRIMARY KEY,
     application_ref VARCHAR(64) NOT NULL,
     has_holding_company BOOLEAN DEFAULT FALSE,
@@ -449,10 +476,10 @@ CREATE TABLE IF NOT EXISTS onboarding_ownership_structures (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS idx_stage4_app_ref ON onboarding_ownership_structures (application_ref);
+CREATE INDEX IF NOT EXISTS idx_step4_app_ref ON step4_ownership (application_ref);
 
--- Stage 5: Governance Mandates & Signing Powers
-CREATE TABLE IF NOT EXISTS onboarding_governance_mandates (
+-- Step 5: Roles (Signing Powers & Governance Limits)
+CREATE TABLE IF NOT EXISTS step5_roles (
     company_uid VARCHAR(64) PRIMARY KEY,
     application_ref VARCHAR(64) NOT NULL,
     signing_power VARCHAR(64) NOT NULL DEFAULT 'sole',
@@ -465,10 +492,10 @@ CREATE TABLE IF NOT EXISTS onboarding_governance_mandates (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS idx_stage5_app_ref ON onboarding_governance_mandates (application_ref);
+CREATE INDEX IF NOT EXISTS idx_step5_app_ref ON step5_roles (application_ref);
 
--- Stage 6: Tax Compliance (FATCA / CRS & Source of Funds)
-CREATE TABLE IF NOT EXISTS onboarding_tax_compliance (
+-- Step 6: FATCA / CRS (Tax Residency & Source of Wealth)
+CREATE TABLE IF NOT EXISTS step6_fatca_crs (
     company_uid VARCHAR(64) PRIMARY KEY,
     application_ref VARCHAR(64) NOT NULL,
     is_us_person BOOLEAN DEFAULT FALSE,
@@ -483,10 +510,10 @@ CREATE TABLE IF NOT EXISTS onboarding_tax_compliance (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS idx_stage6_app_ref ON onboarding_tax_compliance (application_ref);
+CREATE INDEX IF NOT EXISTS idx_step6_app_ref ON step6_fatca_crs (application_ref);
 
--- Stage 7: Legal Declarations & E-Signatures
-CREATE TABLE IF NOT EXISTS onboarding_declarations_signatures (
+-- Step 7: Review & Submit (E-Signatures & Warranties)
+CREATE TABLE IF NOT EXISTS step7_review_submit (
     company_uid VARCHAR(64) PRIMARY KEY,
     application_ref VARCHAR(64) NOT NULL,
     agreed_terms BOOLEAN NOT NULL DEFAULT TRUE,
@@ -502,5 +529,5 @@ CREATE TABLE IF NOT EXISTS onboarding_declarations_signatures (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS idx_stage7_app_ref ON onboarding_declarations_signatures (application_ref);
+CREATE INDEX IF NOT EXISTS idx_step7_app_ref ON step7_review_submit (application_ref);
 
