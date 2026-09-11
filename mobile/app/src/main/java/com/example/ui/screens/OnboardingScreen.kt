@@ -663,20 +663,49 @@ fun Step1DocumentsView(viewModel: BankViewModel, app: OnboardingApplication) {
                             }
                         }
 
-                        Button(
-                            onClick = { viewModel.toggleDocument(doc.id) },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (doc.isUploaded) FnbErrorBg else FnbPrimaryBg,
-                                contentColor = if (doc.isUploaded) FnbError else FnbPrimary
-                            ),
-                            shape = RoundedCornerShape(6.dp),
-                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = if (doc.isUploaded) "Remove" else "Upload",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                            if (doc.isUploaded) {
+                                OutlinedButton(
+                                    onClick = { viewModel.previewDocument(doc) },
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        contentColor = FnbPrimary
+                                    ),
+                                    border = BorderStroke(1.dp, FnbPrimary.copy(alpha = 0.5f)),
+                                    shape = RoundedCornerShape(6.dp),
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Visibility,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(3.dp))
+                                    Text(
+                                        text = "Preview",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                            }
+
+                            Button(
+                                onClick = { viewModel.toggleDocument(doc.id) },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (doc.isUploaded) FnbErrorBg else FnbPrimaryBg,
+                                    contentColor = if (doc.isUploaded) FnbError else FnbPrimary
+                                ),
+                                shape = RoundedCornerShape(6.dp),
+                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = if (doc.isUploaded) "Remove" else "Upload",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
 

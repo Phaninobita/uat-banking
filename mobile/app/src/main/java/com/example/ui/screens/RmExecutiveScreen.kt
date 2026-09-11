@@ -324,9 +324,9 @@ fun RmDashboardView(viewModel: BankViewModel) {
                         ),
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                     ) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Sync", modifier = Modifier.size(13.dp))
+                        Icon(Icons.Default.Refresh, contentDescription = "Refresh", modifier = Modifier.size(13.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "Sync DB", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                        Text(text = "Refresh", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                     }
 
                     Button(
@@ -407,7 +407,7 @@ fun RmDashboardView(viewModel: BankViewModel) {
                         border = BorderStroke(1.dp, FnbGoldDark)
                     ) {
                         Text(
-                            text = "Key: CRN, Email",
+                            text = "Direct Client Verification",
                             color = FnbGold,
                             fontSize = 9.sp,
                             fontWeight = FontWeight.SemiBold,

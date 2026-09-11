@@ -65,6 +65,7 @@ fun BankApp(
     val isTransferSheetOpen by viewModel.isTransferSheetOpen.collectAsState()
     val transferSuccessTx by viewModel.isTransferSuccessDialog.collectAsState()
     val submissionSuccessRef by viewModel.submissionSuccessRef.collectAsState()
+    val selectedDocForPreview by viewModel.selectedDocForPreview.collectAsState()
 
     Scaffold(
         modifier = Modifier
@@ -182,6 +183,14 @@ fun BankApp(
                     onDismiss = {
                         viewModel.submissionSuccessRef.value = null
                     }
+                )
+            }
+
+            // Document Base64 Vault Preview Dialog
+            selectedDocForPreview?.let { doc ->
+                DocumentPreviewDialog(
+                    doc = doc,
+                    onDismiss = { viewModel.closeDocPreview() }
                 )
             }
         }

@@ -12,7 +12,9 @@ data class DocumentItem(
     val fileName: String = "",
     val fileSizeKb: Int = 0,
     val ocrStatus: String = "Ready",
-    val extractedInfo: String = ""
+    val extractedInfo: String = "",
+    val fileDataBase64: String = "",
+    val fileType: String = "application/pdf"
 )
 
 data class CompanyInfo(

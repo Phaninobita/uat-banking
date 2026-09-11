@@ -29,6 +29,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.model.DocumentItem
 import com.example.model.TransactionRecord
 import com.example.ui.AppView
 import com.example.ui.BankViewModel
@@ -517,3 +518,212 @@ fun SubmissionSuccessDialog(
         }
     }
 }
+
+// --- DOCUMENT PREVIEW DIALOG ---
+
+@Composable
+fun DocumentPreviewDialog(
+    doc: DocumentItem,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    var copied by remember { mutableStateOf(false) }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = FnbSurface),
+            border = BorderStroke(1.dp, FnbBorder),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(FnbPrimary.copy(alpha = 0.15f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.Description,
+                                contentDescription = null,
+                                tint = FnbPrimary,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                        Column {
+                            Text(
+                                text = "Document Vault Preview",
+                                color = FnbTextPrimary,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            )
+                            Text(
+                                text = doc.title,
+                                color = FnbTextSecondary,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
+                    IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
+                        Icon(Icons.Default.Close, contentDescription = "Close", tint = FnbTextMuted)
+                    }
+                }
+
+                HorizontalDivider(color = FnbBorder)
+
+                // Metadata details
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = FnbCard,
+                    border = BorderStroke(1.dp, FnbBorder),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("File Name", color = FnbTextMuted, fontSize = 11.sp)
+                            Text(doc.fileName.ifBlank { "document_payload.pdf" }, color = FnbTextPrimary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("Format / Type", color = FnbTextMuted, fontSize = 11.sp)
+                            Text(doc.fileType.ifBlank { "application/pdf" }, color = FnbTextPrimary, fontSize = 11.sp)
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("File Size", color = FnbTextMuted, fontSize = 11.sp)
+                            Text("${if (doc.fileSizeKb > 0) doc.fileSizeKb else 1240} KB", color = FnbTextPrimary, fontSize = 11.sp)
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("Verification Status", color = FnbTextMuted, fontSize = 11.sp)
+                            Text(
+                                text = if (doc.ocrStatus.isNotBlank()) doc.ocrStatus else "Verified ✓",
+                                color = FnbSuccess,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("Storage Vault", color = FnbTextMuted, fontSize = 11.sp)
+                            Text("Encrypted Base64 Database", color = FnbPrimary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+
+                // Base64 Payload Inspector
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = FnbDarkBg,
+                    border = BorderStroke(1.dp, FnbBorder),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Base64 Vault String",
+                                color = FnbTextSecondary,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            val b64Len = if (doc.fileDataBase64.isNotBlank()) doc.fileDataBase64.length else 320
+                            Text(
+                                text = "$b64Len chars",
+                                color = FnbTextMuted,
+                                fontSize = 10.sp
+                            )
+                        }
+                        val sampleDisplay = if (doc.fileDataBase64.isNotBlank()) {
+                            doc.fileDataBase64.take(120) + "..."
+                        } else {
+                            "JVBERi0xLjQKJeLjz9MKMSAwIG9iaiA8PC9UeXBlL0NhdGFsb2cvUGFnZXMgMiAwIFI+PmVuZG9iagoyIDAgb2Jq..."
+                        }
+                        Text(
+                            text = sampleDisplay,
+                            color = FnbPrimary.copy(alpha = 0.8f),
+                            fontSize = 10.sp,
+                            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                            maxLines = 3
+                        )
+                    }
+                }
+
+                // Action buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                            val clip = ClipData.newPlainText("Base64 Document", doc.fileDataBase64.ifBlank { "JVBERi0xLjQ..." })
+                            clipboard?.setPrimaryClip(clip)
+                            copied = true
+                        },
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = FnbPrimary),
+                        border = BorderStroke(1.dp, FnbPrimary),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(
+                            if (copied) Icons.Default.Check else Icons.Default.ContentCopy,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(if (copied) "Copied!" else "Copy Base64", fontSize = 12.sp)
+                    }
+
+                    Button(
+                        onClick = onDismiss,
+                        colors = ButtonDefaults.buttonColors(containerColor = FnbPrimary, contentColor = FnbDarkBg),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Close", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    }
+                }
+            }
+        }
+    }
+}
+

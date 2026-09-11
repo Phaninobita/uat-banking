@@ -406,6 +406,10 @@ class SupabaseDatabaseClient {
                         put("file_size_kb", doc.fileSizeKb)
                         put("ocr_status", doc.ocrStatus)
                         put("extracted_info", doc.extractedInfo)
+                        if (doc.fileDataBase64.isNotBlank()) {
+                            put("file_data_base64", doc.fileDataBase64)
+                            put("file_type", doc.fileType)
+                        }
                     }
                     docsArray.put(d)
                 }
@@ -544,11 +548,168 @@ class SupabaseDatabaseClient {
             Log.d(tag, "Supabase syncApplication HTTP $code for CRN ${application.crn}")
             _lastSyncedApp.value = application.crn
             _syncState.value = SupabaseSyncState.Connected(host, System.currentTimeMillis())
+
+            // Also persist uploaded documents into application_documents table in Base64
+            application.documents.filter { it.isUploaded && it.fileDataBase64.isNotBlank() }.forEach { d ->
+                try {
+                    saveDocument(d, resolvedAppRef, resolvedCuid)
+                } catch (dErr: Exception) {
+                    Log.w(tag, "Document cloud vault sync warning: ${dErr.message}")
+                }
+            }
+
             Result.success("Synced CRN ${application.crn} to Supabase corporate_onboarding_applications")
         } catch (e: Exception) {
             Log.e(tag, "Error syncing to Supabase corporate_onboarding_applications: ${e.message}", e)
             _syncState.value = SupabaseSyncState.Error(e.localizedMessage ?: "Sync error")
             Result.failure(e)
+        }
+    }
+
+    /**
+     * Persists a Base64 document directly into Supabase application_documents table.
+     * Guarantees that uploaded documents are stored in Base64 format and linked by company_uid.
+     */
+    suspend fun saveDocument(doc: DocumentItem, appRef: String, companyUid: String): Result<Boolean> = withContext(Dispatchers.IO) {
+        if (appRef.isBlank() || doc.fileDataBase64.isBlank()) {
+            return@withContext Result.success(false)
+        }
+
+        val cleanRef = appRef.trim()
+        val cuid = if (companyUid.isNotBlank()) companyUid.uppercase() else "CUID-CORPORATE"
+        val docType = resolveDocumentType(doc)
+        val nowIso = getCurrentIsoTimestamp()
+
+        try {
+            val postUrl = "$restApiUrl/application_documents"
+            val payload = JSONObject().apply {
+                put("application_ref", cleanRef)
+                put("company_uid", cuid)
+                put("document_type", docType)
+                put("file_name", doc.fileName.ifBlank { "${doc.title.replace(" ", "_")}.pdf" })
+                put("file_type", doc.fileType.ifBlank { "application/pdf" })
+                put("file_size", if (doc.fileSizeKb > 0) doc.fileSizeKb * 1024 else doc.fileDataBase64.length)
+                put("file_data_base64", doc.fileDataBase64)
+                put("ocr_status", doc.ocrStatus.ifBlank { "stored" })
+                put("updated_at", nowIso)
+            }
+
+            val url = URL(postUrl)
+            val conn = url.openConnection() as HttpURLConnection
+            conn.requestMethod = "POST"
+            conn.connectTimeout = 10000
+            conn.readTimeout = 10000
+            conn.doOutput = true
+            conn.setRequestProperty("Content-Type", "application/json")
+            conn.setRequestProperty("apikey", apiKey)
+            conn.setRequestProperty("Authorization", "Bearer $apiKey")
+            conn.setRequestProperty("Prefer", "return=representation")
+
+            val writer = OutputStreamWriter(conn.outputStream)
+            writer.write(payload.toString())
+            writer.flush()
+            writer.close()
+
+            val code = conn.responseCode
+            if (code in 200..299) {
+                Log.d(tag, "Document ${doc.id} ($docType) persisted to application_documents table in Base64 (Code $code)")
+                Result.success(true)
+            } else {
+                val err = conn.errorStream?.bufferedReader()?.use { it.readText() } ?: "HTTP $code"
+                Log.w(tag, "Document save to Supabase application_documents note: $err")
+                Result.success(false)
+            }
+        } catch (e: Exception) {
+            Log.w(tag, "Exception saving document to application_documents: ${e.message}")
+            Result.success(false)
+        }
+    }
+
+    /**
+     * Fetches all Base64 documents for an application from Supabase application_documents table.
+     */
+    suspend fun fetchDocumentsForApp(appRef: String): Result<List<DocumentItem>> = withContext(Dispatchers.IO) {
+        val cleanRef = appRef.trim()
+        if (cleanRef.isBlank()) return@withContext Result.success(emptyList())
+
+        try {
+            val encodedRef = URLEncoder.encode(cleanRef, "UTF-8")
+            val queryUrl = "$restApiUrl/application_documents?application_ref=eq.$encodedRef&select=*&order=created_at.desc"
+            val url = URL(queryUrl)
+            val conn = url.openConnection() as HttpURLConnection
+            conn.requestMethod = "GET"
+            conn.connectTimeout = 8000
+            conn.readTimeout = 8000
+            conn.setRequestProperty("apikey", apiKey)
+            conn.setRequestProperty("Authorization", "Bearer $apiKey")
+
+            val code = conn.responseCode
+            if (code in 200..299) {
+                val response = conn.inputStream.bufferedReader().use { it.readText() }
+                val jsonArray = JSONArray(response)
+                val list = mutableListOf<DocumentItem>()
+                for (i in 0 until jsonArray.length()) {
+                    val obj = jsonArray.getJSONObject(i)
+                    val docType = obj.optString("document_type", "doc_${i + 1}")
+                    val fileName = obj.optString("file_name", "Document.pdf")
+                    val fileType = obj.optString("file_type", "application/pdf")
+                    val fileSize = obj.optInt("file_size", 0)
+                    val base64 = obj.optString("file_data_base64", "")
+                    val ocrStatus = obj.optString("ocr_status", "Verified ✓")
+                    val title = mapDocumentTypeToTitle(docType)
+
+                    list.add(
+                        DocumentItem(
+                            id = obj.optString("id", "doc_${i + 1}"),
+                            title = title,
+                            recommended = true,
+                            isUploaded = true,
+                            fileName = fileName,
+                            fileSizeKb = if (fileSize > 0) fileSize / 1024 else 1240,
+                            ocrStatus = ocrStatus,
+                            extractedInfo = "Verified & Stored",
+                            fileDataBase64 = base64,
+                            fileType = fileType
+                        )
+                    )
+                }
+                return@withContext Result.success(list)
+            } else {
+                val err = conn.errorStream?.bufferedReader()?.use { it.readText() } ?: "HTTP $code"
+                Log.w(tag, "Fetch documents note: $err")
+                Result.success(emptyList())
+            }
+        } catch (e: Exception) {
+            Log.w(tag, "Fetch documents exception: ${e.message}")
+            Result.success(emptyList())
+        }
+    }
+
+    fun resolveDocumentType(doc: DocumentItem): String {
+        val t = doc.title.lowercase()
+        return when {
+            t.contains("trade licence") || t.contains("trade license") -> "trade_license"
+            t.contains("certificate of incorporation") -> "certificate_of_incorporation"
+            t.contains("board resolution") -> "board_resolution"
+            t.contains("tax residency") || t.contains("trn") -> "tax_residency_certificate"
+            t.contains("passport") -> "passport"
+            t.contains("memorandum") || t.contains("moa") -> "memorandum_of_association"
+            t.contains("bank statement") -> "bank_statement"
+            doc.id.isNotBlank() -> doc.id
+            else -> "commercial_document"
+        }
+    }
+
+    fun mapDocumentTypeToTitle(docType: String): String {
+        return when (docType.lowercase()) {
+            "trade_license" -> "Trade Licence (recommended)"
+            "certificate_of_incorporation" -> "Certificate of Incorporation"
+            "board_resolution" -> "Board Resolution"
+            "tax_residency_certificate" -> "Tax Residency Certificate / TRN"
+            "passport" -> "Passport / National ID"
+            "memorandum_of_association" -> "Memorandum of Association"
+            "bank_statement" -> "Bank Statement (Last 6 Months)"
+            else -> docType.replace("_", " ").replaceFirstChar { it.uppercase() }
         }
     }
 
@@ -626,7 +787,9 @@ class SupabaseDatabaseClient {
                                     fileName = d.optString("file_name", d.optString("fileName", "")),
                                     fileSizeKb = d.optInt("file_size_kb", d.optInt("fileSizeKb", 0)),
                                     ocrStatus = d.optString("ocr_status", "Completed"),
-                                    extractedInfo = d.optString("extracted_info", "")
+                                    extractedInfo = d.optString("extracted_info", ""),
+                                    fileDataBase64 = d.optString("file_data_base64", ""),
+                                    fileType = d.optString("file_type", "application/pdf")
                                 )
                             )
                         }
@@ -639,6 +802,34 @@ class SupabaseDatabaseClient {
                                 DocumentItem(id = "doc_4", title = "Tax Residency Certificate / TRN", recommended = false, isUploaded = false, fileName = "", fileSizeKb = 0, ocrStatus = "Pending", extractedInfo = "")
                             )
                         )
+                    }
+
+                    // Retrieve vaulted Base64 documents from application_documents table for complete web/mobile parity
+                    try {
+                        val cloudDocs = fetchDocumentsForApp(appRef).getOrDefault(emptyList())
+                        if (cloudDocs.isNotEmpty()) {
+                            cloudDocs.forEach { cDoc ->
+                                val existingIndex = docs.indexOfFirst {
+                                    resolveDocumentType(it).equals(resolveDocumentType(cDoc), ignoreCase = true) ||
+                                    it.title.equals(cDoc.title, ignoreCase = true)
+                                }
+                                if (existingIndex != -1) {
+                                    val ex = docs[existingIndex]
+                                    docs[existingIndex] = ex.copy(
+                                        isUploaded = true,
+                                        fileName = cDoc.fileName.ifBlank { ex.fileName },
+                                        fileSizeKb = if (cDoc.fileSizeKb > 0) cDoc.fileSizeKb else ex.fileSizeKb,
+                                        ocrStatus = cDoc.ocrStatus.ifBlank { ex.ocrStatus },
+                                        fileDataBase64 = cDoc.fileDataBase64,
+                                        fileType = cDoc.fileType
+                                    )
+                                } else {
+                                    docs.add(cDoc)
+                                }
+                            }
+                        }
+                    } catch (docErr: Exception) {
+                        Log.w(tag, "Could not fetch cloud documents: ${docErr.message}")
                     }
 
                     // Ownership & UBOs

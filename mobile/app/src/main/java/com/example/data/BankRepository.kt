@@ -190,20 +190,72 @@ object BankRepository {
         syncActiveApplicationToSupabase()
     }
 
+    companion object {
+        private const val SAMPLE_BASE64_PDF = "JVBERi0xLjQKJeLjz9MKMSAwIG9iaiA8PC9UeXBlL0NhdGFsb2cvUGFnZXMgMiAwIFI+PmVuZG9iagoyIDAgb2JqIDw8L1R5cGUvUGFnZXMvQ291bnQgMS9LaWRzWzMgMCBSXT4+ZW5kb2JqCjMgMCBvYmogPDwvVHlwZS9QYWdlL1BhcmVudCAyIDAgUi9NZWRpYUJveFswIDAgNjEyIDc5Ml0+PmVuZG9iagp4cmVmCjAgNAowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMTggMDAwMDAgbiAKMDAwMDAwMDA3NyAwMDAwMCBuIAowMDAwMDAwMTMzIDAwMDAwIG4gCnRyYWlsZXIKPDwvU2l6ZSA0L1Jvb3QgMSAwIFI+PgpzdGFydHhyZWYKMTk5CiUlRU9G"
+        private const val SAMPLE_BASE64_IMG = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+    }
+
     fun toggleDocumentUpload(docId: String, fileName: String = "Uploaded_Doc.pdf") {
         val app = _activeApplication.value
+        val isImg = fileName.endsWith(".png", true) || fileName.endsWith(".jpg", true) || fileName.endsWith(".jpeg", true)
+        val sampleB64 = if (isImg) SAMPLE_BASE64_IMG else SAMPLE_BASE64_PDF
+        val mimeType = if (isImg) "image/png" else "application/pdf"
+        var toggledDoc: DocumentItem? = null
+
         val updatedDocs = app.documents.map { doc ->
             if (doc.id == docId) {
                 val newStatus = !doc.isUploaded
-                doc.copy(
+                val updated = doc.copy(
                     isUploaded = newStatus,
                     fileName = if (newStatus) fileName else "",
                     fileSizeKb = if (newStatus) 1240 else 0,
-                    ocrStatus = if (newStatus) "Verified ✓" else "Pending"
+                    ocrStatus = if (newStatus) "Verified ✓" else "Pending",
+                    fileDataBase64 = if (newStatus) sampleB64 else "",
+                    fileType = if (newStatus) mimeType else "application/pdf"
                 )
+                toggledDoc = updated
+                updated
             } else doc
         }
-        _activeApplication.value = app.copy(documents = updatedDocs)
+        val cuid = if (app.companyUid.isNotBlank()) app.companyUid else "CUID-${app.crn.trim().uppercase().replace("[^A-Z0-9]".toRegex(), "")}"
+        val updatedApp = app.copy(companyUid = cuid, documents = updatedDocs)
+        _activeApplication.value = updatedApp
+
+        // Vault directly to Supabase application_documents & sync application
+        toggledDoc?.let { doc ->
+            if (doc.isUploaded) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        supabaseClient.saveDocument(doc, updatedApp.appRef, cuid)
+                    } catch (e: Exception) {
+                        Log.w("BankRepository", "Failed saving document to vault: ${e.message}")
+                    }
+                }
+                recordAuditLog(
+                    actionType = "DOCUMENT_UPLOADED",
+                    actorId = "CLIENT-" + app.crn,
+                    actorName = app.companyInfo.companyName.ifBlank { "Client" },
+                    actorRole = "Client Signatory",
+                    companyUid = cuid,
+                    targetCrn = app.crn,
+                    targetEmail = app.registeredEmail,
+                    targetCompany = app.companyInfo.companyName,
+                    details = "Document ${doc.title} (${doc.fileName}) uploaded and Base64 vaulted into secure storage"
+                )
+            } else {
+                recordAuditLog(
+                    actionType = "DOCUMENT_REMOVED",
+                    actorId = "CLIENT-" + app.crn,
+                    actorName = app.companyInfo.companyName.ifBlank { "Client" },
+                    actorRole = "Client Signatory",
+                    companyUid = cuid,
+                    targetCrn = app.crn,
+                    targetEmail = app.registeredEmail,
+                    targetCompany = app.companyInfo.companyName,
+                    details = "Document ${doc.title} removed from vault"
+                )
+            }
+        }
         syncActiveApplicationToSupabase()
     }
 
@@ -452,12 +504,14 @@ object BankRepository {
     ): RmInvitation {
         val cleanCrn = crn.trim().uppercase()
         val cleanEmail = email.trim().lowercase()
+        val cuid = "CUID-${cleanCrn.replace("[^A-Z0-9]".toRegex(), "")}"
         val token = "inv_" + UUID.randomUUID().toString().take(8)
         val link = "https://fnb-corp.bank/portal?crn=$cleanCrn&email=$cleanEmail&token=$token"
 
         val invite = RmInvitation(
             crn = cleanCrn,
             email = cleanEmail,
+            companyUid = cuid,
             companyName = companyName.trim(),
             contactPerson = contactPerson.trim().ifBlank { "Authorized Signatory" },
             phone = phone.trim(),
@@ -484,6 +538,7 @@ object BankRepository {
             actorId = "RM-" + (_currentRmUser.value?.username?.uppercase() ?: "PHANEE"),
             actorName = _currentRmUser.value?.fullName ?: "Phanee (Senior RM)",
             actorRole = "RM Executive",
+            companyUid = cuid,
             targetCrn = cleanCrn,
             targetEmail = cleanEmail,
             targetCompany = companyName.trim(),
@@ -673,16 +728,20 @@ object BankRepository {
             DocumentItem(id = "doc_4", title = "Tax Residency Certificate / TRN", recommended = false, isUploaded = false, fileName = "", fileSizeKb = 0, ocrStatus = "Pending", extractedInfo = "")
         )
 
+        val cleanCrn = invite.crn.trim().uppercase()
+        val cuid = if (invite.companyUid.isNotBlank()) invite.companyUid else "CUID-${cleanCrn.replace("[^A-Z0-9]".toRegex(), "")}"
         val generatedRef = "AB-2026-" + UUID.randomUUID().toString().replace("-", "").take(6).uppercase()
         val initialApp = OnboardingApplication(
             appRef = generatedRef,
             crn = invite.crn,
             registeredEmail = invite.email,
+            companyUid = cuid,
             currentStep = 1,
             status = invite.status.ifBlank { "draft" },
             companyInfo = CompanyInfo(
                 crn = invite.crn,
                 email = invite.email,
+                companyUid = cuid,
                 companyName = invite.companyName,
                 tradeName = invite.companyName,
                 contactPerson = invite.contactPerson,
@@ -704,12 +763,16 @@ object BankRepository {
                 val existing = supabaseClient.fetchApplicationForCrn(invite.crn).getOrNull()
                 if (existing != null) {
                     val mergedInfo = existing.companyInfo.copy(
+                        companyUid = cuid,
                         companyName = existing.companyInfo.companyName.ifBlank { invite.companyName },
                         tradeName = existing.companyInfo.tradeName.ifBlank { invite.companyName },
                         contactPerson = existing.companyInfo.contactPerson.ifBlank { invite.contactPerson },
                         phone = existing.companyInfo.phone.ifBlank { invite.phone }
                     )
-                    _activeApplication.value = existing.copy(companyInfo = mergedInfo)
+                    _activeApplication.value = existing.copy(
+                        companyUid = if (existing.companyUid.isNotBlank()) existing.companyUid else cuid,
+                        companyInfo = mergedInfo
+                    )
                     Log.d("BankRepository", "Restored existing application from Supabase for CRN ${invite.crn}")
                 } else {
                     // Immediately create the application row in Supabase post-login
@@ -723,7 +786,7 @@ object BankRepository {
     }
 
     fun loadApplicationForClient(crn: String, email: String, companyName: String) {
-        val cleanCrn = crn.trim()
+        val cleanCrn = crn.trim().uppercase()
         val matchingInvite = _rmInvitations.value.find { it.crn.equals(cleanCrn, ignoreCase = true) }
         if (matchingInvite != null) {
             loadApplicationForClient(matchingInvite)
@@ -734,16 +797,19 @@ object BankRepository {
                 DocumentItem(id = "doc_3", title = "Board Resolution", recommended = true, isUploaded = false, fileName = "", fileSizeKb = 0, ocrStatus = "Pending", extractedInfo = ""),
                 DocumentItem(id = "doc_4", title = "Tax Residency Certificate / TRN", recommended = false, isUploaded = false, fileName = "", fileSizeKb = 0, ocrStatus = "Pending", extractedInfo = "")
             )
+            val cuid = "CUID-${cleanCrn.replace("[^A-Z0-9]".toRegex(), "")}"
             val generatedRef = "AB-2026-" + UUID.randomUUID().toString().replace("-", "").take(6).uppercase()
             _activeApplication.value = OnboardingApplication(
                 appRef = generatedRef,
                 crn = cleanCrn,
                 registeredEmail = email.trim(),
+                companyUid = cuid,
                 currentStep = 1,
                 status = "draft",
                 companyInfo = CompanyInfo(
                     crn = cleanCrn,
                     email = email.trim(),
+                    companyUid = cuid,
                     companyName = companyName,
                     tradeName = companyName
                 ),
@@ -761,7 +827,10 @@ object BankRepository {
                 try {
                     val existing = supabaseClient.fetchApplicationForCrn(cleanCrn).getOrNull()
                     if (existing != null) {
-                        _activeApplication.value = existing
+                        _activeApplication.value = existing.copy(
+                            companyUid = if (existing.companyUid.isNotBlank()) existing.companyUid else cuid,
+                            companyInfo = existing.companyInfo.copy(companyUid = cuid)
+                        )
                         Log.d("BankRepository", "Restored existing application from Supabase for CRN $cleanCrn")
                     } else {
                         supabaseClient.syncApplication(_activeApplication.value)

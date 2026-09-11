@@ -59,6 +59,10 @@ class BankViewModel : ViewModel() {
     private val _isMailboxOpen = MutableStateFlow(false)
     val isMailboxOpen: StateFlow<Boolean> = _isMailboxOpen.asStateFlow()
 
+    // Document Preview
+    private val _selectedDocForPreview = MutableStateFlow<DocumentItem?>(null)
+    val selectedDocForPreview: StateFlow<DocumentItem?> = _selectedDocForPreview.asStateFlow()
+
     // Repository Flows
     val activeApplication = repository.activeApplication
     val accounts = repository.accounts
@@ -319,6 +323,14 @@ class BankViewModel : ViewModel() {
         val doc = activeApplication.value.documents.find { it.id == docId }
         val status = if (doc?.isUploaded == true) "uploaded & OCR verified" else "removed"
         showToast("${doc?.title ?: "Document"} $status")
+    }
+
+    fun previewDocument(doc: DocumentItem) {
+        _selectedDocForPreview.value = doc
+    }
+
+    fun closeDocPreview() {
+        _selectedDocForPreview.value = null
     }
 
     fun updateDocTitle(docId: String, newTitle: String) {
