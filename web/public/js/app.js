@@ -3415,7 +3415,34 @@ document.addEventListener('DOMContentLoaded', () => {
             glare.style.background = 'linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.6), rgba(255, 255, 255, 0.8), rgba(0, 210, 255, 0.6), transparent)';
         }
     });
+
+    // ── mal.ai 3D TILT FOR ALL PORTAL CARDS & DIALOGUES ──
+    initPortalCardsTilt();
 });
 
+function initPortalCardsTilt() {
+    const cards = document.querySelectorAll('.upload-card, .welcome-hero, .sub-wrap, .ubo-card, .doc-preview-box, .audit-modal-box');
+    cards.forEach(card => {
+        if (card._hasTiltListener) return;
+        card._hasTiltListener = true;
 
+        card.addEventListener('mousemove', (e) => {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const rect = card.getBoundingClientRect();
+            const cardX = rect.left + rect.width / 2;
+            const cardY = rect.top + rect.height / 2;
+            const mouseX = e.clientX - cardX;
+            const mouseY = e.clientY - cardY;
 
+            const rotateX = (-mouseY / (rect.height / 2)) * 2.2;
+            const rotateY = (mouseX / (rect.width / 2)) * 2.2;
+
+            card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-2px)`;
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+        });
+    });
+}
+window.initPortalCardsTilt = initPortalCardsTilt;

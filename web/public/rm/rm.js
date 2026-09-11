@@ -54,7 +54,36 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    // Initialize 3D Tilt for all Dashboard Cards & Metrics
+    initRmCardsTilt();
 });
+
+function initRmCardsTilt() {
+    const cards = document.querySelectorAll(".rm-card, .rm-metric-card, .rm-modal-card");
+    cards.forEach(card => {
+        if (card._hasTiltListener) return;
+        card._hasTiltListener = true;
+
+        card.addEventListener("mousemove", (e) => {
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+            const rect = card.getBoundingClientRect();
+            const cardX = rect.left + rect.width / 2;
+            const cardY = rect.top + rect.height / 2;
+            const mouseX = e.clientX - cardX;
+            const mouseY = e.clientY - cardY;
+
+            const rotateX = (-mouseY / (rect.height / 2)) * 2.5;
+            const rotateY = (mouseX / (rect.width / 2)) * 2.5;
+
+            card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-3px)`;
+        });
+
+        card.addEventListener("mouseleave", () => {
+            card.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)";
+        });
+    });
+}
 
 // ── TOAST NOTIFICATIONS ──
 function showRmToast(message, type = "success") {
@@ -111,6 +140,7 @@ function showDashboardView() {
     }
 
     fetchInvitations();
+    initRmCardsTilt();
 
     // Start real-time pipeline polling for live step and status sync
     if (!window._rmPipelinePoll) {
