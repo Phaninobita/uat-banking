@@ -203,9 +203,9 @@ async function handleSupabaseRestQuery(text, params = []) {
     return { rows: updated ? [updated] : [] };
   }
 
-  // 3. application_documents queries
-  if (sqlUpper.includes("FROM APPLICATION_DOCUMENTS")) {
-    if (sqlUpper.startsWith("SELECT ID FROM APPLICATION_DOCUMENTS") && sqlUpper.includes("DOCUMENT_TYPE =")) {
+  // 3. step1_documents & application_documents queries
+  if (sqlUpper.includes("FROM STEP1_DOCUMENTS") || sqlUpper.includes("FROM APPLICATION_DOCUMENTS")) {
+    if ((sqlUpper.startsWith("SELECT ID FROM STEP1_DOCUMENTS") || sqlUpper.startsWith("SELECT ID FROM APPLICATION_DOCUMENTS")) && sqlUpper.includes("DOCUMENT_TYPE =")) {
       const appRef = params[0];
       const docType = params[1];
       const docs = await supabaseClient.listDocuments(appRef);
@@ -222,7 +222,7 @@ async function handleSupabaseRestQuery(text, params = []) {
     }
   }
 
-  if (sqlUpper.startsWith("INSERT INTO APPLICATION_DOCUMENTS")) {
+  if (sqlUpper.startsWith("INSERT INTO STEP1_DOCUMENTS") || sqlUpper.startsWith("INSERT INTO APPLICATION_DOCUMENTS")) {
     // [activeAppRef, companyUid, document_type, file_name, file_type, file_size, file_data_base64]
     const docRecord = {
       application_ref: params[0],
@@ -237,7 +237,7 @@ async function handleSupabaseRestQuery(text, params = []) {
     return { rows: [saved] };
   }
 
-  if (sqlUpper.startsWith("UPDATE APPLICATION_DOCUMENTS")) {
+  if (sqlUpper.startsWith("UPDATE STEP1_DOCUMENTS") || sqlUpper.startsWith("UPDATE APPLICATION_DOCUMENTS")) {
     // [file_name, file_type, file_size, file_data_base64, companyUid, existing.rows[0].id]
     const saved = await supabaseClient.saveDocument({
       id: params[5],
@@ -250,7 +250,7 @@ async function handleSupabaseRestQuery(text, params = []) {
     return { rows: [saved] };
   }
 
-  if (sqlUpper.startsWith("DELETE FROM APPLICATION_DOCUMENTS")) {
+  if (sqlUpper.startsWith("DELETE FROM STEP1_DOCUMENTS") || sqlUpper.startsWith("DELETE FROM APPLICATION_DOCUMENTS")) {
     const docId = params[0];
     const appRef = params[1];
     await supabaseClient.deleteDocument(docId, appRef);

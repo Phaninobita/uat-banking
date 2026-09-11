@@ -109,11 +109,15 @@
         <!-- Rework Banner -->
         <div class="rework-banner" id="reworkBanner" role="status">
             <div class="rb-icon" aria-hidden="true">&#x26A0;</div>
-            <div>
+            <div class="rb-content">
                 <span class="rb-title">Application Returned for Correction</span>
                 <p class="rb-desc" id="reworkComment">Our compliance team flagged an ownership mismatch. Please verify the ownership structures below and upload required documents.</p>
                 <div class="rb-action">* Only Step 4 (Ownership) and Review are editable. Other steps are currently locked.</div>
             </div>
+            <button type="button" class="rb-close-btn" onclick="dismissReworkBanner()" title="Exit / Dismiss Rework Mode" aria-label="Exit rework mode">
+                <span class="rb-close-x">&times;</span>
+                <span class="rb-close-text">Exit</span>
+            </button>
         </div>
 
         <!-- SLEEK EXECUTIVE TOP HEADER -->
@@ -149,7 +153,7 @@
                     <span class="hdr-btn-icon">&#x1F6E1;&#xFE0F;</span>
                     <span>Audit Trail</span>
                 </button>
-                <button type="button" class="btn-hdr-action btn-hdr-save btn-pill-sweep" onclick="showSaveModal()" title="Save application draft">
+                <button type="button" class="btn-hdr-action btn-hdr-save" onclick="showSaveModal()" title="Save application draft">
                     <span class="hdr-btn-icon">&#x1F4BE;</span>
                     <span>Save Draft</span>
                 </button>
@@ -161,7 +165,7 @@
                     <span class="hdr-btn-icon">&#x1F504;</span>
                     <span class="tt-label">Simulate Rework</span>
                 </button>
-                <button type="button" class="btn-hdr-action btn-hdr-signout" id="btnSignOut" onclick="handleSignOut()" title="Sign out of Corporate Portal">
+                <button type="button" class="btn-hdr-action btn-hdr-signout" id="btnSignOut" onclick="handleSignOut()" title="Sign out / Exit Corporate Portal">
                     <span class="hdr-btn-icon">&#x1F6AA;</span>
                     <span>Sign Out</span>
                 </button>

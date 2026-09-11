@@ -439,6 +439,7 @@
             align-items: center;
             gap: 8px;
             flex-shrink: 0;
+            margin-left: auto;
         }
 
         .btn-hdr-action {
@@ -451,14 +452,18 @@
             cursor: pointer;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
             white-space: nowrap;
+            width: auto !important;
+            max-width: max-content;
             flex-shrink: 0;
             line-height: 1;
             transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
             text-decoration: none;
             border: 1px solid transparent;
             outline: none;
+            box-sizing: border-box;
         }
 
         .btn-hdr-action:hover {
@@ -492,6 +497,8 @@
             background: rgba(99, 102, 241, 0.12);
             border-color: rgba(99, 102, 241, 0.35);
             color: #c7d2fe !important;
+            width: auto !important;
+            height: 36px !important;
         }
 
         .btn-hdr-save:hover {
@@ -738,6 +745,11 @@
             margin-top: 2px;
         }
 
+        .rework-banner .rb-content {
+            flex: 1;
+            min-width: 0;
+        }
+
         .rework-banner .rb-title {
             font-weight: 700;
             font-size: 16px;
@@ -756,6 +768,41 @@
             color: #fbbf24;
             margin-top: 6px;
             font-weight: 600;
+        }
+
+        .rework-banner .rb-close-btn {
+            background: rgba(245, 158, 11, 0.18);
+            border: 1px solid rgba(245, 158, 11, 0.45);
+            border-radius: 999px;
+            color: #fef08a;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+            margin-left: 12px;
+            align-self: flex-start;
+            flex-shrink: 0;
+            white-space: nowrap;
+            font-family: var(--font);
+            outline: none;
+        }
+
+        .rework-banner .rb-close-btn:hover {
+            background: rgba(239, 68, 68, 0.28);
+            border-color: rgba(239, 68, 68, 0.6);
+            color: #ffffff;
+            box-shadow: 0 0 14px rgba(239, 68, 68, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .rework-banner .rb-close-x {
+            font-size: 16px;
+            line-height: 1;
+            font-weight: 800;
         }
 
         /* ── DIRECTIONAL SCREEN NAVIGATION (mal.ai MOTION) ── */
@@ -5129,5 +5176,72 @@
         .btn-uc-delete:hover {
             background: rgba(239, 68, 68, 0.3);
             color: #ffffff;
+        }
+
+        /* ── Responsive Top Header & Action Controls ── */
+        @media (max-width: 1200px) {
+            .hdr {
+                padding: 0 16px;
+                gap: 12px;
+            }
+            .hdr-cockpit-capsule {
+                padding: 0 12px;
+                gap: 8px;
+            }
+            .tag-name {
+                max-width: 120px;
+            }
+        }
+
+        @media (max-width: 980px) {
+            .hdr {
+                height: auto;
+                min-height: 64px;
+                padding: 10px 16px;
+                flex-wrap: wrap;
+                justify-content: space-between;
+            }
+            .hdr-brand {
+                order: 1;
+            }
+            .hdr-right {
+                order: 2;
+                margin-left: auto;
+                gap: 6px;
+            }
+            .hdr-cockpit-capsule {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+                margin-top: 4px;
+            }
+            .btn-hdr-action {
+                height: 32px;
+                padding: 0 10px;
+                font-size: 11px;
+            }
+            .rework-banner {
+                margin: 8px 16px 0;
+                padding: 12px 16px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .hdr-right {
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+            .btn-hdr-action {
+                height: 30px;
+                padding: 0 8px;
+                font-size: 11px;
+                gap: 4px;
+            }
+            .btn-hdr-rework .tt-label {
+                display: none;
+            }
+            .btn-hdr-rework::after {
+                content: "Rework";
+            }
         }
 

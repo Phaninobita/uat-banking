@@ -251,7 +251,7 @@ router.post("/upload", requireAuth, async (req, res) => {
         file_name: savedDocument.file_name,
         file_type: savedDocument.file_type,
         file_size: savedDocument.file_size,
-        storedInDatabase: db.isConnected() ? "PostgreSQL Table application_documents" : "In-Memory Base64 Vault",
+        storedInDatabase: db.isConnected() ? "Supabase Cloud Database (step1_documents)" : "In-Memory Base64 Vault",
         updated_at: savedDocument.updated_at
       },
       service: "document-service"
@@ -286,7 +286,7 @@ router.get("/list/:applicationRef?", requireAuth, async (req, res) => {
       success: true,
       count: docs.length,
       documents: docs,
-      storageEngine: db.isConnected() ? "Supabase Cloud Database (application_documents)" : "In-Memory Base64 Store",
+      storageEngine: db.isConnected() ? "Supabase Cloud Database (step1_documents)" : "In-Memory Base64 Store",
       service: "document-service"
     });
   } catch (err) {
@@ -433,7 +433,7 @@ router.get("/health", (req, res) => {
   res.json({
     status: "healthy",
     service: "document-service",
-    storageEngine: db.isConnected() ? "PostgreSQL application_documents" : "In-Memory Vault",
+    storageEngine: db.isConnected() ? "Supabase Cloud Database (step1_documents)" : "In-Memory Vault",
     documentsCount: db.isConnected() ? "connected" : memStore.documents.size,
     port: config.MICROSERVICES.DOCUMENTS.port,
     uptime: process.uptime()

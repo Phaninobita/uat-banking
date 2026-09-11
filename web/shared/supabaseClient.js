@@ -285,11 +285,12 @@ class SupabaseClient {
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // APPLICATION DOCUMENTS (application_documents)
+  // STEP 1 DOCUMENTS (step1_documents)
   // ══════════════════════════════════════════════════════════════════════════
 
   async saveDocument(doc) {
     const {
+      id,
       application_ref,
       company_uid,
       document_type,
@@ -297,37 +298,50 @@ class SupabaseClient {
       file_type,
       file_size,
       file_data_base64,
-      ocr_status
+      ocr_status,
+      verification_status,
+      extracted_data
     } = doc;
 
-    const cleanRef = encodeURIComponent(application_ref);
-    const cleanType = encodeURIComponent(document_type);
+    const activeAppRef = application_ref || "AB-2026-DEMO01";
+    const activeCompUid = (company_uid || "CUID-CORPORATE").toUpperCase();
+    const cleanRef = encodeURIComponent(activeAppRef);
+    const cleanType = encodeURIComponent(document_type || "document");
 
-    // Check if doc of this type already exists for application
-    const checkRes = await this.request(`application_documents?application_ref=eq.${cleanRef}&document_type=eq.${cleanType}&select=id&limit=1`);
-    const existing = checkRes.data && Array.isArray(checkRes.data) && checkRes.data.length > 0 ? checkRes.data[0] : null;
+    // Check if doc exists in step1_documents
+    let existing = null;
+    if (id) {
+      existing = { id };
+    } else {
+      const checkRes = await this.request(`step1_documents?application_ref=eq.${cleanRef}&document_type=eq.${cleanType}&select=id&limit=1`);
+      if (checkRes.data && Array.isArray(checkRes.data) && checkRes.data.length > 0) {
+        existing = checkRes.data[0];
+      }
+    }
 
     const payload = {
-      application_ref,
-      company_uid: (company_uid || "CUID-CORPORATE").toUpperCase(),
-      document_type,
-      file_name,
+      application_ref: activeAppRef,
+      company_uid: activeCompUid,
+      document_type: document_type || "trade_license",
+      file_name: file_name || "document.pdf",
       file_type: file_type || "application/pdf",
       file_size: file_size || (file_data_base64 ? file_data_base64.length : 0),
-      file_data_base64,
-      ocr_status: ocr_status || "stored",
+      file_data_base64: file_data_base64 || null,
+      ocr_status: ocr_status || "verified",
+      verification_status: verification_status || "approved",
+      extracted_data: extracted_data || {},
       updated_at: new Date().toISOString()
     };
 
     if (existing && existing.id) {
-      const updateRes = await this.request(`application_documents?id=eq.${existing.id}`, {
+      const updateRes = await this.request(`step1_documents?id=eq.${existing.id}`, {
         method: "PATCH",
         headers: { "Prefer": "return=representation" },
         body: payload
       });
       return Array.isArray(updateRes.data) && updateRes.data.length > 0 ? updateRes.data[0] : { id: existing.id, ...payload };
     } else {
-      const insertRes = await this.request("application_documents", {
+      const insertRes = await this.request("step1_documents", {
         method: "POST",
         headers: { "Prefer": "return=representation" },
         body: payload
@@ -340,25 +354,41 @@ class SupabaseClient {
     if (!application_ref) return [];
     const cleanRef = encodeURIComponent(application_ref.trim());
     const res = await this.request(
+      `step1_documents?application_ref=eq.${cleanRef}&select=*&order=created_at.desc`
+    );
+    if (Array.isArray(res.data) && res.data.length > 0) {
+      return res.data;
+    }
+    // Fallback to application_documents if legacy records exist
+    const fallbackRes = await this.request(
       `application_documents?application_ref=eq.${cleanRef}&select=*&order=created_at.desc`
     );
-    return Array.isArray(res.data) ? res.data : [];
+    return Array.isArray(fallbackRes.data) ? fallbackRes.data : [];
   }
 
   async getDocument(id, application_ref) {
-    let query = `application_documents?id=eq.${id}&select=*&limit=1`;
+    let query = `step1_documents?id=eq.${id}&select=*&limit=1`;
     if (application_ref) {
-      query = `application_documents?id=eq.${id}&application_ref=eq.${encodeURIComponent(application_ref)}&select=*&limit=1`;
+      query = `step1_documents?id=eq.${id}&application_ref=eq.${encodeURIComponent(application_ref)}&select=*&limit=1`;
     }
     const res = await this.request(query);
     if (res.data && Array.isArray(res.data) && res.data.length > 0) {
       return res.data[0];
     }
+    // Fallback check in application_documents
+    let fallbackQuery = `application_documents?id=eq.${id}&select=*&limit=1`;
+    if (application_ref) {
+      fallbackQuery = `application_documents?id=eq.${id}&application_ref=eq.${encodeURIComponent(application_ref)}&select=*&limit=1`;
+    }
+    const fallbackRes = await this.request(fallbackQuery);
+    if (fallbackRes.data && Array.isArray(fallbackRes.data) && fallbackRes.data.length > 0) {
+      return fallbackRes.data[0];
+    }
     return null;
   }
 
   async deleteDocument(id, application_ref) {
-    let query = `application_documents?id=eq.${id}`;
+    let query = `step1_documents?id=eq.${id}`;
     if (application_ref) {
       query += `&application_ref=eq.${encodeURIComponent(application_ref)}`;
     }

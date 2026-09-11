@@ -179,6 +179,16 @@ function toggleReworkMode() {
     }
 }
 
+function dismissReworkBanner() {
+    if (isReworkMode) {
+        toggleReworkMode();
+    } else {
+        const banner = document.getElementById('reworkBanner');
+        if (banner) banner.classList.remove('active');
+    }
+}
+window.dismissReworkBanner = dismissReworkBanner;
+
 function renderOwnershipErrors() {
     document.querySelectorAll('.rework-error').forEach(el => el.classList.remove('rework-error'));
     document.querySelectorAll('.error-note').forEach(el => el.remove());
