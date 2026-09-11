@@ -214,11 +214,18 @@ function goTo(step) {
     if (loader) loader.classList.add('active');
 
     setTimeout(() => {
+        const isForward = step >= currentStep;
         const prevScreen = document.getElementById('sc-' + currentStep);
         const nextScreen = document.getElementById('sc-' + step);
 
-        if (prevScreen) prevScreen.classList.remove('active');
-        if (nextScreen) nextScreen.classList.add('active');
+        if (prevScreen) {
+            prevScreen.classList.remove('active', 'slide-from-right', 'slide-from-left');
+        }
+        if (nextScreen) {
+            nextScreen.classList.remove('active', 'slide-from-right', 'slide-from-left');
+            void nextScreen.offsetWidth; // reflow to restart animation
+            nextScreen.classList.add('active', isForward ? 'slide-from-right' : 'slide-from-left');
+        }
 
         document.querySelectorAll('.step-pill').forEach((el, i) => {
             el.classList.remove('active', 'done');
@@ -2215,12 +2222,25 @@ async function handleLoginStep1() {
     try {
         const res = await window.VBApi.requestOtp(crn, email);
         document.getElementById('displayEmail').textContent = email;
-        document.getElementById('lStep1').classList.add('hidden');
-        document.getElementById('lStep2').classList.remove('hidden');
-
-        // Focus first OTP input
-        const firstOtp = document.querySelector('#otpInputs input');
-        if (firstOtp) firstOtp.focus();
+        
+        const lStep1 = document.getElementById('lStep1');
+        const lStep2 = document.getElementById('lStep2');
+        if (lStep1 && lStep2) {
+            lStep1.classList.add('step-exit-forward');
+            setTimeout(() => {
+                lStep1.classList.add('hidden');
+                lStep1.classList.remove('step-exit-forward');
+                lStep2.classList.remove('hidden');
+                lStep2.classList.add('step-enter-forward');
+                const firstOtp = document.querySelector('#otpInputs input');
+                if (firstOtp) firstOtp.focus();
+            }, 200);
+        } else {
+            if (lStep1) lStep1.classList.add('hidden');
+            if (lStep2) lStep2.classList.remove('hidden');
+            const firstOtp = document.querySelector('#otpInputs input');
+            if (firstOtp) firstOtp.focus();
+        }
 
         const otpCode = res.debugOtp || '1111';
         const badge = document.getElementById('displayOtpBadge');
@@ -2265,6 +2285,9 @@ function autoFillOtp(code = '1111') {
     const digits = code.split('');
     inputs.forEach((inp, idx) => {
         inp.value = digits[idx] || '1';
+        inp.classList.remove('pop-animate');
+        void inp.offsetWidth; // trigger reflow
+        inp.classList.add('pop-animate');
     });
     if (inputs[inputs.length - 1]) inputs[inputs.length - 1].focus();
     hideLoginError();
@@ -2326,6 +2349,9 @@ async function handleOtpSubmit() {
 
 function moveToNext(current, nextIndex) {
     if (current.value.length === 1) {
+        current.classList.remove('pop-animate');
+        void current.offsetWidth; // trigger reflow
+        current.classList.add('pop-animate');
         const nextInput = document.querySelector(`#otpInputs input:nth-child(${nextIndex + 1})`);
         if (nextInput) nextInput.focus();
     }
@@ -3356,5 +3382,40 @@ window.closeAuditTrailModal = closeAuditTrailModal;
 window.fetchAuditTrail = fetchAuditTrail;
 window.renderAuditTrail = renderAuditTrail;
 window.filterAuditTrailTable = filterAuditTrailTable;
+
+// ── mal.ai INTERACTIVE 3D CARD TILT & GLARE TRACKING ──
+document.addEventListener('DOMContentLoaded', () => {
+    const overlay = document.getElementById('loginOverlay');
+    const box = document.querySelector('.login-box');
+    const glare = document.querySelector('.login-card-glare');
+    if (!overlay || !box) return;
+
+    overlay.addEventListener('mousemove', (e) => {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const rect = box.getBoundingClientRect();
+        const boxX = rect.left + rect.width / 2;
+        const boxY = rect.top + rect.height / 2;
+        const mouseX = e.clientX - boxX;
+        const mouseY = e.clientY - boxY;
+
+        const rotateX = (-mouseY / (rect.height / 2)) * 4.5;
+        const rotateY = (mouseX / (rect.width / 2)) * 4.5;
+
+        box.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-2px)`;
+
+        if (glare) {
+            const glarePos = Math.max(10, Math.min(90, ((e.clientX - rect.left) / rect.width) * 100));
+            glare.style.background = `linear-gradient(90deg, transparent, rgba(43, 214, 115, 0.4) ${glarePos - 25}%, rgba(255, 255, 255, 0.9) ${glarePos}%, rgba(43, 214, 115, 0.4) ${glarePos + 25}%, transparent)`;
+        }
+    });
+
+    overlay.addEventListener('mouseleave', () => {
+        box.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+        if (glare) {
+            glare.style.background = 'linear-gradient(90deg, transparent, rgba(43, 214, 115, 0.6), rgba(255, 255, 255, 0.8), rgba(43, 214, 115, 0.6), transparent)';
+        }
+    });
+});
+
 
 
