@@ -129,7 +129,7 @@ DECLARE
     s7 JSONB;
 BEGIN
     FOR rec IN SELECT * FROM corporate_onboarding_applications LOOP
-        v_cuid := COALESCE(rec.company_uid, 'CUID-' || UPPER(REGEXP_REPLACE(rec.crn, '[^a-zA-Z0-9]', '', 'g')));
+        v_cuid := COALESCE(rec.company_uid, 'CUID-' || UPPER(REGEXP_REPLACE(rec.crn::text, '[^a-zA-Z0-9]', '', 'g')));
         s2 := COALESCE(rec.form_data->'step2', '{}'::jsonb);
         s4 := COALESCE(rec.form_data->'step4', '{}'::jsonb);
         s5 := COALESCE(rec.form_data->'step5', '{}'::jsonb);
@@ -149,8 +149,8 @@ BEGIN
             COALESCE(rec.trade_name, s2->>'trade_name', rec.company_name),
             COALESCE(rec.legal_type, s2->>'legal_type', 'Limited Liability Company (LLC)'),
             COALESCE(rec.licence_issued_by, s2->>'issued_by', 'Delaware Division of Corporations (US)'),
-            COALESCE(rec.licence_issue_date, s2->>'issue_date', '2023-01-15'),
-            COALESCE(rec.licence_expiry_date, s2->>'expiry_date', '2028-01-15'),
+            COALESCE(rec.licence_issue_date::text, s2->>'issue_date', '2023-01-15'),
+            COALESCE(rec.licence_expiry_date::text, s2->>'expiry_date', '2028-01-15'),
             COALESCE(rec.vat_trn, s2->>'vat_trn', '100-2938-4821'),
             COALESCE(rec.contact_person, s2->>'contact_person', 'Authorized Signatory'),
             COALESCE(rec.registered_email, s2->>'email', 'admin@corporate.com'),
