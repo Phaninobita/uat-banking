@@ -206,7 +206,25 @@ function renderOwnershipErrors() {
     }
 }
 
-// &#x1F6C7;&#x1F6C7; NAVIGATION & STEPPER (FAST & NON-DESTRUCTIVE) &#x1F6C7;&#x1F6C7;
+// ── SIDEBAR DRAWER CONTROLLER (MOBILE / TABLET OFF-CANVAS) ──
+function toggleSidebarDrawer(force) {
+    const sidebar = document.getElementById('portalSidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if (!sidebar) return;
+    const isOpen = typeof force === 'boolean' ? force : !sidebar.classList.contains('drawer-open');
+    if (isOpen) {
+        sidebar.classList.add('drawer-open');
+        if (backdrop) backdrop.classList.add('active');
+        document.body.style.overflow = window.innerWidth <= 980 ? 'hidden' : '';
+    } else {
+        sidebar.classList.remove('drawer-open');
+        if (backdrop) backdrop.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+window.toggleSidebarDrawer = toggleSidebarDrawer;
+
+// ── NAVIGATION & STEPPER (FAST & NON-DESTRUCTIVE) ──
 function goTo(step) {
     if (step < 1 || step > totalSteps) return;
     if (isReworkMode && step !== 4 && step !== 7) {
@@ -214,6 +232,11 @@ function goTo(step) {
         if (notif) notif.classList.add('slide-in');
         showToast('Only Step 4 and Review are editable in rework mode.', 'Rework Mode', 'warning', 3000);
         return;
+    }
+
+    // Auto-close sidebar drawer on mobile upon step selection
+    if (window.innerWidth <= 980 && typeof toggleSidebarDrawer === 'function') {
+        toggleSidebarDrawer(false);
     }
 
     // Cache current step state before leaving
@@ -239,8 +262,14 @@ function goTo(step) {
 
         document.querySelectorAll('.step-pill').forEach((el, i) => {
             el.classList.remove('active', 'done');
+            el.setAttribute('aria-selected', 'false');
+            el.setAttribute('tabindex', '-1');
             if (i + 1 < step) el.classList.add('done');
-            if (i + 1 === step) el.classList.add('active');
+            if (i + 1 === step) {
+                el.classList.add('active');
+                el.setAttribute('aria-selected', 'true');
+                el.setAttribute('tabindex', '0');
+            }
         });
 
         currentStep = step;
@@ -2423,9 +2452,9 @@ function hideLoginError() {
     if (el) el.classList.remove('show');
 }
 
-// ── Corporate Client Identity Display (Displays company name & UID on top) ──
+// ── Corporate Client Identity Display (Displays company name & UID on top / sidebar) ──
 function displayClientNameOnTop(companyName, crn, companyUid) {
-    const companyTag = document.getElementById('hdrCompanyTag') || document.getElementById('hdrCompanyCapsule');
+    const companyTag = document.getElementById('hdrCompanyTag') || document.getElementById('hdrCompanyCapsule') || document.getElementById('sidebarCompanyCard');
     const nameEl = document.getElementById('hdrCompanyName');
     const crnEl = document.getElementById('hdrCrnDisplay');
     const cuidEl = document.getElementById('hdrCompanyUidDisplay');
@@ -2444,7 +2473,9 @@ function displayClientNameOnTop(companyName, crn, companyUid) {
         cuidEl.textContent = currentCompanyUid ? `ID: ${currentCompanyUid}` : '';
         cuidEl.style.display = currentCompanyUid ? 'inline-block' : 'none';
     }
-    if (companyTag) companyTag.style.display = 'inline-flex';
+    if (companyTag) {
+        companyTag.style.display = companyTag.id === 'sidebarCompanyCard' ? 'block' : 'inline-flex';
+    }
     if (brandSub) brandSub.textContent = 'Corporate Banking Portal';
 
     // Auto-fill Step 2 company fields

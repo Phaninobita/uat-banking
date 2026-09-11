@@ -552,165 +552,537 @@
             color: #fca5a5 !important;
         }
 
-        .stepper-bar {
-            background: rgba(3, 16, 21, 0.88);
-            padding: 10px 28px;
+        /* ══════════════════════════════════════════════════════════════
+           EXECUTIVE LEFT-SIDEBAR DUAL-COLUMN ARCHITECTURE
+           ══════════════════════════════════════════════════════════════ */
+        .portal-app-shell {
+            display: flex;
+            min-height: 100vh;
+            background: #02070a;
+            position: relative;
+            width: 100%;
+        }
+
+        /* ── Left Sidebar Navigation Hub ── */
+        .portal-sidebar {
+            width: 290px;
+            min-width: 290px;
+            max-width: 290px;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            background: rgba(3, 13, 17, 0.96);
+            border-right: 1px solid rgba(0, 210, 255, 0.14);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        /* Sidebar Brand */
+        .sidebar-brand-header {
+            padding: 18px 20px 14px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            overflow-x: auto;
-            scrollbar-width: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            transition: background var(--transition);
+            gap: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            flex-shrink: 0;
         }
 
-        .stepper-bar::-webkit-scrollbar {
-            display: none;
+        .sidebar-logo-mark {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary-strong) 60%, var(--brand-primary-strong) 100%);
+            border: 1px solid rgba(0, 210, 255, 0.45);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 14px;
+            color: #fff;
+            box-shadow: 0 0 16px rgba(0, 210, 255, 0.35);
+            flex-shrink: 0;
         }
 
-        .step-pill {
+        .sidebar-brand-text .brand-name {
+            font-weight: 800;
+            font-size: 14px;
+            letter-spacing: -0.3px;
+            color: #ffffff;
+            display: block;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .sidebar-brand-text .brand-sub {
+            display: block;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+        }
+
+        /* Active Company Identity & Progress Card */
+        .sidebar-company-card {
+            margin: 12px 14px 6px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(0, 210, 255, 0.18);
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            flex-shrink: 0;
+        }
+
+        .scc-identity {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 8px 16px;
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.65);
-            cursor: pointer;
-            border: 1px solid transparent;
-            border-radius: 999px;
-            white-space: nowrap;
-            transition: all var(--duration-medium) var(--ease-out);
-            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .scc-icon {
+            font-size: 18px;
             flex-shrink: 0;
-            background: rgba(255, 255, 255, 0.02);
-            font-family: var(--font);
-            font-weight: 500;
         }
 
-        .step-pill:hover {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(255, 255, 255, 0.12);
-            transform: translateY(-1px);
+        .scc-details {
+            min-width: 0;
+            flex: 1;
         }
 
-        .step-pill.active {
+        .scc-company-name {
+            font-size: 13px;
+            font-weight: 700;
             color: #ffffff;
-            background: rgba(0, 210, 255, 0.14);
-            border-color: rgba(0, 210, 255, 0.45);
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+
+        .scc-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 3px;
+            flex-wrap: wrap;
+        }
+
+        .scc-crn {
+            font-size: 10px;
+            color: #38bdf8;
+            font-family: monospace;
+            font-weight: 700;
+            background: rgba(0, 210, 255, 0.12);
+            padding: 1px 5px;
+            border-radius: 4px;
+        }
+
+        .scc-cuid {
+            font-size: 10px;
+            color: #f59e0b;
+            font-family: monospace;
+            font-weight: 700;
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.28);
+            padding: 1px 5px;
+            border-radius: 4px;
+        }
+
+        .scc-prog-container {
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 8px;
+        }
+
+        .scc-prog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
             font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 5px;
         }
 
-        .step-pill.done {
-            color: var(--brand-tertiary, #38bdf8);
-            background: rgba(14, 165, 233, 0.08);
-            border-color: rgba(14, 165, 233, 0.25);
+        .scc-prog-val {
+            color: #38bdf8;
+            font-weight: 700;
+            font-family: monospace;
         }
 
-        .step-pill.rework-disabled {
-            opacity: 0.4;
+        .scc-prog-track {
+            height: 5px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .scc-prog-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0284c7 0%, #00d2ff 100%);
+            border-radius: 999px;
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.6);
+            transition: width 0.4s ease;
+        }
+
+        .scc-prog-hint {
+            margin-top: 5px;
+            font-size: 10.5px;
+        }
+
+        /* Vertical Sequential Stepper */
+        .sidebar-stepper {
+            flex: 1;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+
+        .sidebar-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 9px 12px;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+            position: relative;
+            text-decoration: none;
+            width: 100%;
+            box-sizing: border-box;
+            white-space: normal;
+        }
+
+        .sidebar-step:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.08);
+            transform: translateX(3px);
+        }
+
+        .sidebar-step.active {
+            background: rgba(0, 210, 255, 0.12);
+            border-color: rgba(0, 210, 255, 0.45);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .sidebar-step.done {
+            background: rgba(14, 165, 233, 0.03);
+        }
+
+        .sidebar-step.rework-disabled {
+            opacity: 0.35;
             cursor: not-allowed;
             pointer-events: none;
         }
 
-        .step-pill.rework-disabled:hover {
-            transform: none;
-            background: transparent;
+        .step-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+            width: 24px;
         }
 
-        .step-pill .snum {
-            width: 22px;
-            height: 22px;
+        .step-node .snum {
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.08);
-            color: rgba(255, 255, 255, 0.75);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 11px;
             font-weight: 700;
-            transition: all var(--spring);
-            flex-shrink: 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.25s ease;
         }
 
-        .step-pill.active .snum {
+        .sidebar-step.active .snum {
             background: var(--brand-primary, #00d2ff);
             color: #00172e;
-            box-shadow: 0 0 16px rgba(0, 210, 255, 0.7);
-            transform: scale(1.08);
             border-color: #00d2ff;
+            box-shadow: 0 0 14px rgba(0, 210, 255, 0.7);
+            transform: scale(1.06);
         }
 
-        .step-pill.done .snum {
+        .sidebar-step.done .snum {
             background: var(--brand-secondary-strong, #002b52);
-            color: #00d2ff;
+            color: #38bdf8;
             border-color: rgba(0, 210, 255, 0.4);
         }
 
-        .step-pill .stime {
-            font-size: 10px;
+        .step-line-down {
+            width: 2px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.09);
+            margin: 4px 0 -4px;
+            transition: background 0.3s ease;
+        }
+
+        .sidebar-step.done .step-line-down {
+            background: linear-gradient(180deg, rgba(0, 210, 255, 0.6) 0%, rgba(0, 210, 255, 0.2) 100%);
+        }
+
+        .step-body {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .step-body .step-label {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.75);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
+        }
+
+        .sidebar-step.active .step-body .step-label {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .sidebar-step.done .step-body .step-label {
+            color: #e2e8f0;
+        }
+
+        .step-body .stime {
+            font-size: 10.5px;
             color: rgba(255, 255, 255, 0.4);
-            display: block;
-            margin-left: 2px;
+            margin-top: 3px;
         }
 
-        .step-pill.active .stime {
-            color: rgba(56, 189, 248, 0.85);
+        .sidebar-step.active .stime {
+            color: #38bdf8;
+            font-weight: 500;
         }
 
-        .step-pill.done .stime {
-            color: rgba(56, 189, 248, 0.7);
+        /* Sidebar Permanent Footer with Logout */
+        .sidebar-footer {
+            padding: 14px 14px 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(2, 9, 12, 0.98);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0;
         }
 
-        .overall-prog {
-            background: rgba(2, 7, 18, 0.95);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            padding: 10px 32px;
+        .sidebar-footer-btn {
             display: flex;
             align-items: center;
-            gap: 14px;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.65);
-            font-weight: 500;
-            transition: background var(--transition), border-color var(--transition);
+            gap: 8px;
+            padding: 9px 12px;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 600;
+            font-family: var(--font);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+            text-decoration: none;
+            border: 1px solid transparent;
+            width: 100%;
+            box-sizing: border-box;
+            justify-content: flex-start;
         }
 
-        .prog-track {
+        .sidebar-rm-btn {
+            background: rgba(245, 158, 11, 0.08);
+            border-color: rgba(245, 158, 11, 0.25);
+            color: #fbbf24;
+        }
+
+        .sidebar-rm-btn:hover {
+            background: rgba(245, 158, 11, 0.2);
+            border-color: rgba(245, 158, 11, 0.5);
+            color: #ffffff;
+        }
+
+        .sidebar-logout-btn {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.32);
+            color: #fca5a5;
+            font-weight: 700;
+        }
+
+        .sidebar-logout-btn:hover {
+            background: rgba(239, 68, 68, 0.25);
+            border-color: rgba(239, 68, 68, 0.65);
+            color: #ffffff;
+            box-shadow: 0 0 16px rgba(239, 68, 68, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .sidebar-footer-btn .sfb-icon {
+            font-size: 14px;
+        }
+
+        /* ── Main Right Column ── */
+        .portal-main-column {
             flex: 1;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 999px;
-            overflow: hidden;
-            transition: background var(--transition);
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #02070a;
         }
 
-        .prog-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #0284c7 0%, var(--brand-primary, #00d2ff) 60%, var(--brand-tertiary, #38bdf8) 100%);
-            border-radius: 999px;
-            box-shadow: 0 0 16px rgba(0, 210, 255, 0.5);
-            transition: width 0.6s var(--ease-out);
-            position: relative;
-        }
-
-        .prog-fill::after {
-            content: '';
-            position: absolute;
+        /* Slim Executive Topbar */
+        .portal-topbar {
+            height: 56px;
+            padding: 0 28px;
+            background: rgba(2, 9, 12, 0.88);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
             top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
-            animation: progShimmer 2.5s infinite;
+            z-index: 90;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            gap: 16px;
+            flex-shrink: 0;
         }
 
-        @keyframes progShimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(150%); }
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .btn-sidebar-hamburger {
+            display: none;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            padding: 8px;
+            cursor: pointer;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .btn-sidebar-hamburger .hamburger-bar {
+            width: 16px;
+            height: 2px;
+            background: #fff;
+            border-radius: 2px;
+        }
+
+        .topbar-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .topbar-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--brand-primary, #00d2ff);
+            box-shadow: 0 0 8px #00d2ff;
+            flex-shrink: 0;
+            animation: pulseGlow 2s infinite;
+        }
+
+        .topbar-step-pill {
+            color: #38bdf8;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 11px;
+        }
+
+        .topbar-sep {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 11px;
+        }
+
+        .topbar-title {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+
+        /* Screens Content Body */
+        .portal-content-body {
+            flex: 1;
+            padding: 24px 32px 60px;
+            max-width: 1240px;
+            width: 100%;
+            box-sizing: border-box;
+            margin: 0 auto;
+        }
+
+        /* Mobile Drawer & Off-canvas */
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 290;
+        }
+
+        @media (max-width: 980px) {
+            .portal-sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+                z-index: 300;
+            }
+
+            .portal-sidebar.drawer-open {
+                transform: translateX(0);
+                box-shadow: 8px 0 40px rgba(0, 0, 0, 0.85);
+            }
+
+            .sidebar-backdrop.active {
+                display: block;
+            }
+
+            .btn-sidebar-hamburger {
+                display: flex;
+            }
+
+            .portal-topbar {
+                padding: 0 16px;
+            }
+
+            .portal-content-body {
+                padding: 16px 16px 60px;
+            }
         }
 
         .save-hint {

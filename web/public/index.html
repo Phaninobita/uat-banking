@@ -120,101 +120,182 @@
             </button>
         </div>
 
-        <!-- SLEEK EXECUTIVE TOP HEADER -->
-        <header class="hdr" role="banner">
-            <div class="hdr-brand">
-                <div class="logo-mark" aria-hidden="true">FNB</div>
-                <div class="hdr-brand-text">
-                    <span class="brand-name">First National Bank</span>
-                    <small class="brand-sub" id="hdrBrandSub">Corporate Banking Portal</small>
-                </div>
-            </div>
-
-            <!-- Unified Central Cockpit Capsule: Step Indicator & Active Company -->
-            <div class="hdr-cockpit-capsule" id="hdrCockpitCapsule">
-                <div class="capsule-step-badge">
-                    <span class="capsule-dot" aria-hidden="true"></span>
-                    <span class="capsule-step" id="hdr-step-label">Step 1 of 7</span>
-                    <span class="capsule-sep">&bull;</span>
-                    <span class="capsule-title" id="hdrStepTitle">Documents &amp; Verification</span>
-                </div>
-                <!-- Dynamic Company Identity Tag (Rendered inside cockpit when logged in) -->
-                <div class="capsule-company-tag" id="hdrCompanyTag" style="display:none;">
-                    <span class="capsule-divider" aria-hidden="true">|</span>
-                    <span class="tag-icon" aria-hidden="true">&#x1F3E2;</span>
-                    <span class="tag-name" id="hdrCompanyName"></span>
-                    <span class="tag-crn" id="hdrCrnDisplay"></span>
-                    <span class="tag-cuid" id="hdrCompanyUidDisplay" title="Corporate ID"></span>
-                </div>
-            </div>
-
-            <div class="hdr-right">
-                <button type="button" class="btn-hdr-action btn-hdr-audit" id="btnAuditTrail" onclick="openAuditTrailModal()" title="View compliance and security audit logs">
-                    <span class="hdr-btn-icon">&#x1F6E1;&#xFE0F;</span>
-                    <span>Audit Trail</span>
-                </button>
-                <button type="button" class="btn-hdr-action btn-hdr-save" onclick="showSaveModal()" title="Save application draft">
-                    <span class="hdr-btn-icon">&#x1F4BE;</span>
-                    <span>Save Draft</span>
-                </button>
-                <a href="/rm" target="_blank" class="btn-hdr-action btn-hdr-rm" title="Open Relationship Manager Executive Suite">
-                    <span class="hdr-btn-icon">&#x1F517;</span>
-                    <span>RM Suite</span>
-                </a>
-                <button type="button" class="btn-hdr-action btn-hdr-rework" id="reworkToggle" onclick="toggleReworkMode()" title="Simulate compliance return for correction">
-                    <span class="hdr-btn-icon">&#x1F504;</span>
-                    <span class="tt-label">Simulate Rework</span>
-                </button>
-                <button type="button" class="btn-hdr-action btn-hdr-signout" id="btnSignOut" onclick="handleSignOut()" title="Sign out / Exit Corporate Portal">
-                    <span class="hdr-btn-icon">&#x1F6AA;</span>
-                    <span>Sign Out</span>
-                </button>
-            </div>
-        </header>
-
         <!-- ---- ONBOARDING PORTAL CONTAINER (MODE: ONBOARDING) ---- -->
-        <div id="onboardingPortalView">
+        <div id="onboardingPortalView" class="onboarding-portal-root">
+            <div class="portal-app-shell">
+                <!-- EXECUTIVE LEFT NAVIGATION SIDEBAR -->
+                <aside class="portal-sidebar" id="portalSidebar" role="navigation" aria-label="Application Stepper Navigation">
+                    <div class="sidebar-brand-header">
+                        <div class="sidebar-logo-mark" aria-hidden="true">FNB</div>
+                        <div class="sidebar-brand-text">
+                            <span class="brand-name">First National Bank</span>
+                            <small class="brand-sub" id="hdrBrandSub">Corporate Banking Portal</small>
+                        </div>
+                    </div>
 
+                    <!-- Active Corporate Identity & Live Progress Card -->
+                    <div class="sidebar-company-card" id="sidebarCompanyCard">
+                        <div class="scc-identity">
+                            <span class="scc-icon" aria-hidden="true">&#x1F3E2;</span>
+                            <div class="scc-details">
+                                <span class="scc-company-name" id="hdrCompanyName">Corporate Client</span>
+                                <div class="scc-meta-row">
+                                    <span class="scc-crn" id="hdrCrnDisplay">CRN: 509077205</span>
+                                    <span class="scc-cuid" id="hdrCompanyUidDisplay" title="Corporate ID">CUID-509077205</span>
+                                </div>
+                            </div>
+                        </div>
 
-        <div class="stepper-bar" id="stepper" role="tablist" aria-label="Application steps">
-            <div class="step-pill active" id="spill-1" onclick="goTo(1)" role="tab" aria-selected="true" aria-controls="sc-1" tabindex="0">
-                <div class="snum" aria-hidden="true">1</div>
-                <div>Documents<span class="stime">~5 min</span></div>
-            </div>
-            <div class="step-pill" id="spill-2" onclick="goTo(2)" role="tab" aria-selected="false" aria-controls="sc-2" tabindex="-1">
-                <div class="snum" aria-hidden="true">2</div>
-                <div>Company Info<span class="stime">~4 min</span></div>
-            </div>
-            <div class="step-pill" id="spill-3" onclick="goTo(3)" role="tab" aria-selected="false" aria-controls="sc-3" tabindex="-1">
-                <div class="snum" aria-hidden="true">3</div>
-                <div>UBO Details<span class="stime">~5 min</span></div>
-            </div>
-            <div class="step-pill" id="spill-4" onclick="goTo(4)" role="tab" aria-selected="false" aria-controls="sc-4" tabindex="-1">
-                <div class="snum" aria-hidden="true">4</div>
-                <div>Ownership<span class="stime">~3 min</span></div>
-            </div>
-            <div class="step-pill" id="spill-5" onclick="goTo(5)" role="tab" aria-selected="false" aria-controls="sc-5" tabindex="-1">
-                <div class="snum" aria-hidden="true">5</div>
-                <div>Roles<span class="stime">~2 min</span></div>
-            </div>
-            <div class="step-pill" id="spill-6" onclick="goTo(6)" role="tab" aria-selected="false" aria-controls="sc-6" tabindex="-1">
-                <div class="snum" aria-hidden="true">6</div>
-                <div>FATCA / CRS<span class="stime">~3 min</span></div>
-            </div>
-            <div class="step-pill" id="spill-7" onclick="goTo(7)" role="tab" aria-selected="false" aria-controls="sc-7" tabindex="-1">
-                <div class="snum" aria-hidden="true">7</div>
-                <div>Review &amp; Submit<span class="stime">~2 min</span></div>
-            </div>
-        </div>
+                        <!-- Progress Bar inside Sidebar -->
+                        <div class="scc-prog-container">
+                            <div class="scc-prog-header">
+                                <span class="scc-prog-label">Application Progress</span>
+                                <span class="scc-prog-val" id="progPct">14%</span>
+                            </div>
+                            <div class="scc-prog-track" role="progressbar" aria-valuenow="14" aria-valuemin="0" aria-valuemax="100">
+                                <div class="scc-prog-fill prog-fill" id="progFill" style="width:14%"></div>
+                            </div>
+                            <div class="scc-prog-hint">
+                                <span class="save-hint">&#x2713; Draft saved</span>
+                            </div>
+                        </div>
+                    </div>
 
-        <div class="overall-prog">
-            <span style="white-space:nowrap;">Application progress</span>
-            <div class="prog-track" role="progressbar" aria-valuenow="14" aria-valuemin="0" aria-valuemax="100">
-                <div class="prog-fill" id="progFill" style="width:14%"></div>
-            </div>
-            <span id="progPct" style="white-space:nowrap;" aria-live="polite">14%</span>
-            <span class="save-hint">&#x2713; Draft saved</span>
-        </div>
+                    <!-- Vertical Sequential Stepper (1 to 7) -->
+                    <div class="sidebar-stepper" id="stepper" role="tablist" aria-label="Application steps">
+                        <div class="step-pill sidebar-step active" id="spill-1" onclick="goTo(1)" role="tab" aria-selected="true" aria-controls="sc-1" tabindex="0">
+                            <div class="step-node">
+                                <div class="snum" aria-hidden="true">1</div>
+                                <div class="step-line-down"></div>
+                            </div>
+                            <div class="step-body">
+                                <span class="step-label">1. Documents</span>
+                                <span class="stime">Vault &bull; ~5 min</span>
+                            </div>
+                        </div>
+
+                        <div class="step-pill sidebar-step" id="spill-2" onclick="goTo(2)" role="tab" aria-selected="false" aria-controls="sc-2" tabindex="-1">
+                            <div class="step-node">
+                                <div class="snum" aria-hidden="true">2</div>
+                                <div class="step-line-down"></div>
+                            </div>
+                            <div class="step-body">
+                                <span class="step-label">2. Company Info</span>
+                                <span class="stime">Licence &bull; ~4 min</span>
+                            </div>
+                        </div>
+
+                        <div class="step-pill sidebar-step" id="spill-3" onclick="goTo(3)" role="tab" aria-selected="false" aria-controls="sc-3" tabindex="-1">
+                            <div class="step-node">
+                                <div class="snum" aria-hidden="true">3</div>
+                                <div class="step-line-down"></div>
+                            </div>
+                            <div class="step-body">
+                                <span class="step-label">3. UBO Details</span>
+                                <span class="stime">Owners &bull; ~5 min</span>
+                            </div>
+                        </div>
+
+                        <div class="step-pill sidebar-step" id="spill-4" onclick="goTo(4)" role="tab" aria-selected="false" aria-controls="sc-4" tabindex="-1">
+                            <div class="step-node">
+                                <div class="snum" aria-hidden="true">4</div>
+                                <div class="step-line-down"></div>
+                            </div>
+                            <div class="step-body">
+                                <span class="step-label">4. Ownership</span>
+                                <span class="stime">Cap Table &bull; ~3 min</span>
+                            </div>
+                        </div>
+
+                        <div class="step-pill sidebar-step" id="spill-5" onclick="goTo(5)" role="tab" aria-selected="false" aria-controls="sc-5" tabindex="-1">
+                            <div class="step-node">
+                                <div class="snum" aria-hidden="true">5</div>
+                                <div class="step-line-down"></div>
+                            </div>
+                            <div class="step-body">
+                                <span class="step-label">5. Roles</span>
+                                <span class="stime">Signatories &bull; ~2 min</span>
+                            </div>
+                        </div>
+
+                        <div class="step-pill sidebar-step" id="spill-6" onclick="goTo(6)" role="tab" aria-selected="false" aria-controls="sc-6" tabindex="-1">
+                            <div class="step-node">
+                                <div class="snum" aria-hidden="true">6</div>
+                                <div class="step-line-down"></div>
+                            </div>
+                            <div class="step-body">
+                                <span class="step-label">6. FATCA / CRS</span>
+                                <span class="stime">Tax Status &bull; ~3 min</span>
+                            </div>
+                        </div>
+
+                        <div class="step-pill sidebar-step" id="spill-7" onclick="goTo(7)" role="tab" aria-selected="false" aria-controls="sc-7" tabindex="-1">
+                            <div class="step-node">
+                                <div class="snum" aria-hidden="true">7</div>
+                            </div>
+                            <div class="step-body">
+                                <span class="step-label">7. Review &amp; Submit</span>
+                                <span class="stime">Sign &bull; ~2 min</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Permanent Sidebar Footer with Unmissable Log Out Button -->
+                    <div class="sidebar-footer">
+                        <a href="/rm" target="_blank" class="sidebar-footer-btn sidebar-rm-btn" title="Open Relationship Manager Executive Suite">
+                            <span class="sfb-icon">&#x1F517;</span>
+                            <span>RM Suite</span>
+                        </a>
+                        <button type="button" class="sidebar-footer-btn sidebar-logout-btn" id="btnSidebarSignOut" onclick="handleSignOut()" title="Sign out of Corporate Banking Portal">
+                            <span class="sfb-icon">&#x1F6AA;</span>
+                            <span>Log Out</span>
+                        </button>
+                    </div>
+                </aside>
+
+                <!-- Mobile Backdrop for off-canvas drawer -->
+                <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebarDrawer(false)"></div>
+
+                <!-- MAIN RIGHT CONTENT COLUMN -->
+                <div class="portal-main-column">
+                    <!-- SLIM EXECUTIVE TOPBAR -->
+                    <header class="portal-topbar" role="banner">
+                        <div class="topbar-left">
+                            <button type="button" class="btn-sidebar-hamburger" id="btnSidebarToggle" onclick="toggleSidebarDrawer()" aria-label="Toggle Sidebar Menu">
+                                <span class="hamburger-bar"></span>
+                                <span class="hamburger-bar"></span>
+                                <span class="hamburger-bar"></span>
+                            </button>
+                            <div class="topbar-breadcrumb">
+                                <span class="topbar-dot" aria-hidden="true"></span>
+                                <span class="topbar-step-pill" id="hdr-step-label">Step 1 of 7</span>
+                                <span class="topbar-sep">&bull;</span>
+                                <span class="topbar-title" id="hdrStepTitle">Documents &amp; Verification</span>
+                            </div>
+                        </div>
+
+                        <div class="topbar-right">
+                            <button type="button" class="btn-hdr-action btn-hdr-audit" id="btnAuditTrail" onclick="openAuditTrailModal()" title="View compliance and security audit logs">
+                                <span class="hdr-btn-icon">&#x1F6E1;&#xFE0F;</span>
+                                <span>Audit Trail</span>
+                            </button>
+                            <button type="button" class="btn-hdr-action btn-hdr-save" onclick="showSaveModal()" title="Save application draft">
+                                <span class="hdr-btn-icon">&#x1F4BE;</span>
+                                <span>Save Draft</span>
+                            </button>
+                            <button type="button" class="btn-hdr-action btn-hdr-rework" id="reworkToggle" onclick="toggleReworkMode()" title="Simulate compliance return for correction">
+                                <span class="hdr-btn-icon">&#x1F504;</span>
+                                <span class="tt-label">Simulate Rework</span>
+                            </button>
+                            <button type="button" class="btn-hdr-action btn-hdr-signout" id="btnSignOut" onclick="handleSignOut()" title="Sign out / Exit Corporate Portal">
+                                <span class="hdr-btn-icon">&#x1F6AA;</span>
+                                <span>Log Out</span>
+                            </button>
+                        </div>
+                    </header>
+
+                    <!-- Form Screens Wrapper -->
+                    <main class="portal-content-body" id="mainScreensBody">
 
         <!-- ---- SCREEN 1: Documents ---- -->
         <div class="screen active" id="sc-1" role="tabpanel" aria-labelledby="spill-1">
@@ -1035,6 +1116,9 @@
                 </div>
             </div>
         </div>
+                    </main> <!-- /#mainScreensBody -->
+                </div> <!-- /.portal-main-column -->
+            </div> <!-- /.portal-app-shell -->
         </div> <!-- /#onboardingPortalView -->
 
     </div>
