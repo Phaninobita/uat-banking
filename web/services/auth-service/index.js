@@ -281,9 +281,12 @@ router.post("/verify-otp", async (req, res) => {
         memStore.companyUidIndex.set(company_uid, appRef);
         isNew = true;
       }
-    }
-
     const resolvedCompanyUid = applicationRecord.company_uid || company_uid;
+
+    // Always mirror to memStore so RM pipeline has instant real-time lookup
+    memStore.applications.set(applicationRecord.application_ref, applicationRecord);
+    memStore.crnEmailIndex.set(key, applicationRecord.application_ref);
+    memStore.companyUidIndex.set(resolvedCompanyUid, applicationRecord.application_ref);
 
     const token = jwt.sign(
       {

@@ -372,6 +372,10 @@ const db = {
     await initPromise;
     return supabaseClient.getApplicationByUid(uid);
   },
+  async listApplications(filter = {}) {
+    await initPromise;
+    return supabaseClient.listApplications(filter);
+  },
 
   async saveDocument(doc) {
     await initPromise;

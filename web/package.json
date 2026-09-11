@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node server.js",
     "seed": "node db/seed.js",
-    "migrate": "node db/migrate.js"
+    "migrate": "node db/migrate.js",
+    "send:yopmail": "node services/notification-service/yopmailSender.js"
   },
   "dependencies": {
     "cors": "^2.8.6",

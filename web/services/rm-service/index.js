@@ -167,21 +167,78 @@ router.get("/invitations", async (req, res) => {
       invitations = memStore.listRmInvitations();
     }
 
-    // Cross-reference with in-memory application records if DB join was skipped
+    // Query latest applications from DB and in-memory store for real-time step tracking
+    let allApps = [];
+    if (db.isConnected()) {
+      try {
+        allApps = await db.listApplications();
+      } catch (appErr) {
+        console.warn("[RM-SERVICE] Notice querying DB applications:", appErr.message);
+      }
+    }
+
+    const appByCrnEmail = new Map();
+    const appByUid = new Map();
+
+    for (const app of allApps) {
+      if (app.crn && app.registered_email) {
+        const key = `${app.crn.trim().toUpperCase()}:${app.registered_email.trim().toLowerCase()}`;
+        appByCrnEmail.set(key, app);
+      }
+      if (app.company_uid) {
+        appByUid.set(app.company_uid.trim().toUpperCase(), app);
+      }
+    }
+
+    // Merge in-memory applications
+    for (const [ref, app] of memStore.applications.entries()) {
+      const crn = app.crn || "";
+      const email = app.registered_email || "";
+      if (crn && email) {
+        const key = `${crn.trim().toUpperCase()}:${email.trim().toLowerCase()}`;
+        appByCrnEmail.set(key, app);
+      }
+      if (app.company_uid) {
+        appByUid.set(app.company_uid.trim().toUpperCase(), app);
+      }
+    }
+
+    // Cross-reference with application records for real-time progress
     invitations = invitations.map(inv => {
       const crnKey = `${(inv.crn || "").trim().toUpperCase()}:${(inv.email || "").trim().toLowerCase()}`;
-      const appRef = memStore.crnEmailIndex.get(crnKey);
-      const app = appRef ? memStore.applications.get(appRef) : null;
+      const uidKey = (inv.company_uid || "").trim().toUpperCase();
+      const app = appByCrnEmail.get(crnKey) || (uidKey ? appByUid.get(uidKey) : null);
+
       const companyUid = inv.company_uid || (app ? app.company_uid : null) || resolveCompanyUid({ crn: inv.crn, company_uid: inv.company_uid });
-      
+
+      // Determine true latest step: if application has advanced, use the highest step
+      const appStep = (app && typeof app.current_step === "number") ? app.current_step : 0;
+      const invStep = (typeof inv.current_step === "number") ? inv.current_step : 0;
+      const effectiveStep = Math.max(appStep, invStep, 1);
+
+      // Determine real-time journey status
+      let effectiveStatus = inv.status || "invited";
+      if (app) {
+        if (app.status === "approved" || app.status === "completed") {
+          effectiveStatus = "completed";
+        } else if (app.status === "submitted" || app.status === "review") {
+          effectiveStatus = "review";
+        } else if (effectiveStep > 1 || app.status === "in_progress") {
+          effectiveStatus = "in_progress";
+        }
+      } else if (effectiveStep > 1) {
+        effectiveStatus = "in_progress";
+      }
+
       return {
         ...inv,
         company_uid: companyUid,
-        current_step: inv.current_step || (app ? app.current_step : 1),
+        current_step: effectiveStep,
         application_ref: inv.application_ref || (app ? app.application_ref : null),
-        status: app ? (app.status === 'approved' ? 'completed' : 'in_progress') : inv.status
+        status: effectiveStatus
       };
     });
+
 
     return res.json({
       success: true,

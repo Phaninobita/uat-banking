@@ -13,7 +13,8 @@
     "start:web": "npm --prefix web start",
     "seed:web": "npm --prefix web run seed",
     "migrate:web": "npm --prefix web run migrate",
-    "install:web": "npm --prefix web install"
+    "install:web": "npm --prefix web install",
+    "send:yopmail": "npm --prefix web run send:yopmail --"
   },
   "dependencies": {
     "cors": "^2.8.6",

@@ -11,6 +11,8 @@ const memStore = require("../../shared/memStore");
 
 const router = express.Router();
 
+const { sendYopmail } = require("./yopmailSender");
+
 let mailTransporter = null;
 if (config.SMTP.HOST && config.SMTP.USER && config.SMTP.PASS) {
   mailTransporter = nodemailer.createTransport({
@@ -24,6 +26,8 @@ if (config.SMTP.HOST && config.SMTP.USER && config.SMTP.PASS) {
   });
   console.log("📧 [NOTIFICATION SERVICE] Real SMTP delivery active via:", config.SMTP.HOST);
 }
+console.log("📧 [NOTIFICATION SERVICE] Open-source Yopmail real-time delivery engine active.");
+
 
 // 1. Get Simulated Emails
 router.get("/emails", (req, res) => {
@@ -69,7 +73,24 @@ router.post("/simulate", async (req, res) => {
     metadata: metadata || {}
   });
 
-  if (mailTransporter && to) {
+  // If destination is Yopmail, dispatch directly in real-time via open-source SMTP transport
+  if (to && to.toLowerCase().includes("yopmail")) {
+    try {
+      const yopmailRes = await sendYopmail({
+        to,
+        from: '"First National Bank" <alerts@gmail.com>',
+        subject: emailItem.subject,
+        html: emailItem.html,
+        text: emailItem.text
+      });
+      emailItem.metadata.yopmailRealTime = true;
+      emailItem.metadata.yopmailResponse = yopmailRes.response;
+      emailItem.metadata.inboxUrl = yopmailRes.inboxUrl;
+    } catch (err) {
+      console.warn("[NOTIFICATION SERVICE] Yopmail dispatch error:", err.message);
+      emailItem.metadata.yopmailError = err.message;
+    }
+  } else if (mailTransporter && to) {
     try {
       await mailTransporter.sendMail({
         from: config.SMTP.FROM,
@@ -88,6 +109,54 @@ router.post("/simulate", async (req, res) => {
     service: "notification-service"
   });
 });
+
+// 4. Real-time Open-Source Yopmail Dispatch Endpoint
+router.post("/yopmail", async (req, res) => {
+  memStore.metrics.serviceRequests.notifications++;
+  const { to, subject, html, text, from } = req.body;
+
+  if (!to || !to.toLowerCase().includes("yopmail")) {
+    return res.status(400).json({
+      success: false,
+      error: "Recipient must be a valid @yopmail.com email address",
+      service: "notification-service"
+    });
+  }
+
+  try {
+    const result = await sendYopmail({
+      to,
+      from: from || '"First National Bank" <alerts@gmail.com>',
+      subject: subject || "First National Bank Real-Time Notification",
+      html,
+      text
+    });
+
+    const recorded = memStore.recordSimulatedEmail({
+      to,
+      from: from || '"First National Bank" <alerts@gmail.com>',
+      subject: subject || "First National Bank Real-Time Notification",
+      html: html || text,
+      text: text || "Real-time notification",
+      type: "yopmail_realtime",
+      metadata: { ...result }
+    });
+
+    return res.json({
+      success: true,
+      service: "notification-service",
+      email: recorded,
+      ...result
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      error: err.message,
+      service: "notification-service"
+    });
+  }
+});
+
 
 // 4. Mobile Push Notification Simulator
 router.post("/push", (req, res) => {

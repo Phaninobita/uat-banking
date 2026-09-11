@@ -8,6 +8,7 @@ const express = require("express");
 const config = require("../../shared/config");
 const memStore = require("../../shared/memStore");
 const db = require("../../shared/db");
+const supabaseClient = require("../../shared/supabaseClient");
 const { requireAuth } = require("../auth-service");
 const { logAuditEvent, resolveCompanyUid, getAuditTrail } = require("../../shared/audit");
 
@@ -151,9 +152,54 @@ router.post("/save", requireAuth, async (req, res) => {
     memStore.applications.set(application_ref, updatedRecord);
     memStore.companyUidIndex.set(resolvedCompanyUid, application_ref);
 
+    const targetCrn = existingRecord.crn || updatedRecord.crn;
+    const targetEmail = existingRecord.registered_email || req.user?.email || updatedRecord.registered_email;
+
+    if (targetCrn && targetEmail) {
+      const crnKey = `${targetCrn.trim().toUpperCase()}:${targetEmail.trim().toLowerCase()}`;
+      memStore.crnEmailIndex.set(crnKey, application_ref);
+
+      // Immediately sync in-memory invitation status & current_step
+      const memInv = memStore.rmInvitations.get(crnKey);
+      if (memInv) {
+        memInv.current_step = resolvedStep;
+        memInv.application_ref = application_ref;
+        if (resolvedStatus === "submitted" || resolvedStatus === "approved") {
+          memInv.status = resolvedStatus === "approved" ? "completed" : "review";
+        } else if (resolvedStep > 1) {
+          memInv.status = "in_progress";
+        }
+      }
+    }
+
+    // Sync real-time step and status to rm_customer_invitations in DB
+    if (db.isConnected() && targetCrn && targetEmail) {
+      try {
+        const cleanCrn = encodeURIComponent(targetCrn.trim().toUpperCase());
+        const cleanEmail = encodeURIComponent(targetEmail.trim().toLowerCase());
+        const invStatus = resolvedStatus === 'submitted' || resolvedStatus === 'approved'
+          ? (resolvedStatus === 'approved' ? 'completed' : 'review')
+          : (resolvedStep > 1 ? 'in_progress' : 'invited');
+
+        await supabaseClient.request(`rm_customer_invitations?crn=eq.${cleanCrn}&email=eq.${cleanEmail}`, {
+          method: "PATCH",
+          headers: { "Prefer": "return=minimal" },
+          body: {
+            current_step: resolvedStep,
+            status: invStatus,
+            application_ref,
+            updated_at: new Date().toISOString()
+          }
+        });
+      } catch (patchErr) {
+        console.warn("[APPLICATION SERVICE] Invitation step sync notice:", patchErr.message);
+      }
+    }
+
     if (!updatedRecord.company_uid) {
       updatedRecord.company_uid = resolvedCompanyUid;
     }
+
 
     // ── Live Audit Logging for Application Progress ──
     const targetComp = updatedRecord.company_name || existingRecord.company_name;

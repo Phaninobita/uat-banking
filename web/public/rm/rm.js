@@ -78,6 +78,16 @@ function showDashboardView() {
     }
 
     fetchInvitations();
+
+    // Start real-time pipeline polling for live step and status sync
+    if (!window._rmPipelinePoll) {
+        window._rmPipelinePoll = setInterval(() => {
+            const dashView = document.getElementById("rmDashboardView");
+            if (dashView && dashView.style.display !== "none") {
+                fetchInvitations();
+            }
+        }, 3000);
+    }
 }
 
 async function handleRmLoginSubmit(ev) {
