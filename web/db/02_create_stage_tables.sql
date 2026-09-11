@@ -122,6 +122,7 @@ DO $$
 DECLARE
     rec RECORD;
     v_cuid VARCHAR(64);
+    v_addr TEXT;
     s2 JSONB;
     s4 JSONB;
     s5 JSONB;
@@ -129,12 +130,25 @@ DECLARE
     s7 JSONB;
 BEGIN
     FOR rec IN SELECT * FROM corporate_onboarding_applications LOOP
-        v_cuid := COALESCE(rec.company_uid, 'CUID-' || UPPER(REGEXP_REPLACE(rec.crn::text, '[^a-zA-Z0-9]', '', 'g')));
+        v_cuid := COALESCE(rec.company_uid::text, 'CUID-' || UPPER(REGEXP_REPLACE(rec.crn::text, '[^a-zA-Z0-9]', '', 'g')));
         s2 := COALESCE(rec.form_data->'step2', '{}'::jsonb);
         s4 := COALESCE(rec.form_data->'step4', '{}'::jsonb);
         s5 := COALESCE(rec.form_data->'step5', '{}'::jsonb);
         s6 := COALESCE(rec.form_data->'step6', '{}'::jsonb);
         s7 := COALESCE(rec.form_data->'step7', '{}'::jsonb);
+
+        -- Resolve address safely regardless of whether rec.address is jsonb object, string, or null
+        IF rec.address IS NOT NULL AND jsonb_typeof(rec.address) = 'string' AND (rec.address#>>'{}') != '' THEN
+            v_addr := rec.address#>>'{}';
+        ELSIF rec.address IS NOT NULL AND jsonb_typeof(rec.address) = 'object' AND rec.address ? 'registered_address' THEN
+            v_addr := rec.address->>'registered_address';
+        ELSIF rec.address IS NOT NULL AND jsonb_typeof(rec.address) = 'object' AND rec.address ? 'line1' THEN
+            v_addr := rec.address->>'line1';
+        ELSIF s2 ? 'address' AND (s2->>'address') != '' THEN
+            v_addr := s2->>'address';
+        ELSE
+            v_addr := '100 Wall Street, Suite 2400, New York, NY 10005';
+        END IF;
 
         -- Backfill Stage 2
         INSERT INTO onboarding_company_profiles (
@@ -143,20 +157,20 @@ BEGIN
             contact_person, registered_email, phone, registered_address, operating_address
         ) VALUES (
             v_cuid,
-            rec.application_ref,
-            rec.crn,
-            COALESCE(rec.company_name, s2->>'company_name', 'Corporate Entity'),
-            COALESCE(rec.trade_name, s2->>'trade_name', rec.company_name),
-            COALESCE(rec.legal_type, s2->>'legal_type', 'Limited Liability Company (LLC)'),
-            COALESCE(rec.licence_issued_by, s2->>'issued_by', 'Delaware Division of Corporations (US)'),
+            rec.application_ref::text,
+            rec.crn::text,
+            COALESCE(rec.company_name::text, s2->>'company_name', 'Corporate Entity'),
+            COALESCE(rec.trade_name::text, s2->>'trade_name', rec.company_name::text),
+            COALESCE(rec.legal_type::text, s2->>'legal_type', 'Limited Liability Company (LLC)'),
+            COALESCE(rec.licence_issued_by::text, s2->>'issued_by', 'Delaware Division of Corporations (US)'),
             COALESCE(rec.licence_issue_date::text, s2->>'issue_date', '2023-01-15'),
             COALESCE(rec.licence_expiry_date::text, s2->>'expiry_date', '2028-01-15'),
-            COALESCE(rec.vat_trn, s2->>'vat_trn', '100-2938-4821'),
-            COALESCE(rec.contact_person, s2->>'contact_person', 'Authorized Signatory'),
-            COALESCE(rec.registered_email, s2->>'email', 'admin@corporate.com'),
-            COALESCE(rec.phone, s2->>'phone', '+1 212 555 0199'),
-            COALESCE(rec.address, s2->>'address', '100 Wall Street, Suite 2400, New York, NY 10005'),
-            COALESCE(s2->>'operating_address', rec.address, '100 Wall Street, Suite 2400, New York, NY 10005')
+            COALESCE(rec.vat_trn::text, s2->>'vat_trn', '100-2938-4821'),
+            COALESCE(rec.contact_person::text, s2->>'contact_person', 'Authorized Signatory'),
+            COALESCE(rec.registered_email::text, s2->>'email', 'admin@corporate.com'),
+            COALESCE(rec.phone::text, s2->>'phone', '+1 212 555 0199'),
+            v_addr,
+            COALESCE(s2->>'operating_address', v_addr)
         ) ON CONFLICT (company_uid) DO NOTHING;
 
         -- Backfill Stage 4
