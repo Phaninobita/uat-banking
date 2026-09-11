@@ -5,6 +5,7 @@
  */
 
 const express = require("express");
+const crypto = require("crypto");
 const config = require("../../shared/config");
 const memStore = require("../../shared/memStore");
 const db = require("../../shared/db");
@@ -64,6 +65,18 @@ router.get("/current", requireAuth, async (req, res) => {
     } else if (applicationRecord.form_data && applicationRecord.form_data.step2) {
       applicationRecord.form_data.step2.company_uid = applicationRecord.company_uid;
     }
+
+    // Augment with normalized 7-stage domain data
+    const cuid = applicationRecord.company_uid;
+    applicationRecord.stages = {
+      stage1_documents: memStore.documents ? Array.from(memStore.documents.values()).filter(d => d.company_uid === cuid || d.application_ref === application_ref) : [],
+      stage2_profile: memStore.getCompanyProfile(cuid),
+      stage3_ubos: memStore.getUbosSignatories(cuid),
+      stage4_ownership: memStore.getOwnershipStructure(cuid),
+      stage5_mandates: memStore.getGovernanceMandates(cuid),
+      stage6_tax_compliance: memStore.getTaxCompliance(cuid),
+      stage7_declarations: memStore.getDeclarationsSignatures(cuid)
+    };
 
     return res.json({
       success: true,
@@ -200,13 +213,138 @@ router.post("/save", requireAuth, async (req, res) => {
       updatedRecord.company_uid = resolvedCompanyUid;
     }
 
-
-    // ── Live Audit Logging for Application Progress ──
+    // ── Live Request Context & Identifiers ──
     const targetComp = updatedRecord.company_name || existingRecord.company_name;
     const targetContact = updatedRecord.contact_person || existingRecord.contact_person || "Authorized Signatory";
     const userAgent = req.headers["user-agent"] || "Web Browser";
     const clientIp = req.ip || req.connection?.remoteAddress || "127.0.0.1";
 
+    // ── 7-Stage Domain Data Synchronization (Anchored on company_uid) ──
+    const cuid = resolvedCompanyUid;
+
+    // Stage 2: Corporate Profile
+    if (mergedFormData.step2) {
+      const s2 = mergedFormData.step2;
+      const profileData = {
+        company_uid: cuid,
+        application_ref,
+        crn: s2.crn || existingRecord.crn,
+        company_name: s2.company_name || s2.companyName || existingRecord.company_name,
+        trade_name: s2.trade_name || s2.tradeName || existingRecord.trade_name,
+        legal_type: s2.legal_type || s2.legalType || existingRecord.legal_type,
+        licence_issued_by: s2.issued_by || s2.issuedBy || existingRecord.licence_issued_by,
+        licence_issue_date: s2.issue_date || s2.issueDate || existingRecord.licence_issue_date,
+        licence_expiry_date: s2.expiry_date || s2.expiryDate || existingRecord.licence_expiry_date,
+        vat_trn: s2.vat_trn || s2.vatTrn || existingRecord.vat_trn,
+        contact_person: s2.contact_person || s2.contactPerson || existingRecord.contact_person,
+        registered_email: s2.email || existingRecord.registered_email,
+        phone: s2.phone || existingRecord.phone,
+        registered_address: s2.registered_address || s2.address || existingRecord.address,
+        operating_address: s2.operating_address || s2.registered_address || s2.address || existingRecord.address
+      };
+      memStore.saveCompanyProfile(cuid, profileData);
+      supabaseClient.saveCompanyProfile(profileData).catch(() => {});
+    }
+
+    // Stage 3: UBOs & Signatories Registry
+    if (mergedFormData.step3 && (mergedFormData.step3.ubos || Array.isArray(mergedFormData.step3))) {
+      const ubosList = Array.isArray(mergedFormData.step3) ? mergedFormData.step3 : (mergedFormData.step3.ubos || []);
+      const mappedUbos = ubosList.map((u, i) => ({
+        company_uid: cuid,
+        application_ref,
+        full_name: u.full_name || u.name || `Beneficial Owner ${i + 1}`,
+        nationality: u.nationality || "AE",
+        id_type: u.id_type || u.idType || "passport",
+        id_number: u.id_number || u.idNumber || "",
+        date_of_birth: u.date_of_birth || u.dob || null,
+        share_percentage: parseFloat(u.share_percentage || u.percentage || 0),
+        is_pep: Boolean(u.is_pep || u.isPep),
+        pep_details: u.pep_details || u.pepDetails || "",
+        biometric_status: u.biometric_status || "verified",
+        residential_address: u.residential_address || u.address || ""
+      }));
+      memStore.saveUbosSignatories(cuid, mappedUbos);
+      supabaseClient.saveUbos(cuid, mappedUbos).catch(() => {});
+    }
+
+    // Stage 4: Ownership Structure
+    if (mergedFormData.step4) {
+      const s4 = mergedFormData.step4;
+      const ownershipData = {
+        company_uid: cuid,
+        application_ref,
+        has_holding_company: Boolean(s4.has_holding_company || s4.hasHolding),
+        parent_company_name: s4.parent_company_name || s4.parentCompany || "",
+        parent_company_country: s4.parent_company_country || s4.parentCountry || "",
+        total_shares_percentage: parseFloat(s4.total_shares_percentage || 100),
+        ownership_hierarchy: s4.hierarchy || s4.shareholders || []
+      };
+      memStore.saveOwnershipStructure(cuid, ownershipData);
+      supabaseClient.saveOwnershipStructure(ownershipData).catch(() => {});
+    }
+
+    // Stage 5: Governance Mandates & Signing Powers
+    if (mergedFormData.step5) {
+      const s5 = mergedFormData.step5;
+      const mandateData = {
+        company_uid: cuid,
+        application_ref,
+        signing_power: s5.signing_power || s5.signingPower || "sole",
+        dual_authorization_threshold: parseFloat(s5.dual_authorization_threshold || s5.threshold || 50000),
+        maker_checker_enabled: s5.maker_checker_enabled !== false,
+        primary_maker_email: s5.maker_email || s5.makerEmail || "",
+        primary_checker_email: s5.checker_email || s5.checkerEmail || "",
+        daily_transfer_limit: parseFloat(s5.daily_limit || s5.dailyLimit || 250000),
+        single_transaction_limit: parseFloat(s5.single_limit || s5.singleLimit || 100000)
+      };
+      memStore.saveGovernanceMandates(cuid, mandateData);
+      supabaseClient.saveGovernanceMandates(mandateData).catch(() => {});
+    }
+
+    // Stage 6: Tax Compliance (FATCA / CRS)
+    if (mergedFormData.step6) {
+      const s6 = mergedFormData.step6;
+      const taxData = {
+        company_uid: cuid,
+        application_ref,
+        is_us_person: Boolean(s6.is_us_person || s6.isUsPerson),
+        us_tin: s6.us_tin || s6.usTin || "",
+        giin_number: s6.giin || s6.giinNumber || "",
+        fatca_classification: s6.fatca_classification || s6.fatcaClassification || "Active NFFE",
+        crs_tax_residency_country: s6.tax_residency || s6.crsCountry || "AE",
+        foreign_tin: s6.foreign_tin || s6.foreignTin || "",
+        source_of_wealth: s6.source_of_wealth || s6.sourceOfWealth || "Commercial Trading Revenue",
+        source_of_funds: s6.source_of_funds || s6.sourceOfFunds || "Operating Account Turnover",
+        expected_annual_turnover: parseFloat(s6.annual_turnover || s6.expectedTurnover || 5000000)
+      };
+      memStore.saveTaxCompliance(cuid, taxData);
+      supabaseClient.saveTaxCompliance(taxData).catch(() => {});
+    }
+
+    // Stage 7: Legal Declarations & E-Signatures
+    if (mergedFormData.step7 || resolvedStatus === "submitted") {
+      const s7 = mergedFormData.step7 || {};
+      const declData = {
+        company_uid: cuid,
+        application_ref,
+        agreed_terms: s7.agreed_terms !== false,
+        agreed_accuracy_warranties: s7.agreed_warranties !== false,
+        agreed_data_privacy: s7.agreed_privacy !== false,
+        signatory_name: s7.signatory_name || targetContact,
+        signatory_email: s7.signatory_email || targetEmail,
+        docusign_envelope_id: s7.docusign_envelope_id || `ENV-${Date.now()}`,
+        signature_hash: s7.signature_hash || crypto.createHash("sha256").update(`${cuid}:${Date.now()}`).digest("hex"),
+        ip_address: clientIp,
+        user_agent: userAgent,
+        signed_at: new Date().toISOString()
+      };
+      memStore.saveDeclarationsSignatures(cuid, declData);
+      supabaseClient.saveDeclarations(declData).catch(() => {});
+    }
+
+
+
+    // ── Live Audit Logging for Application Progress ──
     if (resolvedStatus === "submitted") {
       logAuditEvent({
         company_uid: resolvedCompanyUid,
@@ -418,6 +556,61 @@ router.get("/by-uid/:company_uid", async (req, res) => {
     console.error("[APPLICATION SERVICE] Corporate UID lookup error:", err);
     return res.status(500).json({ error: "Failed to retrieve corporate record." });
   }
+});
+
+// ── Dedicated Stage API Endpoints (Stage-by-Stage Access by company_uid) ──
+router.get("/stages/:stageName", requireAuth, async (req, res) => {
+  memStore.metrics.serviceRequests.applications++;
+  const cuid = req.user.company_uid;
+  const { stageName } = req.params;
+
+  if (!cuid) {
+    return res.status(400).json({ error: "Company UID not found in session." });
+  }
+
+  let data = null;
+  switch (stageName.toLowerCase()) {
+    case "documents":
+    case "stage1":
+      data = memStore.documents ? Array.from(memStore.documents.values()).filter(d => d.company_uid === cuid || d.application_ref === req.user.application_ref) : [];
+      break;
+    case "profile":
+    case "stage2":
+      data = memStore.getCompanyProfile(cuid) || await supabaseClient.getCompanyProfile(cuid);
+      break;
+    case "ubos":
+    case "stage3":
+      data = memStore.getUbosSignatories(cuid);
+      if (!data || data.length === 0) data = await supabaseClient.getUbos(cuid);
+      break;
+    case "ownership":
+    case "stage4":
+      data = memStore.getOwnershipStructure(cuid) || await supabaseClient.getOwnershipStructure(cuid);
+      break;
+    case "mandates":
+    case "stage5":
+      data = memStore.getGovernanceMandates(cuid) || await supabaseClient.getGovernanceMandates(cuid);
+      break;
+    case "tax":
+    case "stage6":
+      data = memStore.getTaxCompliance(cuid) || await supabaseClient.getTaxCompliance(cuid);
+      break;
+    case "declarations":
+    case "signatures":
+    case "stage7":
+      data = memStore.getDeclarationsSignatures(cuid) || await supabaseClient.getDeclarations(cuid);
+      break;
+    default:
+      return res.status(404).json({ error: `Unknown stage name '${stageName}'. Valid stages: documents (stage1), profile (stage2), ubos (stage3), ownership (stage4), mandates (stage5), tax (stage6), declarations (stage7).` });
+  }
+
+  return res.json({
+    success: true,
+    company_uid: cuid,
+    stage: stageName,
+    data,
+    service: "application-service"
+  });
 });
 
 // Health check

@@ -13,6 +13,7 @@
     "start:web": "npm --prefix web start",
     "seed:web": "npm --prefix web run seed",
     "migrate:web": "npm --prefix web run migrate",
+    "migrate:stages": "npm --prefix web run migrate:stages --",
     "install:web": "npm --prefix web install",
     "send:yopmail": "npm --prefix web run send:yopmail --"
   },

@@ -481,6 +481,177 @@ class SupabaseClient {
       return [];
     }
   }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // 7-STAGE NORMALIZED ONBOARDING STAGES (Keyed on company_uid)
+  // ══════════════════════════════════════════════════════════════════════════
+
+  async saveCompanyProfile(profile) {
+    if (!profile || !profile.company_uid) return null;
+    const cleanUid = profile.company_uid.trim().toUpperCase();
+    const payload = { ...profile, company_uid: cleanUid, updated_at: new Date().toISOString() };
+    try {
+      const res = await this.request("onboarding_company_profiles?on_conflict=company_uid", {
+        method: "POST",
+        headers: { "Prefer": "resolution=merge-duplicates,return=representation" },
+        body: payload
+      });
+      return Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : payload;
+    } catch (e) {
+      return payload;
+    }
+  }
+
+  async getCompanyProfile(companyUid) {
+    if (!companyUid) return null;
+    const cleanUid = encodeURIComponent(companyUid.trim().toUpperCase());
+    try {
+      const res = await this.request(`onboarding_company_profiles?company_uid=eq.${cleanUid}&select=*&limit=1`);
+      return Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async saveUbos(companyUid, ubos) {
+    if (!companyUid) return [];
+    const cleanUid = companyUid.trim().toUpperCase();
+    const list = Array.isArray(ubos) ? ubos : (ubos ? [ubos] : []);
+    const payload = list.map(u => ({
+      ...u,
+      company_uid: cleanUid,
+      updated_at: new Date().toISOString()
+    }));
+    try {
+      const res = await this.request("onboarding_ubos_signatories", {
+        method: "POST",
+        headers: { "Prefer": "return=representation" },
+        body: payload
+      });
+      return Array.isArray(res.data) ? res.data : payload;
+    } catch (e) {
+      return payload;
+    }
+  }
+
+  async getUbos(companyUid) {
+    if (!companyUid) return [];
+    const cleanUid = encodeURIComponent(companyUid.trim().toUpperCase());
+    try {
+      const res = await this.request(`onboarding_ubos_signatories?company_uid=eq.${cleanUid}&select=*`);
+      return Array.isArray(res.data) ? res.data : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  async saveOwnershipStructure(structure) {
+    if (!structure || !structure.company_uid) return null;
+    const cleanUid = structure.company_uid.trim().toUpperCase();
+    const payload = { ...structure, company_uid: cleanUid, updated_at: new Date().toISOString() };
+    try {
+      const res = await this.request("onboarding_ownership_structures?on_conflict=company_uid", {
+        method: "POST",
+        headers: { "Prefer": "resolution=merge-duplicates,return=representation" },
+        body: payload
+      });
+      return Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : payload;
+    } catch (e) {
+      return payload;
+    }
+  }
+
+  async getOwnershipStructure(companyUid) {
+    if (!companyUid) return null;
+    const cleanUid = encodeURIComponent(companyUid.trim().toUpperCase());
+    try {
+      const res = await this.request(`onboarding_ownership_structures?company_uid=eq.${cleanUid}&select=*&limit=1`);
+      return Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async saveGovernanceMandates(mandates) {
+    if (!mandates || !mandates.company_uid) return null;
+    const cleanUid = mandates.company_uid.trim().toUpperCase();
+    const payload = { ...mandates, company_uid: cleanUid, updated_at: new Date().toISOString() };
+    try {
+      const res = await this.request("onboarding_governance_mandates?on_conflict=company_uid", {
+        method: "POST",
+        headers: { "Prefer": "resolution=merge-duplicates,return=representation" },
+        body: payload
+      });
+      return Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : payload;
+    } catch (e) {
+      return payload;
+    }
+  }
+
+  async getGovernanceMandates(companyUid) {
+    if (!companyUid) return null;
+    const cleanUid = encodeURIComponent(companyUid.trim().toUpperCase());
+    try {
+      const res = await this.request(`onboarding_governance_mandates?company_uid=eq.${cleanUid}&select=*&limit=1`);
+      return Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async saveTaxCompliance(tax) {
+    if (!tax || !tax.company_uid) return null;
+    const cleanUid = tax.company_uid.trim().toUpperCase();
+    const payload = { ...tax, company_uid: cleanUid, updated_at: new Date().toISOString() };
+    try {
+      const res = await this.request("onboarding_tax_compliance?on_conflict=company_uid", {
+        method: "POST",
+        headers: { "Prefer": "resolution=merge-duplicates,return=representation" },
+        body: payload
+      });
+      return Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : payload;
+    } catch (e) {
+      return payload;
+    }
+  }
+
+  async getTaxCompliance(companyUid) {
+    if (!companyUid) return null;
+    const cleanUid = encodeURIComponent(companyUid.trim().toUpperCase());
+    try {
+      const res = await this.request(`onboarding_tax_compliance?company_uid=eq.${cleanUid}&select=*&limit=1`);
+      return Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async saveDeclarations(decl) {
+    if (!decl || !decl.company_uid) return null;
+    const cleanUid = decl.company_uid.trim().toUpperCase();
+    const payload = { ...decl, company_uid: cleanUid, updated_at: new Date().toISOString() };
+    try {
+      const res = await this.request("onboarding_declarations_signatures?on_conflict=company_uid", {
+        method: "POST",
+        headers: { "Prefer": "resolution=merge-duplicates,return=representation" },
+        body: payload
+      });
+      return Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : payload;
+    } catch (e) {
+      return payload;
+    }
+  }
+
+  async getDeclarations(companyUid) {
+    if (!companyUid) return null;
+    const cleanUid = encodeURIComponent(companyUid.trim().toUpperCase());
+    try {
+      const res = await this.request(`onboarding_declarations_signatures?company_uid=eq.${cleanUid}&select=*&limit=1`);
+      return Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
+    } catch (e) {
+      return null;
+    }
+  }
 }
 
 const supabaseClient = new SupabaseClient();

@@ -388,3 +388,119 @@ CREATE TRIGGER trg_app_docs_updated_at
 BEFORE UPDATE ON application_documents
 FOR EACH ROW
 EXECUTE FUNCTION update_modified_column();
+
+-- =======================================================
+-- 10. Enterprise 7-Stage Domain Tables (Keyed on company_uid)
+-- =======================================================
+
+-- Stage 2: Corporate Profile
+CREATE TABLE IF NOT EXISTS onboarding_company_profiles (
+    company_uid VARCHAR(64) PRIMARY KEY,
+    application_ref VARCHAR(64) NOT NULL,
+    crn VARCHAR(64) NOT NULL,
+    company_name TEXT NOT NULL,
+    trade_name TEXT,
+    legal_type VARCHAR(128),
+    licence_issued_by TEXT,
+    licence_issue_date TEXT,
+    licence_expiry_date TEXT,
+    vat_trn VARCHAR(64),
+    contact_person TEXT,
+    registered_email VARCHAR(255),
+    phone VARCHAR(64),
+    registered_address TEXT,
+    operating_address TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_stage2_app_ref ON onboarding_company_profiles (application_ref);
+CREATE INDEX IF NOT EXISTS idx_stage2_crn ON onboarding_company_profiles (crn);
+
+-- Stage 3: UBO & Authorized Signatories Registry (1:N)
+CREATE TABLE IF NOT EXISTS onboarding_ubos_signatories (
+    id BIGSERIAL PRIMARY KEY,
+    company_uid VARCHAR(64) NOT NULL,
+    application_ref VARCHAR(64) NOT NULL,
+    full_name TEXT NOT NULL,
+    nationality VARCHAR(64) DEFAULT 'AE',
+    id_type VARCHAR(32) DEFAULT 'passport',
+    id_number VARCHAR(64),
+    date_of_birth DATE,
+    share_percentage NUMERIC(5, 2) DEFAULT 0.00,
+    is_pep BOOLEAN DEFAULT FALSE,
+    pep_details TEXT,
+    biometric_status VARCHAR(32) DEFAULT 'verified',
+    residential_address TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_stage3_company_uid ON onboarding_ubos_signatories (company_uid);
+CREATE INDEX IF NOT EXISTS idx_stage3_app_ref ON onboarding_ubos_signatories (application_ref);
+
+-- Stage 4: Corporate Shareholding & Holding Structure
+CREATE TABLE IF NOT EXISTS onboarding_ownership_structures (
+    company_uid VARCHAR(64) PRIMARY KEY,
+    application_ref VARCHAR(64) NOT NULL,
+    has_holding_company BOOLEAN DEFAULT FALSE,
+    parent_company_name TEXT,
+    parent_company_country VARCHAR(64),
+    total_shares_percentage NUMERIC(5, 2) DEFAULT 100.00,
+    ownership_hierarchy JSONB DEFAULT '[]'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_stage4_app_ref ON onboarding_ownership_structures (application_ref);
+
+-- Stage 5: Governance Mandates & Signing Powers
+CREATE TABLE IF NOT EXISTS onboarding_governance_mandates (
+    company_uid VARCHAR(64) PRIMARY KEY,
+    application_ref VARCHAR(64) NOT NULL,
+    signing_power VARCHAR(64) NOT NULL DEFAULT 'sole',
+    dual_authorization_threshold NUMERIC(18, 2) DEFAULT 50000.00,
+    maker_checker_enabled BOOLEAN DEFAULT TRUE,
+    primary_maker_email VARCHAR(255),
+    primary_checker_email VARCHAR(255),
+    daily_transfer_limit NUMERIC(18, 2) DEFAULT 250000.00,
+    single_transaction_limit NUMERIC(18, 2) DEFAULT 100000.00,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_stage5_app_ref ON onboarding_governance_mandates (application_ref);
+
+-- Stage 6: Tax Compliance (FATCA / CRS & Source of Funds)
+CREATE TABLE IF NOT EXISTS onboarding_tax_compliance (
+    company_uid VARCHAR(64) PRIMARY KEY,
+    application_ref VARCHAR(64) NOT NULL,
+    is_us_person BOOLEAN DEFAULT FALSE,
+    us_tin VARCHAR(64),
+    giin_number VARCHAR(64),
+    fatca_classification VARCHAR(128) DEFAULT 'Active NFFE',
+    crs_tax_residency_country VARCHAR(64) DEFAULT 'AE',
+    foreign_tin VARCHAR(64),
+    source_of_wealth TEXT,
+    source_of_funds TEXT,
+    expected_annual_turnover NUMERIC(18, 2),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_stage6_app_ref ON onboarding_tax_compliance (application_ref);
+
+-- Stage 7: Legal Declarations & E-Signatures
+CREATE TABLE IF NOT EXISTS onboarding_declarations_signatures (
+    company_uid VARCHAR(64) PRIMARY KEY,
+    application_ref VARCHAR(64) NOT NULL,
+    agreed_terms BOOLEAN NOT NULL DEFAULT TRUE,
+    agreed_accuracy_warranties BOOLEAN NOT NULL DEFAULT TRUE,
+    agreed_data_privacy BOOLEAN NOT NULL DEFAULT TRUE,
+    signatory_name TEXT NOT NULL,
+    signatory_email VARCHAR(255) NOT NULL,
+    docusign_envelope_id VARCHAR(128),
+    signature_hash TEXT,
+    ip_address VARCHAR(64),
+    user_agent TEXT,
+    signed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_stage7_app_ref ON onboarding_declarations_signatures (application_ref);
+

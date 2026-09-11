@@ -6,6 +6,7 @@
     "start": "node server.js",
     "seed": "node db/seed.js",
     "migrate": "node db/migrate.js",
+    "migrate:stages": "node db/migrate_stages.js",
     "send:yopmail": "node services/notification-service/yopmailSender.js"
   },
   "dependencies": {

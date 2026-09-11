@@ -41,6 +41,15 @@ class MemoryStore {
     // Key: username (lowercase) -> user record
     this.rmUsers = new Map();
 
+    // ── 7-Stage Domain Stores (Primary Key / Foreign Key: company_uid) ──
+    this.companyProfiles = new Map();        // Stage 2: Corporate Profile
+    this.ubosSignatories = new Map();        // Stage 3: UBO & Signatory Registry
+    this.ownershipStructures = new Map();    // Stage 4: Shareholding & Hierarchy
+    this.governanceMandates = new Map();     // Stage 5: Governance & Signing Mandates
+    this.taxCompliance = new Map();          // Stage 6: FATCA / CRS Tax & Regulatory
+    this.declarationsSignatures = new Map(); // Stage 7: Legal Declarations & E-Signatures
+
+
     // Microservice Telemetry & Health metrics
     this.metrics = {
       startTime: Date.now(),
@@ -255,7 +264,92 @@ class MemoryStore {
     }
     return emailItem;
   }
+
+  // ── 7-Stage Domain Methods (Keyed on company_uid) ──
+  saveCompanyProfile(companyUid, data) {
+    if (!companyUid) return null;
+    const uid = companyUid.trim().toUpperCase();
+    const existing = this.companyProfiles.get(uid) || {};
+    const updated = { ...existing, ...data, company_uid: uid, updated_at: new Date().toISOString() };
+    this.companyProfiles.set(uid, updated);
+    return updated;
+  }
+  getCompanyProfile(companyUid) {
+    if (!companyUid) return null;
+    return this.companyProfiles.get(companyUid.trim().toUpperCase()) || null;
+  }
+
+  saveUbosSignatories(companyUid, ubos) {
+    if (!companyUid) return [];
+    const uid = companyUid.trim().toUpperCase();
+    const list = Array.isArray(ubos) ? ubos : (ubos ? [ubos] : []);
+    const normalized = list.map((u, i) => ({
+      id: u.id || `ubo_${Date.now()}_${i}`,
+      company_uid: uid,
+      ...u,
+      updated_at: new Date().toISOString()
+    }));
+    this.ubosSignatories.set(uid, normalized);
+    return normalized;
+  }
+  getUbosSignatories(companyUid) {
+    if (!companyUid) return [];
+    return this.ubosSignatories.get(companyUid.trim().toUpperCase()) || [];
+  }
+
+  saveOwnershipStructure(companyUid, data) {
+    if (!companyUid) return null;
+    const uid = companyUid.trim().toUpperCase();
+    const existing = this.ownershipStructures.get(uid) || {};
+    const updated = { ...existing, ...data, company_uid: uid, updated_at: new Date().toISOString() };
+    this.ownershipStructures.set(uid, updated);
+    return updated;
+  }
+  getOwnershipStructure(companyUid) {
+    if (!companyUid) return null;
+    return this.ownershipStructures.get(companyUid.trim().toUpperCase()) || null;
+  }
+
+  saveGovernanceMandates(companyUid, data) {
+    if (!companyUid) return null;
+    const uid = companyUid.trim().toUpperCase();
+    const existing = this.governanceMandates.get(uid) || {};
+    const updated = { ...existing, ...data, company_uid: uid, updated_at: new Date().toISOString() };
+    this.governanceMandates.set(uid, updated);
+    return updated;
+  }
+  getGovernanceMandates(companyUid) {
+    if (!companyUid) return null;
+    return this.governanceMandates.get(companyUid.trim().toUpperCase()) || null;
+  }
+
+  saveTaxCompliance(companyUid, data) {
+    if (!companyUid) return null;
+    const uid = companyUid.trim().toUpperCase();
+    const existing = this.taxCompliance.get(uid) || {};
+    const updated = { ...existing, ...data, company_uid: uid, updated_at: new Date().toISOString() };
+    this.taxCompliance.set(uid, updated);
+    return updated;
+  }
+  getTaxCompliance(companyUid) {
+    if (!companyUid) return null;
+    return this.taxCompliance.get(companyUid.trim().toUpperCase()) || null;
+  }
+
+  saveDeclarationsSignatures(companyUid, data) {
+    if (!companyUid) return null;
+    const uid = companyUid.trim().toUpperCase();
+    const existing = this.declarationsSignatures.get(uid) || {};
+    const updated = { ...existing, ...data, company_uid: uid, updated_at: new Date().toISOString() };
+    this.declarationsSignatures.set(uid, updated);
+    return updated;
+  }
+  getDeclarationsSignatures(companyUid) {
+    if (!companyUid) return null;
+    return this.declarationsSignatures.get(companyUid.trim().toUpperCase()) || null;
+  }
 }
 
 const memStore = new MemoryStore();
 module.exports = memStore;
+
