@@ -302,16 +302,22 @@
             <div class="welcome-hero" id="welcomeHero">
                 <div style="position:relative;">
                     <div class="particle-container" id="particleContainer" aria-hidden="true"></div>
-                    <div class="time-pill">&#x23F1; Estimated time: 20&ndash;25 minutes</div>
-                    <h1 style="font-size:32px;font-weight:700;margin:0 0 12px;">Open Your First National Bank Corporate Account</h1>
-                    <p style="color:#cbd5e1;font-size:16px;margin:0 0 32px;max-width:600px;margin-left:auto;margin-right:auto;">We've built this portal to streamline your onboarding. Upload your documents below &mdash; you can name each one however you like. All uploaded documents are stored for compliance review.</p>
-                    <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:24px;margin-bottom:0;text-align:left;backdrop-filter:blur(10px);">
-                        <p style="font-size:13px;font-weight:700;color:#93c5fd;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 16px;">&#x1F4CC; Tip: Click the &#x270F; icon to rename each document</p>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                            <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:#f8fafc;">&#x1F4C4; Trade Licence (recommended)</div>
-                            <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:#f8fafc;">&#x1F4C4; Certificate of Incorporation</div>
-                            <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:#f8fafc;">&#x1F4CB; Board Resolution</div>
-                            <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:#cbd5e1;">&#x1F4D1; Any other supporting document</div>
+                    <div class="hero-split">
+                        <div class="hero-left">
+                            <div class="time-pill">&#x23F1; Estimated time: 20&ndash;25 minutes</div>
+                            <h1 style="font-size:22px;font-weight:800;margin:0 0 8px;color:#ffffff;letter-spacing:-0.4px;">Open Your Corporate Account</h1>
+                            <p style="color:#cbd5e1;font-size:13.5px;margin:0;line-height:1.5;">Upload your business documents below &mdash; you can name each one however you like. All documents are securely verified via banking-grade OCR.</p>
+                        </div>
+                        <div class="hero-right">
+                            <div class="hero-tip-box">
+                                <p style="font-size:11.5px;font-weight:700;color:#93c5fd;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 8px;">&#x1F4CC; Tip: Click the &#x270F; icon to rename each document</p>
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:12.5px;color:#f8fafc;">
+                                    <div>&#x1F4C4; Trade Licence</div>
+                                    <div>&#x1F4C4; Certificate of Inc.</div>
+                                    <div>&#x1F4CB; Board Resolution</div>
+                                    <div>&#x1F4D1; Supporting Docs</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -402,7 +408,7 @@
                     </div>
                     <div class="sub-content">
                         <div class="sub-pane active" id="tab-details" role="tabpanel" aria-labelledby="snav-details">
-                            <div class="g2">
+                            <div class="g4">
                                 <div class="field">
                                     <label>Commercial Registration No.</label>
                                     <input type="text" id="step2_crn" placeholder="e.g. 509077205">
@@ -441,33 +447,34 @@
                                     <input type="text" id="step2_contact_person" placeholder="e.g. Michael Vance">
                                     <span class="help">Optional</span>
                                 </div>
-                                <div class="field span2">
+                                <div class="field">
                                     <label>Licence Issued By</label>
                                     <input type="text" id="step2_issued_by" placeholder="e.g. US Federal Reserve (Federal Reserve)" class="auto-filled">
                                     <span class="auto-badge">&#x26A1; Auto-filled</span>
                                 </div>
                             </div>
-                            <hr class="divider">
-                            <div>
-                                <span class="tog-label">Is your company listed on any stock exchange?</span>
-                                <div class="tog-group" role="group" aria-label="Stock exchange listing status">
-                                    <button class="tog-btn" onclick="tog(this)">Yes</button>
-                                    <button class="tog-btn on" onclick="tog(this)">No</button>
+                            <div class="toggles-row">
+                                <div>
+                                    <span class="tog-label">Is your company listed on any stock exchange?</span>
+                                    <div class="tog-group" role="group" aria-label="Stock exchange listing status">
+                                        <button class="tog-btn" onclick="tog(this)">Yes</button>
+                                        <button class="tog-btn on" onclick="tog(this)">No</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="tog-label">Is your company wholly owned by the US Federal Government?</span>
+                                    <div class="tog-group" role="group" aria-label="Government ownership status">
+                                        <button class="tog-btn" onclick="tog(this)">Yes</button>
+                                        <button class="tog-btn on" onclick="tog(this)">No</button>
+                                    </div>
                                 </div>
                             </div>
-                            <div>
-                                <span class="tog-label">Is your company wholly owned by the US Federal Government?</span>
-                                <div class="tog-group" role="group" aria-label="Government ownership status">
-                                    <button class="tog-btn" onclick="tog(this)">Yes</button>
-                                    <button class="tog-btn on" onclick="tog(this)">No</button>
-                                </div>
-                            </div>
-                            <div style="text-align:right;margin-top:28px;">
+                            <div style="text-align:right;margin-top:16px;">
                                 <button class="btn btn-primary" onclick="switchTab('address');markSnav('details')">Next: Address &rarr;</button>
                             </div>
                         </div>
                         <div class="sub-pane" id="tab-address" role="tabpanel" aria-labelledby="snav-address">
-                            <div class="g2">
+                            <div class="g4">
                                 <div class="field"><label>Building / Unit</label><input type="text" id="step2_building" placeholder="e.g. Tower 1, Suite 402"></div>
                                 <div class="field"><label>Street / Area</label><input type="text" id="step2_street" placeholder="e.g. Commercial District"></div>
                                 <div class="field"><label>City</label><input type="text" id="step2_city" placeholder="e.g. New York"></div>
@@ -481,26 +488,30 @@
                                         <input type="text" id="step2_phone" placeholder="e.g. 212 555 0199" style="flex:1;">
                                     </div>
                                 </div>
-                                <div class="field span2">
-                                    <label style="cursor:pointer;display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-primary);margin-top:10px;">
+                                <div class="field span4" style="grid-column: 1 / -1;">
+                                    <label style="cursor:pointer;display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-primary);margin-top:4px;">
                                         <input type="checkbox" checked style="width:18px;height:18px;accent-color:var(--success);"> Business address is the same as registered address above
                                     </label>
                                 </div>
                             </div>
-                            <div style="display:flex;justify-content:space-between;margin-top:32px;">
+                            <div style="display:flex;justify-content:space-between;margin-top:16px;">
                                 <button class="btn btn-ghost" onclick="switchTab('details')">&larr; Back</button>
                                 <button class="btn btn-primary" onclick="switchTab('ops');markSnav('address')">Next: Operations &rarr;</button>
                             </div>
                         </div>
                         <div class="sub-pane" id="tab-ops" role="tabpanel" aria-labelledby="snav-ops">
-                            <div class="field" style="margin-bottom:24px;">
-                                <label>Country of Domicile</label>
-                                <select id="step2_domicile" style="max-width:340px;"><option selected>United States</option><option>United Arab Emirates</option><option>United Kingdom</option><option>Singapore</option></select>
-                            </div>
-                            <span class="tog-label">Does the entity operate outside its country of domicile?</span>
-                            <div class="tog-group" role="group">
-                                <button class="tog-btn" onclick="tog(this)">Yes</button>
-                                <button class="tog-btn on" onclick="tog(this)">No</button>
+                            <div class="g2" style="align-items: flex-start; gap: 24px; margin-bottom: 16px;">
+                                <div class="field">
+                                    <label>Country of Domicile</label>
+                                    <select id="step2_domicile"><option selected>United States</option><option>United Arab Emirates</option><option>United Kingdom</option><option>Singapore</option></select>
+                                </div>
+                                <div>
+                                    <span class="tog-label">Does the entity operate outside its country of domicile?</span>
+                                    <div class="tog-group" role="group">
+                                        <button class="tog-btn" onclick="tog(this)">Yes</button>
+                                        <button class="tog-btn on" onclick="tog(this)">No</button>
+                                    </div>
+                                </div>
                             </div>
                             <div id="ops-list" style="display:none;">
                                 <div class="g2" style="align-items:end;margin-bottom:12px;">
@@ -508,24 +519,28 @@
                                     <div class="field"><label>Type of Operation</label><select><option>Subsidiary Company</option><option>Branch</option><option>Representative Office</option></select></div>
                                 </div>
                             </div>
-                            <button class="btn btn-ghost btn-sm" style="margin-bottom:32px;display:none;" id="btnAddOpsRow" onclick="addOpsRow()">+ Add Country of Operation</button>
-                            <div style="display:flex;justify-content:space-between;">
+                            <button class="btn btn-ghost btn-sm" style="margin-bottom:20px;display:none;" id="btnAddOpsRow" onclick="addOpsRow()">+ Add Country of Operation</button>
+                            <div style="display:flex;justify-content:space-between;margin-top:16px;">
                                 <button class="btn btn-ghost" onclick="switchTab('address')">&larr; Back</button>
                                 <button class="btn btn-primary" onclick="switchTab('vat');markSnav('ops')">Next: VAT &rarr;</button>
                             </div>
                         </div>
                         <div class="sub-pane" id="tab-vat" role="tabpanel" aria-labelledby="snav-vat">
-                            <span class="tog-label">Is your company registered for VAT / Federal Tax?</span>
-                            <div class="tog-group" role="group">
-                                <button class="tog-btn on" onclick="tog(this)">Yes</button>
-                                <button class="tog-btn" onclick="tog(this)">No</button>
+                            <div class="g2" style="align-items: flex-start; gap: 24px; margin-bottom: 16px;">
+                                <div>
+                                    <span class="tog-label">Is your company registered for VAT / Federal Tax?</span>
+                                    <div class="tog-group" role="group">
+                                        <button class="tog-btn on" onclick="tog(this)">Yes</button>
+                                        <button class="tog-btn" onclick="tog(this)">No</button>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label>Tax Registration Number (TRN / EIN)</label>
+                                    <input type="text" id="step2_vat_trn" placeholder="e.g. 12-3456789">
+                                    <span class="help">Federal Tax ID / EIN or VAT registration number</span>
+                                </div>
                             </div>
-                            <div class="field" style="max-width:340px;margin-bottom:32px;">
-                                <label>Tax Registration Number (TRN / EIN)</label>
-                                <input type="text" id="step2_vat_trn" placeholder="e.g. 12-3456789">
-                                <span class="help">Federal Tax ID / EIN or VAT registration number</span>
-                            </div>
-                            <div style="display:flex;justify-content:space-between;margin-top:24px;">
+                            <div style="display:flex;justify-content:space-between;margin-top:16px;">
                                 <button class="btn btn-ghost" onclick="switchTab('ops')">&larr; Back</button>
                                 <button class="btn btn-success" onclick="markSnav('vat');goTo(3)">&#x2713; Continue &rarr;</button>
                             </div>
@@ -807,86 +822,88 @@
                     <span>FATCA (Foreign Account Tax Compliance Act) and CRS (Common Reporting Standard) are international tax regulations. Your answers help us meet our legal obligations. All information is kept strictly confidential.</span>
                 </div>
 
-                <div class="fatca-crs-card">
-                    <div class="fq-label">
-                        <span>&#x1F4C4; Part 3: FATCA Classification (US Status)</span>
-                        <span class="fq-badge fatca">FATCA</span>
-                    </div>
-                    <div class="fatca-crs-card" style="box-shadow:none; border-color:transparent; padding:0; margin-bottom:12px;">
-                        <div class="fq-label" style="font-size:14px; margin-bottom:8px;">Is the entity a Specified U.S. Person?</div>
-                        <div class="tog-group" id="fatca-us-person-tog" style="margin-bottom:0;">
-                            <button class="tog-btn" onclick="toggleFATCA_USPerson(this, true)">Yes</button>
-                            <button class="tog-btn on" onclick="toggleFATCA_USPerson(this, false)">No</button>
+                <div class="tax-grid">
+                    <div class="fatca-crs-card">
+                        <div class="fq-label">
+                            <span>&#x1F4C4; Part 3: FATCA Classification (US Status)</span>
+                            <span class="fq-badge fatca">FATCA</span>
                         </div>
-                    </div>
-                    <div id="fatca-us-yes" class="conditional-block">
-                        <div class="g2" style="margin-bottom:12px;">
-                            <div class="field"><label>US Tax Identification Number (US TIN)</label><input type="text" placeholder="e.g. 123-45-6789"></div>
-                            <div class="field">
-                                <label style="font-weight:600;color:var(--text-muted);margin-bottom:4px;">Form W-9</label>
-                                <div class="upload-card" id="uc-w9" onclick="triggerUpload('f-w9')" style="padding: 12px 16px; text-align:left; display:flex; align-items:center; gap:12px;">
-                                    <input type="file" id="f-w9" accept=".pdf,.jpg,.png" onchange="markUploaded('uc-w9', this)" aria-label="Upload Form W-9">
-                                    <div style="font-size:24px;" aria-hidden="true">&#x1F4CB;</div>
-                                    <div><strong>Upload Form W-9</strong><small style="display:block;color:var(--text-light);">PDF or image</small></div>
+                        <div class="fatca-crs-card" style="box-shadow:none; border-color:transparent; padding:0; margin-bottom:12px;">
+                            <div class="fq-label" style="font-size:14px; margin-bottom:8px;">Is the entity a Specified U.S. Person?</div>
+                            <div class="tog-group" id="fatca-us-person-tog" style="margin-bottom:0;">
+                                <button class="tog-btn" onclick="toggleFATCA_USPerson(this, true)">Yes</button>
+                                <button class="tog-btn on" onclick="toggleFATCA_USPerson(this, false)">No</button>
+                            </div>
+                        </div>
+                        <div id="fatca-us-yes" class="conditional-block">
+                            <div class="g2" style="margin-bottom:12px;">
+                                <div class="field"><label>US Tax Identification Number (US TIN)</label><input type="text" placeholder="e.g. 123-45-6789"></div>
+                                <div class="field">
+                                    <label style="font-weight:600;color:var(--text-muted);margin-bottom:4px;">Form W-9</label>
+                                    <div class="upload-card" id="uc-w9" onclick="triggerUpload('f-w9')" style="padding: 12px 16px; text-align:left; display:flex; align-items:center; gap:12px;">
+                                        <input type="file" id="f-w9" accept=".pdf,.jpg,.png" onchange="markUploaded('uc-w9', this)" aria-label="Upload Form W-9">
+                                        <div style="font-size:24px;" aria-hidden="true">&#x1F4CB;</div>
+                                        <div><strong>Upload Form W-9</strong><small style="display:block;color:var(--text-light);">PDF or image</small></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="banner banner-info" style="margin-bottom:0; font-size:12px;">
+                                <span style="font-size:14px;" aria-hidden="true">&#x26A0;</span>
+                                <span>A valid Form W-9 is required to certify your US status. Please upload a clear, signed copy.</span>
+                            </div>
+                        </div>
+                        <div id="fatca-us-no" class="conditional-block active">
+                            <div class="field" style="max-width:340px; margin-bottom:16px;">
+                                <label for="fatca-entity-class">Entity Classification</label>
+                                <select id="fatca-entity-class" onchange="toggleFATCA_EntityClassification()">
+                                    <option value="">&mdash; Select Classification &mdash;</option>
+                                    <option value="FFI">Financial Institution (FFI)</option>
+                                    <option value="NFFE">Non-Financial Foreign Entity (NFFE)</option>
+                                </select>
+                            </div>
+                            <div id="fatca-ffi-details" class="conditional-block" style="border-top:none; padding-top:0;">
+                                <div class="g2">
+                                    <div class="field"><label>FATCA Classification</label><select><option value="">&mdash; Select &mdash;</option><option>Participating FFI</option><option>Nonparticipating FFI</option><option>Reporting Model 1 FFI</option><option>Reporting Model 2 FFI</option></select></div>
+                                    <div class="field"><label>Global Intermediary Identification Number (GIIN)</label><input type="text" placeholder="e.g. 123456.12345.LE.123"><span class="help">The 19-character unique GIIN assigned to your institution</span></div>
+                                </div>
+                            </div>
+                            <div id="fatca-nffe-details" class="conditional-block" style="border-top:none; padding-top:0;">
+                                <div class="fatca-crs-card" style="box-shadow:none; border-color:transparent; padding:0; margin-bottom:0;">
+                                    <div class="fq-label" style="font-size:14px; margin-bottom:8px;">Are you an Active NFFE or a Passive NFFE?</div>
+                                    <div class="tog-group" style="margin-bottom:0;">
+                                        <button class="tog-btn on" onclick="tog(this)">Active NFFE</button>
+                                        <button class="tog-btn" onclick="tog(this)">Passive NFFE</button>
+                                    </div>
+                                    <div class="help" style="margin-top:6px;">Active NFFE = Operating business. Passive NFFE = Holding company / Investment vehicle.</div>
                                 </div>
                             </div>
                         </div>
-                        <div class="banner banner-info" style="margin-bottom:0; font-size:12px;">
-                            <span style="font-size:14px;" aria-hidden="true">&#x26A0;</span>
-                            <span>A valid Form W-9 is required to certify your US status. Please upload a clear, signed copy.</span>
-                        </div>
                     </div>
-                    <div id="fatca-us-no" class="conditional-block active">
-                        <div class="field" style="max-width:340px; margin-bottom:16px;">
-                            <label for="fatca-entity-class">Entity Classification</label>
-                            <select id="fatca-entity-class" onchange="toggleFATCA_EntityClassification()">
-                                <option value="">&mdash; Select Classification &mdash;</option>
-                                <option value="FFI">Financial Institution (FFI)</option>
-                                <option value="NFFE">Non-Financial Foreign Entity (NFFE)</option>
-                            </select>
-                        </div>
-                        <div id="fatca-ffi-details" class="conditional-block" style="border-top:none; padding-top:0;">
-                            <div class="g2">
-                                <div class="field"><label>FATCA Classification</label><select><option value="">&mdash; Select &mdash;</option><option>Participating FFI</option><option>Nonparticipating FFI</option><option>Reporting Model 1 FFI</option><option>Reporting Model 2 FFI</option></select></div>
-                                <div class="field"><label>Global Intermediary Identification Number (GIIN)</label><input type="text" placeholder="e.g. 123456.12345.LE.123"><span class="help">The 19-character unique GIIN assigned to your institution</span></div>
-                            </div>
-                        </div>
-                        <div id="fatca-nffe-details" class="conditional-block" style="border-top:none; padding-top:0;">
-                            <div class="fatca-crs-card" style="box-shadow:none; border-color:transparent; padding:0; margin-bottom:0;">
-                                <div class="fq-label" style="font-size:14px; margin-bottom:8px;">Are you an Active NFFE or a Passive NFFE?</div>
-                                <div class="tog-group" style="margin-bottom:0;">
-                                    <button class="tog-btn on" onclick="tog(this)">Active NFFE</button>
-                                    <button class="tog-btn" onclick="tog(this)">Passive NFFE</button>
-                                </div>
-                                <div class="help" style="margin-top:6px;">Active NFFE = Operating business. Passive NFFE = Holding company / Investment vehicle.</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="fatca-crs-card">
-                    <div class="fq-label">
-                        <span>&#x1F310; Part 4: CRS Classification (Global Status)</span>
-                        <span class="fq-badge crs">CRS</span>
-                    </div>
-                    <div class="fatca-crs-card" style="box-shadow:none; border-color:transparent; padding:0; margin-bottom:12px;">
-                        <div class="fq-label" style="font-size:14px; margin-bottom:8px;">Is the entity a Financial Institution?</div>
-                        <div class="tog-group" id="crs-fi-tog" style="margin-bottom:0;">
-                            <button class="tog-btn" onclick="toggleCRS_FI(this, true)">Yes</button>
-                            <button class="tog-btn on" onclick="toggleCRS_FI(this, false)">No</button>
+                    <div class="fatca-crs-card">
+                        <div class="fq-label">
+                            <span>&#x1F310; Part 4: CRS Classification (Global Status)</span>
+                            <span class="fq-badge crs">CRS</span>
                         </div>
-                    </div>
-                    <div id="crs-fi-yes" class="conditional-block">
-                        <div class="field" style="max-width:340px;"><label>Financial Institution Type</label><select><option value="">&mdash; Select Type &mdash;</option><option>Investment Entity</option><option>Depository Institution</option><option>Custodial Institution</option><option>Specified Insurance Company</option></select></div>
-                    </div>
-                    <div id="crs-fi-no" class="conditional-block active">
-                        <div class="fatca-crs-card" style="box-shadow:none; border-color:transparent; padding:0; margin-bottom:0;">
-                            <div class="fq-label" style="font-size:14px; margin-bottom:8px;">Select your Non-Financial Entity (NFE) status:</div>
-                            <div class="tog-group" style="margin-bottom:0;">
-                                <button class="tog-btn on" onclick="tog(this)">Active NFE</button>
-                                <button class="tog-btn" onclick="tog(this)">Passive NFE</button>
+                        <div class="fatca-crs-card" style="box-shadow:none; border-color:transparent; padding:0; margin-bottom:12px;">
+                            <div class="fq-label" style="font-size:14px; margin-bottom:8px;">Is the entity a Financial Institution?</div>
+                            <div class="tog-group" id="crs-fi-tog" style="margin-bottom:0;">
+                                <button class="tog-btn" onclick="toggleCRS_FI(this, true)">Yes</button>
+                                <button class="tog-btn on" onclick="toggleCRS_FI(this, false)">No</button>
                             </div>
-                            <div class="help" style="margin-top:6px;">Active = Operating businesses. Passive = Holding companies, investment vehicles.</div>
+                        </div>
+                        <div id="crs-fi-yes" class="conditional-block">
+                            <div class="field" style="max-width:340px;"><label>Financial Institution Type</label><select><option value="">&mdash; Select Type &mdash;</option><option>Investment Entity</option><option>Depository Institution</option><option>Custodial Institution</option><option>Specified Insurance Company</option></select></div>
+                        </div>
+                        <div id="crs-fi-no" class="conditional-block active">
+                            <div class="fatca-crs-card" style="box-shadow:none; border-color:transparent; padding:0; margin-bottom:0;">
+                                <div class="fq-label" style="font-size:14px; margin-bottom:8px;">Select your Non-Financial Entity (NFE) status:</div>
+                                <div class="tog-group" style="margin-bottom:0;">
+                                    <button class="tog-btn on" onclick="tog(this)">Active NFE</button>
+                                    <button class="tog-btn" onclick="tog(this)">Passive NFE</button>
+                                </div>
+                                <div class="help" style="margin-top:6px;">Active = Operating businesses. Passive = Holding companies, investment vehicles.</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -908,89 +925,95 @@
                     <span>All sections are optional. Fill in only what you have available. You can submit even with partial information.</span>
                 </div>
 
-                <div class="review-accordion">
-                    <div class="ra-hdr" onclick="toggleAccordion('ra1')">
-                        <strong><span class="ra-check" aria-hidden="true">&#x1F4C4;</span> Documents</strong>
-                        <div style="display:flex;align-items:center;gap:12px;">
-                            <span style="font-size:13px;color:var(--text-muted);" id="ra1-count">0 uploaded</span>
-                            <button class="ra-edit" onclick="event.stopPropagation();goTo(1)">Edit</button>
+                <div class="review-split">
+                    <div class="review-col-left">
+                        <div class="review-accordion">
+                            <div class="ra-hdr" onclick="toggleAccordion('ra1')">
+                                <strong><span class="ra-check" aria-hidden="true">&#x1F4C4;</span> Documents</strong>
+                                <div style="display:flex;align-items:center;gap:12px;">
+                                    <span style="font-size:13px;color:var(--text-muted);" id="ra1-count">0 uploaded</span>
+                                    <button class="ra-edit" onclick="event.stopPropagation();goTo(1)">Edit</button>
+                                </div>
+                            </div>
+                            <div class="ra-body" id="ra1">
+                                <div id="ra1-docs-list"><em>No documents uploaded yet.</em></div>
+                            </div>
+                        </div>
+
+                        <div class="review-accordion">
+                            <div class="ra-hdr" onclick="toggleAccordion('ra2')">
+                                <strong><span class="ra-check" aria-hidden="true">&#x1F3E2;</span> Company Information</strong>
+                                <div style="display:flex;align-items:center;gap:12px;">
+                                    <span style="font-size:13px;color:var(--text-muted);" id="ra2-summary">Not filled</span>
+                                    <button class="ra-edit" onclick="event.stopPropagation();goTo(2)">Edit</button>
+                                </div>
+                            </div>
+                            <div class="ra-body" id="ra2">
+                                <div id="ra2-details"><em>No company information provided.</em></div>
+                            </div>
+                        </div>
+
+                        <div class="review-accordion" id="ra3-wrapper">
+                            <div class="ra-hdr" onclick="toggleAccordion('ra3')">
+                                <strong><span class="ra-check" aria-hidden="true">&#x1F465;</span> Owner &amp; Shareholder Details</strong>
+                                <div style="display:flex;align-items:center;gap:12px;">
+                                    <span style="font-size:13px;color:var(--text-muted);" id="ra3-count">0 entities</span>
+                                    <button class="ra-edit" onclick="event.stopPropagation();goTo(3)">Edit</button>
+                                </div>
+                            </div>
+                            <div class="ra-body" id="ra3"></div>
+                        </div>
+
+                        <div class="review-accordion">
+                            <div class="ra-hdr" onclick="toggleAccordion('ra4')">
+                                <strong><span class="ra-check" aria-hidden="true">&#x1F3AF;</span> Ownership Structure &amp; Roles</strong>
+                                <div style="display:flex;align-items:center;gap:12px;">
+                                    <span style="font-size:13px;color:var(--text-muted);" id="ra4-count">Not configured</span>
+                                    <button class="ra-edit" onclick="event.stopPropagation();goTo(4)">Edit</button>
+                                </div>
+                            </div>
+                            <div class="ra-body" id="ra4"></div>
+                        </div>
+
+                        <div class="review-accordion">
+                            <div class="ra-hdr" onclick="toggleAccordion('ra5')">
+                                <strong><span class="ra-check" aria-hidden="true">&#x1F310;</span> Tax Compliance (FATCA &amp; CRS)</strong>
+                                <div style="display:flex;align-items:center;gap:12px;">
+                                    <span style="font-size:13px;color:var(--text-muted);" id="ra5-summary">Not filled</span>
+                                    <button class="ra-edit" onclick="event.stopPropagation();goTo(6)">Edit</button>
+                                </div>
+                            </div>
+                            <div class="ra-body" id="ra5">
+                                <div id="ra5-details"><em>No tax information provided.</em></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="ra-body" id="ra1">
-                        <div id="ra1-docs-list"><em>No documents uploaded yet.</em></div>
-                    </div>
-                </div>
 
-                <div class="review-accordion">
-                    <div class="ra-hdr" onclick="toggleAccordion('ra2')">
-                        <strong><span class="ra-check" aria-hidden="true">&#x1F3E2;</span> Company Information</strong>
-                        <div style="display:flex;align-items:center;gap:12px;">
-                            <span style="font-size:13px;color:var(--text-muted);" id="ra2-summary">Not filled</span>
-                            <button class="ra-edit" onclick="event.stopPropagation();goTo(2)">Edit</button>
+                    <div class="review-col-right">
+                        <div class="declaration-box">
+                            <p style="font-size:15px;font-weight:700;color:var(--text-primary);margin:0 0 16px;">Declarations &mdash; optional:</p>
+                            <div class="decl-check">
+                                <input type="checkbox" id="d1">
+                                <label for="d1">I confirm that all information provided in this application is accurate, true, and complete to the best of my knowledge.</label>
+                            </div>
+                            <div class="decl-check">
+                                <input type="checkbox" id="d2">
+                                <label for="d2">I authorise First National Bank to verify any information provided and conduct necessary due diligence checks including KYC/AML screening.</label>
+                            </div>
+                            <div class="decl-check">
+                                <input type="checkbox" id="d3">
+                                <label for="d3">I agree to First National Bank's <a href="#" style="color:var(--primary);text-decoration:none;font-weight:600;">Terms &amp; Conditions</a> and <a href="#" style="color:var(--primary);text-decoration:none;font-weight:600;">Privacy Policy</a>.</label>
+                            </div>
+                        </div>
+                        <div class="banner banner-info" style="margin-top:16px;">
+                            <span style="font-size:18px;" aria-hidden="true">&#x270D;</span>
+                            <span>After submitting, you may receive a <strong>DocuSign email</strong> with the Client Agreement documents to e-sign if applicable.</span>
+                        </div>
+                        <div class="nav-bar" style="margin-top:16px; justify-content:space-between;">
+                            <button class="btn btn-ghost" onclick="goTo(6)">&larr; Back</button>
+                            <button class="btn btn-success" id="finalSubmitBtn" style="font-size:16px;padding:14px 28px;" onclick="finalizeApp()">&#x2713; Submit Application</button>
                         </div>
                     </div>
-                    <div class="ra-body" id="ra2">
-                        <div id="ra2-details"><em>No company information provided.</em></div>
-                    </div>
-                </div>
-
-                <div class="review-accordion" id="ra3-wrapper">
-                    <div class="ra-hdr" onclick="toggleAccordion('ra3')">
-                        <strong><span class="ra-check" aria-hidden="true">&#x1F465;</span> Owner &amp; Shareholder Details</strong>
-                        <div style="display:flex;align-items:center;gap:12px;">
-                            <span style="font-size:13px;color:var(--text-muted);" id="ra3-count">0 entities</span>
-                            <button class="ra-edit" onclick="event.stopPropagation();goTo(3)">Edit</button>
-                        </div>
-                    </div>
-                    <div class="ra-body" id="ra3"></div>
-                </div>
-
-                <div class="review-accordion">
-                    <div class="ra-hdr" onclick="toggleAccordion('ra4')">
-                        <strong><span class="ra-check" aria-hidden="true">&#x1F3AF;</span> Ownership Structure &amp; Roles</strong>
-                        <div style="display:flex;align-items:center;gap:12px;">
-                            <span style="font-size:13px;color:var(--text-muted);" id="ra4-count">Not configured</span>
-                            <button class="ra-edit" onclick="event.stopPropagation();goTo(4)">Edit</button>
-                        </div>
-                    </div>
-                    <div class="ra-body" id="ra4"></div>
-                </div>
-
-                <div class="review-accordion">
-                    <div class="ra-hdr" onclick="toggleAccordion('ra5')">
-                        <strong><span class="ra-check" aria-hidden="true">&#x1F310;</span> Tax Compliance (FATCA &amp; CRS)</strong>
-                        <div style="display:flex;align-items:center;gap:12px;">
-                            <span style="font-size:13px;color:var(--text-muted);" id="ra5-summary">Not filled</span>
-                            <button class="ra-edit" onclick="event.stopPropagation();goTo(6)">Edit</button>
-                        </div>
-                    </div>
-                    <div class="ra-body" id="ra5">
-                        <div id="ra5-details"><em>No tax information provided.</em></div>
-                    </div>
-                </div>
-
-                <div class="declaration-box">
-                    <p style="font-size:15px;font-weight:700;color:var(--text-primary);margin:0 0 20px;">Declarations &mdash; optional, review and confirm if you wish:</p>
-                    <div class="decl-check">
-                        <input type="checkbox" id="d1">
-                        <label for="d1">I confirm that all information provided in this application is accurate, true, and complete to the best of my knowledge.</label>
-                    </div>
-                    <div class="decl-check">
-                        <input type="checkbox" id="d2">
-                        <label for="d2">I authorise First National Bank to verify any information provided and conduct necessary due diligence checks including KYC/AML screening.</label>
-                    </div>
-                    <div class="decl-check">
-                        <input type="checkbox" id="d3">
-                        <label for="d3">I agree to First National Bank's <a href="#" style="color:var(--primary);text-decoration:none;font-weight:600;">Terms &amp; Conditions</a> and <a href="#" style="color:var(--primary);text-decoration:none;font-weight:600;">Privacy Policy</a>.</label>
-                    </div>
-                </div>
-                <div class="banner banner-info" style="margin-top:28px;">
-                    <span style="font-size:18px;" aria-hidden="true">&#x270D;</span>
-                    <span>After submitting, you may receive a <strong>DocuSign email</strong> with the Client Agreement documents to e-sign if applicable.</span>
-                </div>
-                <div class="nav-bar">
-                    <button class="btn btn-ghost" onclick="goTo(6)">&larr; Back</button>
-                    <button class="btn btn-success" id="finalSubmitBtn" style="font-size:16px;padding:16px 36px;" onclick="finalizeApp()">&#x2713; Submit Application</button>
                 </div>
             </div>
 
