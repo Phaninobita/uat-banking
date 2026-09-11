@@ -4,7 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>First National Bank &mdash; Corporate Account Portal</title>
-    <link rel="stylesheet" href="/css/style.css?v=20260910_02">
+    <link rel="stylesheet" href="/css/style.css?v=20260910_03">
+    <script>
+        // Anti-flicker: if already authenticated, keep overlay hidden during initial render & rehydration
+        try {
+            if (localStorage.getItem('vb_auth_token')) {
+                document.documentElement.classList.add('has-auth-token');
+            }
+        } catch (e) {}
+    </script>
 </head>
 <body>
 
@@ -42,7 +50,7 @@
             <div class="login-grid-sheen"></div>
         </div>
 
-        <div class="login-box">
+        <div class="login-box" id="customerLoginCard">
             <div class="login-card-glare" aria-hidden="true"></div>
             <div class="login-header">
                 <div class="logo-mark" aria-hidden="true">FNB</div>
@@ -108,39 +116,55 @@
             </div>
         </div>
 
+        <!-- SLEEK EXECUTIVE TOP HEADER -->
         <header class="hdr" role="banner">
             <div class="hdr-brand">
                 <div class="logo-mark" aria-hidden="true">FNB</div>
-                <div>
+                <div class="hdr-brand-text">
                     <span class="brand-name">First National Bank</span>
-                    <small class="brand-sub" id="hdrBrandSub">Corporate Onboarding Portal</small>
+                    <small class="brand-sub" id="hdrBrandSub">Corporate Banking Portal</small>
                 </div>
             </div>
 
-            <!-- Corporate Client Identity Capsule (Displays Company Name e.g. test99 on top) -->
-            <div class="hdr-company-capsule" id="hdrCompanyCapsule" style="display:none; align-items:center; gap:8px; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); padding:5px 14px; border-radius:20px; animation:fadeUp 0.3s ease;">
-                <span style="font-size:15px;" aria-hidden="true">&#x1F3E2;</span>
-                <span id="hdrCompanyName" style="font-weight:700; color:#ffffff; font-size:13px; letter-spacing:0.02em;"></span>
-                <span style="color:#94a3b8; font-size:11px;">&bull;</span>
-                <span id="hdrCrnDisplay" style="font-size:11px; color:#38bdf8; font-family:monospace; font-weight:600;"></span>
-                <span style="color:#94a3b8; font-size:11px;">&bull;</span>
-                <span id="hdrCompanyUidDisplay" style="font-size:11px; color:#f59e0b; font-family:monospace; font-weight:700; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); padding:2px 6px; border-radius:4px;" title="Corporate ID"></span>
-            </div>
-
-            <!-- Central Step Indicator Capsule -->
-            <div class="hdr-step-capsule" id="hdrStepCapsule">
-                <span class="capsule-dot"></span>
-                <span class="capsule-step" id="hdr-step-label">Step 1 of 7</span>
-                <span class="capsule-sep">&bull;</span>
-                <span class="capsule-title" id="hdrStepTitle">Documents &amp; Verification</span>
+            <!-- Unified Central Cockpit Capsule: Step Indicator & Active Company -->
+            <div class="hdr-cockpit-capsule" id="hdrCockpitCapsule">
+                <div class="capsule-step-badge">
+                    <span class="capsule-dot" aria-hidden="true"></span>
+                    <span class="capsule-step" id="hdr-step-label">Step 1 of 7</span>
+                    <span class="capsule-sep">&bull;</span>
+                    <span class="capsule-title" id="hdrStepTitle">Documents &amp; Verification</span>
+                </div>
+                <!-- Dynamic Company Identity Tag (Rendered inside cockpit when logged in) -->
+                <div class="capsule-company-tag" id="hdrCompanyTag" style="display:none;">
+                    <span class="capsule-divider" aria-hidden="true">|</span>
+                    <span class="tag-icon" aria-hidden="true">&#x1F3E2;</span>
+                    <span class="tag-name" id="hdrCompanyName"></span>
+                    <span class="tag-crn" id="hdrCrnDisplay"></span>
+                    <span class="tag-cuid" id="hdrCompanyUidDisplay" title="Corporate ID"></span>
+                </div>
             </div>
 
             <div class="hdr-right">
-                <button class="btn btn-ghost btn-sm" id="btnAuditTrail" onclick="openAuditTrailModal()" style="color:#38bdf8; border-color:rgba(56,189,248,0.4); display:inline-flex; align-items:center; gap:5px;" title="View compliance and security audit logs">&#x1F6E1;&#xFE0F; Audit Trail</button>
-                <a href="/rm" target="_blank" class="btn btn-ghost btn-sm" style="color: #f59e0b; border-color: rgba(245, 158, 11, 0.4); text-decoration: none;" title="Open Relationship Manager Portal">&#x1F517; RM Portal</a>
-                <button class="btn-rework" id="reworkToggle" onclick="toggleReworkMode()" aria-label="Toggle rework simulation mode" title="Simulate compliance return for correction">&#x1F504; <span class="tt-label">Simulate Rework</span></button>
-                <button class="btn btn-ghost btn-sm btn-hdr-save" onclick="showSaveModal()" aria-label="Save progress">&#x1F4BE; Save Draft</button>
-                <button class="btn btn-ghost btn-sm btn-hdr-signout" id="btnSignOut" onclick="handleSignOut()" aria-label="Sign out">&#x1F6AA; Sign Out</button>
+                <button type="button" class="btn-hdr-action btn-hdr-audit" id="btnAuditTrail" onclick="openAuditTrailModal()" title="View compliance and security audit logs">
+                    <span class="hdr-btn-icon">&#x1F6E1;&#xFE0F;</span>
+                    <span>Audit Trail</span>
+                </button>
+                <button type="button" class="btn-hdr-action btn-hdr-save btn-pill-sweep" onclick="showSaveModal()" title="Save application draft">
+                    <span class="hdr-btn-icon">&#x1F4BE;</span>
+                    <span>Save Draft</span>
+                </button>
+                <a href="/rm" target="_blank" class="btn-hdr-action btn-hdr-rm" title="Open Relationship Manager Executive Suite">
+                    <span class="hdr-btn-icon">&#x1F517;</span>
+                    <span>RM Suite</span>
+                </a>
+                <button type="button" class="btn-hdr-action btn-hdr-rework" id="reworkToggle" onclick="toggleReworkMode()" title="Simulate compliance return for correction">
+                    <span class="hdr-btn-icon">&#x1F504;</span>
+                    <span class="tt-label">Simulate Rework</span>
+                </button>
+                <button type="button" class="btn-hdr-action btn-hdr-signout" id="btnSignOut" onclick="handleSignOut()" title="Sign out of Corporate Portal">
+                    <span class="hdr-btn-icon">&#x1F6AA;</span>
+                    <span>Sign Out</span>
+                </button>
             </div>
         </header>
 

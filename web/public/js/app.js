@@ -2415,7 +2415,7 @@ function hideLoginError() {
 
 // ── Corporate Client Identity Display (Displays company name & UID on top) ──
 function displayClientNameOnTop(companyName, crn, companyUid) {
-    const capsule = document.getElementById('hdrCompanyCapsule');
+    const companyTag = document.getElementById('hdrCompanyTag') || document.getElementById('hdrCompanyCapsule');
     const nameEl = document.getElementById('hdrCompanyName');
     const crnEl = document.getElementById('hdrCrnDisplay');
     const cuidEl = document.getElementById('hdrCompanyUidDisplay');
@@ -2434,8 +2434,8 @@ function displayClientNameOnTop(companyName, crn, companyUid) {
         cuidEl.textContent = currentCompanyUid ? `ID: ${currentCompanyUid}` : '';
         cuidEl.style.display = currentCompanyUid ? 'inline-block' : 'none';
     }
-    if (capsule) capsule.style.display = 'inline-flex';
-    if (brandSub) brandSub.textContent = resolvedName;
+    if (companyTag) companyTag.style.display = 'inline-flex';
+    if (brandSub) brandSub.textContent = 'Corporate Banking Portal';
 
     // Auto-fill Step 2 company fields
     const s2Name = document.getElementById('step2_name');
@@ -2569,14 +2569,16 @@ function handleSignOut() {
     if (window.VBApi) {
         window.VBApi.clearToken();
     }
-    const companyCap = document.getElementById('hdrCompanyCapsule');
+    document.documentElement.classList.remove('has-auth-token');
+    const companyCap = document.getElementById('hdrCompanyTag') || document.getElementById('hdrCompanyCapsule');
     if (companyCap) companyCap.style.display = 'none';
     const brandSub = document.getElementById('hdrBrandSub');
-    if (brandSub) brandSub.textContent = 'Corporate Onboarding Portal';
+    if (brandSub) brandSub.textContent = 'Corporate Banking Portal';
     showToast('Signed out. Enter your CRN and Email to resume your application.', 'Signed Out', 'info', 4000);
     const overlay = document.getElementById('loginOverlay');
     if (overlay) {
         overlay.classList.remove('hidden');
+        overlay.classList.add('force-show');
         const s1 = document.getElementById('lStep1');
         const s2 = document.getElementById('lStep2');
         if (s1) s1.classList.remove('hidden');
@@ -3153,13 +3155,21 @@ window.addEventListener('DOMContentLoaded', async () => {
         } catch (err) {
             console.warn('Session expired or invalid, please sign in:', err.message);
             window.VBApi.clearToken();
+            document.documentElement.classList.remove('has-auth-token');
             const overlay = document.getElementById('loginOverlay');
-            if (overlay) overlay.classList.remove('hidden');
+            if (overlay) {
+                overlay.classList.remove('hidden');
+                overlay.classList.add('force-show');
+            }
         }
     } else {
         // Show login overlay
+        document.documentElement.classList.remove('has-auth-token');
         const overlay = document.getElementById('loginOverlay');
-        if (overlay) overlay.classList.remove('hidden');
+        if (overlay) {
+            overlay.classList.remove('hidden');
+            overlay.classList.add('force-show');
+        }
     }
 
     // Check for RM customer magic invite URL params (?crn=...&email=...&company=...&contact=...&phone=...&company_uid=...)
@@ -3385,12 +3395,21 @@ window.filterAuditTrailTable = filterAuditTrailTable;
 
 // ── mal.ai INTERACTIVE 3D CARD TILT & GLARE TRACKING ──
 document.addEventListener('DOMContentLoaded', () => {
-    const overlay = document.getElementById('loginOverlay');
-    const box = document.querySelector('.login-box');
-    const glare = document.querySelector('.login-card-glare');
-    if (!overlay || !box) return;
+    initCustomerLoginTilt();
+    initPortalCardsTilt();
+});
 
-    overlay.addEventListener('mousemove', (e) => {
+function initCustomerLoginTilt() {
+    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    if (isTouch) return; // Prevent mobile touch scroll redraw flickering
+
+    const overlay = document.getElementById('loginOverlay');
+    const box = document.getElementById('customerLoginCard') || document.querySelector('.login-box');
+    const glare = box ? box.querySelector('.login-card-glare') : null;
+    if (!overlay || !box || overlay._hasTiltListener) return;
+    overlay._hasTiltListener = true;
+
+    function handleMove(e) {
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         const rect = box.getBoundingClientRect();
         const boxX = rect.left + rect.width / 2;
@@ -3405,22 +3424,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (glare) {
             const glarePos = Math.max(10, Math.min(90, ((e.clientX - rect.left) / rect.width) * 100));
+            glare.style.opacity = '1';
             glare.style.background = `linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.4) ${glarePos - 25}%, rgba(255, 255, 255, 0.9) ${glarePos}%, rgba(0, 210, 255, 0.4) ${glarePos + 25}%, transparent)`;
         }
-    });
+    }
 
-    overlay.addEventListener('mouseleave', () => {
+    function handleLeave() {
         box.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
         if (glare) {
+            glare.style.opacity = '0.4';
             glare.style.background = 'linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.6), rgba(255, 255, 255, 0.8), rgba(0, 210, 255, 0.6), transparent)';
         }
-    });
+    }
 
-    // ── mal.ai 3D TILT FOR ALL PORTAL CARDS & DIALOGUES ──
-    initPortalCardsTilt();
-});
+    overlay.addEventListener('mousemove', handleMove);
+    box.addEventListener('mousemove', handleMove);
+    overlay.addEventListener('mouseleave', handleLeave);
+}
+window.initCustomerLoginTilt = initCustomerLoginTilt;
 
 function initPortalCardsTilt() {
+    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    if (isTouch) return; // Prevent mobile touch scroll redraw flickering
+
     const cards = document.querySelectorAll('.upload-card, .welcome-hero, .sub-wrap, .ubo-card, .doc-preview-box, .audit-modal-box');
     cards.forEach(card => {
         if (card._hasTiltListener) return;

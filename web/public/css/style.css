@@ -260,26 +260,30 @@
         #uc-4::after { animation-delay: 3.3s; }
 
         .hdr {
-            background: rgba(2, 11, 14, 0.88);
+            background: rgba(2, 11, 14, 0.92);
             color: #ffffff;
-            padding: 0 32px;
+            padding: 0 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            height: 68px;
+            height: 64px;
             position: sticky;
             top: 0;
             z-index: 200;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+            gap: 16px;
+            white-space: nowrap;
         }
 
         .hdr-brand {
             display: flex;
             align-items: center;
             gap: 12px;
+            flex-shrink: 0;
+            white-space: nowrap;
         }
 
         .hdr-brand .logo-mark {
@@ -299,12 +303,13 @@
 
         .hdr-brand .brand-name {
             font-weight: 800;
-            font-size: 16px;
+            font-size: 15px;
             letter-spacing: -0.3px;
             color: #ffffff;
             display: block;
             line-height: 1.2;
-            background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.75) 100%);
+            white-space: nowrap;
+            background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.85) 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -312,170 +317,232 @@
 
         .hdr-brand .brand-sub {
             display: block;
-            color: rgba(255, 255, 255, 0.55);
+            color: rgba(255, 255, 255, 0.5);
             font-size: 11px;
             font-weight: 500;
             letter-spacing: 0.2px;
+            white-space: nowrap;
         }
 
-        /* ── Corporate Client Identity Capsule ── */
-        .hdr-company-capsule {
+        /* ── Unified Central Cockpit Capsule ── */
+        .hdr-cockpit-capsule {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(0, 210, 255, 0.22);
+            border-radius: 999px;
+            height: 38px;
+            padding: 0 16px;
+            box-shadow: 0 2px 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            transition: all 0.3s var(--ease-out);
+            flex-shrink: 0;
+        }
+
+        .hdr-cockpit-capsule:hover {
+            border-color: rgba(0, 210, 255, 0.45);
+            background: rgba(255, 255, 255, 0.07);
+            box-shadow: 0 4px 20px rgba(0, 210, 255, 0.15);
+        }
+
+        .capsule-step-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(0, 210, 255, 0.09);
-            border: 1px solid rgba(0, 210, 255, 0.3);
-            padding: 6px 16px;
-            border-radius: 999px;
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s var(--ease-out);
-        }
-
-        .hdr-company-capsule:hover {
-            border-color: rgba(0, 210, 255, 0.55);
-            background: rgba(0, 210, 255, 0.14);
-        }
-
-        /* ── Central Step Indicator Capsule ── */
-        .hdr-step-capsule {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 999px;
-            padding: 6px 18px;
-            box-shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s var(--ease-out);
+            font-size: 12px;
         }
 
         .capsule-dot {
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
             background: var(--brand-primary, #00d2ff);
-            box-shadow: 0 0 12px var(--brand-primary, #00d2ff);
+            box-shadow: 0 0 10px var(--brand-primary, #00d2ff);
             display: inline-block;
             animation: pulseGlow 2s infinite;
         }
 
         .capsule-step {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
-            color: var(--brand-tertiary, #38bdf8);
+            color: #38bdf8;
             text-transform: uppercase;
-            letter-spacing: 0.6px;
+            letter-spacing: 0.5px;
         }
 
         .capsule-sep {
-            color: rgba(255, 255, 255, 0.3);
-            font-size: 12px;
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 11px;
         }
 
         .capsule-title {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            color: #f8fafc;
-            letter-spacing: 0.2px;
+            color: #f1f5f9;
+            letter-spacing: 0.1px;
         }
 
+        .capsule-company-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #cbd5e1;
+        }
+
+        .capsule-divider {
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 12px;
+            font-weight: 300;
+            margin: 0 2px;
+        }
+
+        .tag-icon {
+            font-size: 13px;
+        }
+
+        .tag-name {
+            font-weight: 700;
+            color: #ffffff;
+            max-width: 170px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .tag-crn {
+            font-size: 11px;
+            color: #38bdf8;
+            font-family: monospace;
+            font-weight: 600;
+            background: rgba(0, 210, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .tag-cuid {
+            font-size: 10px;
+            color: #f59e0b;
+            font-family: monospace;
+            font-weight: 700;
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            padding: 1px 6px;
+            border-radius: 4px;
+        }
+
+        /* ── Header Action Buttons ── */
         .hdr-right {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            flex-shrink: 0;
         }
 
-        .theme-toggle {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
-            padding: 5px 14px;
+        .btn-hdr-action {
+            height: 36px;
+            padding: 0 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: var(--font);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            line-height: 1;
+            transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+            text-decoration: none;
+            border: 1px solid transparent;
+            outline: none;
+        }
+
+        .btn-hdr-action:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-hdr-action:active {
+            transform: translateY(0);
+        }
+
+        .btn-hdr-action .hdr-btn-icon {
             font-size: 13px;
-            cursor: pointer;
-            transition: all var(--transition);
-            color: #e2e8f0;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 6px;
-            height: 34px;
-            font-weight: 600;
         }
 
-        .theme-toggle:hover {
-            background: rgba(255, 255, 255, 0.16);
-            transform: translateY(-1px);
+        .btn-hdr-audit {
+            background: rgba(0, 210, 255, 0.08);
+            border-color: rgba(0, 210, 255, 0.28);
+            color: #38bdf8;
         }
 
-        .theme-toggle .tt-label {
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .btn-rework {
-            background: rgba(245, 158, 11, 0.15);
-            border: 1px solid rgba(245, 158, 11, 0.35);
-            border-radius: 20px;
-            padding: 5px 12px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all var(--transition);
-            color: #fbbf24;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            height: 34px;
-            font-weight: 600;
-        }
-
-        .btn-rework:hover {
-            background: rgba(245, 158, 11, 0.28);
-            transform: translateY(-1px);
-        }
-
-        .btn-rework.active {
-            background: rgba(239, 68, 68, 0.2);
-            border-color: rgba(239, 68, 68, 0.5);
-            color: #f87171;
+        .btn-hdr-audit:hover {
+            background: rgba(0, 210, 255, 0.18);
+            border-color: rgba(0, 210, 255, 0.55);
+            color: #ffffff;
+            box-shadow: 0 0 16px rgba(0, 210, 255, 0.25);
         }
 
         .btn-hdr-save {
-            background: rgba(99, 102, 241, 0.15);
-            border: 1px solid rgba(99, 102, 241, 0.35);
+            background: rgba(99, 102, 241, 0.12);
+            border-color: rgba(99, 102, 241, 0.35);
             color: #c7d2fe !important;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            padding: 5px 14px;
-            height: 34px;
-            cursor: pointer;
-            transition: all var(--transition);
         }
 
         .btn-hdr-save:hover {
-            background: rgba(99, 102, 241, 0.28);
+            background: rgba(99, 102, 241, 0.25);
+            border-color: rgba(99, 102, 241, 0.6);
             color: #ffffff !important;
-            transform: translateY(-1px);
+            box-shadow: 0 0 16px rgba(99, 102, 241, 0.25);
+        }
+
+        .btn-hdr-rm {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.3);
+            color: #fbbf24;
+            text-decoration: none;
+        }
+
+        .btn-hdr-rm:hover {
+            background: rgba(245, 158, 11, 0.22);
+            border-color: rgba(245, 158, 11, 0.55);
+            color: #ffffff;
+            box-shadow: 0 0 16px rgba(245, 158, 11, 0.25);
+        }
+
+        .btn-hdr-rework {
+            background: rgba(239, 68, 68, 0.08);
+            border-color: rgba(239, 68, 68, 0.25);
+            color: #fca5a5;
+        }
+
+        .btn-hdr-rework:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.5);
+            color: #ffffff;
+        }
+
+        .btn-hdr-rework.active {
+            background: rgba(239, 68, 68, 0.25);
+            border-color: rgba(239, 68, 68, 0.6);
+            color: #f87171;
         }
 
         .btn-hdr-signout {
-            background: rgba(239, 68, 68, 0.12);
-            border: 1px solid rgba(239, 68, 68, 0.35);
-            color: #fca5a5 !important;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            padding: 5px 14px;
-            height: 34px;
-            cursor: pointer;
-            transition: all var(--transition);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.14);
+            color: #cbd5e1 !important;
         }
 
         .btn-hdr-signout:hover {
-            background: rgba(239, 68, 68, 0.24);
-            color: #ffffff !important;
-            transform: translateY(-1px);
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.45);
+            color: #fca5a5 !important;
         }
 
         .stepper-bar {
@@ -2972,15 +3039,91 @@
             .span2 {
                 grid-column: span 1;
             }
-            .hdr {
-                padding: 0 16px;
-                height: 56px;
+
+            * {
+                -webkit-tap-highlight-color: transparent;
             }
-            .hdr-brand span {
+
+            /* Disable 3D tilt & perspective on mobile to eliminate GPU texture flicker */
+            .login-box,
+            .upload-card,
+            .welcome-hero,
+            .sub-wrap,
+            .ubo-card,
+            .doc-preview-box,
+            .audit-modal-box,
+            .rm-card,
+            .rm-metric-card,
+            .rm-modal-card {
+                transform: none !important;
+                perspective: none !important;
+                will-change: auto !important;
+                -webkit-backface-visibility: hidden;
+                backface-visibility: hidden;
+            }
+
+            /* Optimize blur to avoid mobile GPU buffer thrashing */
+            .login-box,
+            .hdr,
+            .app-wrap,
+            .audit-modal-box {
+                backdrop-filter: blur(12px) !important;
+                -webkit-backdrop-filter: blur(12px) !important;
+            }
+
+            /* Prevent subpixel grid sheen flickering on mobile pinch/scroll */
+            .login-grid-sheen {
+                display: none !important;
+            }
+
+            .hdr {
+                padding: 8px 14px;
+                height: auto;
+                min-height: 56px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .hdr-brand {
+                gap: 8px;
+            }
+            .hdr-brand .brand-name {
                 font-size: 13px;
             }
-            .hdr-brand small {
+            .hdr-brand .brand-sub {
                 display: none;
+            }
+            .hdr-cockpit-capsule {
+                height: 32px;
+                padding: 0 10px;
+                gap: 8px;
+                max-width: 100%;
+                overflow-x: auto;
+            }
+            .capsule-step-badge {
+                font-size: 11px;
+                gap: 6px;
+            }
+            .capsule-title {
+                font-size: 11px;
+            }
+            .capsule-company-tag {
+                font-size: 11px;
+            }
+            .tag-name {
+                max-width: 110px;
+            }
+            .hdr-right {
+                gap: 6px;
+                flex-wrap: wrap;
+            }
+            .btn-hdr-action {
+                height: 32px;
+                padding: 0 10px;
+                font-size: 11px;
+                gap: 5px;
+            }
+            .btn-hdr-action .hdr-btn-icon {
+                font-size: 12px;
             }
             .stepper-bar {
                 padding: 0 12px;
@@ -3295,10 +3438,18 @@
             }
         }
 
+        /* ── Anti-Flicker: Keep loginOverlay invisible while rehydrating existing session ── */
+        html.has-auth-token #loginOverlay:not(.force-show) {
+            display: none !important;
+        }
+
         /* ── LOGIN OVERLAY & AMBIENT AURORA (mal.ai VIBE) ── */
         #loginOverlay {
             position: fixed;
             inset: 0;
+            width: 100%;
+            height: 100%;
+            min-height: 100dvh;
             z-index: 10000;
             background: var(--page-bg, #010507);
             display: flex;
@@ -3306,7 +3457,7 @@
             justify-content: center;
             padding: 20px;
             overflow: hidden;
-            transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out), filter 0.6s var(--ease-out);
+            transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out), filter 0.5s var(--ease-out);
         }
 
         #loginOverlay.hidden {
@@ -3412,7 +3563,10 @@
             max-width: 470px;
             padding: 44px 38px 36px;
             overflow: hidden;
-            animation: loginCardEnter 0.7s var(--ease-out) both, cardGlowBreath 6s ease-in-out infinite 0.7s;
+            transform-style: preserve-3d;
+            will-change: transform;
+            transition: transform 0.12s ease-out;
+            animation: cardGlowBreath 6s ease-in-out infinite;
         }
 
         .login-card-glare {
@@ -3420,9 +3574,11 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 1px;
+            height: 1.5px;
             background: linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.65), rgba(255, 255, 255, 0.9), rgba(0, 210, 255, 0.65), transparent);
             pointer-events: none;
+            z-index: 20;
+            transition: background 0.08s ease-out, opacity 0.3s ease;
         }
 
         .login-header {
