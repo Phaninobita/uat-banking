@@ -12,7 +12,14 @@
 <body>
     <div id="rmToastContainer" class="rm-toast-container"></div>
     <div id="rmLoginView" class="rm-login-wrap">
-        <div class="rm-login-card">
+        <!-- Ambient Neo-Banking Aurora Mesh (mal.ai style) -->
+        <div class="rm-aurora-bg" aria-hidden="true">
+            <div class="rm-aurora-glow glow-1"></div>
+            <div class="rm-aurora-glow glow-2"></div>
+            <div class="rm-aurora-beam"></div>
+        </div>
+        <div class="rm-login-card" id="rmLoginCard">
+            <div class="rm-card-glare"></div>
             <div class="rm-login-header">
                 <div class="rm-logo-shield">
                     <div class="rm-logo-mark">FNB</div>
@@ -32,7 +39,7 @@
                     <input type="password" id="rmPassword" class="rm-input" value="" placeholder="Enter secure passkey" required>
                 </div>
                 <button type="submit" class="rm-btn rm-btn-primary rm-btn-block">
-                    &#x1F511; Access Relationship Manager Suite
+                    <span>&#x1F511; Access Relationship Manager Suite</span>
                 </button>
             </form>
             <div class="rm-login-footer">

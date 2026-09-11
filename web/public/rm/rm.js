@@ -21,6 +21,39 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     if (idInput) idInput.addEventListener("input", hideAlert);
     if (pwdInput) pwdInput.addEventListener("input", hideAlert);
+
+    // ── mal.ai INTERACTIVE 3D CARD TILT & GLARE TRACKING ──
+    const rmLoginWrap = document.getElementById("rmLoginView");
+    const rmCard = document.getElementById("rmLoginCard");
+    const rmGlare = rmCard ? rmCard.querySelector(".rm-card-glare") : null;
+
+    if (rmLoginWrap && rmCard) {
+        rmLoginWrap.addEventListener("mousemove", (e) => {
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+            const rect = rmCard.getBoundingClientRect();
+            const cardX = rect.left + rect.width / 2;
+            const cardY = rect.top + rect.height / 2;
+            const mouseX = e.clientX - cardX;
+            const mouseY = e.clientY - cardY;
+
+            const rotateX = (-mouseY / (rect.height / 2)) * 4.5;
+            const rotateY = (mouseX / (rect.width / 2)) * 4.5;
+
+            rmCard.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-2px)`;
+
+            if (rmGlare) {
+                const glarePos = Math.max(10, Math.min(90, ((e.clientX - rect.left) / rect.width) * 100));
+                rmGlare.style.background = `linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.4) ${glarePos - 25}%, rgba(255, 255, 255, 0.9) ${glarePos}%, rgba(0, 210, 255, 0.4) ${glarePos + 25}%, transparent)`;
+            }
+        });
+
+        rmLoginWrap.addEventListener("mouseleave", () => {
+            rmCard.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)";
+            if (rmGlare) {
+                rmGlare.style.background = "linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.65), rgba(255, 255, 255, 0.85), rgba(0, 210, 255, 0.65), transparent)";
+            }
+        });
+    }
 });
 
 // ── TOAST NOTIFICATIONS ──

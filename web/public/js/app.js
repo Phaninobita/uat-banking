@@ -3405,14 +3405,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (glare) {
             const glarePos = Math.max(10, Math.min(90, ((e.clientX - rect.left) / rect.width) * 100));
-            glare.style.background = `linear-gradient(90deg, transparent, rgba(43, 214, 115, 0.4) ${glarePos - 25}%, rgba(255, 255, 255, 0.9) ${glarePos}%, rgba(43, 214, 115, 0.4) ${glarePos + 25}%, transparent)`;
+            glare.style.background = `linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.4) ${glarePos - 25}%, rgba(255, 255, 255, 0.9) ${glarePos}%, rgba(0, 210, 255, 0.4) ${glarePos + 25}%, transparent)`;
         }
     });
 
     overlay.addEventListener('mouseleave', () => {
         box.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
         if (glare) {
-            glare.style.background = 'linear-gradient(90deg, transparent, rgba(43, 214, 115, 0.6), rgba(255, 255, 255, 0.8), rgba(43, 214, 115, 0.6), transparent)';
+            glare.style.background = 'linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.6), rgba(255, 255, 255, 0.8), rgba(0, 210, 255, 0.6), transparent)';
         }
     });
 });

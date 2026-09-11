@@ -1,31 +1,34 @@
 /* ==============================================================================
    First National Bank — Relationship Manager (RM) Executive Suite Design System
-   Color Palette: Deep Midnight Navy (#090e17), Obsidian Slate (#0f172a), 
-   Executive Amber/Gold (#f59e0b), Cyan Glass (#38bdf8), High-Contrast Text (#ffffff)
+   Color Palette: Electric Cyber Cyan (#00d2ff), Sapphire Azure (#0ea5e9 / #0284c7),
+   Deep Oceanic Void (#020712 / #030d1e), Executive Amber (#f59e0b), Crisp White
    ============================================================================== */
 
 :root {
-    --rm-bg-root: #070b12;
-    --rm-bg-surface: #0c1322;
-    --rm-bg-card: rgba(15, 23, 42, 0.85);
-    --rm-bg-input: #020617;
-    --rm-border: rgba(255, 255, 255, 0.08);
-    --rm-border-focus: #38bdf8;
-    --rm-primary: #0284c7;
-    --rm-primary-hover: #0369a1;
+    --rm-bg-root: #020712;
+    --rm-bg-surface: #030d1e;
+    --rm-bg-card: rgba(2, 13, 30, 0.86);
+    --rm-bg-input: rgba(3, 16, 36, 0.75);
+    --rm-border: rgba(255, 255, 255, 0.1);
+    --rm-border-focus: #00d2ff;
+    --rm-primary: #00d2ff;
+    --rm-primary-hover: #38bdf8;
+    --rm-primary-strong: #00172e;
+    --rm-secondary-strong: #002b52;
     --rm-accent: #f59e0b;
     --rm-accent-hover: #d97706;
     --rm-text-primary: #ffffff;
-    --rm-text-secondary: #cbd5e1;
+    --rm-text-secondary: #e2e8f0;
     --rm-text-muted: #94a3b8;
     --rm-success: #10b981;
     --rm-warning: #f59e0b;
     --rm-danger: #ef4444;
     --rm-font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --rm-radius-sm: 6px;
-    --rm-radius-md: 10px;
-    --rm-radius-lg: 16px;
-    --rm-shadow-card: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 1px rgba(255, 255, 255, 0.1);
+    --rm-radius-sm: 8px;
+    --rm-radius-md: 12px;
+    --rm-radius-lg: 20px;
+    --rm-radius-xl: 28px;
+    --rm-shadow-card: 0 16px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 * {
@@ -37,8 +40,9 @@
 body {
     background-color: var(--rm-bg-root);
     background-image: 
-        radial-gradient(ellipse 60% 40% at 50% -10%, rgba(2, 132, 199, 0.15), transparent),
-        radial-gradient(ellipse 40% 30% at 85% 15%, rgba(245, 158, 11, 0.08), transparent);
+        radial-gradient(ellipse 70% 50% at 50% -10%, rgba(0, 210, 255, 0.16), transparent 70%),
+        radial-gradient(ellipse 50% 40% at 85% 20%, rgba(14, 165, 233, 0.12), transparent 65%),
+        radial-gradient(circle at 10% 80%, rgba(2, 43, 82, 0.25), transparent 50%);
     color: var(--rm-text-primary);
     font-family: var(--rm-font);
     font-size: 14px;
@@ -84,36 +88,117 @@ body {
     to { transform: translateX(0); opacity: 1; }
 }
 
-/* ── 1. RM LOGIN SCREEN ── */
+/* ── KEYFRAME ANIMATIONS (mal.ai style) ── */
+@keyframes malPillSweep {
+    0% { transform: translateY(-140%) rotate(25deg); }
+    100% { transform: translateY(160%) rotate(25deg); }
+}
+
+@keyframes rmAuroraDrift1 {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(40px, -30px) scale(1.06); }
+    100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes rmAuroraDrift2 {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-40px, 30px) scale(0.95); }
+    100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes rmCardGlowBreath {
+    0%, 100% {
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 35px rgba(0, 210, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+    50% {
+        box-shadow: 0 32px 80px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 0 55px rgba(0, 210, 255, 0.22);
+        border-color: rgba(0, 210, 255, 0.35);
+    }
+}
+
+/* ── 1. RM LOGIN SCREEN & AMBIENT AURORA ── */
 .rm-login-wrap {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 24px;
-}
-
-.rm-login-card {
-    background: var(--rm-bg-card);
-    border: 1px solid var(--rm-border);
-    border-radius: var(--rm-radius-lg);
-    box-shadow: var(--rm-shadow-card);
-    width: 100%;
-    max-width: 480px;
-    padding: 40px;
-    backdrop-filter: blur(16px);
     position: relative;
     overflow: hidden;
 }
 
-.rm-login-card::before {
-    content: '';
+.rm-aurora-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.rm-aurora-glow {
+    position: absolute;
+    border-radius: 50%;
+    mix-blend-mode: screen;
+    pointer-events: none;
+}
+
+.rm-aurora-glow.glow-1 {
+    width: 650px;
+    height: 650px;
+    top: -120px;
+    left: 15%;
+    background: radial-gradient(50% 50% at 50% 50%, rgba(0, 210, 255, 0.22) 0%, rgba(2, 132, 199, 0.12) 45%, transparent 75%);
+    filter: blur(65px);
+    animation: rmAuroraDrift1 20s ease-in-out infinite alternate;
+}
+
+.rm-aurora-glow.glow-2 {
+    width: 750px;
+    height: 750px;
+    bottom: -150px;
+    right: 10%;
+    background: radial-gradient(50% 50% at 50% 50%, rgba(14, 165, 233, 0.2) 0%, rgba(0, 23, 46, 0.2) 50%, transparent 75%);
+    filter: blur(75px);
+    animation: rmAuroraDrift2 24s ease-in-out infinite alternate;
+}
+
+.rm-aurora-beam {
+    position: absolute;
+    width: 500px;
+    height: 1600px;
+    background: linear-gradient(180deg, rgba(0, 210, 255, 0.06) 0%, transparent 100%);
+    pointer-events: none;
+    transform: rotate(30deg);
+    top: -300px;
+    left: 25%;
+    mix-blend-mode: plus-lighter;
+}
+
+.rm-login-card {
+    background: rgba(2, 13, 30, 0.86);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--rm-radius-xl, 28px);
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 0 45px rgba(0, 210, 255, 0.12);
+    width: 100%;
+    max-width: 480px;
+    padding: 44px 40px;
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    position: relative;
+    overflow: hidden;
+    animation: rmCardGlowBreath 6s ease-in-out infinite;
+    z-index: 10;
+}
+
+.rm-card-glare {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--rm-primary), var(--rm-accent));
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.65), rgba(255, 255, 255, 0.85), rgba(0, 210, 255, 0.65), transparent);
+    pointer-events: none;
 }
 
 .rm-login-header {
@@ -130,18 +215,19 @@ body {
 }
 
 .rm-logo-mark {
-    width: 48px;
-    height: 48px;
-    background: linear-gradient(135deg, var(--rm-primary), #1d4ed8);
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, var(--rm-primary), var(--rm-secondary-strong));
     color: #ffffff;
     font-weight: 800;
     font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 12px;
-    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+    border-radius: 14px;
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
     letter-spacing: -0.05em;
+    border: 1px solid rgba(0, 210, 255, 0.4);
 }
 
 .rm-secure-badge {
@@ -205,20 +291,22 @@ body {
 
 .rm-input {
     width: 100%;
-    padding: 12px 14px;
+    padding: 13px 16px;
     background: var(--rm-bg-input);
-    border: 1px solid var(--rm-border);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: var(--rm-radius-md);
     color: #ffffff;
     font-family: inherit;
     font-size: 13.5px;
     transition: all 0.2s ease;
     outline: none;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
 }
 
 .rm-input:focus {
     border-color: var(--rm-border-focus);
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+    box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.25), 0 0 20px rgba(0, 210, 255, 0.15);
+    background: rgba(4, 24, 52, 0.88);
 }
 
 .rm-select {
@@ -234,10 +322,10 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 12px 20px;
+    padding: 12px 24px;
     font-size: 13.5px;
     font-weight: 700;
-    border-radius: var(--rm-radius-md);
+    border-radius: 999px;
     border: none;
     cursor: pointer;
     font-family: inherit;
@@ -250,14 +338,53 @@ body {
 }
 
 .rm-btn-primary {
-    background: linear-gradient(135deg, var(--rm-primary), #0369a1);
+    position: relative;
+    border-radius: 999px;
+    background: linear-gradient(16.7deg, var(--rm-primary) 9.6%, var(--rm-secondary-strong) 36.3%, var(--rm-primary-strong) 92.5%);
+    border: 1px solid rgba(0, 210, 255, 0.55);
     color: #ffffff;
-    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+    box-shadow: inset 0 -8px 20px rgba(0, 210, 255, 0.32), 0 8px 24px rgba(0, 23, 46, 0.6);
+    overflow: hidden;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.rm-btn-primary::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    inset: -1px 0 auto;
+    height: 60%;
+    background: radial-gradient(60% 100% at 50% 0, rgba(255, 255, 255, 0.4), transparent 70%);
+    mix-blend-mode: color-dodge;
+    pointer-events: none;
+}
+
+.rm-btn-primary::after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: -140%;
+    left: 0;
+    width: 60px;
+    height: 380%;
+    background: #ffffff;
+    filter: blur(32px);
+    mix-blend-mode: overlay;
+    opacity: 0.85;
+    pointer-events: none;
+    animation: malPillSweep 4.5s linear infinite;
 }
 
 .rm-btn-primary:hover {
-    background: linear-gradient(135deg, var(--rm-primary-hover), #0284c7);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    border-color: rgba(0, 210, 255, 0.9);
+    box-shadow: inset 0 -8px 20px #00d2ff, 0 12px 36px rgba(0, 210, 255, 0.45);
 }
 
 .rm-btn-demo {
