@@ -93,15 +93,15 @@ function initParticles() {
     }
 }
 
-// &#8212;&#8212; THEME INITIALIZATION &#8212;&#8212;
+// ── THEME INITIALIZATION ──
 const stepTitles = [
     "",
-    "Documents & Verification",
-    "Company Information",
-    "UBO Identification",
+    "Document Vault",
+    "Company Profile",
+    "Beneficial Owners (UBO)",
     "Ownership Structure",
-    "Corporate Governance",
-    "FATCA & CRS Compliance",
+    "Access & Governance Roles",
+    "Tax & Compliance (FATCA / CRS)",
     "Review & Final Submission"
 ];
 
