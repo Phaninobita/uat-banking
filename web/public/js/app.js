@@ -4284,8 +4284,8 @@ function openEmailInReader(id) {
     // Dynamic Action Banner for interactive demo
     if (actionBanner) {
         let yopmailBtn = '';
-        if (email.to && email.to.toLowerCase().includes('yopmail')) {
-            const user = email.to.split('@')[0];
+        if (email.to) {
+            const user = email.to.split('@')[0].replace(/[^a-z0-9._-]/gi, '');
             yopmailBtn = `
                 <a href="https://yopmail.com/?${encodeURIComponent(user)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.4);color:#38bdf8;padding:6px 12px;border-radius:6px;font-size:12px;text-decoration:none;font-weight:600;margin-left:auto;">
                     📬 View in Yopmail ↗

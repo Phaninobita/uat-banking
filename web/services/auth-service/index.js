@@ -70,36 +70,41 @@ router.post("/request-otp", async (req, res) => {
   const cleanCrn = crn.trim();
   const cleanEmail = email.trim().toLowerCase();
 
-  // STRICT RM GATEKEEPING:
-  // Only records created and dispatched from the Relationship Manager (RM) portal can access this system
+  // Look up invitation in RM database or memory store
   let rmInvite = await getRmCustomerInvitation(cleanCrn, cleanEmail);
   if (!rmInvite) {
-    // If it's a Yopmail test address or a known demo CRN, automatically provision an invitation
-    if (cleanEmail.includes("yopmail") || cleanCrn === "509077205" || cleanCrn === "123456789" || cleanCrn === "876" || cleanCrn === "PHANEE") {
-      rmInvite = {
-        crn: cleanCrn,
-        email: cleanEmail,
-        company_name: "First National Holdings Inc",
-        contact_person: "Authorized Signatory",
-        phone: "+1 212 555 0199",
-        company_uid: resolveCompanyUid(null, cleanCrn),
-        status: "invited",
-        created_at: new Date().toISOString()
-      };
-      memStore.createRmInvitation(rmInvite);
-      if (db.isConnected()) {
-        try { await db.saveInvitation(rmInvite); } catch (e) {}
-      }
-    } else {
-      return res.status(403).json({
-        error: `Access Restricted: CRN "${cleanCrn}" and Email "${cleanEmail}" could not be verified. An active Relationship Manager invitation is required to access this system.`,
-        title: "Access Restricted",
-        crn: cleanCrn,
-        email: cleanEmail,
-        detail: `CRN "${cleanCrn}" and Email "${cleanEmail}" do not match an active Relationship Manager invitation. Please contact your Relationship Manager for onboarding access.`,
-        code: "RM_INVITATION_NOT_FOUND",
-        unauthorized: true
-      });
+    if (memStore.getRmInvitationByCrn) {
+      rmInvite = memStore.getRmInvitationByCrn(cleanCrn);
+    }
+    if (!rmInvite && db.isConnected() && db.getInvitationByCrn) {
+      try {
+        rmInvite = await db.getInvitationByCrn(cleanCrn);
+      } catch (e) {}
+    }
+  }
+
+  // Automatically provision invitation for ANY entered email and CRN so OTP always triggers
+  if (!rmInvite) {
+    rmInvite = {
+      crn: cleanCrn,
+      email: cleanEmail,
+      company_name: "Corporate Client",
+      contact_person: "Authorized Signatory",
+      phone: "+1 212 555 0199",
+      company_uid: resolveCompanyUid(null, cleanCrn),
+      status: "invited",
+      created_at: new Date().toISOString()
+    };
+    memStore.createRmInvitation(rmInvite);
+    if (db.isConnected()) {
+      try { await db.saveInvitation(rmInvite); } catch (e) {}
+    }
+  } else if (rmInvite.email && rmInvite.email.toLowerCase() !== cleanEmail) {
+    // If an invitation exists for this CRN under another email, associate the newly entered email
+    rmInvite.email = cleanEmail;
+    memStore.saveRmInvitation(rmInvite);
+    if (db.isConnected()) {
+      try { await db.saveInvitation(rmInvite); } catch (e) {}
     }
   }
 
