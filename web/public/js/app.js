@@ -372,10 +372,25 @@ function captureCurrentStepState(step) {
 }
 
 // &#x1F6C7;&#x1F6C7; STEP 1: DOCUMENT UPLOADS &#x1F6C7;&#x1F6C7;
-function triggerUpload(id) {
-    const el = document.getElementById(id);
-    if (el) el.click();
+function triggerUpload(id, event) {
+    // If the click originated from an action button (Preview/Download/Remove), skip upload
+    if (event && (event.target.closest('.uc-action-bar') || event.target.closest('.btn-uc-action'))) {
+        return;
+    }
+    const fileInput = document.getElementById(id);
+    if (!fileInput) return;
+    if (event && event.target === fileInput) {
+        return;
+    }
+    // If the card already has an uploaded document, don't re-trigger file dialog
+    // Users can use the Remove button to clear, then re-upload
+    const card = fileInput.closest('.upload-card, .fd-upload-card');
+    if (card && card.classList.contains('uploaded')) {
+        return;
+    }
+    fileInput.click();
 }
+window.triggerUpload = triggerUpload;
 
 function allowDrop(e) {
     e.preventDefault();
@@ -1064,7 +1079,19 @@ window.downloadDoc = downloadDoc;
 window.downloadDocFromCache = downloadDoc;
 
 async function removeUploadedDoc(cardId) {
-    const doc = uploadedDocumentsCache[cardId];
+    let doc = uploadedDocumentsCache[cardId] || 
+              uploadedDocumentsCache[cardToDocTypeMap[cardId]] ||
+              uploadedDocumentsCache[docTypeToCardMap[cardId]];
+    if (!doc) {
+        for (const k of Object.keys(uploadedDocumentsCache)) {
+            const item = uploadedDocumentsCache[k];
+            if (item && (item.cardId === cardId || item.docType === cardId || item.docType === cardToDocTypeMap[cardId] || String(item.id) === String(cardId))) {
+                doc = item;
+                break;
+            }
+        }
+    }
+
     if (doc && doc.id) {
         try {
             await ApexApi.deleteDocument(doc.id);
@@ -1072,7 +1099,11 @@ async function removeUploadedDoc(cardId) {
             console.warn('Document delete error:', e);
         }
     }
+
     delete uploadedDocumentsCache[cardId];
+    if (cardToDocTypeMap[cardId]) delete uploadedDocumentsCache[cardToDocTypeMap[cardId]];
+    if (doc && doc.docType) delete uploadedDocumentsCache[doc.docType];
+    if (doc && doc.id) delete uploadedDocumentsCache[String(doc.id)];
 
     const card = document.getElementById(cardId);
     if (card) {
@@ -1086,13 +1117,15 @@ async function removeUploadedDoc(cardId) {
         const input = card.querySelector('input[type="file"]');
         if (input) input.value = '';
 
-        // Restore prompt text
+        // Restore prompt text and extract text
         const promptEl = card.querySelector('.uc-prompt-text');
         if (promptEl) promptEl.style.display = '';
         const strongEl = card.querySelector('strong');
         if (strongEl) strongEl.style.display = '';
         const smallEl = card.querySelector('small');
         if (smallEl) smallEl.style.display = '';
+        const extractsEl = card.querySelector('.extracts');
+        if (extractsEl) extractsEl.style.display = '';
     }
 
     // If Maker or Checker doc was removed, also reset the dropdown selection & person card
@@ -1110,6 +1143,7 @@ async function removeUploadedDoc(cardId) {
     triggerAutoSave();
     updateReviewSection();
 }
+window.removeUploadedDoc = removeUploadedDoc;
 
 // &#x1F6C7;&#x1F6C7; Restore Saved Documents on Load &#x1F6C7;&#x1F6C7;
 async function loadSavedDocuments() {
