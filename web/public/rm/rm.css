@@ -88,10 +88,11 @@ body {
     to { transform: translateX(0); opacity: 1; }
 }
 
-/* ── KEYFRAME ANIMATIONS (mal.ai style) ── */
 @keyframes malPillSweep {
-    0% { transform: translateY(-140%) rotate(25deg); }
-    100% { transform: translateY(160%) rotate(25deg); }
+    0%, 15% { transform: translateX(-140%); opacity: 0; }
+    18% { opacity: 0.85; }
+    38% { transform: translateX(260%); opacity: 0.85; }
+    42%, 100% { transform: translateX(260%); opacity: 0; }
 }
 
 @keyframes logoPulse {
@@ -423,8 +424,16 @@ body {
     text-decoration: none;
 }
 
-.rm-btn-block {
-    width: 100%;
+.rm-btn-block,
+.btn-pill-sweep,
+.btn-login,
+.rm-login-card .rm-btn-primary,
+#rmLoginForm .rm-btn-primary {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin-top: 10px;
 }
 
 .rm-btn-primary {
