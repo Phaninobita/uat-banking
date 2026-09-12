@@ -203,20 +203,12 @@ function toggleRmPasswordVisibility() {
     if (pwdInput.type === "password") {
         pwdInput.type = "text";
         if (eyeIcon) eyeIcon.textContent = "🙈";
-        if (toggleText) toggleText.textContent = "Hide Plain Text";
+        if (toggleText) toggleText.textContent = "Hide Password";
     } else {
         pwdInput.type = "password";
         if (eyeIcon) eyeIcon.textContent = "👁️";
-        if (toggleText) toggleText.textContent = "Show Plain Text";
+        if (toggleText) toggleText.textContent = "Show Password";
     }
-}
-
-function fillDemoRmCredentials() {
-    const idInput = document.getElementById("rmStaffId");
-    const pwdInput = document.getElementById("rmPassword");
-    if (idInput) idInput.value = "phanee";
-    if (pwdInput) pwdInput.value = "Visionbank@324";
-    showRmToast("Demo credentials loaded (Staff ID: phanee | Passkey: Visionbank@324)", "info");
 }
 
 function handleRmSignOut() {
