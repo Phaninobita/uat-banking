@@ -4090,6 +4090,27 @@ function receiveSimulatedEmail(emailItem, suppressAlert = false) {
         playEmailChime();
         showIncomingEmailAlert(item);
     }
+
+    // Auto-dispatch real-time email to Yopmail if recipient is a Yopmail address
+    if (item.to && item.to.toLowerCase().includes('yopmail') && !emailItem.yopmailRealTime && !emailItem.metadata?.yopmailRealTime) {
+        fetch('/api/v1/notifications/yopmail', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                to: item.to,
+                subject: item.subject,
+                html: item.html,
+                text: item.text
+            })
+        }).then(r => r.json()).then(data => {
+            if (data && data.success) {
+                console.log(`📬 [YOPMAIL] Email successfully delivered to ${item.to}: ${data.inboxUrl}`);
+                showToast(`Live email sent to ${item.to}`, 'Yopmail Dispatched', 'success', 3500);
+            }
+        }).catch(err => {
+            console.warn('[YOPMAIL] Client dispatch notice:', err.message);
+        });
+    }
 }
 
 function updateMailboxBadge() {
@@ -4239,15 +4260,28 @@ function openEmailInReader(id) {
 
     // Dynamic Action Banner for interactive demo
     if (actionBanner) {
+        let yopmailBtn = '';
+        if (email.to && email.to.toLowerCase().includes('yopmail')) {
+            const user = email.to.split('@')[0];
+            yopmailBtn = `
+                <a href="https://yopmail.com/?${encodeURIComponent(user)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.4);color:#38bdf8;padding:6px 12px;border-radius:6px;font-size:12px;text-decoration:none;font-weight:600;margin-left:auto;">
+                    📬 View in Yopmail ↗
+                </a>
+            `;
+        }
+
         if (email.code) {
             actionBanner.style.display = 'flex';
             actionBanner.innerHTML = `
                 <div style="font-size:12px; color:#166534; font-weight:600;">
                     💡 Access Code: <strong style="font-size:16px; font-family:monospace; color:#0284c7;">${email.code}</strong>
                 </div>
-                <button type="button" class="btn-autofill-email-code" onclick="autoFillOtpFromEmail('${email.code}')">
-                    ⚡ Auto-Fill Code into Login
-                </button>
+                <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+                    <button type="button" class="btn-autofill-email-code" onclick="autoFillOtpFromEmail('${email.code}')">
+                        ⚡ Auto-Fill Code into Login
+                    </button>
+                    ${yopmailBtn}
+                </div>
             `;
         } else if (email.type === 'docusign') {
             actionBanner.style.display = 'flex';
@@ -4255,9 +4289,12 @@ function openEmailInReader(id) {
                 <div style="font-size:12px; color:#92400e; font-weight:600;">
                     ✍️ E-Signature Required on Client Agreement
                 </div>
-                <button type="button" class="btn-autofill-email-code" style="background:#ffbe00; color:#111827;" onclick="simulateDocuSignSign()">
-                    Sign Documents Now
-                </button>
+                <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+                    <button type="button" class="btn-autofill-email-code" style="background:#ffbe00; color:#111827;" onclick="simulateDocuSignSign()">
+                        Sign Documents Now
+                    </button>
+                    ${yopmailBtn}
+                </div>
             `;
         } else if (email.type === 'resume') {
             actionBanner.style.display = 'flex';
@@ -4265,9 +4302,20 @@ function openEmailInReader(id) {
                 <div style="font-size:12px; color:#1e40af; font-weight:600;">
                     💾 Direct Application Resume Link
                 </div>
-                <button type="button" class="btn-autofill-email-code" onclick="showToast('Resume link copied!', 'Resume', 'info'); closeModal('saveModal');">
-                    Continue Application
-                </button>
+                <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+                    <button type="button" class="btn-autofill-email-code" onclick="showToast('Resume link copied!', 'Resume', 'info'); closeModal('saveModal');">
+                        Continue Application
+                    </button>
+                    ${yopmailBtn}
+                </div>
+            `;
+        } else if (yopmailBtn) {
+            actionBanner.style.display = 'flex';
+            actionBanner.innerHTML = `
+                <div style="font-size:12px; color:#38bdf8; font-weight:600;">
+                    📬 Real-time email dispatched to Yopmail
+                </div>
+                ${yopmailBtn}
             `;
         } else {
             actionBanner.style.display = 'none';

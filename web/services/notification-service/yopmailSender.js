@@ -42,23 +42,32 @@ async function sendYopmail({
     cleanFrom = `${displayName} <alerts@gmail.com>`;
   }
 
+  const cleanTo = to.trim().toLowerCase();
+
   const transporter = nodemailer.createTransport({
     host: "smtp.yopmail.com",
     port: 587,
     secure: false, // opportunistic STARTTLS
     ignoreTLS: true,
-    name: "gmail.com"
+    name: "gmail.com",
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000
   });
 
   const info = await transporter.sendMail({
     from: cleanFrom,
-    to,
+    to: cleanTo,
     subject: subject || "Notification Alert",
     text: text || "This is a real-time notification sent to your Yopmail address.",
-    html: html || `<p>${text || "This is a real-time notification sent to your Yopmail address."}</p>`
+    html: html || `<p>${text || "This is a real-time notification sent to your Yopmail address."}</p>`,
+    envelope: {
+      from: "alerts@gmail.com",
+      to: [cleanTo]
+    }
   });
 
-  const inboxUser = to.split("@")[0];
+  const inboxUser = cleanTo.split("@")[0];
 
   return {
     success: true,

@@ -200,6 +200,10 @@ class MemoryStore {
     return record;
   }
 
+  createRmInvitation(invite) {
+    return this.saveRmInvitation(invite);
+  }
+
   getRmInvitation(crn, email) {
     if (!crn || !email) return null;
     const key = `${crn.trim().toUpperCase()}:${email.trim().toLowerCase()}`;
@@ -273,7 +277,7 @@ class MemoryStore {
     }
 
     // Auto-dispatch real-time email to Yopmail if recipient is a Yopmail address
-    if (to && to.toLowerCase().includes("yopmail")) {
+    if (to && to.toLowerCase().includes("yopmail") && !metadata?.messageId) {
       try {
         const { sendYopmail } = require("../services/notification-service/yopmailSender");
         sendYopmail({
