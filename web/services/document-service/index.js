@@ -295,10 +295,11 @@ router.get("/list/:applicationRef?", requireAuth, async (req, res) => {
   }
 });
 
-// 3. Download Document (Decodes Base64 to binary buffer and sends with correct headers)
+// 3. Download Document (Decodes Base64 to binary buffer from Database and sends with correct headers)
 router.get("/download/:id", async (req, res) => {
   memStore.metrics.serviceRequests.documents++;
   const docId = req.params.id;
+  const appRef = (req.query.appRef || req.query.application_ref || "").trim();
 
   try {
     let doc = null;
@@ -306,26 +307,51 @@ router.get("/download/:id", async (req, res) => {
 
     if (db.isConnected()) {
       try {
-        doc = await db.getDocument(docId);
+        if (!isNaN(parseInt(docId, 10))) {
+          doc = await db.getDocument(docId, appRef);
+        }
+        if (!doc && appRef) {
+          const allDbDocs = await db.listDocuments(appRef);
+          if (Array.isArray(allDbDocs) && allDbDocs.length > 0) {
+            doc = allDbDocs.find(d => 
+              String(d.id) === String(docId) ||
+              d.document_type === docId ||
+              d.file_name === docId
+            ) || null;
+          }
+        }
       } catch (err) {
         console.warn("[DOCUMENT SERVICE] DB get doc warning:", err.message);
       }
     }
+
     if (!doc) {
       doc = memStore.documents.get(parseInt(docId, 10)) || null;
+      if (!doc) {
+        const allMemDocs = Array.from(memStore.documents.values());
+        doc = allMemDocs.find(d => 
+          String(d.id) === String(docId) ||
+          (d.document_type === docId && (!appRef || d.application_ref === appRef)) ||
+          (d.cardId === docId && (!appRef || d.application_ref === appRef)) ||
+          (d.file_name === docId && (!appRef || d.application_ref === appRef))
+        ) || null;
+      }
     }
 
     if (!doc || !doc.file_data_base64) {
-      return res.status(404).json({ error: "Document not found." });
+      return res.status(404).json({ error: `Document "${docId}" not found in database.` });
     }
 
     // Strip data URL prefix if present
     const cleanBase64 = doc.file_data_base64.replace(/^data:[^;]+;base64,/, "");
     const fileBuffer = Buffer.from(cleanBase64, "base64");
+    const mimeType = doc.file_type || (doc.file_name && doc.file_name.endsWith(".pdf") ? "application/pdf" : "application/octet-stream");
+    const safeFileName = doc.file_name || `document_${docId}.pdf`;
 
-    res.setHeader("Content-Type", doc.file_type || "application/octet-stream");
-    res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(doc.file_name)}"`);
+    res.setHeader("Content-Type", mimeType);
+    res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(safeFileName)}"`);
     res.setHeader("Content-Length", fileBuffer.length);
+    res.setHeader("X-Downloaded-From", db.isConnected() ? "PostgreSQL-Supabase" : "Base64-Vault");
 
     return res.send(fileBuffer);
   } catch (err) {

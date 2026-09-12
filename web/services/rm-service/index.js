@@ -258,7 +258,7 @@ router.get("/invitations", async (req, res) => {
  */
 router.post("/invite", async (req, res) => {
   try {
-    const { crn, email, companyName, contactPerson, phone, notes, company_uid } = req.body;
+    const { crn, email, companyName, tradeName, trade_name, contactPerson, phone, notes, company_uid } = req.body;
 
     if (!crn || !crn.trim()) {
       return res.status(400).json({ error: "Commercial Registration Number (CRN) is required." });
@@ -272,6 +272,7 @@ router.post("/invite", async (req, res) => {
 
     const cleanCrn = crn.trim().toUpperCase();
     const cleanEmail = email.trim().toLowerCase();
+    const cleanTrade = (tradeName || trade_name || "").trim();
 
     // Enforce 1:1 Corporate UID resolution: lookup from DB or memStore, else generate canonical CUID
     let companyUid = "";
@@ -309,16 +310,17 @@ router.post("/invite", async (req, res) => {
 
     const inviteToken = "inv_" + crypto.randomBytes(12).toString("hex");
 
-    // Construct customer portal URL with prefill parameters (including company_uid)
+    // Construct customer portal URL with prefill parameters (including company_uid & trade_name)
     const host = req.get("host") || "localhost:3000";
     const protocol = req.protocol === "https" || req.get("x-forwarded-proto") === "https" ? "https" : "http";
-    const inviteLink = `${protocol}://${host}/?crn=${encodeURIComponent(cleanCrn)}&email=${encodeURIComponent(cleanEmail)}&company=${encodeURIComponent(companyName.trim())}&contact=${encodeURIComponent((contactPerson || "").trim())}&phone=${encodeURIComponent((phone || "").trim())}&token=${inviteToken}&company_uid=${encodeURIComponent(companyUid)}`;
+    const inviteLink = `${protocol}://${host}/?crn=${encodeURIComponent(cleanCrn)}&email=${encodeURIComponent(cleanEmail)}&company=${encodeURIComponent(companyName.trim())}&trade_name=${encodeURIComponent(cleanTrade)}&contact=${encodeURIComponent((contactPerson || "").trim())}&phone=${encodeURIComponent((phone || "").trim())}&token=${inviteToken}&company_uid=${encodeURIComponent(companyUid)}`;
 
     const inviteRecord = {
       crn: cleanCrn,
       email: cleanEmail,
       company_uid: companyUid,
       company_name: companyName.trim(),
+      trade_name: cleanTrade,
       contact_person: (contactPerson || "Authorized Signatory").trim(),
       phone: (phone || "").trim(),
       rm_name: req.body.rmName || "Phanee (Senior Relationship Manager)",

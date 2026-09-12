@@ -291,6 +291,7 @@ function goTo(step) {
             if (crnField && !crnField.value && currentLoginCrn) {
                 crnField.value = currentLoginCrn;
             }
+            lockRmFields();
         } else if (step === 4) {
             renderStep4();
             if (isReworkMode) renderOwnershipErrors();
@@ -469,7 +470,7 @@ function markUploaded(cardId, input) {
             <button type="button" class="btn-uc-action btn-uc-preview" onclick="event.stopPropagation(); openDocPreview('${cardId}')">
                 👁️ Preview
             </button>
-            <button type="button" class="btn-uc-action" onclick="event.stopPropagation(); downloadDocFromCache('${cardId}')">
+            <button type="button" class="btn-uc-action" onclick="event.stopPropagation(); downloadDoc('${cardId}')">
                 📥 Download
             </button>
             <button type="button" class="btn-uc-action btn-uc-delete" onclick="event.stopPropagation(); removeUploadedDoc('${cardId}')">
@@ -516,6 +517,7 @@ function markUploaded(cardId, input) {
             const s2Trade = document.getElementById('trade_name');
             if (s2Trade && !s2Trade.value) s2Trade.value = activeComp;
         }
+        lockRmFields();
 
         triggerAutoSave();
         updateReviewSection();
@@ -524,37 +526,150 @@ function markUploaded(cardId, input) {
     reader.readAsDataURL(file);
 }
 
-// &#x1F6C7;&#x1F6C7; Document Preview & Actions &#x1F6C7;&#x1F6C7;
+// ── Document Base64 Decoding & Preview / Database Download Utilities ──
 let currentPreviewCardId = null;
+let activePreviewBlobUrl = null;
 
-function openDocPreview(cardId) {
-    currentPreviewCardId = cardId;
-    const doc = uploadedDocumentsCache[cardId];
-    if (!doc) {
-        showToast('No document content available for preview.', 'Preview Unavailable', 'warning');
-        return;
+function decodeBase64ToBlob(base64Data, fallbackMime = 'application/pdf') {
+    if (!base64Data) return null;
+    let cleanBase64 = base64Data;
+    let mimeType = fallbackMime;
+
+    if (typeof cleanBase64 === 'string' && cleanBase64.startsWith('data:')) {
+        const commaIdx = cleanBase64.indexOf(',');
+        if (commaIdx !== -1) {
+            const header = cleanBase64.substring(0, commaIdx);
+            cleanBase64 = cleanBase64.substring(commaIdx + 1);
+            const match = header.match(/data:([^;]+);/);
+            if (match && match[1]) {
+                mimeType = match[1];
+            }
+        }
     }
+
+    cleanBase64 = cleanBase64.replace(/\s/g, '');
+    const byteCharacters = atob(cleanBase64);
+    const byteNumbers = new Uint8Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    return new Blob([byteNumbers], { type: mimeType });
+}
+window.decodeBase64ToBlob = decodeBase64ToBlob;
+
+async function openDocPreview(cardId) {
+    currentPreviewCardId = cardId;
+    let doc = uploadedDocumentsCache[cardId];
 
     const modal = document.getElementById('docPreviewModal');
     const titleEl = document.getElementById('docPreviewTitle');
     const contentEl = document.getElementById('docPreviewContent');
     const metaEl = document.getElementById('docPreviewMeta');
+    const extLink = document.getElementById('docPreviewExternalLink');
 
     if (!modal || !contentEl) return;
 
-    if (titleEl) titleEl.textContent = doc.fileName;
+    // If doc not cached or missing base64, attempt to load from database
+    if (!doc || !doc.base64Data) {
+        contentEl.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;gap:12px;color:#38bdf8;padding:40px 20px;">
+                <div class="spinner" style="width:36px;height:36px;border:3px solid rgba(56,189,248,0.2);border-top-color:#38bdf8;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+                <div style="font-size:14px;font-weight:600;">Retrieving document from secure database...</div>
+            </div>
+        `;
+        modal.classList.add('open');
+
+        try {
+            const appRef = (ApexApi.getApplicationRef && ApexApi.getApplicationRef()) || currentAppRef || 'AB-2026-DEMO01';
+            const res = await ApexApi.getDocuments(appRef);
+            if (res.success && Array.isArray(res.documents)) {
+                const matched = res.documents.find(d => 
+                    (doc && doc.id && d.id == doc.id) ||
+                    (doc && doc.docType && d.document_type === doc.docType) ||
+                    (doc && doc.fileName && d.file_name === doc.fileName)
+                );
+                if (matched && matched.file_data_base64) {
+                    doc = {
+                        id: matched.id,
+                        cardId: cardId,
+                        docType: matched.document_type,
+                        fileName: matched.file_name,
+                        fileType: matched.file_type || 'application/pdf',
+                        fileSize: matched.file_size || 0,
+                        base64Data: matched.file_data_base64
+                    };
+                    uploadedDocumentsCache[cardId] = doc;
+                }
+            }
+        } catch (fetchErr) {
+            console.warn('[DOC PREVIEW] DB load notice:', fetchErr.message);
+        }
+    }
+
+    if (!doc || !doc.base64Data) {
+        contentEl.innerHTML = `
+            <div style="text-align:center;color:#ef4444;padding:40px 20px;">
+                <div style="font-size:32px;margin-bottom:12px;">⚠️</div>
+                <div style="font-size:15px;font-weight:700;margin-bottom:6px;">Document Content Unavailable</div>
+                <div style="font-size:13px;color:#94a3b8;">The document data could not be retrieved from storage.</div>
+            </div>
+        `;
+        modal.classList.add('open');
+        return;
+    }
+
+    if (titleEl) titleEl.textContent = doc.fileName || 'Document Preview';
+    const sizeKb = Math.round((doc.fileSize || doc.base64Data.length) / 1024);
+    const sizeFormatted = sizeKb > 1024 ? (sizeKb / 1024).toFixed(1) + ' MB' : sizeKb + ' KB';
+
     if (metaEl) {
         metaEl.innerHTML = `
+            <span>File: <strong>${escapeHtml(doc.fileName || 'document')}</strong></span> &bull; 
             <span>Type: <strong>${doc.fileType}</strong></span> &bull; 
-            <span>Size: <strong>${Math.round(doc.fileSize / 1024)} KB</strong></span> &bull; 
-            <span style="color:#34d399;font-weight:700;">🟢 Verified &amp; Stored</span>
+            <span>Size: <strong>${sizeFormatted}</strong></span> &bull; 
+            <span style="color:#34d399;font-weight:700;">🟢 Decoded &amp; Verified</span>
         `;
     }
 
-    if (doc.fileType.startsWith('image/')) {
-        contentEl.innerHTML = `<img class="doc-preview-img-full" src="${doc.base64Data}" alt="${doc.fileName}">`;
-    } else {
-        contentEl.innerHTML = `<iframe class="doc-preview-pdf-embed" src="${doc.base64Data}"></iframe>`;
+    // Revoke previous blob URL to prevent memory leaks
+    if (activePreviewBlobUrl) {
+        URL.revokeObjectURL(activePreviewBlobUrl);
+        activePreviewBlobUrl = null;
+    }
+
+    try {
+        const mimeType = doc.fileType || (doc.fileName && doc.fileName.endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream');
+        const blob = decodeBase64ToBlob(doc.base64Data, mimeType);
+        activePreviewBlobUrl = URL.createObjectURL(blob);
+
+        if (extLink) {
+            extLink.href = activePreviewBlobUrl;
+            extLink.style.display = 'inline-flex';
+        }
+
+        if (mimeType.startsWith('image/')) {
+            contentEl.innerHTML = `<img class="doc-preview-img-full" src="${activePreviewBlobUrl}" alt="${escapeHtml(doc.fileName || 'Uploaded Document')}">`;
+        } else {
+            // PDF: render using object with iframe fallback for native viewer
+            contentEl.innerHTML = `
+                <object data="${activePreviewBlobUrl}" type="application/pdf" class="doc-preview-pdf-embed">
+                    <iframe src="${activePreviewBlobUrl}#toolbar=1" class="doc-preview-pdf-embed">
+                        <div style="padding:30px; text-align:center; color:#94a3b8;">
+                            <p style="font-size:15px;margin-bottom:12px;color:#e2e8f0;">PDF preview is ready.</p>
+                            <a href="${activePreviewBlobUrl}" target="_blank" class="btn btn-primary btn-sm">↗️ Open in New Tab</a>
+                        </div>
+                    </iframe>
+                </object>
+            `;
+        }
+    } catch (err) {
+        console.error('[DOC PREVIEW] Base64 decode error:', err);
+        // Resilient fallback
+        if (doc.fileType && doc.fileType.startsWith('image/')) {
+            contentEl.innerHTML = `<img class="doc-preview-img-full" src="${doc.base64Data}" alt="${escapeHtml(doc.fileName)}">`;
+        } else {
+            contentEl.innerHTML = `<iframe class="doc-preview-pdf-embed" src="${doc.base64Data}"></iframe>`;
+        }
     }
 
     modal.classList.add('open');
@@ -563,29 +678,128 @@ function openDocPreview(cardId) {
 function closeDocPreview() {
     const modal = document.getElementById('docPreviewModal');
     if (modal) modal.classList.remove('open');
+    if (activePreviewBlobUrl) {
+        URL.revokeObjectURL(activePreviewBlobUrl);
+        activePreviewBlobUrl = null;
+    }
+    const extLink = document.getElementById('docPreviewExternalLink');
+    if (extLink) extLink.style.display = 'none';
+    const contentEl = document.getElementById('docPreviewContent');
+    if (contentEl) contentEl.innerHTML = '';
 }
 
 function downloadCurrentPreviewDoc() {
     if (currentPreviewCardId) {
-        downloadDocFromCache(currentPreviewCardId);
+        downloadDoc(currentPreviewCardId);
     }
 }
 window.downloadCurrentPreviewDoc = downloadCurrentPreviewDoc;
 window.closeDocPreview = closeDocPreview;
+window.openDocPreview = openDocPreview;
 
+async function downloadDoc(cardId) {
+    let doc = uploadedDocumentsCache[cardId];
+    const appRef = (ApexApi.getApplicationRef && ApexApi.getApplicationRef()) || currentAppRef || 'AB-2026-DEMO01';
 
-function downloadDocFromCache(cardId) {
-    const doc = uploadedDocumentsCache[cardId];
-    if (!doc || !doc.base64Data) return;
+    // If card metadata is missing, try looking up in DB
+    if (!doc) {
+        try {
+            const listRes = await ApexApi.getDocuments(appRef);
+            if (listRes.success && Array.isArray(listRes.documents)) {
+                const cardMapping = {
+                    'uc-1': 'trade_licence',
+                    'uc-2': 'certificate_of_incorporation',
+                    'uc-3': 'board_resolution',
+                    'uc-4': 'supporting_document'
+                };
+                const expectedType = cardMapping[cardId] || cardId;
+                const matched = listRes.documents.find(d => d.document_type === expectedType || d.id == cardId);
+                if (matched) {
+                    doc = {
+                        id: matched.id,
+                        cardId: cardId,
+                        docType: matched.document_type,
+                        fileName: matched.file_name,
+                        fileType: matched.file_type,
+                        base64Data: matched.file_data_base64
+                    };
+                    uploadedDocumentsCache[cardId] = doc;
+                }
+            }
+        } catch (e) {}
+    }
 
+    if (!doc) {
+        showToast('Document metadata not found.', 'Download Notice', 'warning');
+        return;
+    }
+
+    const fileName = doc.fileName || `${doc.docType || 'document'}.pdf`;
+    showToast(`Downloading "${fileName}" from database...`, 'Database Download', 'info', 2000);
+
+    let downloadedFromDb = false;
+    let blob = null;
+
+    // 1. Prioritize direct download from database microservice endpoint (/download/:id)
+    const docLookupId = doc.id || doc.docType || cardId;
+    try {
+        const dlRes = await fetch(`/api/v1/documents/download/${encodeURIComponent(docLookupId)}?appRef=${encodeURIComponent(appRef)}`);
+        if (dlRes.ok) {
+            blob = await dlRes.blob();
+            downloadedFromDb = true;
+        }
+    } catch (netErr) {
+        console.warn('[DOC DOWNLOAD] Direct database endpoint notice:', netErr.message);
+    }
+
+    // 2. If direct download did not return 200, query database document list to get latest persisted record
+    if (!blob) {
+        try {
+            const listRes = await ApexApi.getDocuments(appRef);
+            if (listRes.success && Array.isArray(listRes.documents)) {
+                const matched = listRes.documents.find(d => 
+                    (doc.id && d.id == doc.id) ||
+                    (doc.docType && d.document_type === doc.docType) ||
+                    (d.file_name === doc.fileName)
+                );
+                if (matched && matched.file_data_base64) {
+                    blob = decodeBase64ToBlob(matched.file_data_base64, matched.file_type || doc.fileType);
+                    downloadedFromDb = true;
+                }
+            }
+        } catch (dbErr) {
+            console.warn('[DOC DOWNLOAD] DB list fetch notice:', dbErr.message);
+        }
+    }
+
+    // 3. Fallback to cached base64 if network is completely unreachable
+    if (!blob && doc.base64Data) {
+        blob = decodeBase64ToBlob(doc.base64Data, doc.fileType);
+    }
+
+    if (!blob) {
+        showToast(`Unable to download "${fileName}". Document not found in database.`, 'Download Failed', 'error', 3000);
+        return;
+    }
+
+    // Trigger browser native file download
+    const blobUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = doc.base64Data;
-    link.download = doc.fileName;
+    link.href = blobUrl;
+    link.download = fileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast(`Downloaded: ${doc.fileName}`, 'Download Complete', 'success', 2000);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 20000);
+
+    if (downloadedFromDb) {
+        showToast(`Downloaded "${fileName}" from database.`, 'Download Complete', 'success', 3000);
+    } else {
+        showToast(`Downloaded: ${fileName}`, 'Download Complete', 'success', 2500);
+    }
 }
+window.downloadDoc = downloadDoc;
+window.downloadDocFromCache = downloadDoc;
 
 async function removeUploadedDoc(cardId) {
     const doc = uploadedDocumentsCache[cardId];
@@ -708,7 +922,7 @@ async function loadSavedDocuments() {
                     <button type="button" class="btn-uc-action btn-uc-preview" onclick="event.stopPropagation(); openDocPreview('${cardId}')">
                         👁️ Preview
                     </button>
-                    <button type="button" class="btn-uc-action" onclick="event.stopPropagation(); downloadDocFromCache('${cardId}')">
+                    <button type="button" class="btn-uc-action" onclick="event.stopPropagation(); downloadDoc('${cardId}')">
                         📥 Download
                     </button>
                     <button type="button" class="btn-uc-action btn-uc-delete" onclick="event.stopPropagation(); removeUploadedDoc('${cardId}')">
@@ -734,7 +948,21 @@ async function loadSavedDocuments() {
 }
 window.loadSavedDocuments = loadSavedDocuments;
 
-// &#x1F6C7;&#x1F6C7; STEP 2: COMPANY INFO TABS & TOGGLES &#x1F6C7;&#x1F6C7;
+// ── RELATIONSHIP MANAGER PRE-SET READONLY FIELDS ──
+function lockRmFields() {
+    ['step2_crn', 'step2_name', 'trade_name'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.readOnly = true;
+            el.classList.add('input-readonly-rm');
+            el.setAttribute('tabindex', '-1');
+            el.setAttribute('title', 'Pre-configured by Relationship Manager in RM Portal (Non-editable)');
+        }
+    });
+}
+window.lockRmFields = lockRmFields;
+
+// ── STEP 2: COMPANY INFO TABS & TOGGLES ──
 function switchTab(id) {
     document.querySelectorAll('.sub-nav-item').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.sub-pane').forEach(p => p.classList.remove('active'));
@@ -2815,6 +3043,7 @@ function populateFormData(formData) {
         if (emailVal && document.getElementById('step2_email')) document.getElementById('step2_email').value = emailVal;
         if (vatVal && document.getElementById('step2_vat_trn')) document.getElementById('step2_vat_trn').value = vatVal;
         if (addrVal && document.querySelector('#tab-address input')) document.querySelector('#tab-address input').value = addrVal;
+        lockRmFields();
     }
 
     // Restore Step 3 & 4 entities and UBOs
@@ -3140,6 +3369,7 @@ function displayClientNameOnTop(companyName, crn, companyUid) {
     if (s2Uid && currentCompanyUid) {
         s2Uid.value = currentCompanyUid;
     }
+    lockRmFields();
 }
 
 // &#x1F6C7;&#x1F6C7; FINAL APPLICATION SUBMISSION &#x1F6C7;&#x1F6C7;
@@ -3881,6 +4111,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         const inviteCrn = urlParams.get('crn');
         const inviteEmail = urlParams.get('email');
         const inviteCompany = urlParams.get('company') || urlParams.get('company_name');
+        const inviteTrade = urlParams.get('trade') || urlParams.get('trade_name') || urlParams.get('tradeName') || inviteCompany;
         const inviteContact = urlParams.get('contact') || urlParams.get('contact_person');
         const invitePhone = urlParams.get('phone');
         const inviteCuid = urlParams.get('company_uid') || urlParams.get('cuid');
@@ -3896,9 +4127,11 @@ window.addEventListener('DOMContentLoaded', async () => {
             // Pre-seed Step 2 DOM inputs if available
             if (inviteCrn && document.getElementById('step2_crn')) document.getElementById('step2_crn').value = inviteCrn;
             if (inviteCompany && document.getElementById('step2_name')) document.getElementById('step2_name').value = inviteCompany;
+            if (inviteTrade && document.getElementById('trade_name')) document.getElementById('trade_name').value = inviteTrade;
             if (inviteContact && document.getElementById('step2_contact_person')) document.getElementById('step2_contact_person').value = inviteContact;
             if (invitePhone && document.getElementById('step2_phone')) document.getElementById('step2_phone').value = invitePhone;
             if (inviteEmail && document.getElementById('step2_email')) document.getElementById('step2_email').value = inviteEmail;
+            lockRmFields();
 
             // Display VIP Relationship Manager Invitation Banner on login card
             const loginBox = document.querySelector('.login-box');
@@ -4191,3 +4424,12 @@ function initPortalCardsTilt() {
     });
 }
 window.initPortalCardsTilt = initPortalCardsTilt;
+
+// Enforce read-only state for RM pre-configured fields immediately
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        lockRmFields();
+    });
+} else {
+    lockRmFields();
+}

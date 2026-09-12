@@ -390,17 +390,17 @@
                         <div class="sub-pane active" id="tab-details" role="tabpanel" aria-labelledby="snav-details">
                             <div class="g4">
                                 <div class="field">
-                                    <label>Commercial Registration No.</label>
-                                    <input type="text" id="step2_crn" placeholder="e.g. 509077205">
+                                    <label>Commercial Registration No. <span class="rm-locked-badge">🔒 RM Verified</span></label>
+                                    <input type="text" id="step2_crn" placeholder="e.g. 509077205" readonly class="input-readonly-rm" title="Pre-configured by Relationship Manager in RM Portal (Non-editable)">
                                 </div>
                                 <div class="field">
-                                    <label>Company Name</label>
-                                    <input type="text" id="step2_name" placeholder="Legal Entity Name">
+                                    <label>Company Name <span class="rm-locked-badge">🔒 RM Verified</span></label>
+                                    <input type="text" id="step2_name" placeholder="Legal Entity Name" readonly class="input-readonly-rm" title="Pre-configured by Relationship Manager in RM Portal (Non-editable)">
                                 </div>
                                 <div class="field">
-                                    <label>Trade Name (if different)</label>
-                                    <input type="text" id="trade_name" placeholder="Leave blank if same">
-                                    <span class="help">Optional</span>
+                                    <label>Trade Name (if different) <span class="rm-locked-badge">🔒 RM Verified</span></label>
+                                    <input type="text" id="trade_name" placeholder="Leave blank if same" readonly class="input-readonly-rm" title="Pre-configured by Relationship Manager in RM Portal (Non-editable)">
+                                    <span class="help">Pre-configured by Relationship Manager</span>
                                 </div>
                                 <div class="field">
                                     <label>Legal Type<span class="tooltip-wrap"><span class="tt-icon" aria-label="More information">?</span><span class="tt-popup" role="tooltip">The legal structure of your entity as registered</span></span></label>
@@ -1416,10 +1416,13 @@
         <div class="doc-preview-box">
             <div class="doc-preview-header">
                 <div class="doc-preview-title">
-                    <span>&#x1F4C4;</span>
+                    <span>📄</span>
                     <span id="docPreviewTitle">Document Preview</span>
                 </div>
-                <button type="button" class="btn btn-ghost btn-sm" onclick="closeDocPreview()" style="font-size:16px;">&#x2715;</button>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <a id="docPreviewExternalLink" href="#" target="_blank" class="btn btn-ghost btn-sm" style="display:none;font-size:12px;text-decoration:none;padding:5px 12px;border:1px solid rgba(56,189,248,0.3);color:#38bdf8;border-radius:6px;">↗️ Full View</a>
+                    <button type="button" class="btn btn-ghost btn-sm" onclick="closeDocPreview()" style="font-size:18px;line-height:1;padding:4px 8px;">✕</button>
+                </div>
             </div>
             <div class="doc-preview-content" id="docPreviewContent">
                 <!-- Base64 image or PDF embedded here -->
@@ -1428,9 +1431,14 @@
                 <div id="docPreviewMeta" style="font-size:12px;color:#94a3b8;">
                     <span>Secure Document Storage</span>
                 </div>
-                <button type="button" class="btn btn-primary btn-sm" onclick="closeDocPreview()">
-                    Close Preview
-                </button>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <button type="button" id="docPreviewDownloadBtn" class="btn btn-secondary btn-sm" onclick="downloadCurrentPreviewDoc()" style="display:inline-flex;align-items:center;gap:6px;background:rgba(56,189,248,0.15);border:1px solid #38bdf8;color:#38bdf8;">
+                        📥 Download from Database
+                    </button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="closeDocPreview()">
+                        Close Preview
+                    </button>
+                </div>
             </div>
         </div>
     </div>

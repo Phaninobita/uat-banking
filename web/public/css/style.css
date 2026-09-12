@@ -6257,34 +6257,35 @@
         .doc-preview-modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.88);
             backdrop-filter: blur(14px);
-            z-index: 1000;
+            -webkit-backdrop-filter: blur(14px);
+            z-index: 10500;
             display: none;
             align-items: center;
             justify-content: center;
-            padding: 24px;
+            padding: 20px;
             animation: fadeIn 0.25s ease-out;
         }
         .doc-preview-modal-overlay.open {
             display: flex;
         }
         .doc-preview-box {
-            background: #0f172a;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: var(--radius-xl);
+            background: rgba(15, 23, 42, 0.98);
+            border: 1px solid rgba(0, 210, 255, 0.35);
+            border-radius: var(--radius-xl, 16px);
             width: 100%;
-            max-width: 900px;
-            max-height: 90vh;
+            max-width: 960px;
+            max-height: 92vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 210, 255, 0.15);
         }
         .doc-preview-header {
             padding: 16px 24px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            background: #1e293b;
+            background: linear-gradient(90deg, rgba(15,23,42,1) 0%, rgba(30,41,59,0.9) 100%);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -6300,26 +6301,27 @@
         .doc-preview-content {
             flex: 1;
             overflow: auto;
-            padding: 24px;
+            padding: 20px;
             text-align: center;
-            background: #090d16;
-            min-height: 400px;
+            background: #020d1e;
+            min-height: 480px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .doc-preview-img-full {
             max-width: 100%;
-            max-height: 70vh;
+            max-height: 72vh;
             border-radius: 8px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
             object-fit: contain;
         }
         .doc-preview-pdf-embed {
             width: 100%;
-            height: 65vh;
+            height: 70vh;
             border: none;
             border-radius: 8px;
+            background: #0f172a;
         }
         .doc-preview-footer {
             padding: 14px 24px;
@@ -6328,6 +6330,37 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        /* ── Pre-filled RM Locked Field Styles (Step 2 Non-editable) ── */
+        .input-readonly-rm,
+        input[readonly].input-readonly-rm,
+        input.input-readonly-rm:focus {
+            background-color: rgba(15, 23, 42, 0.75) !important;
+            color: #94a3b8 !important;
+            border-color: rgba(56, 189, 248, 0.25) !important;
+            cursor: not-allowed !important;
+            box-shadow: none !important;
+            outline: none !important;
+            user-select: text;
+        }
+
+        .rm-locked-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10.5px;
+            font-weight: 600;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 4px;
+            padding: 2px 7px;
+            margin-left: 8px;
+            letter-spacing: 0.02em;
+            vertical-align: middle;
         }
 
 

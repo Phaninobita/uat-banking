@@ -211,6 +211,7 @@ async function handleDispatchInvite(ev) {
     const crn = document.getElementById("inviteCrn").value.trim();
     const email = document.getElementById("inviteEmail").value.trim();
     const companyName = document.getElementById("inviteCompany").value.trim();
+    const tradeName = (document.getElementById("inviteTrade")?.value || "").trim();
     const contactPerson = document.getElementById("inviteContact").value.trim();
     const phone = document.getElementById("invitePhone").value.trim();
     const notes = document.getElementById("inviteNotes").value.trim();
@@ -229,6 +230,7 @@ async function handleDispatchInvite(ev) {
                 crn,
                 email,
                 companyName,
+                tradeName,
                 contactPerson,
                 phone,
                 notes
