@@ -1827,26 +1827,26 @@ function initRoleHoverTooltips() {
 
     function positionPopover(target, popover) {
         const rect = target.getBoundingClientRect();
-        const popoverWidth = Math.min(390, window.innerWidth - 32);
+        const popoverWidth = Math.min(380, window.innerWidth - 20);
         popover.style.width = popoverWidth + 'px';
 
         const popoverHeight = popover.offsetHeight || 280;
 
         let left = rect.left + (rect.width / 2) - (popoverWidth / 2);
-        if (left < 16) left = 16;
-        if (left + popoverWidth > window.innerWidth - 16) {
-            left = window.innerWidth - popoverWidth - 16;
+        if (left < 10) left = 10;
+        if (left + popoverWidth > window.innerWidth - 10) {
+            left = window.innerWidth - popoverWidth - 10;
         }
 
         // Try placing below target
         let top = rect.bottom + 10;
-        if (top + popoverHeight > window.innerHeight - 16) {
+        if (top + popoverHeight > window.innerHeight - 10) {
             // Place above if no space below
             const aboveTop = rect.top - popoverHeight - 10;
-            if (aboveTop >= 16) {
+            if (aboveTop >= 10) {
                 top = aboveTop;
             } else {
-                top = Math.max(16, window.innerHeight - popoverHeight - 16);
+                top = Math.max(10, window.innerHeight - popoverHeight - 10);
             }
         }
 
@@ -1880,6 +1880,16 @@ function initRoleHoverTooltips() {
             }
         }
     });
+
+    // Touch support: tap to show, tap outside to dismiss
+    document.addEventListener('touchstart', (e) => {
+        const target = e.target.closest('[data-role]');
+        if (target) {
+            showRoleTooltip(target);
+        } else if (popover && popover.style.display !== 'none' && !popover.contains(e.target)) {
+            hideRoleTooltip();
+        }
+    }, { passive: true });
 
     window.addEventListener('scroll', () => {
         if (activeTarget && popover.style.display !== 'none') {
@@ -4094,12 +4104,20 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initCustomerLoginTilt() {
-    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-    if (isTouch) return; // Prevent mobile touch scroll redraw flickering
+    const isMobileOrTouch = window.innerWidth <= 980 || 
+        ('ontouchstart' in window) || 
+        (navigator.maxTouchPoints > 0) || 
+        !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
     const overlay = document.getElementById('loginOverlay');
     const box = document.getElementById('customerLoginCard') || document.querySelector('.login-box');
     const glare = box ? box.querySelector('.login-card-glare') : null;
+
+    if (isMobileOrTouch) {
+        if (box) box.style.transform = '';
+        return; // Completely disable 3D tilt calculations on mobile to eliminate GPU repaint flickering
+    }
+
     if (!overlay || !box || overlay._hasTiltListener) return;
     overlay._hasTiltListener = true;
 
@@ -4138,10 +4156,17 @@ function initCustomerLoginTilt() {
 window.initCustomerLoginTilt = initCustomerLoginTilt;
 
 function initPortalCardsTilt() {
-    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-    if (isTouch) return; // Prevent mobile touch scroll redraw flickering
+    const isMobileOrTouch = window.innerWidth <= 980 || 
+        ('ontouchstart' in window) || 
+        (navigator.maxTouchPoints > 0) || 
+        !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
     const cards = document.querySelectorAll('.upload-card, .welcome-hero, .sub-wrap, .ubo-card, .doc-preview-box, .audit-modal-box');
+    if (isMobileOrTouch) {
+        cards.forEach(card => { card.style.transform = ''; });
+        return; // Completely disable card tilt on mobile to prevent touch scroll stutter
+    }
+
     cards.forEach(card => {
         if (card._hasTiltListener) return;
         card._hasTiltListener = true;

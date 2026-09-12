@@ -4181,21 +4181,60 @@
             }
         }
 
-        @media (max-width: 720px) {
+        @media (max-width: 768px) {
             .screen-body {
-                padding: 24px 20px;
+                padding: 20px 16px;
             }
             .g2,
             .g3,
             .upload-grid {
                 grid-template-columns: 1fr;
             }
-            .span2 {
+            .span2, .span3, .span4 {
                 grid-column: span 1;
             }
 
             * {
                 -webkit-tap-highlight-color: transparent;
+            }
+
+            /* ── Stop Infinite Animations on Mobile to Prevent GPU Thrashing & Screen Flickering ── */
+            .sub-wrap,
+            .welcome-hero,
+            .ubo-card,
+            .doc-preview-box,
+            .audit-modal-box,
+            .mailbox-panel,
+            .login-box,
+            .logo-mark {
+                animation: none !important;
+            }
+
+            .sub-wrap::after,
+            .welcome-hero::after,
+            .welcome-hero::before,
+            .ubo-card::after,
+            .doc-preview-box::after,
+            .audit-modal-box::after,
+            .mailbox-panel::after,
+            .upload-card::after,
+            .btn-pill-sweep::after,
+            .btn-login::after,
+            .btn-primary::after,
+            .btn-success::after,
+            .particle {
+                animation: none !important;
+                display: none !important;
+            }
+
+            /* Disable heavy blurred glow meshes on mobile (prevent TBDR tile invalidations) */
+            .app-aurora-bg,
+            .login-aurora-bg,
+            .aurora-glow,
+            .app-glow,
+            .aurora-beam,
+            .login-grid-sheen {
+                display: none !important;
             }
 
             /* Disable 3D tilt & perspective on mobile to eliminate GPU texture flicker */
@@ -4220,14 +4259,65 @@
             .login-box,
             .hdr,
             .app-wrap,
-            .audit-modal-box {
-                backdrop-filter: blur(12px) !important;
-                -webkit-backdrop-filter: blur(12px) !important;
+            .audit-modal-box,
+            .portal-sidebar,
+            .portal-topbar {
+                backdrop-filter: blur(8px) !important;
+                -webkit-backdrop-filter: blur(8px) !important;
             }
 
-            /* Prevent subpixel grid sheen flickering on mobile pinch/scroll */
-            .login-grid-sheen {
-                display: none !important;
+            /* ── Responsive Tables & Corporate Role Matrix ── */
+            .table-responsive {
+                width: 100% !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                margin-bottom: 12px !important;
+            }
+            table.rtable {
+                min-width: 540px !important;
+            }
+            .role-category-footer {
+                padding: 10px 14px !important;
+                font-size: 11.5px !important;
+            }
+
+            /* ── Responsive Grids & Dashboards ── */
+            .success-dashboard-grid {
+                grid-template-columns: 1fr !important;
+                gap: 16px !important;
+            }
+            .fd-compact-grid {
+                grid-template-columns: 1fr !important;
+            }
+            .pdc-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+            }
+
+            /* ── Login Box & Fluid OTP Inputs (Prevent Horizontal Overflow) ── */
+            .login-box {
+                padding: 28px 18px 24px !important;
+                border-radius: 20px !important;
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+            .login-header {
+                margin-bottom: 20px !important;
+            }
+            .login-header h1 {
+                font-size: 22px !important;
+            }
+            .otp-row {
+                gap: 8px !important;
+                margin: 18px 0 !important;
+                width: 100% !important;
+                justify-content: center !important;
+            }
+            .otp-row input {
+                width: min(50px, 14vw) !important;
+                height: min(56px, 16vw) !important;
+                font-size: 20px !important;
+                border-radius: 12px !important;
             }
 
             .hdr {
@@ -4295,29 +4385,29 @@
                 flex-wrap: wrap;
             }
             .welcome-hero {
-                padding: 32px 20px;
+                padding: 24px 16px;
             }
             .welcome-hero h1 {
-                font-size: 22px;
+                font-size: 20px;
             }
             .welcome-hero .time-pill {
                 font-size: 11px;
-                padding: 4px 12px;
+                padding: 4px 10px;
             }
             .welcome-hero>div>div {
                 grid-template-columns: 1fr !important;
             }
             .upload-card {
-                padding: 18px 16px;
+                padding: 16px 14px;
             }
             .ubo-card-body {
-                padding: 16px;
+                padding: 14px;
             }
             .success-wrap {
-                padding: 32px 20px;
+                padding: 24px 16px;
             }
             .rm-card {
-                padding: 20px;
+                padding: 16px;
             }
             .nav-bar {
                 flex-wrap: wrap;
@@ -4340,11 +4430,38 @@
         }
 
         @media (max-width: 480px) {
-            body {
-                padding: 8px;
+            html, body {
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow-x: hidden !important;
+                width: 100% !important;
             }
             .app-wrap {
-                border-radius: var(--radius-lg);
+                border-radius: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                overflow-x: hidden !important;
+            }
+            .portal-app-shell {
+                width: 100% !important;
+                overflow-x: hidden !important;
+            }
+            .portal-main-area {
+                width: 100% !important;
+                min-width: 0 !important;
+                overflow-x: hidden !important;
+            }
+            .portal-content-body {
+                padding: 12px 10px 60px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .portal-topbar {
+                padding: 0 10px !important;
+                gap: 6px !important;
+            }
+            .topbar-title {
+                display: none !important;
             }
             .hdr-right .hdr-step-label {
                 font-size: 11px;
@@ -4363,7 +4480,7 @@
                 font-size: 8px;
             }
             .modal-box {
-                padding: 24px 20px;
+                padding: 20px 16px;
             }
             .decl-check label {
                 font-size: 13px;
@@ -4371,6 +4488,35 @@
             .ubo-card-hdr {
                 flex-wrap: wrap;
                 gap: 8px;
+            }
+            .login-box {
+                padding: 22px 14px 18px !important;
+                border-radius: 16px !important;
+            }
+            .login-header h1 {
+                font-size: 19px !important;
+            }
+            .login-header p {
+                font-size: 12.5px !important;
+            }
+            .pdc-grid {
+                grid-template-columns: 1fr !important;
+                gap: 6px !important;
+            }
+            .person-detail-card {
+                padding: 12px !important;
+            }
+            .role-hover-popover {
+                width: calc(100vw - 20px) !important;
+                max-width: calc(100vw - 20px) !important;
+                padding: 12px 14px !important;
+                left: 10px !important;
+            }
+            .rhp-title {
+                font-size: 14px !important;
+            }
+            .rhp-summary {
+                font-size: 11.5px !important;
             }
         }
 
