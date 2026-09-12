@@ -235,7 +235,7 @@ async function handleDispatchInvite(ev) {
     const submitBtn = document.getElementById("btnDispatchInvite");
     if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = "&#x23F3; Dispatching Invitation &amp; Generating Link&hellip;";
+        submitBtn.innerHTML = "<span class=\"btn-label\">&#x23F3; Issuing Corporate Invitation &amp; Generating Link&hellip;</span>";
     }
 
     try {
@@ -255,12 +255,12 @@ async function handleDispatchInvite(ev) {
 
         const data = await res.json();
         if (!res.ok || !data.success) {
-            throw new Error(data.error || "Failed to dispatch customer onboarding invitation.");
+            throw new Error(data.error || "Failed to issue corporate onboarding invitation.");
         }
 
         // Show Success Box with generated link
         displayGeneratedInvite(data.invitation, data.inviteLink);
-        showRmToast(`Invitation dispatched to ${email} for CRN ${crn}.`, "success");
+        showRmToast(`Corporate onboarding invitation issued to ${email} for CRN ${crn}.`, "success");
 
         // Refresh pipeline table
         fetchInvitations();
@@ -269,7 +269,7 @@ async function handleDispatchInvite(ev) {
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = "&#x1F680; Dispatch Customer Invitation &amp; Generate Access Link";
+            submitBtn.innerHTML = "<span class=\"btn-label\">Issue Corporate Onboarding Invitation &amp; Access Link &rarr;</span>";
         }
     }
 }

@@ -94,11 +94,11 @@
         <main class="rm-content">
             <div class="rm-page-header">
                 <div>
-                    <h1 class="rm-page-title">Corporate Customer Onboarding Dispatcher</h1>
-                    <p class="rm-page-sub">Issue tailored customer onboarding links with automated CRN and Email validation.</p>
+                    <h1 class="rm-page-title">Corporate Client Onboarding Command Center</h1>
+                    <p class="rm-page-sub">Issue tailored corporate client onboarding mandates with automated CRN and email verification.</p>
                 </div>
                 <div class="rm-header-actions">
-                    <button class="rm-btn rm-btn-primary" onclick="focusInviteForm()">+ Dispatch New Customer Journey</button>
+                    <button class="rm-btn rm-btn-primary" onclick="focusInviteForm()">+ Initiate Corporate Onboarding</button>
                 </div>
             </div>
             <section class="rm-metrics-grid">
@@ -124,8 +124,8 @@
                     <div class="rm-card-title-group">
                         <span class="rm-card-icon">&#x1F4E7;</span>
                         <div>
-                            <h2 class="rm-card-title">Dispatch Customer Onboarding Link</h2>
-                            <p class="rm-card-sub">Enter the customer's CRN and Email to generate their dedicated access link.</p>
+                            <h2 class="rm-card-title">Issue Corporate Onboarding Invitation</h2>
+                            <p class="rm-card-sub">Enter the corporate client's CRN and registered email to authorize and issue their dedicated onboarding portal access.</p>
                         </div>
                     </div>
                 </div>
@@ -169,20 +169,20 @@
                     <div class="rm-form-actions">
                         <button type="button" class="rm-btn rm-btn-ghost" onclick="resetInviteForm()">Clear Form</button>
                         <button type="submit" class="rm-btn rm-btn-primary" id="btnDispatchInvite">
-                            &#x1F680; Dispatch Customer Invitation &amp; Generate Access Link
+                            <span class="btn-label">Issue Corporate Onboarding Invitation &amp; Access Link &rarr;</span>
                         </button>
                     </div>
                 </form>
                 <div id="inviteSuccessCard" class="rm-success-box" style="display:none;">
                     <div class="rm-success-hdr">
-                        <span class="rm-success-badge">&#x2705; Invitation Generated &amp; Dispatched</span>
+                        <span class="rm-success-badge">&#x2705; Onboarding Invitation Issued &amp; Dispatched</span>
                         <span class="rm-success-time" id="inviteGeneratedTime">Just now</span>
                     </div>
-                    <p class="rm-success-msg">A corporate invitation email has been dispatched. You can also copy and send the secure customer portal link below to your customer:</p>
+                    <p class="rm-success-msg">A corporate onboarding invitation has been dispatched. You can also copy and send the secure client portal link below to your customer:</p>
                     <div class="rm-link-wrap">
                         <input type="text" id="generatedLinkInput" class="rm-link-input" readonly>
                         <button class="rm-btn rm-btn-copy" onclick="copyGeneratedLink()">&#x1F4CB; Copy Link</button>
-                        <a id="btnTestCustomerLink" href="#" target="_blank" class="rm-btn rm-btn-launch">&#x1F680; Open in Customer Portal</a>
+                        <a id="btnTestCustomerLink" href="#" target="_blank" class="rm-btn rm-btn-launch">&#x1F3E2; Open Customer Portal &rarr;</a>
                     </div>
                     <div class="rm-success-chips">
                         <span>CRN: <strong id="chipCrn"></strong></span>
