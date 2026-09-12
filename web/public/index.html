@@ -710,21 +710,21 @@
                             </div>
                             
                             <div class="rcg-pills-row">
-                                <div class="rcg-pill">
+                                <div class="rcg-pill" data-role="board-member">
                                     <span class="rcg-icon">👔</span>
                                     <div>
                                         <strong>Board Member</strong>
                                         <span>Fiduciary governance & statutory oversight</span>
                                     </div>
                                 </div>
-                                <div class="rcg-pill">
+                                <div class="rcg-pill" data-role="senior-management">
                                     <span class="rcg-icon">🏢</span>
                                     <div>
                                         <strong>Senior Management</strong>
                                         <span>Executive C-Suite business leadership</span>
                                     </div>
                                 </div>
-                                <div class="rcg-pill">
+                                <div class="rcg-pill" data-role="authorised-signatory">
                                     <span class="rcg-icon">✍️</span>
                                     <div>
                                         <strong>Authorised Signatory</strong>
@@ -739,9 +739,9 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 37%;">Legal Entity / Person Name</th>
-                                        <th style="width: 21%;">Board Member <span class="role-desc">Sits on board</span></th>
-                                        <th style="width: 21%;">Senior Management <span class="role-desc">C-suite</span></th>
-                                        <th style="width: 21%;">Authorised Signatory <span class="role-desc">Signs & binds</span></th>
+                                        <th style="width: 21%;" data-role="board-member">Board Member <span class="role-desc">Sits on board</span> <span class="role-info-hint">ℹ️</span></th>
+                                        <th style="width: 21%;" data-role="senior-management">Senior Management <span class="role-desc">C-suite</span> <span class="role-info-hint">ℹ️</span></th>
+                                        <th style="width: 21%;" data-role="authorised-signatory">Authorised Signatory <span class="role-desc">Signs & binds</span> <span class="role-info-hint">ℹ️</span></th>
                                     </tr>
                                 </thead>
                                 <tbody id="govTableBody"></tbody>
@@ -759,28 +759,28 @@
                         <div class="role-category-header">
                             <div class="rch-top-row">
                                 <div>
-                                    <div class="rcg-badge">🔐 Treasury & Security</div>
-                                    <h3 class="rcg-title">Portal System Access & Security Matrix</h3>
+                                    <div class="rcg-badge" data-role="admin" style="cursor:pointer;" title="Hover to view Portal Administrator capabilities">🔐 Treasury & Security</div>
+                                    <h3 class="rcg-title">Portal System Access &amp; Security Matrix <span data-role="admin" class="rcg-admin-hint" style="cursor:pointer; font-size:11px; font-weight:600; padding:2px 8px; border-radius:12px; background:rgba(56,189,248,0.12); color:#38bdf8; border:1px solid rgba(56,189,248,0.3); vertical-align:middle; margin-left:6px;" title="Hover to inspect Admin role scope">ℹ️ Admin Role Scope</span></h3>
                                     <p class="rcg-desc">Configure role-based access controls (RBAC) and payment authorization tiers across the First National Bank corporate online portal.</p>
                                 </div>
                             </div>
                             
                             <div class="rcg-pills-row">
-                                <div class="rcg-pill">
+                                <div class="rcg-pill" data-role="admin-maker">
                                     <span class="rcg-icon">📤</span>
                                     <div>
                                         <strong>Admin Maker</strong>
                                         <span>Drafts & initiates wire payments, payroll & FX</span>
                                     </div>
                                 </div>
-                                <div class="rcg-pill">
+                                <div class="rcg-pill" data-role="admin-checker">
                                     <span class="rcg-icon">🔍</span>
                                     <div>
                                         <strong>Admin Checker</strong>
                                         <span>Independently reviews & releases funds</span>
                                     </div>
                                 </div>
-                                <div class="rcg-pill">
+                                <div class="rcg-pill" data-role="superuser">
                                     <span class="rcg-icon">🔑</span>
                                     <div>
                                         <strong>Superuser</strong>
@@ -795,9 +795,9 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 37%;">Legal Entity / Person Name</th>
-                                        <th style="width: 21%;">Admin Maker <span class="role-desc">Creates & initiates</span></th>
-                                        <th style="width: 21%;">Admin Checker <span class="role-desc">Reviews & approves</span></th>
-                                        <th style="width: 21%;">Superuser <span class="role-desc">Full admin access</span></th>
+                                        <th style="width: 21%;" data-role="admin-maker">Admin Maker <span class="role-desc">Creates & initiates</span> <span class="role-info-hint">ℹ️</span></th>
+                                        <th style="width: 21%;" data-role="admin-checker">Admin Checker <span class="role-desc">Reviews & approves</span> <span class="role-info-hint">ℹ️</span></th>
+                                        <th style="width: 21%;" data-role="superuser">Superuser <span class="role-desc">Full admin access</span> <span class="role-info-hint">ℹ️</span></th>
                                     </tr>
                                 </thead>
                                 <tbody id="sysTableBody"></tbody>
@@ -1497,6 +1497,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Floating Global Role Capabilities Popover Tooltip -->
+    <div id="roleTooltipPopover" class="role-hover-popover" style="display:none;" aria-hidden="true"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>

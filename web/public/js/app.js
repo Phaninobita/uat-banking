@@ -403,41 +403,58 @@ function markUploaded(cardId, input) {
         const sizeKb = Math.round(file.size / 1024);
         const sizeFormatted = sizeKb > 1024 ? (sizeKb / 1024).toFixed(1) + ' MB' : sizeKb + ' KB';
 
+        const isMakerChecker = (cardId === 'uc-maker' || cardId === 'uc-checker');
+
         // Update status text with DB badge
         const statusEl = card.querySelector('.file-status');
         if (statusEl) {
-            statusEl.innerHTML = `
-                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-                    <div>&#x2705; <strong>${file.name}</strong> (${sizeFormatted})</div>
-                    <span class="db-status-chip">🟢 Verified &amp; Saved</span>
-                </div>
-            `;
-        }
-
-        // Render Base64 Thumbnail
-        let thumbContainer = card.querySelector('.uc-thumbnail-container');
-        if (!thumbContainer) {
-            thumbContainer = document.createElement('div');
-            thumbContainer.className = 'uc-thumbnail-container';
-            const iconEl = card.querySelector('.uc-icon');
-            if (iconEl && iconEl.nextSibling) {
-                card.insertBefore(thumbContainer, iconEl.nextSibling);
+            if (isMakerChecker) {
+                statusEl.innerHTML = `
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin:6px 0;">
+                        <div style="font-size:12.5px;font-weight:600;color:#f8fafc;">🛂 <strong>${file.name}</strong> (${sizeFormatted})</div>
+                        <span class="db-status-chip" style="background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.3);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;">🟢 Passport Verified &amp; Saved</span>
+                    </div>
+                `;
             } else {
-                card.appendChild(thumbContainer);
+                statusEl.innerHTML = `
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                        <div>&#x2705; <strong>${file.name}</strong> (${sizeFormatted})</div>
+                        <span class="db-status-chip">🟢 Verified &amp; Saved</span>
+                    </div>
+                `;
             }
         }
 
-        const isImage = file.type.startsWith('image/');
-        if (isImage) {
-            thumbContainer.innerHTML = `<img class="uc-thumbnail-img" src="${base64Data}" alt="${file.name}">`;
+        // Render Base64 Thumbnail (Omit bulky image preview for Maker / Checker cards)
+        let thumbContainer = card.querySelector('.uc-thumbnail-container');
+        if (isMakerChecker) {
+            // Remove image thumbnail from upload card to keep it clean & compact
+            // Full image preview remains accessible anytime via the Preview button modal
+            if (thumbContainer) thumbContainer.remove();
         } else {
-            thumbContainer.innerHTML = `
-                <div class="uc-pdf-badge">
-                    <span style="font-size:26px;">&#x1F4E4;</span>
-                    <span style="font-weight:700;letter-spacing:0.02em;color:#e2e8f0;">PDF Document</span>
-                    <span style="font-size:11px;color:#38bdf8;font-weight:600;">${sizeFormatted}</span>
-                </div>
-            `;
+            if (!thumbContainer) {
+                thumbContainer = document.createElement('div');
+                thumbContainer.className = 'uc-thumbnail-container';
+                const iconEl = card.querySelector('.uc-icon');
+                if (iconEl && iconEl.nextSibling) {
+                    card.insertBefore(thumbContainer, iconEl.nextSibling);
+                } else {
+                    card.appendChild(thumbContainer);
+                }
+            }
+
+            const isImage = file.type.startsWith('image/');
+            if (isImage) {
+                thumbContainer.innerHTML = `<img class="uc-thumbnail-img" src="${base64Data}" alt="${file.name}">`;
+            } else {
+                thumbContainer.innerHTML = `
+                    <div class="uc-pdf-badge">
+                        <span style="font-size:26px;">&#x1F4E4;</span>
+                        <span style="font-weight:700;letter-spacing:0.02em;color:#e2e8f0;">PDF Document</span>
+                        <span style="font-size:11px;color:#38bdf8;font-weight:600;">${sizeFormatted}</span>
+                    </div>
+                `;
+            }
         }
 
         // Render Action Buttons (Preview, Download, Delete)
@@ -592,6 +609,25 @@ async function removeUploadedDoc(cardId) {
         if (actionBar) actionBar.remove();
         const input = card.querySelector('input[type="file"]');
         if (input) input.value = '';
+
+        // Restore prompt text
+        const promptEl = card.querySelector('.uc-prompt-text');
+        if (promptEl) promptEl.style.display = '';
+        const strongEl = card.querySelector('strong');
+        if (strongEl) strongEl.style.display = '';
+        const smallEl = card.querySelector('small');
+        if (smallEl) smallEl.style.display = '';
+    }
+
+    // If Maker or Checker doc was removed, also reset the dropdown selection & person card
+    if (cardId === 'uc-maker') {
+        const makerSelect = document.getElementById('maker-select');
+        if (makerSelect) makerSelect.value = '';
+        renderPersonDetails('maker', '');
+    } else if (cardId === 'uc-checker') {
+        const checkerSelect = document.getElementById('checker-select');
+        if (checkerSelect) checkerSelect.value = '';
+        renderPersonDetails('checker', '');
     }
 
     showToast('Document removed.', 'Removed', 'info', 2000);
@@ -1633,7 +1669,236 @@ function showDragDemo() {
     }, 900);
 }
 
-// &#x1F6C7;&#x1F6C7; STEP 5: ROLES & GOVERNANCE &#x1F6C7;&#x1F6C7;
+// ==========================================================================
+// ROLE DEFINITIONS & HOVER TOOLTIPS (RBAC Banking Permissions)
+// ==========================================================================
+const ROLE_DEFINITIONS = {
+    'admin': {
+        title: 'Portal Administrator',
+        category: 'Identity & Access Control',
+        icon: '🛡️',
+        summary: 'Provisions system roles in the future, controls user account visibility, resets credentials, and manages organizational access.',
+        capabilities: [
+            '<strong>Role Governance:</strong> Creates and provisions portal roles and access tiers for current and future users',
+            '<strong>Account Visibility:</strong> Controls who can see, view statements, and perform actions on each bank account',
+            '<strong>Credential Management:</strong> Resets passwords, unlocks suspended accounts, and re-issues MFA security tokens',
+            '<strong>User Details:</strong> Updates team member profiles, phone numbers, email addresses, and departmental mandates',
+            '<strong>Access Permissions:</strong> Grants or revokes account-level permissions and sets authorization limits'
+        ],
+        auditNote: 'Administrative security role. Does not directly release corporate funds without dual authorization.'
+    },
+    'superuser': {
+        title: 'Superuser (Master Access)',
+        category: 'Master Administrative & Financial Authority',
+        icon: '🔑',
+        summary: 'Holds full Portal Administrator control PLUS complete operational capability to initiate payments, add beneficiaries, and retrieve statements.',
+        capabilities: [
+            '<strong>All Administrator Powers:</strong> Creates roles, resets user passwords, manages MFA tokens, and controls account visibility',
+            '<strong>Make & Initiate Payments:</strong> Drafts and executes high-value wire transfers, ACH payroll, and FX conversions',
+            '<strong>Add & Manage Beneficiaries:</strong> Creates, validates, and approves domestic and international payment payees (benes)',
+            '<strong>Take & Download Statements:</strong> Downloads certified bank e-statements, transaction ledgers, and audit reports',
+            '<strong>Emergency Treasury Control:</strong> Expedites urgent payments and exercises high-tier transaction authorization'
+        ],
+        auditNote: 'Highest-level portal privilege. Enforces complete executive administrative and financial authority.'
+    },
+    'admin-maker': {
+        title: 'Admin Maker (Initiator)',
+        category: 'Dual-Control Treasury Operations',
+        icon: '📤',
+        summary: 'Drafts, prepares, and initiates outward financial transactions and operational transfers for secondary verification.',
+        capabilities: [
+            '<strong>Initiate Payments:</strong> Drafts wire transfers, foreign currency exchanges, and scheduled bill payments',
+            '<strong>Batch Payroll:</strong> Prepares and uploads bulk payroll disbursement batches and ACH creditor files',
+            '<strong>Add Beneficiaries:</strong> Inputs new payee bank details into the compliance verification queue',
+            '<strong>Dual Control Constraint:</strong> Cannot self-approve or release funds without Admin Checker sign-off (Four-Eyes Principle)'
+        ],
+        auditNote: 'Initiation-only role. Guarantees fraud prevention via strict segregation of duties.'
+    },
+    'admin-checker': {
+        title: 'Admin Checker (Approver)',
+        category: 'Dual-Control Verification & Release',
+        icon: '🔍',
+        summary: 'Independently inspects, authenticates, and releases payments and beneficiaries initiated by the Admin Maker.',
+        capabilities: [
+            '<strong>Payment Authorization:</strong> Reviews payment details, currency amounts, and recipient IBAN/SWIFT credentials',
+            '<strong>Release Funds:</strong> Authenticates and releases transactions for direct execution by the bank',
+            '<strong>Beneficiary Verification:</strong> Independently reviews and approves newly added payment beneficiaries',
+            '<strong>Dual Control Constraint:</strong> Cannot initiate payments; dedicated strictly to secondary audit and release'
+        ],
+        auditNote: 'Approval-only role. Enforces mandatory Four-Eyes dual control before funds exit the bank.'
+    },
+    'board-member': {
+        title: 'Board Member',
+        category: 'Corporate Fiduciary Governance',
+        icon: '👔',
+        summary: 'Statutory director exercising corporate fiduciary oversight and board-level statutory governance.',
+        capabilities: [
+            '<strong>Board Resolutions:</strong> Votes on and passes board resolutions establishing and modifying corporate banking mandates',
+            '<strong>Credit Facilities:</strong> Approves corporate borrowing, debt lines, major mortgages, and banking covenants',
+            '<strong>Audit & Compliance:</strong> Inspects company audit trails, regulatory compliance filings, and annual disclosures',
+            '<strong>Non-Operational:</strong> Does not handle day-to-day transaction processing or portal user administration'
+        ],
+        auditNote: 'Statutory corporate governance role.'
+    },
+    'senior-management': {
+        title: 'Senior Management (Executive)',
+        category: 'Executive Commercial Leadership',
+        icon: '🏢',
+        summary: 'Executive leadership (CEO, CFO, Managing Director) driving commercial strategy and operational thresholds.',
+        capabilities: [
+            '<strong>Authorization Limits:</strong> Sets company-wide transaction limits, payment tiers, and departmental budgets',
+            '<strong>Treasury Strategy:</strong> Oversees corporate liquidity, working capital requirements, and banking relationships',
+            '<strong>Credit Drawdowns:</strong> Authorizes credit facility utilization within approved board covenants',
+            '<strong>Executive Reporting:</strong> Receives executive cash flow summaries, liquidity forecasts, and risk metrics'
+        ],
+        auditNote: 'Executive C-Suite business leadership role.'
+    },
+    'authorised-signatory': {
+        title: 'Authorised Signatory',
+        category: 'Statutory Binding Authority',
+        icon: '✍️',
+        summary: 'Legally designated by Board Resolution to sign official banking agreements and legally bind the company.',
+        capabilities: [
+            '<strong>Legal Mandates:</strong> Signs official bank account opening mandates and electronic signature agreements',
+            '<strong>Facility Contracts:</strong> Executes credit lines, term loans, letters of credit, and treasury trade agreements',
+            '<strong>Mandate Changes:</strong> Authorizes additions or cancellations of official bank accounts and signing lists',
+            '<strong>Statutory Binding:</strong> Legally binds the corporate entity under corporate power of attorney / seal'
+        ],
+        auditNote: 'Mandatory statutory role required for banking onboarding.'
+    }
+};
+
+let roleTooltipInitialized = false;
+
+function initRoleHoverTooltips() {
+    if (roleTooltipInitialized) return;
+    roleTooltipInitialized = true;
+
+    const popover = document.getElementById('roleTooltipPopover');
+    if (!popover) return;
+
+    let activeTarget = null;
+    let hideTimer = null;
+
+    function showRoleTooltip(target) {
+        const roleKey = target.getAttribute('data-role');
+        if (!roleKey) return;
+        const normalizedKey = roleKey.toLowerCase().replace(/_/g, '-');
+        const roleData = ROLE_DEFINITIONS[normalizedKey] || ROLE_DEFINITIONS[roleKey];
+        if (!roleData) return;
+
+        if (hideTimer) {
+            clearTimeout(hideTimer);
+            hideTimer = null;
+        }
+
+        activeTarget = target;
+
+        const itemsHtml = roleData.capabilities.map(cap => {
+            return `<li><span class="rhp-check">✓</span><span>${cap}</span></li>`;
+        }).join('');
+
+        popover.innerHTML = `
+            <div class="rhp-header">
+                <div class="rhp-icon-box">${roleData.icon || '🛡️'}</div>
+                <div>
+                    <div class="rhp-category">${roleData.category}</div>
+                    <h4 class="rhp-title">${roleData.title}</h4>
+                </div>
+            </div>
+            <div class="rhp-summary">${roleData.summary}</div>
+            <div class="rhp-cap-heading">Role Capabilities &amp; Permissions:</div>
+            <ul class="rhp-cap-list">
+                ${itemsHtml}
+            </ul>
+            <div class="rhp-footer">
+                <span class="rhp-ft-icon">🛡️</span>
+                <span>${roleData.auditNote || 'Role permissions are logged and audit-tracked.'}</span>
+            </div>
+        `;
+
+        popover.style.display = 'block';
+        positionPopover(target, popover);
+
+        requestAnimationFrame(() => {
+            popover.classList.add('visible');
+        });
+    }
+
+    function positionPopover(target, popover) {
+        const rect = target.getBoundingClientRect();
+        const popoverWidth = Math.min(390, window.innerWidth - 32);
+        popover.style.width = popoverWidth + 'px';
+
+        const popoverHeight = popover.offsetHeight || 280;
+
+        let left = rect.left + (rect.width / 2) - (popoverWidth / 2);
+        if (left < 16) left = 16;
+        if (left + popoverWidth > window.innerWidth - 16) {
+            left = window.innerWidth - popoverWidth - 16;
+        }
+
+        // Try placing below target
+        let top = rect.bottom + 10;
+        if (top + popoverHeight > window.innerHeight - 16) {
+            // Place above if no space below
+            const aboveTop = rect.top - popoverHeight - 10;
+            if (aboveTop >= 16) {
+                top = aboveTop;
+            } else {
+                top = Math.max(16, window.innerHeight - popoverHeight - 16);
+            }
+        }
+
+        popover.style.left = `${left}px`;
+        popover.style.top = `${top}px`;
+    }
+
+    function hideRoleTooltip() {
+        if (!popover) return;
+        popover.classList.remove('visible');
+        hideTimer = setTimeout(() => {
+            popover.style.display = 'none';
+            activeTarget = null;
+        }, 180);
+    }
+
+    // Delegated mouse hover listeners
+    document.addEventListener('mouseover', (e) => {
+        const target = e.target.closest('[data-role]');
+        if (target) {
+            showRoleTooltip(target);
+        }
+    });
+
+    document.addEventListener('mouseout', (e) => {
+        const target = e.target.closest('[data-role]');
+        if (target) {
+            const related = e.relatedTarget;
+            if (!target.contains(related)) {
+                hideRoleTooltip();
+            }
+        }
+    });
+
+    window.addEventListener('scroll', () => {
+        if (activeTarget && popover.style.display !== 'none') {
+            positionPopover(activeTarget, popover);
+        }
+    }, { passive: true });
+
+    window.addEventListener('resize', () => {
+        if (activeTarget && popover.style.display !== 'none') {
+            positionPopover(activeTarget, popover);
+        }
+    }, { passive: true });
+}
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initRoleHoverTooltips();
+}
+
+// ── STEP 5: ROLES & GOVERNANCE ──
 function renderRoleTables() {
     const govBody = document.getElementById('govTableBody');
     const sysBody = document.getElementById('sysTableBody');
@@ -1856,14 +2121,54 @@ function renderPersonDetails(roleType, personName) {
     cardEl.style.display = 'block';
 }
 
+function resetMakerCheckerUpload(roleType) {
+    const cardId = roleType === 'maker' ? 'uc-maker' : 'uc-checker';
+    const inputId = roleType === 'maker' ? 'f-maker' : 'f-checker';
+
+    // Clear from uploaded document cache
+    delete uploadedDocumentsCache[cardId];
+
+    // Reset file input value
+    const input = document.getElementById(inputId);
+    if (input) input.value = '';
+
+    // Reset upload card element
+    const card = document.getElementById(cardId);
+    if (card) {
+        card.classList.remove('uploaded');
+        const statusEl = card.querySelector('.file-status');
+        if (statusEl) statusEl.innerHTML = '';
+        const thumbContainer = card.querySelector('.uc-thumbnail-container');
+        if (thumbContainer) thumbContainer.remove();
+        const actionBar = card.querySelector('.uc-action-bar');
+        if (actionBar) actionBar.remove();
+
+        // Restore prompt text
+        const promptEl = card.querySelector('.uc-prompt-text');
+        if (promptEl) promptEl.style.display = '';
+        const strongEl = card.querySelector('strong');
+        if (strongEl) strongEl.style.display = '';
+        const smallEl = card.querySelector('small');
+        if (smallEl) smallEl.style.display = '';
+    }
+
+    // Hide person details card above
+    renderPersonDetails(roleType, '');
+    triggerAutoSave();
+}
+
 function onMakerChanged(select) {
     const val = select.value;
+    if (!val) {
+        resetMakerCheckerUpload('maker');
+        return;
+    }
+
     const checkerSelect = document.getElementById('checker-select');
-    
     if (val && checkerSelect && checkerSelect.value === val) {
         showToast('The same individual cannot act as both Maker and Checker (Four-Eyes Principle).', 'Four-Eyes Principle', 'warning');
         checkerSelect.value = '';
-        renderPersonDetails('checker', '');
+        resetMakerCheckerUpload('checker');
     }
 
     renderPersonDetails('maker', val);
@@ -1871,8 +2176,14 @@ function onMakerChanged(select) {
 }
 
 function onCheckerChanged(select) {
+    const val = select.value;
+    if (!val) {
+        resetMakerCheckerUpload('checker');
+        return;
+    }
+
     validateMakerChecker(select);
-    renderPersonDetails('checker', select.value);
+    renderPersonDetails('checker', val);
     triggerAutoSave();
 }
 
@@ -1914,9 +2225,13 @@ function validateMakerChecker(checkerSelect) {
     if (checkerSelect.value && !makerSelect.value) {
         showToast('Please assign a Maker before assigning a Checker.', 'Role Dependency', 'warning');
         checkerSelect.value = '';
+        resetMakerCheckerUpload('checker');
+        return;
     } else if (checkerSelect.value && checkerSelect.value === makerSelect.value) {
         showToast('The same individual cannot act as both Maker and Checker (Four-Eyes Principle).', 'Four-Eyes Principle', 'warning');
         checkerSelect.value = '';
+        resetMakerCheckerUpload('checker');
+        return;
     }
     renderPersonDetails('checker', checkerSelect.value);
     triggerAutoSave();
@@ -2065,6 +2380,12 @@ async function extractMakerChecker(input, roleType) {
 
         // 8. Render rich details card above with extracted passport details
         renderPersonDetails(roleType, personName);
+
+        // Ensure bulky preview image is removed from upload card after extraction
+        if (uploadCardEl) {
+            const thumb = uploadCardEl.querySelector('.uc-thumbnail-container');
+            if (thumb) thumb.remove();
+        }
 
         showToast(`Verified ${personName} (${nationality} Passport ${passportNumber}) as ${roleType}.`, 'Passport Verified', 'success');
         triggerAutoSave();
@@ -3769,6 +4090,7 @@ window.filterAuditTrailTable = filterAuditTrailTable;
 document.addEventListener('DOMContentLoaded', () => {
     initCustomerLoginTilt();
     initPortalCardsTilt();
+    initRoleHoverTooltips();
 });
 
 function initCustomerLoginTilt() {

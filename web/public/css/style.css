@@ -6351,4 +6351,180 @@
                 content: "Rework";
             }
         }
+
+        /* ==========================================================================
+           ROLE HOVER POPOVER TOOLTIP (Corporate Banking RBAC & Permissions)
+           ========================================================================== */
+        .role-hover-popover {
+            position: fixed;
+            z-index: 99999;
+            pointer-events: none;
+            max-width: 390px;
+            width: calc(100vw - 32px);
+            background: linear-gradient(145deg, rgba(13, 23, 42, 0.97) 0%, rgba(15, 30, 56, 0.98) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1.5px solid rgba(56, 189, 248, 0.35);
+            border-radius: 12px;
+            padding: 16px 18px;
+            color: #f1f5f9;
+            box-shadow: 0 16px 42px rgba(0, 0, 0, 0.75), 0 0 24px rgba(56, 189, 248, 0.18);
+            opacity: 0;
+            transform: translateY(6px);
+            transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+            font-family: inherit;
+        }
+
+        .role-hover-popover.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .rhp-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .rhp-icon-box {
+            width: 38px;
+            height: 38px;
+            border-radius: 9px;
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.28);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .rhp-category {
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+            color: #38bdf8;
+            margin-bottom: 2px;
+        }
+
+        .rhp-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #f8fafc;
+            margin: 0;
+            line-height: 1.25;
+        }
+
+        .rhp-summary {
+            font-size: 12px;
+            line-height: 1.5;
+            color: #cbd5e1;
+            margin-bottom: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px 10px;
+            border-radius: 6px;
+            border-left: 3px solid #38bdf8;
+        }
+
+        .rhp-cap-heading {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #94a3b8;
+            margin-bottom: 6px;
+        }
+
+        .rhp-cap-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 12px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .rhp-cap-list li {
+            font-size: 11.5px;
+            line-height: 1.45;
+            color: #e2e8f0;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .rhp-cap-list li strong {
+            color: #38bdf8;
+        }
+
+        .rhp-check {
+            color: #34d399;
+            font-weight: 800;
+            font-size: 12px;
+            line-height: 1.2;
+            flex-shrink: 0;
+        }
+
+        .rhp-footer {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 10.5px;
+            color: #94a3b8;
+        }
+
+        .rhp-ft-icon {
+            font-size: 12px;
+        }
+
+        /* Interactive hover indicators on pills and table headers */
+        .rcg-pill[data-role] {
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+        }
+
+        .rcg-pill[data-role]:hover {
+            background: rgba(56, 189, 248, 0.09);
+            border-color: rgba(56, 189, 248, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(56, 189, 248, 0.14);
+        }
+
+        .rtable th[data-role] {
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .rtable th[data-role]:hover {
+            background: rgba(56, 189, 248, 0.12) !important;
+            color: #38bdf8 !important;
+        }
+
+        .rtable th[data-role] .role-info-hint {
+            font-size: 10px;
+            margin-left: 4px;
+            opacity: 0.65;
+            vertical-align: middle;
+            transition: opacity 0.2s, transform 0.2s;
+            display: inline-block;
+        }
+
+        .rtable th[data-role]:hover .role-info-hint {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        .rcg-admin-hint:hover {
+            background: rgba(56, 189, 248, 0.25) !important;
+            border-color: #38bdf8 !important;
+        }
 
