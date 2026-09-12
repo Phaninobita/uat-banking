@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gringotts Bank &mdash; Relationship Manager Executive Suite | Diagon Alley</title>
-    <link rel="stylesheet" href="/rm/rm.css?v=20260910_02">
+    <link rel="stylesheet" href="/rm/rm.css?v=20260912_03">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -16,19 +16,22 @@
         <div class="rm-aurora-bg" aria-hidden="true">
             <div class="rm-aurora-glow glow-1"></div>
             <div class="rm-aurora-glow glow-2"></div>
-            <div class="rm-aurora-beam"></div>
+            <div class="rm-aurora-glow glow-3"></div>
+            <div class="rm-aurora-beam beam-1"></div>
+            <div class="rm-aurora-beam beam-2"></div>
+            <div class="rm-grid-sheen"></div>
         </div>
         <div class="rm-login-card" id="rmLoginCard">
-            <div class="rm-card-glare"></div>
+            <div class="rm-card-glare" aria-hidden="true"></div>
             <div class="rm-login-header">
-                <div class="rm-logo-shield">
-                    <div class="rm-logo-mark">GB</div>
-                    <span class="rm-secure-badge">&#x1F512; BANK INTRANET</span>
-                </div>
+                <div class="rm-logo-mark" aria-hidden="true">GB</div>
                 <h1 class="rm-login-title">Executive RM Suite</h1>
                 <p class="rm-login-sub">Diagon Alley &bull; Institutional &amp; Vault Services</p>
+                <div class="rm-badge-row">
+                    <span class="rm-secure-badge">&#x1F512; BANK INTRANET</span>
+                </div>
             </div>
-            <div id="rmLoginAlert" class="rm-alert-box" style="display:none;"></div>
+            <div id="rmLoginAlert" class="rm-alert-box" style="display:none;" role="alert"></div>
             <form id="rmLoginForm" onsubmit="handleRmLoginSubmit(event)">
                 <div class="rm-form-group">
                     <label for="rmStaffId">Relationship Manager Staff ID / Username</label>
@@ -38,13 +41,16 @@
                     <label for="rmPassword">Executive Security Passkey</label>
                     <input type="password" id="rmPassword" class="rm-input" value="" placeholder="Enter secure passkey" required>
                 </div>
-                <button type="submit" class="rm-btn rm-btn-primary rm-btn-block">
-                    <span>&#x1F511; Access Relationship Manager Suite</span>
+                <button type="submit" class="rm-btn-primary rm-btn-block">
+                    <span class="btn-label">&#x1F511; Access Relationship Manager Suite &rarr;</span>
                 </button>
             </form>
             <div class="rm-login-footer">
-                <p>Enterprise 256-Bit Encrypted &middot; Internal Bank Intranet Only</p>
-                <p>&copy; 2026 Gringotts Wizarding Bank. Located at 1 Diagon Alley, London. In reference with Hogwarts Financial Council.</p>
+                Enterprise 256-Bit Encrypted &bull; Internal Bank Intranet Only<br>
+                &copy; 2026 Gringotts Wizarding Bank. Located at 1 Diagon Alley, London &bull; In reference with Hogwarts Financial Council.
+                <div class="rm-footer-portal-link">
+                    <a href="/" style="color: #fbbf24; font-size: 11.5px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">&#x1F3E2; Customer Onboarding &amp; Vault Portal &rarr;</a>
+                </div>
             </div>
         </div>
     </div>

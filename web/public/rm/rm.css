@@ -94,6 +94,17 @@ body {
     100% { transform: translateY(160%) rotate(25deg); }
 }
 
+@keyframes logoPulse {
+    0%, 100% {
+        box-shadow: 0 0 24px rgba(0, 210, 255, 0.35);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 36px rgba(0, 210, 255, 0.55);
+        transform: scale(1.02);
+    }
+}
+
 @keyframes rmAuroraDrift1 {
     0% { transform: translate(0, 0) scale(1); }
     50% { transform: translate(40px, -30px) scale(1.06); }
@@ -173,45 +184,79 @@ body {
 }
 
 .rm-aurora-glow.glow-1 {
-    width: 650px;
-    height: 650px;
-    top: -120px;
-    left: 15%;
-    background: radial-gradient(50% 50% at 50% 50%, rgba(0, 210, 255, 0.22) 0%, rgba(2, 132, 199, 0.12) 45%, transparent 75%);
+    width: 750px;
+    height: 750px;
+    top: -150px;
+    left: 10%;
+    background: radial-gradient(50% 50% at 50% 50%, rgba(0, 210, 255, 0.28) 0%, rgba(2, 132, 199, 0.16) 45%, transparent 75%);
     filter: blur(65px);
-    animation: rmAuroraDrift1 20s ease-in-out infinite alternate;
+    animation: rmAuroraDrift1 18s ease-in-out infinite alternate;
 }
 
 .rm-aurora-glow.glow-2 {
-    width: 750px;
-    height: 750px;
-    bottom: -150px;
-    right: 10%;
-    background: radial-gradient(50% 50% at 50% 50%, rgba(14, 165, 233, 0.2) 0%, rgba(0, 23, 46, 0.2) 50%, transparent 75%);
-    filter: blur(75px);
-    animation: rmAuroraDrift2 24s ease-in-out infinite alternate;
+    width: 900px;
+    height: 900px;
+    bottom: -200px;
+    right: 5%;
+    background: radial-gradient(50% 50% at 50% 50%, rgba(14, 165, 233, 0.24) 0%, rgba(0, 23, 46, 0.25) 48%, transparent 75%);
+    filter: blur(80px);
+    animation: rmAuroraDrift2 22s ease-in-out infinite alternate;
+}
+
+.rm-aurora-glow.glow-3 {
+    width: 550px;
+    height: 550px;
+    top: 40%;
+    left: 45%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 65%);
+    filter: blur(55px);
 }
 
 .rm-aurora-beam {
     position: absolute;
-    width: 500px;
-    height: 1600px;
-    background: linear-gradient(180deg, rgba(0, 210, 255, 0.06) 0%, transparent 100%);
+    width: 600px;
+    height: 1800px;
+    background: linear-gradient(180deg, rgba(0, 210, 255, 0.08) 0%, rgba(2, 132, 199, 0.04) 50%, transparent 100%);
     pointer-events: none;
-    transform: rotate(30deg);
-    top: -300px;
-    left: 25%;
     mix-blend-mode: plus-lighter;
 }
 
+.rm-aurora-beam.beam-1 {
+    top: -400px;
+    left: 20%;
+    transform: rotate(35deg);
+    opacity: 0.6;
+}
+
+.rm-aurora-beam.beam-2 {
+    top: -200px;
+    right: 15%;
+    transform: rotate(-25deg);
+    opacity: 0.5;
+}
+
+.rm-grid-sheen {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+    background-size: 36px 36px;
+    opacity: 0.35;
+    mask-image: radial-gradient(circle at 50% 50%, black 40%, transparent 80%);
+    -webkit-mask-image: radial-gradient(circle at 50% 50%, black 40%, transparent 80%);
+    pointer-events: none;
+}
+
 .rm-login-card {
-    background: rgba(2, 13, 30, 0.86);
+    background: rgba(2, 13, 30, 0.84);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: var(--rm-radius-xl, 28px);
-    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 0 45px rgba(0, 210, 255, 0.12);
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.85),
+                inset 0 1px 0 rgba(255, 255, 255, 0.16),
+                0 0 45px rgba(0, 210, 255, 0.12);
     width: 100%;
-    max-width: 480px;
-    padding: 44px 40px;
+    max-width: 470px;
+    padding: 44px 38px 36px;
     backdrop-filter: blur(28px);
     -webkit-backdrop-filter: blur(28px);
     position: relative;
@@ -225,62 +270,71 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.65), rgba(255, 255, 255, 0.85), rgba(0, 210, 255, 0.65), transparent);
+    height: 1.5px;
+    background: linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.65), rgba(255, 255, 255, 0.9), rgba(0, 210, 255, 0.65), transparent);
     pointer-events: none;
+    z-index: 20;
 }
 
 .rm-login-header {
     text-align: center;
     margin-bottom: 28px;
-}
-
-.rm-logo-shield {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 16px;
+    position: relative;
 }
 
 .rm-logo-mark {
-    width: 52px;
-    height: 52px;
-    background: linear-gradient(135deg, var(--rm-primary), var(--rm-secondary-strong));
-    color: #ffffff;
-    font-weight: 800;
-    font-size: 20px;
-    display: flex;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--rm-primary) 0%, var(--rm-secondary-strong) 55%, var(--rm-primary-strong) 100%);
+    border: 1px solid rgba(0, 210, 255, 0.5);
+    border-radius: 16px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 14px;
-    box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
-    letter-spacing: -0.05em;
-    border: 1px solid rgba(0, 210, 255, 0.4);
+    font-weight: 900;
+    font-size: 22px;
+    color: #ffffff;
+    margin-bottom: 16px;
+    animation: logoPulse 4s ease-in-out infinite;
+    letter-spacing: -0.5px;
+    box-shadow: 0 0 24px rgba(0, 210, 255, 0.35);
+}
+
+.rm-badge-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
 }
 
 .rm-secure-badge {
-    font-size: 10px;
-    font-weight: 800;
-    background: rgba(245, 158, 11, 0.15);
-    border: 1px solid var(--rm-accent);
-    color: var(--rm-accent);
-    padding: 3px 8px;
-    border-radius: 20px;
-    letter-spacing: 0.05em;
+    font-size: 10.5px;
+    font-weight: 700;
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    color: #fbbf24;
+    padding: 3px 10px;
+    border-radius: 999px;
+    letter-spacing: 0.04em;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .rm-login-title {
-    font-size: 24px;
-    font-weight: 800;
-    color: #ffffff;
-    letter-spacing: -0.02em;
-    margin-bottom: 4px;
+    font-size: 25px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -0.6px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, #ffffff 55%, rgba(255, 255, 255, 0.65) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
 }
 
 .rm-login-sub {
-    font-size: 13.5px;
-    color: var(--rm-text-muted);
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 14px;
+    letter-spacing: -0.2px;
 }
 
 .rm-clearance-pill {
@@ -301,10 +355,11 @@ body {
 
 .rm-form-group label {
     display: block;
-    font-size: 12.5px;
+    font-size: 13px;
     font-weight: 600;
-    color: var(--rm-text-secondary);
+    color: rgba(255, 255, 255, 0.88) !important;
     margin-bottom: 8px;
+    letter-spacing: -0.2px;
 }
 
 .rm-req {
@@ -320,22 +375,27 @@ body {
 
 .rm-input {
     width: 100%;
-    padding: 13px 16px;
-    background: var(--rm-bg-input);
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.04) !important;
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: var(--rm-radius-md);
-    color: #ffffff;
+    border-radius: 14px;
+    color: #ffffff !important;
     font-family: inherit;
-    font-size: 13.5px;
-    transition: all 0.2s ease;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
     outline: none;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.rm-input::placeholder {
+    color: rgba(255, 255, 255, 0.35) !important;
 }
 
 .rm-input:focus {
     border-color: var(--rm-border-focus);
     box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.25), 0 0 20px rgba(0, 210, 255, 0.15);
-    background: rgba(4, 24, 52, 0.88);
+    background: rgba(255, 255, 255, 0.07) !important;
 }
 
 .rm-select {
@@ -368,19 +428,29 @@ body {
 
 .rm-btn-primary {
     position: relative;
-    border-radius: 999px;
-    background: linear-gradient(16.7deg, var(--rm-primary) 9.6%, var(--rm-secondary-strong) 36.3%, var(--rm-primary-strong) 92.5%);
-    border: 1px solid rgba(0, 210, 255, 0.55);
-    color: #ffffff;
-    box-shadow: inset 0 -8px 20px rgba(0, 210, 255, 0.32), 0 8px 24px rgba(0, 23, 46, 0.6);
-    overflow: hidden;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    width: 100%;
+    height: 52px;
+    padding: 0 24px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 210, 255, 0.55);
+    overflow: hidden;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 20px;
+    letter-spacing: -0.2px;
+    color: #ffffff;
+    cursor: pointer;
+    background: linear-gradient(16.7deg, var(--rm-primary) 9.6%, var(--rm-secondary-strong) 36.3%, var(--rm-primary-strong) 92.5%);
+    box-shadow: inset 0 -8px 20px rgba(0, 210, 255, 0.32), 0 8px 24px rgba(0, 23, 46, 0.6);
+    transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1),
+                border-color 0.3s cubic-bezier(0.2, 0, 0, 1),
+                box-shadow 0.3s cubic-bezier(0.2, 0, 0, 1),
+                filter 0.3s cubic-bezier(0.2, 0, 0, 1);
+    font-family: var(--rm-font);
+    text-decoration: none;
 }
 
 .rm-btn-primary::before {
@@ -400,20 +470,33 @@ body {
     z-index: 1;
     top: -140%;
     left: 0;
-    width: 60px;
+    width: 68px;
     height: 380%;
     background: #ffffff;
-    filter: blur(32px);
+    filter: blur(36px);
     mix-blend-mode: overlay;
     opacity: 0.85;
     pointer-events: none;
     animation: malPillSweep 4.5s linear infinite;
+    transition: opacity 0.3s cubic-bezier(0.2, 0, 0, 1);
 }
 
 .rm-btn-primary:hover {
     transform: translateY(-2px);
     border-color: rgba(0, 210, 255, 0.9);
     box-shadow: inset 0 -8px 20px #00d2ff, 0 12px 36px rgba(0, 210, 255, 0.45);
+}
+
+.rm-btn-primary:active {
+    transform: translateY(1px) scale(0.99);
+}
+
+.rm-btn-primary .btn-label {
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .rm-btn-demo {
@@ -476,13 +559,29 @@ body {
 }
 
 .rm-login-footer {
-    margin-top: 28px;
+    margin-top: 24px;
     text-align: center;
-    font-size: 11.5px;
-    color: var(--rm-text-muted);
-    line-height: 1.6;
-    border-top: 1px solid var(--rm-border);
-    padding-top: 20px;
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.5;
+    border-top: none;
+    padding-top: 0;
+}
+
+.rm-login-footer a {
+    color: #a5b4fc;
+    text-decoration: none;
+}
+
+.rm-footer-portal-link {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.rm-footer-portal-link a:hover {
+    color: #fef08a !important;
+    text-decoration: underline;
 }
 
 /* ── 2. RM DASHBOARD ── */
