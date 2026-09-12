@@ -72,14 +72,14 @@ function updateNetworkStatus() {
     if (navigator.onLine) {
         status.className = 'online';
         status.style.display = 'flex';
-        icon.textContent = '&#x1F7E2;';
+        icon.textContent = '●';
         text.textContent = 'Online';
         status.style.color = 'var(--toast-success)';
     } else {
         status.className = 'offline';
         status.style.display = 'flex';
-        icon.textContent = '&#x1F534;';
-        text.textContent = 'Offline &#8212; Working locally';
+        icon.textContent = '●';
+        text.textContent = 'Offline — Working locally';
         status.style.color = 'var(--toast-error)';
         showToast('You are offline. Application changes will sync when reconnected.', 'Offline Mode', 'warning', 5000);
     }
@@ -164,7 +164,7 @@ function toggleReworkMode() {
     if (isReworkMode) {
         if (btn) { btn.classList.add('active'); btn.innerHTML = '&#x1F527; <span class="tt-label">Exit Rework</span>'; }
         if (banner) banner.classList.add('active');
-        if (submitBtn) submitBtn.textContent = '&#x2705; Resubmit for Review';
+        if (submitBtn) submitBtn.textContent = '✅ Resubmit for Review';
 
         document.querySelectorAll('.step-pill').forEach((el, i) => {
             if (i + 1 !== 4 && i + 1 !== 7) el.classList.add('rework-disabled');
@@ -180,7 +180,7 @@ function toggleReworkMode() {
     } else {
         if (btn) { btn.classList.remove('active'); btn.innerHTML = '&#x1F527; <span class="tt-label">Simulate Rework</span>'; }
         if (banner) banner.classList.remove('active');
-        if (submitBtn) submitBtn.textContent = '&#x2705; Submit Application';
+        if (submitBtn) submitBtn.textContent = '✅ Submit Application';
 
         document.querySelectorAll('.step-pill').forEach(el => el.classList.remove('rework-disabled'));
         document.querySelectorAll('.rework-error').forEach(el => el.classList.remove('rework-error'));
@@ -1326,7 +1326,7 @@ function handleDocUpload(boxIdNum, input) {
         card.style.borderColor = 'var(--success)';
         const strongEl = card.querySelector('strong');
         if (strongEl) {
-            strongEl.textContent = '&#x2705; ' + input.files[0].name;
+            strongEl.textContent = '✅ ' + input.files[0].name;
             strongEl.style.color = 'var(--success-dark)';
         }
         const extractBtn = document.getElementById('btn-extract-ubos');
@@ -2020,7 +2020,7 @@ function drop(ev) {
         dropZone.appendChild(card);
         const removeBtn = document.createElement('button');
         removeBtn.className = 'dz-remove';
-        removeBtn.textContent = '&#x2715;';
+        removeBtn.textContent = '✕';
         removeBtn.title = 'Remove entity to pool';
         removeBtn.onclick = (e) => { e.stopPropagation(); removeCard(removeBtn); };
         dropZone.appendChild(removeBtn);
@@ -4496,55 +4496,14 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Check for RM customer magic invite URL params (?crn=...&email=...&company=...&contact=...&phone=...&company_uid=...)
+    // Security & Data Privacy: Strip any query parameters so sensitive data or tokens never persist in browser history
+    // Customer details must NEVER auto-populate prior to explicit user credential entry and successful OTP verification.
     try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const inviteCrn = urlParams.get('crn');
-        const inviteEmail = urlParams.get('email');
-        const inviteCompany = urlParams.get('company') || urlParams.get('company_name');
-        const inviteTrade = urlParams.get('trade') || urlParams.get('trade_name') || urlParams.get('tradeName') || inviteCompany;
-        const inviteContact = urlParams.get('contact') || urlParams.get('contact_person');
-        const invitePhone = urlParams.get('phone');
-        const inviteCuid = urlParams.get('company_uid') || urlParams.get('cuid');
-
-        if (inviteCuid) setCompanyUid(inviteCuid);
-
-        if (inviteCrn || inviteEmail) {
-            const crnInput = document.getElementById('crnInput');
-            const emailInput = document.getElementById('emailInput');
-            if (inviteCrn && crnInput) crnInput.value = inviteCrn;
-            if (inviteEmail && emailInput) emailInput.value = inviteEmail;
-
-            // Pre-seed Step 2 DOM inputs if available
-            if (inviteCrn && document.getElementById('step2_crn')) document.getElementById('step2_crn').value = inviteCrn;
-            if (inviteCompany && document.getElementById('step2_name')) document.getElementById('step2_name').value = inviteCompany;
-            if (inviteTrade && document.getElementById('trade_name')) document.getElementById('trade_name').value = inviteTrade;
-            if (inviteContact && document.getElementById('step2_contact_person')) document.getElementById('step2_contact_person').value = inviteContact;
-            if (invitePhone && document.getElementById('step2_phone')) document.getElementById('step2_phone').value = invitePhone;
-            if (inviteEmail && document.getElementById('step2_email')) document.getElementById('step2_email').value = inviteEmail;
-            lockRmFields();
-
-            // Display VIP Relationship Manager Invitation Banner on login card
-            const loginBox = document.querySelector('.login-box');
-            if (loginBox && !document.getElementById('rm-invite-banner')) {
-                const banner = document.createElement('div');
-                banner.id = 'rm-invite-banner';
-                banner.style.cssText = 'margin-bottom:16px; padding:12px 16px; background:rgba(245,158,11,0.15); border:1.5px solid #f59e0b; border-radius:10px; font-size:12.5px; color:#fef08a; text-align:left; animation:fadeUp 0.3s ease;';
-                banner.innerHTML = `<strong style="color:#ffffff; font-size:13px;">&#x1F4CB; Relationship Manager Invitation</strong><br>Welcome to Gringotts Bank (Diagon Alley)! You are accessing your onboarding journey with CRN <strong>${inviteCrn || ''}</strong>${inviteCompany ? ` (${inviteCompany})` : ''}. Click Request OTP to begin.`;
-                const errorBox = document.getElementById('loginError');
-                if (errorBox) {
-                    errorBox.parentNode.insertBefore(banner, errorBox.nextSibling);
-                } else {
-                    loginBox.prepend(banner);
-                }
-            }
-            if (inviteCuid) {
-                localStorage.setItem('vb_company_uid', inviteCuid);
-            }
-            loadSavedDocuments();
+        if (window.history && window.history.replaceState && window.location.search) {
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
-    } catch (paramErr) {
-        console.warn('[ROUTING] URL params parse notice:', paramErr.message);
+    } catch (cleanErr) {
+        console.warn('[SECURITY] URL query cleanse notice:', cleanErr.message);
     }
 
     // Auto-dismiss login alerts upon user typing in credentials

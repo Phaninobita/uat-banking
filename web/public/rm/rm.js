@@ -253,7 +253,7 @@ async function handleDispatchInvite(ev) {
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = "&#x1F680; Dispatch Customer Invitation &amp; Generate Magic Link";
+            submitBtn.innerHTML = "&#x1F680; Dispatch Customer Invitation &amp; Generate Access Link";
         }
     }
 }
@@ -284,7 +284,7 @@ function copyGeneratedLink() {
 
     input.select();
     navigator.clipboard.writeText(input.value).then(() => {
-        showRmToast("Customer Onboarding Magic Link copied to clipboard!", "success");
+        showRmToast("Customer Onboarding Access Link copied to clipboard!", "success");
     }).catch(() => {
         document.execCommand("copy");
         showRmToast("Customer Link copied!", "success");
@@ -384,7 +384,7 @@ function renderPipelineTable(invitations) {
                 </td>
                 <td style="text-align:right;">
                     <div class="rm-action-btns">
-                        <button class="rm-btn-action" onclick="copySpecificLink('${encodeURIComponent(inv.invite_link)}')" title="Copy Magic Link">
+                        <button class="rm-btn-action" onclick="copySpecificLink('${encodeURIComponent(inv.invite_link)}')" title="Copy Portal Link">
                             &#x1F4CB; Link
                         </button>
                         <a href="${inv.invite_link}" target="_blank" class="rm-btn-action" style="color:#38bdf8;" title="Open Customer Portal">

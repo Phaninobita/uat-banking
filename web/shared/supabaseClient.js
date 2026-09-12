@@ -128,7 +128,7 @@ class SupabaseClient {
       rm_id: invite.rm_id || invite.rmId || "RM-PHANEE",
       invite_token: invite.invite_token || invite.inviteToken || ("inv_" + crypto.randomBytes(12).toString("hex")),
       status: invite.status || "invited",
-      invite_link: invite.invite_link || invite.inviteLink || `https://phanee.up.railway.app/?crn=${encodeURIComponent(crn)}&email=${encodeURIComponent(email)}`,
+      invite_link: invite.invite_link || invite.inviteLink || `https://phanee.up.railway.app/`,
       notes: (invite.notes || "").trim(),
       company_uid: (invite.company_uid || `CUID-${crn.replace(/[^A-Z0-9]/g, "")}`).toUpperCase(),
       current_step: invite.current_step || 1,

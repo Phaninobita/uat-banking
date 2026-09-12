@@ -310,10 +310,10 @@ router.post("/invite", async (req, res) => {
 
     const inviteToken = "inv_" + crypto.randomBytes(12).toString("hex");
 
-    // Construct customer portal URL with prefill parameters (including company_uid & trade_name)
+    // Construct clean and secure customer portal onboarding URL (Zero PII parameters exposed in URL)
     const host = req.get("host") || "localhost:3000";
     const protocol = req.protocol === "https" || req.get("x-forwarded-proto") === "https" ? "https" : "http";
-    const inviteLink = `${protocol}://${host}/?crn=${encodeURIComponent(cleanCrn)}&email=${encodeURIComponent(cleanEmail)}&company=${encodeURIComponent(companyName.trim())}&trade_name=${encodeURIComponent(cleanTrade)}&contact=${encodeURIComponent((contactPerson || "").trim())}&phone=${encodeURIComponent((phone || "").trim())}&token=${inviteToken}&company_uid=${encodeURIComponent(companyUid)}`;
+    const inviteLink = `${protocol}://${host}/`;
 
     const inviteRecord = {
       crn: cleanCrn,
