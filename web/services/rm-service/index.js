@@ -383,7 +383,7 @@ router.post("/invite", async (req, res) => {
           <div style="padding: 32px 28px;">
             <h2 style="color: #0f172a; font-size: 18px; margin-top: 0;">Dear ${inviteRecord.contact_person},</h2>
             <p style="color: #334155; font-size: 14px; line-height: 1.6;">
-              On behalf of Gringotts Bank (Diagon Alley), it is our pleasure to invite <strong>${inviteRecord.company_name}</strong> (CRN: ${cleanCrn}) to complete digital onboarding for our multi-currency corporate banking accounts, Galleon reserves, and Hogwarts treasury solutions.
+              On behalf of Gringotts Bank (1 Diagon Alley, London), it is our pleasure to invite <strong>${inviteRecord.company_name}</strong> (CRN: ${cleanCrn}) to complete digital onboarding for our multi-currency corporate banking accounts, Galleon reserves, and Hogwarts treasury solutions.
             </p>
             <div style="background: #f8fafc; border: 1.5px dashed #f59e0b; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center;">
               <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #92400e; margin-bottom: 8px;">Your Unique Corporate Access Details</div>
@@ -401,7 +401,7 @@ router.post("/invite", async (req, res) => {
             <div style="display: flex; align-items: center; gap: 14px;">
               <div>
                 <strong style="color: #0f172a; font-size: 13px;">Bogrod &amp; Griphook</strong><br>
-                <span style="font-size: 12px; color: #64748b;">Senior Vault Masters — Diagon Alley Branch &bull; Gringotts Bank</span><br>
+                <span style="font-size: 12px; color: #64748b;">Senior Vault Masters — 1 Diagon Alley, London Branch &bull; Gringotts Bank</span><br>
                 <span style="font-size: 11px; color: #94a3b8;">📞 +44 20 7946 0190 · ✉️ vaults@gringotts.co.uk</span>
               </div>
             </div>
@@ -491,7 +491,7 @@ router.post("/resend/:crn/:email", async (req, res) => {
           <div style="padding: 32px 28px;">
             <h2 style="color: #0f172a; font-size: 18px; margin-top: 0;">Dear ${invite.contact_person || 'Authorized Signatory'},</h2>
             <p style="color: #334155; font-size: 14px; line-height: 1.6;">
-              On behalf of Gringotts Bank (Diagon Alley), this is a reminder to complete your digital onboarding for <strong>${companyTitle}</strong> (CRN: ${invite.crn}).
+              On behalf of Gringotts Bank (1 Diagon Alley, London), this is a reminder to complete your digital onboarding for <strong>${companyTitle}</strong> (CRN: ${invite.crn}).
             </p>
             <div style="background: #f8fafc; border: 1.5px dashed #f59e0b; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center;">
               <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #92400e; margin-bottom: 8px;">Your Unique Corporate Access Details</div>

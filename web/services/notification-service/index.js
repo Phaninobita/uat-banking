@@ -67,7 +67,7 @@ router.post("/simulate", async (req, res) => {
     from: '"Gringotts Bank" <onboarding@gringotts.com>',
     subject: subject || "Gringotts Bank Corporate Update",
     html: html || "<p>Notification from Gringotts Bank (1 Diagon Alley, London)</p>",
-    text: text || "Notification from Gringotts Bank (Diagon Alley)",
+    text: text || "Notification from Gringotts Bank (1 Diagon Alley, London)",
     code: code || null,
     type: type || "system",
     metadata: metadata || {}

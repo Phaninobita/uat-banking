@@ -3669,7 +3669,7 @@ function displayClientNameOnTop(companyName, crn, companyUid) {
     if (companyTag) {
         companyTag.style.display = companyTag.id === 'sidebarCompanyCard' ? 'block' : 'inline-flex';
     }
-    if (brandSub) brandSub.textContent = 'Diagon Alley • Hogwarts Vaults';
+    if (brandSub) brandSub.textContent = '1 Diagon Alley, London • Hogwarts Vaults';
 
     // Auto-fill Step 2 company fields
     const s2Name = document.getElementById('step2_name');
@@ -3912,7 +3912,7 @@ function triggerDocuSign() {
                     <div style="text-align: center; margin-bottom: 20px;">
                         <div style="display: inline-block; background: #ffbe00; color: #0f172a; font-weight: 800; font-size: 16px; width: 44px; height: 44px; line-height: 44px; border-radius: 8px;">DS</div>
                         <h2 style="margin: 10px 0 2px; color: #0f172a; font-size: 20px;">DocuSign Electronic Signature</h2>
-                        <p style="color: #64748b; font-size: 12px; margin: 0;">Gringotts Bank Corporate Account Opening Package &bull; Diagon Alley</p>
+                        <p style="color: #64748b; font-size: 12px; margin: 0;">Gringotts Bank Corporate Account Opening Package &bull; 1 Diagon Alley, London</p>
                     </div>
                     <p style="color: #1e293b; font-size: 14px;">Hello Authorized Signatory,</p>
                     <p style="color: #334155; font-size: 14px; line-height: 1.5;">Gringotts Bank has prepared your Corporate Banking Master Agreement and Authorized Signatory Mandate for digital signature.</p>
@@ -3933,8 +3933,8 @@ function downloadReceipt() {
 
     const txt = `GRINGOTTS BANK CORPORATE ONBOARDING RECEIPT
 ==================================================
-Bank: Gringotts Bank (Diagon Alley, London)
-Affiliation: Hogwarts School of Witchcraft and Wizardry Treasury
+Bank: Gringotts Bank (1 Diagon Alley, London)
+Affiliation: Hogwarts Financial Council Treasury
 Location: 1 Diagon Alley, London, WC2 (Underground Vault Complex)
 ==================================================
 Application Ref: ${appRef}
@@ -3951,7 +3951,7 @@ NEXT STEPS:
 5. Final onboarding review: 1-2 business days
 
 RELATIONSHIP MANAGER & VAULT MASTERS:
-Bogrod & Griphook | Diagon Alley Vault Operations
+Bogrod & Griphook | 1 Diagon Alley, London Vault Operations
 Email: vaults@gringotts.co.uk | Support: support@gringotts.com
 Address: 1 Diagon Alley, London, UK
 `;
