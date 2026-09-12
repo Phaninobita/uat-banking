@@ -293,6 +293,20 @@ async function handleSupabaseRestQuery(text, params = []) {
     const memUser = memStore.getRmUser(cleanUser);
     return { rows: memUser ? [memUser] : [] };
   }
+  if (sqlUpper.startsWith("INSERT INTO RM_USERS")) {
+    const cleanUser = (params[0] || "").trim().toLowerCase();
+    const cleanPassword = (params[1] || "Visionbank@324").trim();
+    const memUser = memStore.saveRmUser({
+      username: cleanUser,
+      password: cleanPassword,
+      password_hash: cleanPassword,
+      full_name: params[2] || cleanUser,
+      email: params[3] || `${cleanUser}@fnb-us.com`,
+      role: params[4] || "Senior Relationship Manager · Corporate Banking",
+      branch: params[5] || "Diagon Alley Financial Center"
+    });
+    return { rows: [memUser] };
+  }
 
   // 6. corporate_accounts & account_transactions
   if (sqlUpper.includes("FROM CORPORATE_ACCOUNTS")) {

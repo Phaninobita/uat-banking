@@ -195,6 +195,30 @@ async function handleRmLoginSubmit(ev) {
     }
 }
 
+function toggleRmPasswordVisibility() {
+    const pwdInput = document.getElementById("rmPassword");
+    const eyeIcon = document.getElementById("pwdEyeIcon");
+    const toggleText = document.getElementById("pwdToggleText");
+    if (!pwdInput) return;
+    if (pwdInput.type === "password") {
+        pwdInput.type = "text";
+        if (eyeIcon) eyeIcon.textContent = "🙈";
+        if (toggleText) toggleText.textContent = "Hide Plain Text";
+    } else {
+        pwdInput.type = "password";
+        if (eyeIcon) eyeIcon.textContent = "👁️";
+        if (toggleText) toggleText.textContent = "Show Plain Text";
+    }
+}
+
+function fillDemoRmCredentials() {
+    const idInput = document.getElementById("rmStaffId");
+    const pwdInput = document.getElementById("rmPassword");
+    if (idInput) idInput.value = "phanee";
+    if (pwdInput) pwdInput.value = "Visionbank@324";
+    showRmToast("Demo credentials loaded (Staff ID: phanee | Passkey: Visionbank@324)", "info");
+}
+
 function handleRmSignOut() {
     localStorage.removeItem("fnb_rm_token");
     localStorage.removeItem("fnb_rm_profile");

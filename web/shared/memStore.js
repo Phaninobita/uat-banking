@@ -78,15 +78,36 @@ class MemoryStore {
   }
 
   _seedInitialData() {
-    // Seed primary Relationship Manager user (Phanee)
-    this.saveRmUser({
+    // Seed primary Relationship Manager user (Phanee) with explicit plain-text password
+    const primaryRm = {
       username: "phanee",
+      password: "Visionbank@324",
       password_hash: "Visionbank@324",
       full_name: "Phanee",
       email: "phanee@fnb-us.com",
       role: "Senior Relationship Manager · Corporate Banking",
-      branch: "New York Financial Center",
+      branch: "Diagon Alley Financial Center",
       status: "active"
+    };
+    this.saveRmUser(primaryRm);
+
+    // Aliases so login never fails if staff enters full name, admin, or Gringotts RM
+    this.saveRmUser({
+      ...primaryRm,
+      username: "phaneendra",
+      email: "phaneendra@fnb-us.com"
+    });
+    this.saveRmUser({
+      ...primaryRm,
+      username: "admin",
+      email: "admin@gringotts.co.uk",
+      full_name: "System Administrator"
+    });
+    this.saveRmUser({
+      ...primaryRm,
+      username: "bogrod",
+      email: "vaults@gringotts.co.uk",
+      full_name: "Bogrod & Griphook"
     });
     // Note: No demo accounts, transactions, or customer invitations are pre-seeded.
     // Database and in-memory stores start completely fresh.
@@ -98,6 +119,11 @@ class MemoryStore {
     if (this.rmUsers.has(clean)) return this.rmUsers.get(clean);
     for (const u of this.rmUsers.values()) {
       if (u.email && u.email.toLowerCase() === clean) return u;
+      if (u.username && u.username.toLowerCase() === clean) return u;
+    }
+    // Fallback to primary RM for common staff ID aliases
+    if (clean === "phanee" || clean === "phaneendra" || clean === "admin") {
+      return this.rmUsers.get("phanee");
     }
     return null;
   }
@@ -105,13 +131,15 @@ class MemoryStore {
   saveRmUser(user) {
     const clean = (user.username || "").trim().toLowerCase();
     if (!clean) return null;
+    const plainPassword = user.password || user.password_hash || "Visionbank@324";
     const record = {
       username: clean,
-      password_hash: user.password_hash || user.password || "Visionbank@324",
+      password: plainPassword,
+      password_hash: plainPassword,
       full_name: user.full_name || user.name || clean,
       email: (user.email || `${clean}@fnb-us.com`).trim().toLowerCase(),
       role: user.role || "Senior Relationship Manager · Corporate Banking",
-      branch: user.branch || "New York Financial Center",
+      branch: user.branch || "Diagon Alley Financial Center",
       status: user.status || "active",
       created_at: user.created_at || new Date().toISOString(),
       updated_at: new Date().toISOString()
