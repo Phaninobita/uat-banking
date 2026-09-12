@@ -829,18 +829,20 @@
                     </div>
 
                     <div id="maker-checker-upload" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
-                        <div class="g2" style="margin-bottom: 16px;">
+                        <div class="g2" style="margin-bottom: 16px; align-items: start;">
                             <div class="field" style="margin-bottom: 0;">
-                                <label for="maker-select">Assign Maker Role</label>
-                                <select id="maker-select">
-                                    <option value="">&mdash; Select existing UBO/Entity &mdash;</option>
+                                <label for="maker-select">Assign Maker Role <span style="font-size: 11px; color: #38bdf8; font-weight: 600;">(Individual Person Only)</span></label>
+                                <select id="maker-select" onchange="onMakerChanged(this)">
+                                    <option value="">&mdash; Select Individual Person &mdash;</option>
                                 </select>
+                                <div id="maker-person-card" class="person-detail-card" style="display: none;"></div>
                             </div>
                             <div class="field" style="margin-bottom: 0;">
-                                <label for="checker-select">Assign Checker Role</label>
-                                <select id="checker-select" onchange="validateMakerChecker(this)">
-                                    <option value="">&mdash; Select existing UBO/Entity &mdash;</option>
+                                <label for="checker-select">Assign Checker Role <span style="font-size: 11px; color: #38bdf8; font-weight: 600;">(Individual Person Only)</span></label>
+                                <select id="checker-select" onchange="onCheckerChanged(this)">
+                                    <option value="">&mdash; Select Individual Person &mdash;</option>
                                 </select>
+                                <div id="checker-person-card" class="person-detail-card" style="display: none;"></div>
                             </div>
                         </div>
                         <div class="g2" style="margin-bottom: 0;">
