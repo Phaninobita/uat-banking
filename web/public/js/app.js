@@ -2747,6 +2747,23 @@ function downloadReceipt() {
     showToast('Onboarding receipt downloaded.', 'Download Complete', 'success');
 }
 
+function copyAppRef(btn) {
+    const codeEl = document.querySelector('.app-ref');
+    const text = codeEl ? codeEl.textContent.trim() : (currentAppRef || 'AB-2026-001245');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+            const textEl = btn ? btn.querySelector('.copy-text') : null;
+            if (textEl) textEl.textContent = 'Copied!';
+            showToast(`Application Reference copied: ${text}`, 'Copied', 'info');
+            setTimeout(() => { if (textEl) textEl.textContent = 'Copy'; }, 2000);
+        }).catch(() => {
+            showToast(`Application Reference: ${text}`, 'Reference', 'info');
+        });
+    } else {
+        showToast(`Application Reference: ${text}`, 'Reference', 'info');
+    }
+}
+
 function fireConfetti() {
     const canvas = document.createElement('canvas');
     canvas.classList.add('confetti');

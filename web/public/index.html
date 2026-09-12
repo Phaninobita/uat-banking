@@ -239,18 +239,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Permanent Sidebar Footer with Unmissable Log Out Button -->
-                    <div class="sidebar-footer">
-                        <a href="/rm" target="_blank" class="sidebar-footer-btn sidebar-rm-btn" title="Open Relationship Manager Executive Suite">
-                            <span class="sfb-icon">&#x1F517;</span>
-                            <span>RM Suite</span>
-                        </a>
-                        <button type="button" class="sidebar-footer-btn sidebar-logout-btn" id="btnSidebarSignOut" onclick="handleSignOut()" title="Sign out of Corporate Banking Portal">
-                            <span class="sfb-icon">&#x1F6AA;</span>
-                            <span>Log Out</span>
-                        </button>
-                    </div>
                 </aside>
 
                 <!-- Mobile Backdrop for off-canvas drawer -->
@@ -275,19 +263,11 @@
                         </div>
 
                         <div class="topbar-right">
-                            <button type="button" class="btn-hdr-action btn-hdr-audit" id="btnAuditTrail" onclick="openAuditTrailModal()" title="View compliance and security audit logs">
-                                <span class="hdr-btn-icon">&#x1F6E1;&#xFE0F;</span>
-                                <span>Audit Trail</span>
-                            </button>
-                            <button type="button" class="btn-hdr-action btn-hdr-save" onclick="showSaveModal()" title="Save application draft">
-                                <span class="hdr-btn-icon">&#x1F4BE;</span>
-                                <span>Save Draft</span>
-                            </button>
                             <button type="button" class="btn-hdr-action btn-hdr-rework" id="reworkToggle" onclick="toggleReworkMode()" title="Simulate compliance return for correction">
                                 <span class="hdr-btn-icon">&#x1F504;</span>
                                 <span class="tt-label">Simulate Rework</span>
                             </button>
-                            <button type="button" class="btn-hdr-action btn-hdr-signout" id="btnSignOut" onclick="handleSignOut()" title="Sign out / Exit Corporate Portal">
+                            <button type="button" class="btn-hdr-action btn-hdr-signout" id="btnSignOut" onclick="handleSignOut()" title="Sign out of Corporate Banking Portal">
                                 <span class="hdr-btn-icon">&#x1F6AA;</span>
                                 <span>Log Out</span>
                             </button>
@@ -1019,122 +999,212 @@
 
             <div id="successState" style="display:none;">
                 <div class="success-wrap">
-                    <div class="success-anim" aria-hidden="true">&#x2713;</div>
-                    <h2 style="font-size:28px;font-weight:700;margin:0 0 12px;color:var(--text-primary);">Application Submitted!</h2>
-                    <p style="color:var(--text-muted);font-size:16px;margin:0 0 16px;">Your Corporate Account opening request has been received by First National Bank.</p>
-                    <div class="app-ref">Application Reference: AB-2026-001245</div>
-
-                    <div class="rm-card">
-                        <div class="rm-avatar" aria-hidden="true">&#x1F464;</div>
-                        <div>
-                            <h4>Your Dedicated Relationship Manager</h4>
-                            <p>Michael Vance has been assigned to your account and will be your primary point of contact throughout the process.</p>
-                            <div class="rm-contact">&#x1F4DE; +1 212 555 0190 &nbsp;&middot;&nbsp; &#x2709; m.vance@fnb-us.com</div>
+                    <!-- Ambient celebratory hero card -->
+                    <div class="success-hero-card">
+                        <div class="success-anim-wrap">
+                            <div class="success-anim-glow" aria-hidden="true"></div>
+                            <div class="success-anim" aria-hidden="true">&#x2713;</div>
                         </div>
-                    </div>
-
-                    <div class="timeline-section">
-                        <h3 style="font-size:20px;font-weight:700;margin:0 0 32px;text-align:left;color:var(--text-primary);">&#x1F4C5; Application Status Timeline</h3>
-                        <div style="position:relative; max-width:800px;">
-                            <div class="timeline-line" aria-hidden="true"></div>
-                            <div class="timeline-step timeline-step-1">
-                                <div class="timeline-icon" aria-hidden="true">&#x1F50D;</div>
-                                <div class="timeline-content">
-                                    <div class="timeline-badge">IN PROGRESS</div>
-                                    <h4 class="timeline-title">Application Under Review</h4>
-                                    <p class="timeline-desc">Our Bank Team team is now reviewing your submitted documents and information.</p>
-                                    <div class="timeline-items">
-                                        <div class="timeline-item"><span style="font-weight:600;color:var(--primary);" aria-hidden="true">&#x2713;</span><span>Documents validation</span></div>
-                                        <div class="timeline-item"><span style="font-weight:600;color:var(--primary);" aria-hidden="true">&#x2713;</span><span>AML/KYC screening in progress</span></div>
-                                        <div class="timeline-item"><span style="font-weight:600;color:var(--primary);" aria-hidden="true">&#x2713;</span><span>Estimated time: 24&ndash;48 hours</span></div>
-                                    </div>
-                                </div>
+                        <div class="success-hero-text">
+                            <div class="success-hero-status-pill">
+                                <span class="live-pulse-dot" aria-hidden="true"></span>
+                                <span>Application Submitted &bull; Compliance Verification In Progress</span>
                             </div>
-                            <div class="timeline-step timeline-step-2">
-                                <div class="timeline-icon" aria-hidden="true">&#x1F4DD;</div>
-                                <div class="timeline-content">
-                                    <div class="timeline-badge">PENDING</div>
-                                    <h4 class="timeline-title">Authorised Signatory Review & E-Signature</h4>
-                                    <p class="timeline-desc">Once the bank completes the initial review, you can initiate the DocuSign process for your authorised signatories.</p>
-
-                                    <div id="docusign-action-area" style="margin: 16px 0; padding: 16px; background: rgba(255,255,255,0.7); border-radius: 8px; border: 1px dashed var(--warning); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; transition: all var(--spring);">
-                                        <span style="font-size: 13px; font-weight: 600; color: #92400e;">Ready to request signatures?</span>
-                                        <button class="btn btn-primary btn-sm" id="btn-trigger-docusign" onclick="triggerDocuSign()" style="box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);">
-                                            &#x1F4E7; Send DocuSign Invites
-                                        </button>
-                                    </div>
-
-                                    <div class="timeline-items" id="docusign-status-items">
-                                        <div class="timeline-item"><span style="font-weight:600;color:var(--warning);" aria-hidden="true">&#x23F3;</span><span>Awaiting manual initiation&hellip;</span></div>
-                                    </div>
-
-                                    <div class="timeline-alert" id="docusign-alert" style="display: none; animation: fadeUp 0.4s ease;">
-                                        <strong>&#x1F514; Action Required:</strong> Remind signatories to check their email for invitations from <strong>documents@docusign.net</strong>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="timeline-step timeline-step-3">
-                                <div class="timeline-icon" aria-hidden="true">&#x1F389;</div>
-                                <div class="timeline-content">
-                                    <div class="timeline-badge">FINAL STEP</div>
-                                    <h4 class="timeline-title">Account Activated & Ready to Use</h4>
-                                    <p class="timeline-desc">Congratulations! Your First National Bank corporate account is fully activated and ready for transactions.</p>
-                                    <div class="timeline-items">
-                                        <div class="timeline-item"><span style="font-weight:600;color:var(--success);" aria-hidden="true">&#x2713;</span><span>IBAN & banking details provided</span></div>
-                                        <div class="timeline-item"><span style="font-weight:600;color:var(--success);" aria-hidden="true">&#x2713;</span><span>Online banking portal access</span></div>
-                                        <div class="timeline-item"><span style="font-weight:600;color:var(--success);" aria-hidden="true">&#x2713;</span><span>Mobile app setup complete</span></div>
-                                    </div>
-                                    <div class="timeline-alert"><strong>&#x1F3AF; You're all set!</strong> Start using your account immediately. Your RM will follow up.</div>
-                                </div>
+                            <h2 class="success-hero-title">Application Submitted Successfully!</h2>
+                            <p class="success-hero-subtitle">Your corporate account application has been received by First National Bank and is now undergoing regulatory verification and compliance checks.</p>
+                            
+                            <div class="success-ref-bar">
+                                <span class="srb-label">Application Reference:</span>
+                                <span class="srb-code app-ref" id="successAppRefBadge">AB-2026-001245</span>
+                                <button type="button" class="btn-copy-ref" onclick="copyAppRef(this)" title="Copy Reference to clipboard">
+                                    <span class="cr-icon">&#x1F4CB;</span>
+                                    <span class="copy-text">Copy</span>
+                                </button>
+                                <span class="srb-sep">&bull;</span>
+                                <span class="srb-info">&#x2709; Confirmation delivered to registered email</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="forgotten-docs-section" id="forgottenDocsSection">
-                        <div class="fd-header">
-                            <div class="fd-icon" aria-hidden="true">&#x1F4C4;</div>
-                            <div>
-                                <h3 class="fd-title">Forgot to add documents? No problem!</h3>
-                                <p class="fd-subtitle">Submit any remaining documents now &mdash; we'll review them as part of your application.</p>
-                            </div>
-                        </div>
-                        <div class="fd-desc" id="fdDesc">You can upload additional documents even after submission. Common documents clients add later include updated certifications, additional passports, proof of funds, bank references, or insurance documents.</div>
-                        <div class="fd-upload-grid" id="fdUploadGrid">
-                            <div class="fd-upload-card" id="fd-uc-1" onclick="triggerUpload('fd-f-1')" ondragover="allowDrop(event)" ondrop="handleFileDrop(event,'fd-uc-1','fd-f-1')">
-                                <input type="file" id="fd-f-1" accept=".pdf,.jpg,.png" onchange="markUploaded('fd-uc-1',this)" aria-label="Upload additional document 1">
-                                <div class="opt-badge" id="fdBadge1">Optional</div>
-                                <div class="fdu-icon" aria-hidden="true">&#x1F4C4;</div>
-                                <strong id="fdLabel1">Additional Document 1</strong>
-                                <small>PDF or image</small>
-                            </div>
-                            <div class="fd-upload-card" id="fd-uc-2" onclick="triggerUpload('fd-f-2')" ondragover="allowDrop(event)" ondrop="handleFileDrop(event,'fd-uc-2','fd-f-2')">
-                                <input type="file" id="fd-f-2" accept=".pdf,.jpg,.png" onchange="markUploaded('fd-uc-2',this)" aria-label="Upload additional document 2">
-                                <div class="opt-badge" id="fdBadge2">Optional</div>
-                                <div class="fdu-icon" aria-hidden="true">&#x1F4C4;</div>
-                                <strong id="fdLabel2">Additional Document 2</strong>
-                                <small>PDF or image</small>
-                            </div>
-                            <div class="fd-upload-card" id="fd-uc-3" onclick="triggerUpload('fd-f-3')" ondragover="allowDrop(event)" ondrop="handleFileDrop(event,'fd-uc-3','fd-f-3')">
-                                <input type="file" id="fd-f-3" accept=".pdf,.jpg,.png" onchange="markUploaded('fd-uc-3',this)" aria-label="Upload additional document 3">
-                                <div class="opt-badge" id="fdBadge3">Optional</div>
-                                <div class="fdu-icon" aria-hidden="true">&#x1F4C4;</div>
-                                <strong id="fdLabel3">Additional Document 3</strong>
-                                <small>PDF or image</small>
-                            </div>
-                            <div class="fd-upload-card" id="fd-uc-4" onclick="triggerUpload('fd-f-4')" ondragover="allowDrop(event)" ondrop="handleFileDrop(event,'fd-uc-4','fd-f-4')">
-                                <input type="file" id="fd-f-4" accept=".pdf,.jpg,.png" onchange="markUploaded('fd-uc-4',this)" aria-label="Upload additional document 4">
-                                <div class="opt-badge" id="fdBadge4">Optional</div>
-                                <div class="fdu-icon" aria-hidden="true">&#x1F4C4;</div>
-                                <strong id="fdLabel4">Additional Document 4</strong>
-                                <small>PDF or image</small>
-                            </div>
-                        </div>
-                        <div class="fd-note"><strong>&#x1F4DD; Note:</strong> Uploading additional documents is optional, but we recommend submitting any outstanding items to avoid delays in account activation.</div>
-                    </div>
+                    <!-- 2-COLUMN BALANCED DASHBOARD GRID -->
+                    <div class="success-dashboard-grid">
+                        <!-- Left Column: Application Status Timeline -->
+                        <div class="success-col-timeline">
+                            <div class="success-section-card">
+                                <div class="ssc-header">
+                                    <div class="ssc-title-wrap">
+                                        <span class="ssc-icon">&#x1F4C5;</span>
+                                        <div>
+                                            <h3 class="ssc-title">Application Status Timeline</h3>
+                                            <p class="ssc-sub">Real-time status of your compliance review and account onboarding.</p>
+                                        </div>
+                                    </div>
+                                    <span class="ssc-badge-live">&#x25CF; Active Pipeline</span>
+                                </div>
 
-                    <div style="margin-top:32px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
-                        <button class="btn btn-primary" onclick="downloadReceipt()">&#x1F4E5; Download Receipt</button>
-                        <button class="btn btn-ghost" onclick="window.print()">&#x1F5A8; Print Summary</button>
+                                <div class="timeline-container">
+                                    <div class="timeline-line" aria-hidden="true"></div>
+                                    
+                                    <!-- Step 1 -->
+                                    <div class="timeline-step timeline-step-1">
+                                        <div class="timeline-icon" aria-hidden="true">&#x1F50D;</div>
+                                        <div class="timeline-content">
+                                            <div class="timeline-badge">IN PROGRESS</div>
+                                            <h4 class="timeline-title">Application Under Review</h4>
+                                            <p class="timeline-desc">Our Bank Onboarding team is currently verifying your submitted corporate documents and entity details.</p>
+                                            <div class="timeline-items">
+                                                <div class="timeline-item"><span class="ti-check">&#x2713;</span><span>Document OCR validation &amp; authenticity check</span></div>
+                                                <div class="timeline-item"><span class="ti-check">&#x2713;</span><span>AML / KYC regulatory screening in progress</span></div>
+                                                <div class="timeline-item"><span class="ti-check">&#x2713;</span><span>Estimated turnaround: 24&ndash;48 hours</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 2 -->
+                                    <div class="timeline-step timeline-step-2">
+                                        <div class="timeline-icon" aria-hidden="true">&#x1F4DD;</div>
+                                        <div class="timeline-content">
+                                            <div class="timeline-badge">PENDING</div>
+                                            <h4 class="timeline-title">Authorised Signatory Review &amp; E-Signature</h4>
+                                            <p class="timeline-desc">Once initial bank review completes, dispatch digital DocuSign packages to authorised signatories.</p>
+
+                                            <div id="docusign-action-area" class="docusign-action-box">
+                                                <div class="ds-action-text">
+                                                    <strong>Ready to request digital signatures?</strong>
+                                                    <small>Dispatch signature links to all designated corporate signatories.</small>
+                                                </div>
+                                                <button class="btn btn-primary btn-sm btn-pill-sweep" id="btn-trigger-docusign" onclick="triggerDocuSign()">
+                                                    <span class="btn-label">&#x1F4E7; Send DocuSign Invites &rarr;</span>
+                                                </button>
+                                            </div>
+
+                                            <div class="timeline-items" id="docusign-status-items">
+                                                <div class="timeline-item"><span class="ti-amber">&#x23F3;</span><span>Awaiting manual dispatch or verification clearance</span></div>
+                                            </div>
+
+                                            <div class="timeline-alert" id="docusign-alert" style="display: none;">
+                                                <strong>&#x1F514; Action Required:</strong> Remind signatories to check their inbox for invitations from <strong>documents@docusign.net</strong>.
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 3 -->
+                                    <div class="timeline-step timeline-step-3">
+                                        <div class="timeline-icon" aria-hidden="true">&#x1F389;</div>
+                                        <div class="timeline-content">
+                                            <div class="timeline-badge">FINAL STEP</div>
+                                            <h4 class="timeline-title">Account Activated &amp; Ready to Use</h4>
+                                            <p class="timeline-desc">Congratulations! Your First National Bank corporate account credentials and IBANs will be released.</p>
+                                            <div class="timeline-items">
+                                                <div class="timeline-item"><span class="ti-green">&#x2713;</span><span>Corporate IBAN &amp; SWIFT routing instructions provided</span></div>
+                                                <div class="timeline-item"><span class="ti-green">&#x2713;</span><span>Online banking administrator login activated</span></div>
+                                                <div class="timeline-item"><span class="ti-green">&#x2713;</span><span>Corporate debit card dispatched to business address</span></div>
+                                            </div>
+                                            <div class="timeline-alert alert-final">
+                                                <strong>&#x1F3AF; You're all set!</strong> Start transacting immediately upon completion. Your Relationship Manager will follow up.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Dedicated RM & Quick Actions & Uploads -->
+                        <div class="success-col-sidebar">
+                            <!-- Executive RM Card -->
+                            <div class="success-side-card rm-side-card">
+                                <div class="rm-card-header">
+                                    <span class="rm-card-badge">&#x1F6E1; Dedicated Account Coverage</span>
+                                </div>
+                                <div class="rm-card-body">
+                                    <div class="rm-avatar-wrapper">
+                                        <div class="rm-avatar" aria-hidden="true">&#x1F464;</div>
+                                        <span class="rm-online-dot" title="Online & Available"></span>
+                                    </div>
+                                    <div class="rm-info">
+                                        <h4 class="rm-name">Michael Vance</h4>
+                                        <span class="rm-title">Executive Director &bull; Corporate Banking</span>
+                                        <p class="rm-desc">Assigned primary point of contact for your onboarding, treasury setup, and credit facility requirements.</p>
+                                    </div>
+                                </div>
+                                <div class="rm-contacts-list">
+                                    <a href="tel:+12125550190" class="rm-contact-chip">
+                                        <span class="rcc-icon">&#x1F4DE;</span>
+                                        <span>+1 212 555 0190</span>
+                                    </a>
+                                    <a href="mailto:m.vance@fnb-us.com" class="rm-contact-chip">
+                                        <span class="rcc-icon">&#x2709;</span>
+                                        <span>m.vance@fnb-us.com</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Official Submission Actions -->
+                            <div class="success-side-card actions-side-card">
+                                <div class="side-card-title-row">
+                                    <span class="side-card-icon">&#x1F4C1;</span>
+                                    <h4 class="side-card-title">Application Records</h4>
+                                </div>
+                                <p class="side-card-desc">Download your signed application receipt or print a full disclosure summary for your company compliance records.</p>
+                                <div class="side-actions-group">
+                                    <button type="button" class="btn-side-action btn-receipt" onclick="downloadReceipt()">
+                                        <span class="bsa-icon">&#x1F4E5;</span>
+                                        <div class="bsa-text">
+                                            <strong>Download Receipt</strong>
+                                            <small>Official timestamp &amp; reference</small>
+                                        </div>
+                                    </button>
+                                    <button type="button" class="btn-side-action btn-print" onclick="window.print()">
+                                        <span class="bsa-icon">&#x1F5A8;</span>
+                                        <div class="bsa-text">
+                                            <strong>Print Summary</strong>
+                                            <small>Complete disclosure &amp; form copy</small>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Upload Additional Documents Vault -->
+                            <div class="success-side-card forgotten-docs-side-card" id="forgottenDocsSection">
+                                <div class="fd-side-hdr">
+                                    <span class="fd-side-icon">&#x1F4C4;</span>
+                                    <div>
+                                        <h4 class="side-card-title">Upload Additional Docs</h4>
+                                        <p class="side-card-desc">Forgot to attach any documents? Submit any remaining files anytime below.</p>
+                                    </div>
+                                </div>
+                                <div class="fd-compact-grid" id="fdUploadGrid">
+                                    <div class="fd-upload-card" id="fd-uc-1" onclick="triggerUpload('fd-f-1')" ondragover="allowDrop(event)" ondrop="handleFileDrop(event,'fd-uc-1','fd-f-1')">
+                                        <input type="file" id="fd-f-1" accept=".pdf,.jpg,.png" onchange="markUploaded('fd-uc-1',this)" aria-label="Upload additional document 1">
+                                        <div class="opt-badge" id="fdBadge1">Optional</div>
+                                        <div class="fdu-icon" aria-hidden="true">&#x1F4C4;</div>
+                                        <strong id="fdLabel1">Additional Doc 1</strong>
+                                        <small>PDF or image</small>
+                                    </div>
+                                    <div class="fd-upload-card" id="fd-uc-2" onclick="triggerUpload('fd-f-2')" ondragover="allowDrop(event)" ondrop="handleFileDrop(event,'fd-uc-2','fd-f-2')">
+                                        <input type="file" id="fd-f-2" accept=".pdf,.jpg,.png" onchange="markUploaded('fd-uc-2',this)" aria-label="Upload additional document 2">
+                                        <div class="opt-badge" id="fdBadge2">Optional</div>
+                                        <div class="fdu-icon" aria-hidden="true">&#x1F4C4;</div>
+                                        <strong id="fdLabel2">Additional Doc 2</strong>
+                                        <small>PDF or image</small>
+                                    </div>
+                                    <div class="fd-upload-card" id="fd-uc-3" onclick="triggerUpload('fd-f-3')" ondragover="allowDrop(event)" ondrop="handleFileDrop(event,'fd-uc-3','fd-f-3')">
+                                        <input type="file" id="fd-f-3" accept=".pdf,.jpg,.png" onchange="markUploaded('fd-uc-3',this)" aria-label="Upload additional document 3">
+                                        <div class="opt-badge" id="fdBadge3">Optional</div>
+                                        <div class="fdu-icon" aria-hidden="true">&#x1F4C4;</div>
+                                        <strong id="fdLabel3">Additional Doc 3</strong>
+                                        <small>PDF or image</small>
+                                    </div>
+                                    <div class="fd-upload-card" id="fd-uc-4" onclick="triggerUpload('fd-f-4')" ondragover="allowDrop(event)" ondrop="handleFileDrop(event,'fd-uc-4','fd-f-4')">
+                                        <input type="file" id="fd-f-4" accept=".pdf,.jpg,.png" onchange="markUploaded('fd-uc-4',this)" aria-label="Upload additional document 4">
+                                        <div class="opt-badge" id="fdBadge4">Optional</div>
+                                        <div class="fdu-icon" aria-hidden="true">&#x1F4C4;</div>
+                                        <strong id="fdLabel4">Additional Doc 4</strong>
+                                        <small>PDF or image</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
