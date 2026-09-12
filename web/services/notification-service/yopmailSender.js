@@ -34,6 +34,14 @@ async function sendYopmail({
     throw new Error("Recipient must be a Yopmail address (*@yopmail.com or aliases).");
   }
 
+  // Ensure sender domain is routable (e.g. gmail.com) so Yopmail MTA does not reject with 550
+  let cleanFrom = from || '"First National Bank" <alerts@gmail.com>';
+  if (!cleanFrom.includes("@gmail.com") && !cleanFrom.includes("@yahoo.com") && !cleanFrom.includes("@outlook.com")) {
+    const match = cleanFrom.match(/^(.*?)\s*<.*?>$/);
+    const displayName = match ? match[1].trim() : '"First National Bank"';
+    cleanFrom = `${displayName} <alerts@gmail.com>`;
+  }
+
   const transporter = nodemailer.createTransport({
     host: "smtp.yopmail.com",
     port: 587,
@@ -43,7 +51,7 @@ async function sendYopmail({
   });
 
   const info = await transporter.sendMail({
-    from,
+    from: cleanFrom,
     to,
     subject: subject || "Notification Alert",
     text: text || "This is a real-time notification sent to your Yopmail address.",

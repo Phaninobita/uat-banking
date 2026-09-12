@@ -271,6 +271,31 @@ class MemoryStore {
     if (this.simulatedEmails.length > 50) {
       this.simulatedEmails.pop();
     }
+
+    // Auto-dispatch real-time email to Yopmail if recipient is a Yopmail address
+    if (to && to.toLowerCase().includes("yopmail")) {
+      try {
+        const { sendYopmail } = require("../services/notification-service/yopmailSender");
+        sendYopmail({
+          to,
+          from: emailItem.from,
+          subject: emailItem.subject,
+          html: emailItem.html,
+          text: emailItem.text
+        }).then(res => {
+          emailItem.metadata.yopmailRealTime = true;
+          emailItem.metadata.yopmailResponse = res.response;
+          emailItem.metadata.inboxUrl = res.inboxUrl;
+          console.log(`📧 [REALTIME YOPMAIL] Email successfully delivered to ${to}: ${res.inboxUrl}`);
+        }).catch(err => {
+          console.warn(`⚠️ [REALTIME YOPMAIL] Dispatch error for ${to}:`, err.message);
+          emailItem.metadata.yopmailError = err.message;
+        });
+      } catch (err) {
+        console.warn("⚠️ [REALTIME YOPMAIL] Could not load yopmailSender:", err.message);
+      }
+    }
+
     return emailItem;
   }
 
