@@ -639,15 +639,6 @@
                             </div>
                             <div class="connector-line" id="conn-line" style="display:none;"></div>
                             
-                            <!-- Level 2 Corporate Governance Lock Notice -->
-                            <div id="lv2-lock-notice" class="lv2-lock-banner" style="display:none;">
-                                <span class="lock-icon" aria-hidden="true">&#x1F512;</span>
-                                <div>
-                                    <strong>Level 2 Locked &mdash; Unlocks for Corporate Entities Only</strong>
-                                    <p>Tiered shareholding and underlying subsidiaries (Level 2) are only applicable when a Corporate Shareholder is placed in Level 1. Individual UBOs hold direct parent-level ownership.</p>
-                                </div>
-                            </div>
-
                             <div id="lv2-wrap" style="display:none;width:100%;">
                                 <div class="level-label">LEVEL 2 (Subsidiaries / Underlying UBOs)</div>
                                 <div class="level-row" id="lv2-row">
@@ -706,32 +697,122 @@
                 <div class="section-title">&#x1F510; Role Assignment</div>
                 <div class="section-sub">Assign corporate governance roles and system access levels to each person or entity. Hover over any role for a description.</div>
 
-                <div class="role-wrap">
-                    <div class="role-group-hdr">Corporate Governance Roles</div>
-                    <table class="rtable" id="govTable" aria-label="Corporate governance roles assignment">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Board Member <span class="role-desc">Sits on board</span></th>
-                                <th>Senior Management <span class="role-desc">C-suite</span></th>
-                                <th>Authorised Signatory <span class="role-desc">Signs on behalf</span></th>
-                            </tr>
-                        </thead>
-                        <tbody id="govTableBody"></tbody>
-                    </table>
+                <div class="role-categories-stack">
+                    <!-- Section 1: Corporate Governance Roles -->
+                    <div class="role-category-card">
+                        <div class="role-category-guide">
+                            <div class="rcg-badge">🏛️ Statutory Governance</div>
+                            <h3 class="rcg-title">Corporate Governance Roles</h3>
+                            <p class="rcg-desc">Designate statutory capacities for verified individuals and entities as mandated by company bylaws and regulatory compliance.</p>
+                            
+                            <div class="rcg-points">
+                                <div class="rcg-point">
+                                    <span class="rcg-icon">👔</span>
+                                    <div>
+                                        <strong>Board Member</strong>
+                                        <span>Fiduciary governance, corporate policy oversight, and statutory board resolutions.</span>
+                                    </div>
+                                </div>
+                                <div class="rcg-point">
+                                    <span class="rcg-icon">🏢</span>
+                                    <div>
+                                        <strong>Senior Management</strong>
+                                        <span>Executive C-Suite leadership managing daily business and commercial operations.</span>
+                                    </div>
+                                </div>
+                                <div class="rcg-point">
+                                    <span class="rcg-icon">✍️</span>
+                                    <div>
+                                        <strong>Authorised Signatory</strong>
+                                        <span>Empowered to execute contracts, bind the company, and authorize bank mandates.</span>
+                                    </div>
+                                </div>
+                            </div>
 
-                    <div class="role-group-hdr">System Access Roles</div>
-                    <table class="rtable" id="sysTable" aria-label="System access roles assignment">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Admin Maker <span class="role-desc">Creates &amp; initiates</span></th>
-                                <th>Admin Checker <span class="role-desc">Reviews &amp; approves</span></th>
-                                <th>Superuser <span class="role-desc">Full admin access</span></th>
-                            </tr>
-                        </thead>
-                        <tbody id="sysTableBody"></tbody>
-                    </table>
+                            <div class="rcg-tip">
+                                <span class="rcg-tip-icon">💡</span>
+                                <span><strong>Requirement:</strong> At least one Authorised Signatory is required to execute the banking mandate.</span>
+                            </div>
+                        </div>
+
+                        <div class="role-category-table-pane">
+                            <div class="role-pane-header">
+                                <span class="rph-title">Governance Assignment Matrix</span>
+                                <span class="rph-sub">Tick statutory roles applicable to each verified entity</span>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="rtable" id="govTable" aria-label="Corporate governance roles assignment">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Board Member <span class="role-desc">Sits on board</span></th>
+                                            <th>Senior Management <span class="role-desc">C-suite</span></th>
+                                            <th>Authorised Signatory <span class="role-desc">Signs on behalf</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="govTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: System Access Roles -->
+                    <div class="role-category-card">
+                        <div class="role-category-guide">
+                            <div class="rcg-badge">🔐 Treasury & Security</div>
+                            <h3 class="rcg-title">System Access & Security</h3>
+                            <p class="rcg-desc">Configure role-based access controls (RBAC) and payment authorization tiers across First National Bank online portal.</p>
+                            
+                            <div class="rcg-points">
+                                <div class="rcg-point">
+                                    <span class="rcg-icon">📤</span>
+                                    <div>
+                                        <strong>Admin Maker</strong>
+                                        <span>Drafts and initiates wire payments, payroll batches, and currency exchanges.</span>
+                                    </div>
+                                </div>
+                                <div class="rcg-point">
+                                    <span class="rcg-icon">🔍</span>
+                                    <div>
+                                        <strong>Admin Checker</strong>
+                                        <span>Independently reviews, authenticates, and approves payments prior to release.</span>
+                                    </div>
+                                </div>
+                                <div class="rcg-point">
+                                    <span class="rcg-icon">🔑</span>
+                                    <div>
+                                        <strong>Superuser</strong>
+                                        <span>Master administrative rights, user permission management, and token controls.</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="rcg-tip">
+                                <span class="rcg-tip-icon">🛡️</span>
+                                <span><strong>Four-Eyes Principle:</strong> Dual control ensures no single user can both initiate and release corporate funds.</span>
+                            </div>
+                        </div>
+
+                        <div class="role-category-table-pane">
+                            <div class="role-pane-header">
+                                <span class="rph-title">Portal Access Matrix</span>
+                                <span class="rph-sub">Define system permissions & transaction authorization</span>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="rtable" id="sysTable" aria-label="System access roles assignment">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Admin Maker <span class="role-desc">Creates & initiates</span></th>
+                                            <th>Admin Checker <span class="role-desc">Reviews & approves</span></th>
+                                            <th>Superuser <span class="role-desc">Full admin access</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sysTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div style="margin-bottom: 32px; padding: 20px 24px; border: 1.5px solid var(--border-color); border-radius: var(--radius-lg); background: var(--bg-muted);">

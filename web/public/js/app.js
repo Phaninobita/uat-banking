@@ -1507,7 +1507,6 @@ function checkLevels() {
     const lv1Cards = document.querySelectorAll('#lv1-row .entity-card');
     const connLine = document.getElementById('conn-line');
     const lv2Wrap = document.getElementById('lv2-wrap');
-    let lv2Notice = document.getElementById('lv2-lock-notice');
 
     // RULE: Level 2 unlocks ONLY if a Corporate entity is present in Level 1
     let hasCorporateInLv1 = false;
@@ -1525,31 +1524,9 @@ function checkLevels() {
             lv2Wrap.style.display = 'block';
             lv2Wrap.style.animation = 'fadeUp 0.4s ease';
         }
-        if (lv2Notice) lv2Notice.style.display = 'none';
     } else {
         if (connLine) connLine.style.display = 'none';
         if (lv2Wrap) lv2Wrap.style.display = 'none';
-
-        // If there are cards in Level 1 (individual UBOs only)
-        if (lv1Cards.length > 0) {
-            if (!lv2Notice) {
-                lv2Notice = document.createElement('div');
-                lv2Notice.id = 'lv2-lock-notice';
-                lv2Notice.className = 'lv2-lock-banner';
-                const chartWrap = document.querySelector('.chart-wrap');
-                if (chartWrap) chartWrap.appendChild(lv2Notice);
-            }
-            lv2Notice.innerHTML = `
-                <span class="lock-icon" aria-hidden="true">🔒</span>
-                <div>
-                    <strong>Level 2 Locked — Unlocks for Corporate Entities Only</strong>
-                    <p>Underlying subsidiaries and tiered shareholding (Level 2) are only required when a Corporate Shareholder is placed in Level 1. Individual UBOs hold direct parent-level ownership.</p>
-                </div>
-            `;
-            lv2Notice.style.display = 'flex';
-        } else {
-            if (lv2Notice) lv2Notice.style.display = 'none';
-        }
     }
 }
 
