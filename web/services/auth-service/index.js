@@ -126,7 +126,7 @@ router.post("/request-otp", async (req, res) => {
         <div style="text-align: center; margin-bottom: 20px;">
           <div style="display: inline-block; background: linear-gradient(135deg, #0ea5e9, #4f46e5); color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; box-shadow: 0 4px 12px rgba(14,165,233,0.3);">GB</div>
           <h2 style="color: #0f172a; margin: 12px 0 2px; font-size: 20px; font-weight: 700;">Gringotts Bank Identity Verification</h2>
-          <p style="color: #64748b; font-size: 13px; margin: 0;">1 Diagon Alley, London &bull; Identity Verification for <strong>${companyTitle}</strong></p>
+          <p style="color: #64748b; font-size: 13px; margin: 0;">Diagon Alley &bull; Identity Verification for <strong>${companyTitle}</strong></p>
         </div>
         <p style="color: #334155; font-size: 14px; line-height: 1.5;">Hello,</p>
         <p style="color: #334155; font-size: 14px; line-height: 1.5;">Use the following verification code to access your corporate onboarding application for <strong>${companyTitle}</strong> (CRN: <strong>${cleanCrn}</strong>):</p>

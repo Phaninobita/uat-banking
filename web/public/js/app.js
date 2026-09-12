@@ -3495,7 +3495,7 @@ async function handleLoginStep1() {
                         <div style="text-align: center; margin-bottom: 16px;">
                             <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 16px; width: 40px; height: 40px; line-height: 40px; border-radius: 8px;">GB</div>
                             <h2 style="margin: 8px 0 2px; color: #0f172a; font-size: 18px;">Gringotts Bank Corporate Portal</h2>
-                            <p style="color: #64748b; font-size: 12px; margin: 0;">1 Diagon Alley, London &bull; Vault Verification Code</p>
+                            <p style="color: #64748b; font-size: 12px; margin: 0;">Diagon Alley &bull; Vault Verification Code</p>
                         </div>
                         <p style="color: #334155; font-size: 14px;">Use the following verification code to access your corporate onboarding application for CRN <strong>${crn}</strong>:</p>
                         <div style="background: #f8fafc; border: 2px dashed #0284c7; border-radius: 8px; padding: 16px; text-align: center; margin: 16px 0;">
@@ -3669,7 +3669,7 @@ function displayClientNameOnTop(companyName, crn, companyUid) {
     if (companyTag) {
         companyTag.style.display = companyTag.id === 'sidebarCompanyCard' ? 'block' : 'inline-flex';
     }
-    if (brandSub) brandSub.textContent = '1 Diagon Alley, London • Hogwarts Vaults';
+    if (brandSub) brandSub.textContent = 'Diagon Alley • Hogwarts Vaults';
 
     // Auto-fill Step 2 company fields
     const s2Name = document.getElementById('step2_name');
@@ -3721,7 +3721,7 @@ async function finalizeApp() {
                 <div style="text-align: center; margin-bottom: 20px;">
                     <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px;">GB</div>
                     <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Gringotts Bank Corporate Portal</h2>
-                    <p style="color: #64748b; font-size: 13px; margin: 0;">1 Diagon Alley, London &bull; Application Confirmation</p>
+                    <p style="color: #64748b; font-size: 13px; margin: 0;">Diagon Alley &bull; Application Confirmation</p>
                 </div>
                 <p style="color: #334155; font-size: 14px;">Dear Corporate Customer,</p>
                 <p style="color: #334155; font-size: 14px;">Your corporate account and vault allocation application has been received and logged into our compliance verification queue.</p>
@@ -3729,7 +3729,7 @@ async function finalizeApp() {
                     <span style="font-size: 11px; color: #166534; font-weight: 700; text-transform: uppercase;">Application Reference</span><br>
                     <span style="font-size: 24px; font-weight: 800; color: #15803d; font-family: monospace;">${appRef}</span>
                 </div>
-                <p style="color: #475569; font-size: 13px;">Our onboarding desk will complete the verification within 1–2 business days. Your assigned Relationship Manager is <strong>Bogrod & Griphook</strong> (vaults@gringotts.co.uk &bull; +44 20 7946 0190 &bull; 1 Diagon Alley, London).</p>
+                <p style="color: #475569; font-size: 13px;">Our onboarding desk will complete the verification within 1–2 business days. Your assigned Relationship Manager is <strong>Bogrod & Griphook</strong> (vaults@gringotts.co.uk &bull; +44 20 7946 0190 &bull; Diagon Alley).</p>
             </div>
         `
     });
@@ -3787,7 +3787,7 @@ function showSaveModal() {
                 <div style="text-align: center; margin-bottom: 20px;">
                     <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px;">GB</div>
                     <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Gringotts Bank Corporate Portal</h2>
-                    <p style="color: #64748b; font-size: 13px; margin: 0;">1 Diagon Alley, London &bull; Application Progress Saved</p>
+                    <p style="color: #64748b; font-size: 13px; margin: 0;">Diagon Alley &bull; Application Progress Saved</p>
                 </div>
                 <p style="color: #334155; font-size: 14px;">Your onboarding progress has been saved securely.</p>
                 <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; margin: 16px 0; word-break: break-all;">
@@ -3864,7 +3864,7 @@ function sendInvite() {
                 <div style="text-align: center; margin-bottom: 20px;">
                     <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px;">GB</div>
                     <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Gringotts Bank Corporate Portal</h2>
-                    <p style="color: #64748b; font-size: 13px; margin: 0;">1 Diagon Alley, London &bull; Beneficial Ownership Verification</p>
+                    <p style="color: #64748b; font-size: 13px; margin: 0;">Diagon Alley &bull; Beneficial Ownership Verification</p>
                 </div>
                 <p style="color: #334155; font-size: 14px;">You have been nominated as an Ultimate Beneficial Owner (UBO) for a Gringotts Bank corporate vault account application.</p>
                 <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; margin: 16px 0; text-align: center;">
@@ -3912,7 +3912,7 @@ function triggerDocuSign() {
                     <div style="text-align: center; margin-bottom: 20px;">
                         <div style="display: inline-block; background: #ffbe00; color: #0f172a; font-weight: 800; font-size: 16px; width: 44px; height: 44px; line-height: 44px; border-radius: 8px;">DS</div>
                         <h2 style="margin: 10px 0 2px; color: #0f172a; font-size: 20px;">DocuSign Electronic Signature</h2>
-                        <p style="color: #64748b; font-size: 12px; margin: 0;">Gringotts Bank Corporate Account Opening Package &bull; 1 Diagon Alley, London</p>
+                        <p style="color: #64748b; font-size: 12px; margin: 0;">Gringotts Bank Corporate Account Opening Package &bull; Diagon Alley</p>
                     </div>
                     <p style="color: #1e293b; font-size: 14px;">Hello Authorized Signatory,</p>
                     <p style="color: #334155; font-size: 14px; line-height: 1.5;">Gringotts Bank has prepared your Corporate Banking Master Agreement and Authorized Signatory Mandate for digital signature.</p>
@@ -3933,9 +3933,9 @@ function downloadReceipt() {
 
     const txt = `GRINGOTTS BANK CORPORATE ONBOARDING RECEIPT
 ==================================================
-Bank: Gringotts Bank (1 Diagon Alley, London)
+Bank: Gringotts Bank (Diagon Alley)
 Affiliation: Hogwarts Financial Council Treasury
-Location: 1 Diagon Alley, London, WC2 (Underground Vault Complex)
+Location: Diagon Alley, WC2 (Underground Vault Complex)
 ==================================================
 Application Ref: ${appRef}
 Submitted: ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}
@@ -3951,9 +3951,9 @@ NEXT STEPS:
 5. Final onboarding review: 1-2 business days
 
 RELATIONSHIP MANAGER & VAULT MASTERS:
-Bogrod & Griphook | 1 Diagon Alley, London Vault Operations
+Bogrod & Griphook | Diagon Alley Vault Operations
 Email: vaults@gringotts.co.uk | Support: support@gringotts.com
-Address: 1 Diagon Alley, London, UK
+Address: Diagon Alley, London, UK
 `;
 
     const a = Object.assign(document.createElement('a'), {

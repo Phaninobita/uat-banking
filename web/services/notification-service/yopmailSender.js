@@ -96,7 +96,7 @@ if (require.main === module) {
       <div style="font-family: Arial, sans-serif; max-width: 500px; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
         <div style="border-bottom: 2px solid #0b3954; padding-bottom: 12px; margin-bottom: 16px;">
           <h2 style="color: #0b3954; margin: 0;">Gringotts Bank</h2>
-          <span style="font-size: 12px; color: #64748b;">1 Diagon Alley, London &bull; Real-Time Vault Dispatch</span>
+          <span style="font-size: 12px; color: #64748b;">Diagon Alley &bull; Real-Time Vault Dispatch</span>
         </div>
         <p style="color: #334155; font-size: 15px;">Hello,</p>
         <p style="color: #334155; font-size: 14px;">Here is your verification code requested at <strong>${timestamp}</strong>:</p>
