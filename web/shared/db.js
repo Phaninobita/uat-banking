@@ -381,13 +381,13 @@ const db = {
     await initPromise;
     return supabaseClient.saveDocument(doc);
   },
-  async getDocument(id, appRef) {
+  async getDocument(id, appRef, companyUid) {
     await initPromise;
-    return supabaseClient.getDocument(id, appRef);
+    return supabaseClient.getDocument(id, appRef, companyUid);
   },
-  async listDocuments(appRef) {
+  async listDocuments(appRef, companyUid) {
     await initPromise;
-    return supabaseClient.listDocuments(appRef);
+    return supabaseClient.listDocuments(appRef, companyUid);
   },
   async deleteDocument(id, appRef) {
     await initPromise;

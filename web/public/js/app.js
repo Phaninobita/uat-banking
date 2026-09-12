@@ -9,7 +9,19 @@ const totalSteps = 7;
 const stepProgress = [0, 14, 28, 43, 57, 71, 86, 100];
 let currentLoginCrn = '';
 let currentLoginEmail = '';
-let currentCompanyUid = '';
+let currentCompanyUid = (typeof localStorage !== 'undefined' && localStorage.getItem('vb_company_uid')) || '';
+window.currentCompanyUid = currentCompanyUid;
+
+function setCompanyUid(uid) {
+    if (!uid) return;
+    currentCompanyUid = uid;
+    window.currentCompanyUid = uid;
+    try {
+        localStorage.setItem('vb_company_uid', uid);
+        sessionStorage.setItem('vb_company_uid', uid);
+    } catch (e) {}
+}
+window.setCompanyUid = setCompanyUid;
 let currentAppRef = null;
 let isReworkMode = false;
 let uboCount = 0;
@@ -557,10 +569,43 @@ function decodeBase64ToBlob(base64Data, fallbackMime = 'application/pdf') {
 }
 window.decodeBase64ToBlob = decodeBase64ToBlob;
 
+let currentPdfDoc = null;
+let currentPdfPage = 1;
+let currentPdfZoom = 1.0;
+let currentPreviewDocData = null;
+
+const cardToDocTypeMap = {
+    'uc-1': 'trade_licence',
+    'uc-2': 'certificate_of_incorporation',
+    'uc-3': 'board_resolution',
+    'uc-4': 'supporting_document',
+    'doc_1': 'trade_licence',
+    'doc_2': 'certificate_of_incorporation',
+    'doc_3': 'board_resolution',
+    'doc_4': 'supporting_document',
+    'fd-uc-1': 'additional_document_1',
+    'fd-uc-2': 'additional_document_2',
+    'fd-uc-3': 'additional_document_3',
+    'fd-uc-4': 'additional_document_4',
+    'uc-maker': 'uc-maker',
+    'uc-checker': 'uc-checker'
+};
+
+const docTypeToCardMap = {
+    'trade_licence': 'uc-1',
+    'certificate_of_incorporation': 'uc-2',
+    'board_resolution': 'uc-3',
+    'supporting_document': 'uc-4',
+    'additional_document_1': 'fd-uc-1',
+    'additional_document_2': 'fd-uc-2',
+    'additional_document_3': 'fd-uc-3',
+    'additional_document_4': 'fd-uc-4',
+    'uc-maker': 'uc-maker',
+    'uc-checker': 'uc-checker'
+};
+
 async function openDocPreview(cardId) {
     currentPreviewCardId = cardId;
-    let doc = uploadedDocumentsCache[cardId];
-
     const modal = document.getElementById('docPreviewModal');
     const titleEl = document.getElementById('docPreviewTitle');
     const contentEl = document.getElementById('docPreviewContent');
@@ -569,25 +614,72 @@ async function openDocPreview(cardId) {
 
     if (!modal || !contentEl) return;
 
-    // If doc not cached or missing base64, attempt to load from database
+    // Resolve document from memory cache
+    let doc = uploadedDocumentsCache[cardId] || 
+              uploadedDocumentsCache[cardToDocTypeMap[cardId]] ||
+              uploadedDocumentsCache[docTypeToCardMap[cardId]];
+
+    // If still missing, check all cached records for matching id or cardId or type
+    if (!doc) {
+        for (const k of Object.keys(uploadedDocumentsCache)) {
+            const item = uploadedDocumentsCache[k];
+            if (item && (item.cardId === cardId || item.docType === cardId || item.docType === cardToDocTypeMap[cardId] || item.id == cardId)) {
+                doc = item;
+                break;
+            }
+        }
+    }
+
+    const cardEl = document.getElementById(cardId);
+    const cardStatusText = cardEl?.querySelector('.file-status')?.textContent || '';
+
+    // If doc not cached or missing base64, display loading spinner and load from database
     if (!doc || !doc.base64Data) {
         contentEl.innerHTML = `
-            <div style="display:flex;flex-direction:column;align-items:center;gap:12px;color:#38bdf8;padding:40px 20px;">
-                <div class="spinner" style="width:36px;height:36px;border:3px solid rgba(56,189,248,0.2);border-top-color:#38bdf8;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
-                <div style="font-size:14px;font-weight:600;">Retrieving document from secure database...</div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:14px;color:#38bdf8;padding:50px 20px;">
+                <div class="spinner" style="width:40px;height:40px;border:3px solid rgba(56,189,248,0.2);border-top-color:#38bdf8;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+                <div style="font-size:15px;font-weight:600;">Retrieving document from database...</div>
+                <div style="font-size:12px;color:#94a3b8;">Decoding Base64 data stream</div>
             </div>
         `;
+        if (titleEl) titleEl.textContent = 'Loading Document...';
         modal.classList.add('open');
 
+        const appRef = (ApexApi.getApplicationRef && ApexApi.getApplicationRef()) || currentAppRef || '';
+        const urlParams = typeof window !== 'undefined' && window.location ? new URLSearchParams(window.location.search) : null;
+        const compUid = (ApexApi.getCompanyUid ? ApexApi.getCompanyUid() : (window.currentCompanyUid || (urlParams && urlParams.get('company_uid')) || (typeof localStorage !== 'undefined' && localStorage.getItem('vb_company_uid')) || '')).trim();
+
+        // 1. Query database document list
         try {
-            const appRef = (ApexApi.getApplicationRef && ApexApi.getApplicationRef()) || currentAppRef || 'AB-2026-DEMO01';
             const res = await ApexApi.getDocuments(appRef);
-            if (res.success && Array.isArray(res.documents)) {
+            if (res.success && Array.isArray(res.documents) && res.documents.length > 0) {
+                // Populate cache for all retrieved documents
+                res.documents.forEach((d, idx) => {
+                    const mappedCard = docTypeToCardMap[d.document_type] || `uc-${(idx % 4) + 1}`;
+                    const cachedItem = {
+                        id: d.id,
+                        cardId: mappedCard,
+                        docType: d.document_type,
+                        fileName: d.file_name,
+                        fileType: d.file_type || (d.file_name && d.file_name.endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream'),
+                        fileSize: d.file_size || (d.file_data_base64 ? d.file_data_base64.length : 0),
+                        base64Data: d.file_data_base64
+                    };
+                    uploadedDocumentsCache[mappedCard] = cachedItem;
+                    uploadedDocumentsCache[d.document_type] = cachedItem;
+                    uploadedDocumentsCache[String(d.id)] = cachedItem;
+                });
+
+                // Find matching document for this card
+                const expectedType = cardToDocTypeMap[cardId] || cardId;
                 const matched = res.documents.find(d => 
                     (doc && doc.id && d.id == doc.id) ||
-                    (doc && doc.docType && d.document_type === doc.docType) ||
-                    (doc && doc.fileName && d.file_name === doc.fileName)
+                    (d.document_type === expectedType) ||
+                    (cardStatusText && cardStatusText.includes(d.file_name)) ||
+                    (d.id == cardId) ||
+                    (d.file_name === cardStatusText.trim())
                 );
+
                 if (matched && matched.file_data_base64) {
                     doc = {
                         id: matched.id,
@@ -604,30 +696,65 @@ async function openDocPreview(cardId) {
         } catch (fetchErr) {
             console.warn('[DOC PREVIEW] DB load notice:', fetchErr.message);
         }
+
+        // 2. If still missing, query direct download endpoint with ?as_base64=1
+        if (!doc || !doc.base64Data) {
+            try {
+                const lookupId = (doc && doc.id) || cardToDocTypeMap[cardId] || cardId;
+                const queryParams = new URLSearchParams();
+                if (appRef) queryParams.set('appRef', appRef);
+                if (compUid) queryParams.set('company_uid', compUid);
+                queryParams.set('as_base64', '1');
+
+                const resp = await fetch(`/api/v1/documents/download/${encodeURIComponent(lookupId)}?${queryParams.toString()}`);
+                if (resp.ok) {
+                    const json = await resp.json();
+                    if (json.success && json.document && json.document.file_data_base64) {
+                        doc = {
+                            id: json.document.id,
+                            cardId: cardId,
+                            docType: cardToDocTypeMap[cardId] || cardId,
+                            fileName: json.document.file_name,
+                            fileType: json.document.file_type || 'application/pdf',
+                            fileSize: json.document.file_size || 0,
+                            base64Data: json.document.file_data_base64
+                        };
+                        uploadedDocumentsCache[cardId] = doc;
+                    }
+                }
+            } catch (dlErr) {
+                console.warn('[DOC PREVIEW] Direct download fetch notice:', dlErr.message);
+            }
+        }
     }
 
     if (!doc || !doc.base64Data) {
         contentEl.innerHTML = `
-            <div style="text-align:center;color:#ef4444;padding:40px 20px;">
-                <div style="font-size:32px;margin-bottom:12px;">⚠️</div>
-                <div style="font-size:15px;font-weight:700;margin-bottom:6px;">Document Content Unavailable</div>
-                <div style="font-size:13px;color:#94a3b8;">The document data could not be retrieved from storage.</div>
+            <div style="text-align:center;color:#ef4444;padding:50px 20px;">
+                <div style="font-size:36px;margin-bottom:12px;">⚠️</div>
+                <div style="font-size:16px;font-weight:700;margin-bottom:6px;">Document Content Unavailable</div>
+                <div style="font-size:13px;color:#94a3b8;margin-bottom:16px;">The document data could not be retrieved from secure database storage.</div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openDocPreview('${cardId}')" style="display:inline-flex;align-items:center;gap:6px;">
+                    🔄 Retry Loading
+                </button>
             </div>
         `;
         modal.classList.add('open');
         return;
     }
 
+    currentPreviewDocData = doc;
     if (titleEl) titleEl.textContent = doc.fileName || 'Document Preview';
+
     const sizeKb = Math.round((doc.fileSize || doc.base64Data.length) / 1024);
     const sizeFormatted = sizeKb > 1024 ? (sizeKb / 1024).toFixed(1) + ' MB' : sizeKb + ' KB';
 
     if (metaEl) {
         metaEl.innerHTML = `
             <span>File: <strong>${escapeHtml(doc.fileName || 'document')}</strong></span> &bull; 
-            <span>Type: <strong>${doc.fileType}</strong></span> &bull; 
+            <span>Type: <strong>${doc.fileType || 'PDF'}</strong></span> &bull; 
             <span>Size: <strong>${sizeFormatted}</strong></span> &bull; 
-            <span style="color:#34d399;font-weight:700;">🟢 Decoded &amp; Verified</span>
+            <span style="color:#34d399;font-weight:700;">🟢 Base64 Decoded &amp; Verified</span>
         `;
     }
 
@@ -647,32 +774,156 @@ async function openDocPreview(cardId) {
             extLink.style.display = 'inline-flex';
         }
 
-        if (mimeType.startsWith('image/')) {
-            contentEl.innerHTML = `<img class="doc-preview-img-full" src="${activePreviewBlobUrl}" alt="${escapeHtml(doc.fileName || 'Uploaded Document')}">`;
-        } else {
-            // PDF: render using object with iframe fallback for native viewer
-            contentEl.innerHTML = `
-                <object data="${activePreviewBlobUrl}" type="application/pdf" class="doc-preview-pdf-embed">
-                    <iframe src="${activePreviewBlobUrl}#toolbar=1" class="doc-preview-pdf-embed">
-                        <div style="padding:30px; text-align:center; color:#94a3b8;">
-                            <p style="font-size:15px;margin-bottom:12px;color:#e2e8f0;">PDF preview is ready.</p>
-                            <a href="${activePreviewBlobUrl}" target="_blank" class="btn btn-primary btn-sm">↗️ Open in New Tab</a>
+        const isPdf = mimeType === 'application/pdf' || 
+                      (doc.fileName && doc.fileName.toLowerCase().endsWith('.pdf')) ||
+                      (doc.base64Data && (doc.base64Data.includes('JVBERi') || doc.base64Data.startsWith('data:application/pdf')));
+
+        if (isPdf) {
+            // Check if PDF.js is available in window
+            if (window.pdfjsLib) {
+                contentEl.innerHTML = `
+                    <div class="pdf-viewer-toolbar">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <button type="button" class="btn-pdf-nav" id="pdfPrevPage" onclick="changePdfPage(-1)">◀ Prev</button>
+                            <span id="pdfPageNum" style="color:#f8fafc;font-size:13px;font-weight:600;">Loading PDF...</span>
+                            <button type="button" class="btn-pdf-nav" id="pdfNextPage" onclick="changePdfPage(1)">Next ▶</button>
                         </div>
-                    </iframe>
-                </object>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <button type="button" class="btn-pdf-tool" onclick="zoomPdf(-0.25)" title="Zoom Out">🔍−</button>
+                            <span id="pdfZoomLevel" style="color:#94a3b8;font-size:12px;font-weight:600;min-width:44px;text-align:center;">100%</span>
+                            <button type="button" class="btn-pdf-tool" onclick="zoomPdf(0.25)" title="Zoom In">🔍+</button>
+                            <button type="button" class="btn-pdf-tool" onclick="fitPdfWidth()" title="Fit Width">↔ Fit</button>
+                        </div>
+                    </div>
+                    <div class="pdf-canvas-wrapper" id="pdfCanvasWrapper">
+                        <canvas id="pdfViewerCanvas" class="doc-preview-pdf-canvas"></canvas>
+                    </div>
+                `;
+
+                try {
+                    window.pdfjsLib.GlobalWorkerOptions.workerSrc = '/js/pdf.worker.js?v=20260912_02';
+                    const arrayBuffer = await blob.arrayBuffer();
+                    const loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer });
+                    currentPdfDoc = await loadingTask.promise;
+                    currentPdfPage = 1;
+                    currentPdfZoom = 1.0;
+                    await renderPdfPage(1);
+                } catch (pdfRenderErr) {
+                    console.warn('[PDF.js] Canvas render notice, falling back to embedded viewer:', pdfRenderErr);
+                    renderPdfFallback(contentEl, activePreviewBlobUrl, doc);
+                }
+            } else {
+                renderPdfFallback(contentEl, activePreviewBlobUrl, doc);
+            }
+        } else {
+            // Image Preview (PNG, JPG, WebP)
+            contentEl.innerHTML = `
+                <div style="overflow:auto;max-height:75vh;display:flex;align-items:center;justify-content:center;padding:16px;width:100%;">
+                    <img class="doc-preview-img-full" src="${activePreviewBlobUrl}" alt="${escapeHtml(doc.fileName || 'Uploaded Document')}">
+                </div>
             `;
         }
     } catch (err) {
-        console.error('[DOC PREVIEW] Base64 decode error:', err);
-        // Resilient fallback
-        if (doc.fileType && doc.fileType.startsWith('image/')) {
-            contentEl.innerHTML = `<img class="doc-preview-img-full" src="${doc.base64Data}" alt="${escapeHtml(doc.fileName)}">`;
-        } else {
-            contentEl.innerHTML = `<iframe class="doc-preview-pdf-embed" src="${doc.base64Data}"></iframe>`;
-        }
+        console.error('[DOC PREVIEW] Decode error:', err);
+        renderPdfFallback(contentEl, doc.base64Data, doc);
     }
 
     modal.classList.add('open');
+}
+
+async function renderPdfPage(pageNum) {
+    if (!currentPdfDoc) return;
+    const canvas = document.getElementById('pdfViewerCanvas');
+    if (!canvas) return;
+
+    try {
+        const page = await currentPdfDoc.getPage(pageNum);
+        const wrapper = document.getElementById('pdfCanvasWrapper');
+        const containerWidth = (wrapper ? wrapper.clientWidth : 760) || 760;
+
+        const unscaledViewport = page.getViewport({ scale: 1.0 });
+        const fitScale = (containerWidth / unscaledViewport.width) * currentPdfZoom;
+        const scale = Math.max(0.6, Math.min(fitScale, 3.0));
+        const viewport = page.getViewport({ scale });
+
+        // High-DPI Retina canvas scaling
+        const outputScale = window.devicePixelRatio || 1;
+        canvas.width = Math.floor(viewport.width * outputScale);
+        canvas.height = Math.floor(viewport.height * outputScale);
+        canvas.style.width = Math.floor(viewport.width) + "px";
+        canvas.style.height = Math.floor(viewport.height) + "px";
+
+        const ctx = canvas.getContext('2d');
+        const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+
+        const renderContext = {
+            canvasContext: ctx,
+            transform: transform,
+            viewport: viewport
+        };
+        await page.render(renderContext).promise;
+
+        const pageNumEl = document.getElementById('pdfPageNum');
+        if (pageNumEl) pageNumEl.textContent = `Page ${pageNum} of ${currentPdfDoc.numPages}`;
+
+        const zoomEl = document.getElementById('pdfZoomLevel');
+        if (zoomEl) zoomEl.textContent = `${Math.round(currentPdfZoom * 100)}%`;
+
+        const prevBtn = document.getElementById('pdfPrevPage');
+        if (prevBtn) prevBtn.disabled = pageNum <= 1;
+
+        const nextBtn = document.getElementById('pdfNextPage');
+        if (nextBtn) nextBtn.disabled = pageNum >= currentPdfDoc.numPages;
+    } catch (renderErr) {
+        console.warn('[PDF.js] Page render warning:', renderErr);
+    }
+}
+
+function changePdfPage(delta) {
+    if (!currentPdfDoc) return;
+    const targetPage = currentPdfPage + delta;
+    if (targetPage >= 1 && targetPage <= currentPdfDoc.numPages) {
+        currentPdfPage = targetPage;
+        renderPdfPage(currentPdfPage);
+    }
+}
+window.changePdfPage = changePdfPage;
+
+function zoomPdf(delta) {
+    currentPdfZoom = Math.max(0.5, Math.min(currentPdfZoom + delta, 2.5));
+    renderPdfPage(currentPdfPage);
+}
+window.zoomPdf = zoomPdf;
+
+function fitPdfWidth() {
+    currentPdfZoom = 1.0;
+    renderPdfPage(currentPdfPage);
+}
+window.fitPdfWidth = fitPdfWidth;
+
+function renderPdfFallback(contentEl, blobUrl, doc) {
+    contentEl.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;min-height:500px;padding:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;width:100%;max-width:820px;margin-bottom:12px;padding:10px 16px;background:rgba(15,23,42,0.85);border-radius:8px;border:1px solid rgba(255,255,255,0.1);">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-size:22px;">📄</span>
+                    <div>
+                        <div style="font-size:14px;font-weight:700;color:#f8fafc;">${escapeHtml(doc.fileName || 'PDF Document')}</div>
+                        <div style="font-size:12px;color:#38bdf8;">Decoded Base64 &bull; Verified Database Storage</div>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <a href="${blobUrl}" target="_blank" class="btn btn-primary btn-sm" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;padding:6px 14px;font-size:12.5px;">
+                        ↗️ Open in New Tab
+                    </a>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="downloadCurrentPreviewDoc()" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;font-size:12.5px;">
+                        📥 Download
+                    </button>
+                </div>
+            </div>
+            <iframe src="${blobUrl}#toolbar=1" style="width:100%;max-width:820px;height:65vh;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:#0f172a;" title="${escapeHtml(doc.fileName || 'PDF Preview')}"></iframe>
+        </div>
+    `;
 }
 
 function closeDocPreview() {
@@ -686,7 +937,11 @@ function closeDocPreview() {
     if (extLink) extLink.style.display = 'none';
     const contentEl = document.getElementById('docPreviewContent');
     if (contentEl) contentEl.innerHTML = '';
+    currentPdfDoc = null;
+    currentPreviewDocData = null;
 }
+window.closeDocPreview = closeDocPreview;
+window.openDocPreview = openDocPreview;
 
 function downloadCurrentPreviewDoc() {
     if (currentPreviewCardId) {
@@ -694,77 +949,87 @@ function downloadCurrentPreviewDoc() {
     }
 }
 window.downloadCurrentPreviewDoc = downloadCurrentPreviewDoc;
-window.closeDocPreview = closeDocPreview;
-window.openDocPreview = openDocPreview;
+
+// Close preview modal on backdrop click or Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('docPreviewModal');
+        if (modal && modal.classList.contains('open')) {
+            closeDocPreview();
+        }
+    } else if (e.key === 'ArrowLeft' && currentPdfDoc) {
+        changePdfPage(-1);
+    } else if (e.key === 'ArrowRight' && currentPdfDoc) {
+        changePdfPage(1);
+    }
+});
 
 async function downloadDoc(cardId) {
-    let doc = uploadedDocumentsCache[cardId];
-    const appRef = (ApexApi.getApplicationRef && ApexApi.getApplicationRef()) || currentAppRef || 'AB-2026-DEMO01';
+    const appRef = (ApexApi.getApplicationRef && ApexApi.getApplicationRef()) || currentAppRef || '';
+    const urlParams = typeof window !== 'undefined' && window.location ? new URLSearchParams(window.location.search) : null;
+    const compUid = (ApexApi.getCompanyUid ? ApexApi.getCompanyUid() : (window.currentCompanyUid || (urlParams && urlParams.get('company_uid')) || (typeof localStorage !== 'undefined' && localStorage.getItem('vb_company_uid')) || '')).trim();
 
-    // If card metadata is missing, try looking up in DB
+    let doc = uploadedDocumentsCache[cardId] || 
+              uploadedDocumentsCache[cardToDocTypeMap[cardId]] ||
+              uploadedDocumentsCache[docTypeToCardMap[cardId]];
+
+    // If still missing, check all cached records
     if (!doc) {
-        try {
-            const listRes = await ApexApi.getDocuments(appRef);
-            if (listRes.success && Array.isArray(listRes.documents)) {
-                const cardMapping = {
-                    'uc-1': 'trade_licence',
-                    'uc-2': 'certificate_of_incorporation',
-                    'uc-3': 'board_resolution',
-                    'uc-4': 'supporting_document'
-                };
-                const expectedType = cardMapping[cardId] || cardId;
-                const matched = listRes.documents.find(d => d.document_type === expectedType || d.id == cardId);
-                if (matched) {
-                    doc = {
-                        id: matched.id,
-                        cardId: cardId,
-                        docType: matched.document_type,
-                        fileName: matched.file_name,
-                        fileType: matched.file_type,
-                        base64Data: matched.file_data_base64
-                    };
-                    uploadedDocumentsCache[cardId] = doc;
-                }
+        for (const k of Object.keys(uploadedDocumentsCache)) {
+            const item = uploadedDocumentsCache[k];
+            if (item && (item.cardId === cardId || item.docType === cardId || item.docType === cardToDocTypeMap[cardId] || item.id == cardId)) {
+                doc = item;
+                break;
             }
-        } catch (e) {}
+        }
     }
 
-    if (!doc) {
-        showToast('Document metadata not found.', 'Download Notice', 'warning');
-        return;
-    }
+    const cardEl = document.getElementById(cardId);
+    const cardStatusText = cardEl?.querySelector('.file-status')?.textContent || '';
 
-    const fileName = doc.fileName || `${doc.docType || 'document'}.pdf`;
-    showToast(`Downloading "${fileName}" from database...`, 'Database Download', 'info', 2000);
+    let lookupId = (doc && doc.id) || cardToDocTypeMap[cardId] || cardId;
+    let fallbackFileName = (doc && doc.fileName) || (cardStatusText.trim() ? cardStatusText.trim().replace(/^.*?\s/, '') : `${cardId}.pdf`);
 
-    let downloadedFromDb = false;
+    showToast(`Downloading "${fallbackFileName}" from database...`, 'Database Download', 'info', 2500);
+
     let blob = null;
+    let downloadedFileName = fallbackFileName;
 
-    // 1. Prioritize direct download from database microservice endpoint (/download/:id)
-    const docLookupId = doc.id || doc.docType || cardId;
+    // 1. Fetch directly from database microservice endpoint (/download/:id)
     try {
-        const dlRes = await fetch(`/api/v1/documents/download/${encodeURIComponent(docLookupId)}?appRef=${encodeURIComponent(appRef)}`);
-        if (dlRes.ok) {
-            blob = await dlRes.blob();
-            downloadedFromDb = true;
+        const queryParams = new URLSearchParams();
+        if (appRef) queryParams.set('appRef', appRef);
+        if (compUid) queryParams.set('company_uid', compUid);
+        const url = `/api/v1/documents/download/${encodeURIComponent(lookupId)}?${queryParams.toString()}`;
+
+        const resp = await fetch(url);
+        if (resp.ok) {
+            blob = await resp.blob();
+            const disp = resp.headers.get('Content-Disposition');
+            if (disp && disp.includes('filename=')) {
+                const match = disp.match(/filename="?([^";]+)"?/);
+                if (match && match[1]) downloadedFileName = decodeURIComponent(match[1]);
+            }
         }
     } catch (netErr) {
         console.warn('[DOC DOWNLOAD] Direct database endpoint notice:', netErr.message);
     }
 
-    // 2. If direct download did not return 200, query database document list to get latest persisted record
+    // 2. If direct endpoint did not return 200, query database document list
     if (!blob) {
         try {
             const listRes = await ApexApi.getDocuments(appRef);
             if (listRes.success && Array.isArray(listRes.documents)) {
+                const expectedType = cardToDocTypeMap[cardId] || cardId;
                 const matched = listRes.documents.find(d => 
-                    (doc.id && d.id == doc.id) ||
-                    (doc.docType && d.document_type === doc.docType) ||
-                    (d.file_name === doc.fileName)
+                    (doc && doc.id && d.id == doc.id) ||
+                    (d.document_type === expectedType) ||
+                    (cardStatusText && cardStatusText.includes(d.file_name)) ||
+                    (d.id == cardId)
                 );
                 if (matched && matched.file_data_base64) {
-                    blob = decodeBase64ToBlob(matched.file_data_base64, matched.file_type || doc.fileType);
-                    downloadedFromDb = true;
+                    blob = decodeBase64ToBlob(matched.file_data_base64, matched.file_type || 'application/pdf');
+                    downloadedFileName = matched.file_name || downloadedFileName;
                 }
             }
         } catch (dbErr) {
@@ -772,13 +1037,14 @@ async function downloadDoc(cardId) {
         }
     }
 
-    // 3. Fallback to cached base64 if network is completely unreachable
-    if (!blob && doc.base64Data) {
-        blob = decodeBase64ToBlob(doc.base64Data, doc.fileType);
+    // 3. Fallback to cached base64
+    if (!blob && doc && doc.base64Data) {
+        blob = decodeBase64ToBlob(doc.base64Data, doc.fileType || 'application/pdf');
+        downloadedFileName = doc.fileName || downloadedFileName;
     }
 
     if (!blob) {
-        showToast(`Unable to download "${fileName}". Document not found in database.`, 'Download Failed', 'error', 3000);
+        showToast(`Could not download document from database. Document record unavailable.`, 'Download Notice', 'warning', 3500);
         return;
     }
 
@@ -786,17 +1052,13 @@ async function downloadDoc(cardId) {
     const blobUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = blobUrl;
-    link.download = fileName;
+    link.download = downloadedFileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     setTimeout(() => URL.revokeObjectURL(blobUrl), 20000);
 
-    if (downloadedFromDb) {
-        showToast(`Downloaded "${fileName}" from database.`, 'Download Complete', 'success', 3000);
-    } else {
-        showToast(`Downloaded: ${fileName}`, 'Download Complete', 'success', 2500);
-    }
+    showToast(`Downloaded "${downloadedFileName}" from database successfully.`, 'Download Complete', 'success', 3500);
 }
 window.downloadDoc = downloadDoc;
 window.downloadDocFromCache = downloadDoc;
@@ -930,15 +1192,18 @@ async function loadSavedDocuments() {
                     </button>
                 `;
 
-                uploadedDocumentsCache[cardId] = {
+                const item = {
                     id: doc.id,
                     cardId,
                     docType: doc.document_type,
                     fileName: doc.file_name,
-                    fileType: doc.file_type,
+                    fileType: doc.file_type || 'application/pdf',
                     fileSize: doc.file_size,
                     base64Data: doc.file_data_base64
                 };
+                uploadedDocumentsCache[cardId] = item;
+                if (doc.document_type) uploadedDocumentsCache[doc.document_type] = item;
+                if (doc.id) uploadedDocumentsCache[String(doc.id)] = item;
             });
             console.log(`📑 [DOCUMENTS] Restored ${res.documents.length} Base64 documents from database.`);
         }
@@ -3010,6 +3275,25 @@ function populateFormData(formData) {
                 if (isUp) {
                     card.classList.add('uploaded');
                     if (statusEl && fileName) statusEl.textContent = fileName;
+
+                    let actionBar = card.querySelector('.uc-action-bar');
+                    if (!actionBar) {
+                        actionBar = document.createElement('div');
+                        actionBar.className = 'uc-action-bar';
+                        card.appendChild(actionBar);
+                    }
+                    const cId = card.id;
+                    actionBar.innerHTML = `
+                        <button type="button" class="btn-uc-action btn-uc-preview" onclick="event.stopPropagation(); openDocPreview('${cId}')">
+                            👁️ Preview
+                        </button>
+                        <button type="button" class="btn-uc-action" onclick="event.stopPropagation(); downloadDoc('${cId}')">
+                            📥 Download
+                        </button>
+                        <button type="button" class="btn-uc-action btn-uc-delete" onclick="event.stopPropagation(); removeUploadedDoc('${cId}')">
+                            🗑️ Remove
+                        </button>
+                    `;
                 }
             }
         });
@@ -3236,7 +3520,8 @@ async function handleOtpSubmit() {
                 populateFormData(result.data.form_data);
             }
 
-            currentCompanyUid = result.company_uid || result.data.company_uid || ('CUID-' + currentLoginCrn.toUpperCase().replace(/[^A-Z0-9]/g, ''));
+            const resolvedUid = result.company_uid || result.data?.company_uid || ('CUID-' + currentLoginCrn.toUpperCase().replace(/[^A-Z0-9]/g, ''));
+            setCompanyUid(resolvedUid);
 
             // Display Corporate Client Identity (e.g. test99) prominently on top
             const compName = result.company_name || result.data.company_name || result.data.form_data?.step2?.company_name || '';
@@ -3336,9 +3621,9 @@ function displayClientNameOnTop(companyName, crn, companyUid) {
 
     const resolvedName = (companyName || '').trim() || 'Corporate Client';
     const resolvedCrn = (crn || currentLoginCrn || '').trim();
-    if (companyUid) currentCompanyUid = companyUid;
+    if (companyUid) setCompanyUid(companyUid);
     if (!currentCompanyUid && resolvedCrn) {
-        currentCompanyUid = 'CUID-' + resolvedCrn.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        setCompanyUid('CUID-' + resolvedCrn.toUpperCase().replace(/[^A-Z0-9]/g, ''));
     }
 
     if (nameEl) nameEl.textContent = resolvedName;
@@ -4053,7 +4338,8 @@ window.addEventListener('DOMContentLoaded', async () => {
                 currentAppRef = record.application_ref;
                 currentLoginCrn = record.crn;
                 currentLoginEmail = record.registered_email;
-                currentCompanyUid = record.company_uid || ('CUID-' + (record.crn || '').toUpperCase().replace(/[^A-Z0-9]/g, ''));
+                const resolvedUid = record.company_uid || ('CUID-' + (record.crn || '').toUpperCase().replace(/[^A-Z0-9]/g, ''));
+                setCompanyUid(resolvedUid);
 
                 // Hide login overlay
                 const overlay = document.getElementById('loginOverlay');
@@ -4116,7 +4402,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         const invitePhone = urlParams.get('phone');
         const inviteCuid = urlParams.get('company_uid') || urlParams.get('cuid');
 
-        if (inviteCuid) currentCompanyUid = inviteCuid;
+        if (inviteCuid) setCompanyUid(inviteCuid);
 
         if (inviteCrn || inviteEmail) {
             const crnInput = document.getElementById('crnInput');
@@ -4147,6 +4433,10 @@ window.addEventListener('DOMContentLoaded', async () => {
                     loginBox.prepend(banner);
                 }
             }
+            if (inviteCuid) {
+                localStorage.setItem('vb_company_uid', inviteCuid);
+            }
+            loadSavedDocuments();
         }
     } catch (paramErr) {
         console.warn('[ROUTING] URL params parse notice:', paramErr.message);
@@ -4214,8 +4504,8 @@ async function fetchAuditTrail(forceRefresh = false) {
         if (window.VBApi && window.VBApi.isAuthenticated()) {
             const res = await window.VBApi.request('/application/audit-trail');
             logs = res.auditTrail || [];
-            if (res.company_uid && !currentCompanyUid) {
-                currentCompanyUid = res.company_uid;
+            if (res.company_uid) {
+                setCompanyUid(res.company_uid);
             }
         } else if (currentLoginCrn || currentCompanyUid) {
             const q = currentCompanyUid ? `company_uid=${encodeURIComponent(currentCompanyUid)}` : `crn=${encodeURIComponent(currentLoginCrn)}`;

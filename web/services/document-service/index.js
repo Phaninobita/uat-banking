@@ -263,9 +263,35 @@ router.post("/upload", requireAuth, async (req, res) => {
 });
 
 // 2. Retrieve All Documents for an Application (includes Base64 preview)
-router.get("/list/:applicationRef?", requireAuth, async (req, res) => {
+router.get("/list/:applicationRef?", async (req, res) => {
   memStore.metrics.serviceRequests.documents++;
-  const activeAppRef = req.params.applicationRef || req.user.application_ref;
+  let activeAppRef = req.params.applicationRef || req.query.application_ref || req.query.appRef || "";
+  let companyUid = req.query.company_uid || req.query.companyUid || "";
+
+  // Attempt to decode optional Bearer auth token if present
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    try {
+      const jwt = require("jsonwebtoken");
+      const decoded = jwt.verify(authHeader.split(" ")[1], config.jwtSecret);
+      req.user = decoded;
+      if (!activeAppRef && decoded.application_ref) activeAppRef = decoded.application_ref;
+      if (!companyUid && decoded.company_uid) companyUid = decoded.company_uid;
+    } catch (e) {
+      // Optional auth: continue without blocking
+    }
+  }
+
+  // If companyUid still empty but activeAppRef exists, resolve company_uid from application record
+  if (activeAppRef && !companyUid) {
+    try {
+      await db.ready();
+      const appRecord = await db.getApplication(activeAppRef);
+      if (appRecord && appRecord.company_uid) {
+        companyUid = appRecord.company_uid;
+      }
+    } catch (e) {}
+  }
 
   try {
     let docs = [];
@@ -273,13 +299,16 @@ router.get("/list/:applicationRef?", requireAuth, async (req, res) => {
 
     if (db.isConnected()) {
       try {
-        docs = await db.listDocuments(activeAppRef);
+        docs = await db.listDocuments(activeAppRef, companyUid);
       } catch (err) {
         console.warn("[DOCUMENT SERVICE] DB list warning:", err.message);
       }
     }
     if (!docs || docs.length === 0) {
-      docs = Array.from(memStore.documents.values()).filter(d => d.application_ref === activeAppRef);
+      docs = Array.from(memStore.documents.values()).filter(d => 
+        (activeAppRef && d.application_ref === activeAppRef) ||
+        (companyUid && d.company_uid === companyUid)
+      );
     }
 
     return res.json({
@@ -299,7 +328,19 @@ router.get("/list/:applicationRef?", requireAuth, async (req, res) => {
 router.get("/download/:id", async (req, res) => {
   memStore.metrics.serviceRequests.documents++;
   const docId = req.params.id;
-  const appRef = (req.query.appRef || req.query.application_ref || "").trim();
+  let appRef = (req.query.appRef || req.query.application_ref || "").trim();
+  let companyUid = (req.query.company_uid || req.query.companyUid || "").trim();
+
+  // If companyUid not provided, resolve it from appRef or auth token
+  if (appRef && !companyUid) {
+    try {
+      await db.ready();
+      const appRecord = await db.getApplication(appRef);
+      if (appRecord && appRecord.company_uid) {
+        companyUid = appRecord.company_uid;
+      }
+    } catch (e) {}
+  }
 
   try {
     let doc = null;
@@ -307,16 +348,15 @@ router.get("/download/:id", async (req, res) => {
 
     if (db.isConnected()) {
       try {
-        if (!isNaN(parseInt(docId, 10))) {
-          doc = await db.getDocument(docId, appRef);
-        }
-        if (!doc && appRef) {
-          const allDbDocs = await db.listDocuments(appRef);
+        doc = await db.getDocument(docId, appRef, companyUid);
+        if (!doc && (appRef || companyUid)) {
+          const allDbDocs = await db.listDocuments(appRef, companyUid);
           if (Array.isArray(allDbDocs) && allDbDocs.length > 0) {
             doc = allDbDocs.find(d => 
               String(d.id) === String(docId) ||
               d.document_type === docId ||
-              d.file_name === docId
+              d.file_name === docId ||
+              (d.file_name && d.file_name.toLowerCase().includes(String(docId).toLowerCase()))
             ) || null;
           }
         }
@@ -340,6 +380,20 @@ router.get("/download/:id", async (req, res) => {
 
     if (!doc || !doc.file_data_base64) {
       return res.status(404).json({ error: `Document "${docId}" not found in database.` });
+    }
+
+    // If client requested JSON with base64
+    if (req.query.json === "1" || req.query.as_base64 === "1") {
+      return res.json({
+        success: true,
+        document: {
+          id: doc.id,
+          file_name: doc.file_name,
+          file_type: doc.file_type,
+          file_size: doc.file_size,
+          file_data_base64: doc.file_data_base64
+        }
+      });
     }
 
     // Strip data URL prefix if present

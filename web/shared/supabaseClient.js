@@ -350,40 +350,102 @@ class SupabaseClient {
     }
   }
 
-  async listDocuments(application_ref) {
-    if (!application_ref) return [];
-    const cleanRef = encodeURIComponent(application_ref.trim());
-    const res = await this.request(
-      `step1_documents?application_ref=eq.${cleanRef}&select=*&order=created_at.desc`
-    );
-    if (Array.isArray(res.data) && res.data.length > 0) {
-      return res.data;
+  async listDocuments(application_ref, company_uid) {
+    const docMap = new Map();
+
+    // 1. Query by company_uid if available (returns all documents for this corporate client)
+    if (company_uid) {
+      const cleanUid = encodeURIComponent(company_uid.trim());
+      const compRes = await this.request(
+        `step1_documents?company_uid=eq.${cleanUid}&select=*&order=created_at.desc`
+      );
+      if (Array.isArray(compRes.data)) {
+        compRes.data.forEach(d => { if (d && d.id) docMap.set(d.id, d); });
+      }
     }
-    // Fallback to application_documents if legacy records exist
-    const fallbackRes = await this.request(
-      `application_documents?application_ref=eq.${cleanRef}&select=*&order=created_at.desc`
-    );
-    return Array.isArray(fallbackRes.data) ? fallbackRes.data : [];
+
+    // 2. Query by application_ref if available
+    if (application_ref) {
+      const cleanRef = encodeURIComponent(application_ref.trim());
+      const res = await this.request(
+        `step1_documents?application_ref=eq.${cleanRef}&select=*&order=created_at.desc`
+      );
+      if (Array.isArray(res.data)) {
+        res.data.forEach(d => { if (d && d.id) docMap.set(d.id, d); });
+      } else {
+        const fallbackRes = await this.request(
+          `application_documents?application_ref=eq.${cleanRef}&select=*&order=created_at.desc`
+        );
+        if (Array.isArray(fallbackRes.data)) {
+          fallbackRes.data.forEach(d => { if (d && d.id && !docMap.has(d.id)) docMap.set(d.id, d); });
+        }
+      }
+    }
+
+    // Sort newest first
+    const docs = Array.from(docMap.values()).sort((a, b) => {
+      const ta = new Date(a.created_at || 0).getTime();
+      const tb = new Date(b.created_at || 0).getTime();
+      return tb - ta;
+    });
+
+    return docs;
   }
 
-  async getDocument(id, application_ref) {
-    let query = `step1_documents?id=eq.${id}&select=*&limit=1`;
+  async listDocumentsByCompanyUid(company_uid) {
+    if (!company_uid) return [];
+    const cleanUid = encodeURIComponent(company_uid.trim());
+    const res = await this.request(
+      `step1_documents?company_uid=eq.${cleanUid}&select=*&order=created_at.desc`
+    );
+    return Array.isArray(res.data) ? res.data : [];
+  }
+
+  async getDocument(id, application_ref, company_uid) {
+    if (!id) return null;
+    const strId = String(id).trim();
+
+    // 1. Numeric Primary Key Lookup (e.g. 5, 6, 13)
+    if (/^\d+$/.test(strId)) {
+      const numId = parseInt(strId, 10);
+      const directRes = await this.request(`step1_documents?id=eq.${numId}&select=*&limit=1`);
+      if (directRes.data && Array.isArray(directRes.data) && directRes.data.length > 0) {
+        return directRes.data[0];
+      }
+      const fallbackRes = await this.request(`application_documents?id=eq.${numId}&select=*&limit=1`);
+      if (fallbackRes.data && Array.isArray(fallbackRes.data) && fallbackRes.data.length > 0) {
+        return fallbackRes.data[0];
+      }
+    }
+
+    // 2. Document Type or File Name Lookup (e.g. 'trade_licence', 'certificate_of_incorporation', 'board_resolution')
+    const cleanId = encodeURIComponent(strId);
+
+    // Scoped by company_uid
+    if (company_uid) {
+      const cleanUid = encodeURIComponent(company_uid.trim());
+      const res = await this.request(`step1_documents?company_uid=eq.${cleanUid}&document_type=eq.${cleanId}&select=*&order=created_at.desc&limit=1`);
+      if (res.data && Array.isArray(res.data) && res.data.length > 0) return res.data[0];
+      const resFile = await this.request(`step1_documents?company_uid=eq.${cleanUid}&file_name=eq.${cleanId}&select=*&order=created_at.desc&limit=1`);
+      if (resFile.data && Array.isArray(resFile.data) && resFile.data.length > 0) return resFile.data[0];
+    }
+
+    // Scoped by application_ref
     if (application_ref) {
-      query = `step1_documents?id=eq.${id}&application_ref=eq.${encodeURIComponent(application_ref)}&select=*&limit=1`;
+      const cleanRef = encodeURIComponent(application_ref.trim());
+      const res = await this.request(`step1_documents?application_ref=eq.${cleanRef}&document_type=eq.${cleanId}&select=*&order=created_at.desc&limit=1`);
+      if (res.data && Array.isArray(res.data) && res.data.length > 0) return res.data[0];
+      const resFile = await this.request(`step1_documents?application_ref=eq.${cleanRef}&file_name=eq.${cleanId}&select=*&order=created_at.desc&limit=1`);
+      if (resFile.data && Array.isArray(resFile.data) && resFile.data.length > 0) return resFile.data[0];
     }
-    const res = await this.request(query);
-    if (res.data && Array.isArray(res.data) && res.data.length > 0) {
-      return res.data[0];
-    }
-    // Fallback check in application_documents
-    let fallbackQuery = `application_documents?id=eq.${id}&select=*&limit=1`;
-    if (application_ref) {
-      fallbackQuery = `application_documents?id=eq.${id}&application_ref=eq.${encodeURIComponent(application_ref)}&select=*&limit=1`;
-    }
-    const fallbackRes = await this.request(fallbackQuery);
-    if (fallbackRes.data && Array.isArray(fallbackRes.data) && fallbackRes.data.length > 0) {
-      return fallbackRes.data[0];
-    }
+
+    // General match by document_type or file_name
+    const genType = await this.request(`step1_documents?document_type=eq.${cleanId}&select=*&order=created_at.desc&limit=1`);
+    if (genType.data && Array.isArray(genType.data) && genType.data.length > 0) return genType.data[0];
+
+    const genFile = await this.request(`step1_documents?file_name=eq.${cleanId}&select=*&order=created_at.desc&limit=1`);
+    if (genFile.data && Array.isArray(genFile.data) && genFile.data.length > 0) return genFile.data[0];
+
     return null;
   }
 

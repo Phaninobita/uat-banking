@@ -23,14 +23,30 @@
                    null;
         },
 
-        setToken(token, appRef) {
+        setToken(token, appRef, companyUid) {
             if (token) {
                 sessionStorage.setItem(TOKEN_KEY, token);
                 localStorage.setItem(TOKEN_KEY, token);
+                try {
+                    const parts = token.split('.');
+                    if (parts.length === 3) {
+                        const payload = JSON.parse(atob(parts[1]));
+                        if (payload.company_uid) {
+                            localStorage.setItem('vb_company_uid', payload.company_uid);
+                            sessionStorage.setItem('vb_company_uid', payload.company_uid);
+                            if (typeof window !== 'undefined') window.currentCompanyUid = payload.company_uid;
+                        }
+                    }
+                } catch (e) {}
             }
             if (appRef) {
                 sessionStorage.setItem(REF_KEY, appRef);
                 localStorage.setItem(REF_KEY, appRef);
+            }
+            if (companyUid) {
+                localStorage.setItem('vb_company_uid', companyUid);
+                sessionStorage.setItem('vb_company_uid', companyUid);
+                if (typeof window !== 'undefined') window.currentCompanyUid = companyUid;
             }
         },
 
@@ -43,6 +59,28 @@
             sessionStorage.removeItem(LEGACY_REF_KEY);
             localStorage.removeItem(LEGACY_TOKEN_KEY);
             localStorage.removeItem(LEGACY_REF_KEY);
+        },
+
+        getCompanyUid() {
+            if (typeof window !== 'undefined' && window.currentCompanyUid) {
+                return window.currentCompanyUid;
+            }
+            if (typeof localStorage !== 'undefined') {
+                const stored = localStorage.getItem('vb_company_uid') || sessionStorage.getItem('vb_company_uid');
+                if (stored) return stored;
+                const token = localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
+                if (token) {
+                    try {
+                        const parts = token.split('.');
+                        if (parts.length === 3) {
+                            const payload = JSON.parse(atob(parts[1]));
+                            if (payload.company_uid) return payload.company_uid;
+                        }
+                    } catch (e) {}
+                }
+            }
+            const urlParams = typeof window !== 'undefined' && window.location ? new URLSearchParams(window.location.search) : null;
+            return (urlParams && urlParams.get('company_uid')) || '';
         },
 
         getApplicationRef() {
@@ -163,8 +201,10 @@
         },
 
         async getDocuments(applicationRef) {
-            const appRef = applicationRef || this.getApplicationRef();
-            return this._fetch(`/api/v1/documents/list/${encodeURIComponent(appRef)}`, {
+            const appRef = applicationRef || this.getApplicationRef() || '';
+            const compUid = this.getCompanyUid();
+            const qs = compUid ? `?company_uid=${encodeURIComponent(compUid)}` : '';
+            return this._fetch(`/api/v1/documents/list/${encodeURIComponent(appRef || 'default')}${qs}`, {
                 method: 'GET'
             });
         },
@@ -175,8 +215,14 @@
             });
         },
 
-        getDownloadUrl(id) {
-            return `/api/v1/documents/download/${id}`;
+        getDownloadUrl(id, appRef) {
+            const resolvedRef = appRef || this.getApplicationRef() || '';
+            const compUid = this.getCompanyUid();
+            const params = new URLSearchParams();
+            if (resolvedRef) params.set('appRef', resolvedRef);
+            if (compUid) params.set('company_uid', compUid);
+            const qs = params.toString() ? `?${params.toString()}` : '';
+            return `/api/v1/documents/download/${encodeURIComponent(id)}${qs}`;
         },
 
         async performOcr(imageBase64, docType = 'individual', clientText = '') {
