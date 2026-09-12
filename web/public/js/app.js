@@ -3463,12 +3463,14 @@ async function handleLoginStep1() {
                 lStep1.classList.remove('step-exit-forward');
                 lStep2.classList.remove('hidden');
                 lStep2.classList.add('step-enter-forward');
+                if (typeof resetOtpAnimationState === 'function') resetOtpAnimationState();
                 const firstOtp = document.querySelector('#otpInputs input');
                 if (firstOtp) firstOtp.focus();
             }, 200);
         } else {
             if (lStep1) lStep1.classList.add('hidden');
             if (lStep2) lStep2.classList.remove('hidden');
+            if (typeof resetOtpAnimationState === 'function') resetOtpAnimationState();
             const firstOtp = document.querySelector('#otpInputs input');
             if (firstOtp) firstOtp.focus();
         }
@@ -3511,86 +3513,337 @@ async function handleLoginStep1() {
     }
 }
 
-function autoFillOtp(code = '1111') {
+let isOtpVerifying = false;
+
+function resetOtpAnimationState() {
+    isOtpVerifying = false;
+    const otpRow = document.getElementById('otpInputs');
+    if (otpRow) {
+        otpRow.classList.remove('converging', 'loading', 'success-state', 'error-state');
+    }
+    const symbolEl = document.getElementById('otpMorphSymbol');
+    if (symbolEl) symbolEl.textContent = '';
+    const overlay = document.getElementById('loginOverlay');
+    if (overlay) overlay.classList.remove('pure-transition-exit');
+    const loginCard = document.getElementById('customerLoginCard');
+    if (loginCard) loginCard.classList.remove('pure-transition-exit');
+    const mainApp = document.getElementById('mainApp');
+    if (mainApp) mainApp.classList.remove('pure-transition-enter');
+
     const inputs = document.querySelectorAll('#otpInputs input');
+    inputs.forEach(inp => {
+        inp.value = '';
+        inp.disabled = false;
+        inp.removeAttribute('readonly');
+    });
+}
+
+function handleOtpDigitInput(inputEl, digitIdx) {
+    if (isOtpVerifying) return;
+
+    // Sanitize to only single digit 0-9
+    const rawVal = inputEl.value || '';
+    const cleaned = rawVal.replace(/[^0-9]/g, '');
+    inputEl.value = cleaned.slice(-1);
+
+    if (inputEl.value.length === 1) {
+        inputEl.classList.remove('pop-animate');
+        void inputEl.offsetWidth; // trigger reflow
+        inputEl.classList.add('pop-animate');
+
+        const inputs = Array.from(document.querySelectorAll('#otpInputs input'));
+        const enteredOtp = inputs.map(inp => inp.value).join('');
+
+        if (digitIdx < 4) {
+            const nextInput = inputs[digitIdx]; // 0-based: inputs[1] is 2nd box, etc.
+            if (nextInput) {
+                nextInput.focus();
+                nextInput.select();
+            }
+        } else if (enteredOtp.length === 4) {
+            // Stage 1: The Trigger (Input Complete)
+            // Trigger automatically the moment the user types the 4th and final digit of the OTP
+            triggerOtpVerificationSequence(enteredOtp);
+        }
+    }
+}
+
+function handleOtpKeyDown(event, inputEl, digitIdx) {
+    if (isOtpVerifying) {
+        event.preventDefault();
+        return;
+    }
+
+    const inputs = Array.from(document.querySelectorAll('#otpInputs input'));
+
+    if (event.key === 'Backspace') {
+        if (!inputEl.value && digitIdx > 1) {
+            const prevInput = inputs[digitIdx - 2];
+            if (prevInput) {
+                prevInput.focus();
+                prevInput.value = '';
+            }
+        }
+    } else if (event.key === 'ArrowLeft' && digitIdx > 1) {
+        const prevInput = inputs[digitIdx - 2];
+        if (prevInput) prevInput.focus();
+    } else if (event.key === 'ArrowRight' && digitIdx < 4) {
+        const nextInput = inputs[digitIdx];
+        if (nextInput) nextInput.focus();
+    } else if (event.key === 'Enter') {
+        event.preventDefault();
+        handleOtpSubmit();
+    }
+}
+
+function handleOtpPaste(event) {
+    if (isOtpVerifying) {
+        event.preventDefault();
+        return;
+    }
+
+    const clipboardData = event.clipboardData || window.clipboardData;
+    if (!clipboardData) return;
+
+    const pasted = clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 4);
+    if (!pasted) return;
+
+    event.preventDefault();
+    const inputs = Array.from(document.querySelectorAll('#otpInputs input'));
+    const chars = pasted.split('');
+
+    inputs.forEach((inp, idx) => {
+        inp.value = chars[idx] || '';
+        if (chars[idx]) {
+            inp.classList.remove('pop-animate');
+            void inp.offsetWidth;
+            inp.classList.add('pop-animate');
+        }
+    });
+
+    if (pasted.length === 4) {
+        triggerOtpVerificationSequence(pasted);
+    } else if (inputs[pasted.length]) {
+        inputs[pasted.length].focus();
+    }
+}
+
+function autoFillOtp(code = '1111') {
+    if (isOtpVerifying) return;
+    hideLoginError();
+    const inputs = Array.from(document.querySelectorAll('#otpInputs input'));
     const digits = code.split('');
     inputs.forEach((inp, idx) => {
         inp.value = digits[idx] || '1';
         inp.classList.remove('pop-animate');
-        void inp.offsetWidth; // trigger reflow
+        void inp.offsetWidth;
         inp.classList.add('pop-animate');
     });
-    if (inputs[inputs.length - 1]) inputs[inputs.length - 1].focus();
-    hideLoginError();
+
+    triggerOtpVerificationSequence(code);
 }
 
-async function handleOtpSubmit() {
-    const inputs = document.querySelectorAll('#otpInputs input');
-    let enteredOtp = '';
-    inputs.forEach(inp => enteredOtp += inp.value);
+function handleOtpSubmit() {
+    if (isOtpVerifying) return;
+    const inputs = Array.from(document.querySelectorAll('#otpInputs input'));
+    const enteredOtp = inputs.map(inp => inp.value).join('');
 
     if (enteredOtp.length < 4) {
         showLoginError('Please enter the full 4-digit verification code.');
         return;
     }
 
-    try {
-        const result = await window.VBApi.verifyOtp(currentLoginCrn, currentLoginEmail, enteredOtp);
-        if (result.success && result.data) {
-            hideLoginError();
-            document.getElementById('loginOverlay').classList.add('hidden');
-
-            currentAppRef = result.data.application_ref;
-            document.querySelectorAll('.app-ref').forEach(el => {
-                el.textContent = 'Application Reference: ' + currentAppRef;
-            });
-
-            // Sync CRN to company details
-            const step2Crn = document.getElementById('step2_crn');
-            if (step2Crn) step2Crn.value = currentLoginCrn;
-
-            // Restore application state
-            if (result.data.form_data) {
-                populateFormData(result.data.form_data);
-            }
-
-            const resolvedUid = result.company_uid || result.data?.company_uid || ('CUID-' + currentLoginCrn.toUpperCase().replace(/[^A-Z0-9]/g, ''));
-            setCompanyUid(resolvedUid);
-
-            // Display Corporate Client Identity (e.g. test99) prominently on top
-            const compName = result.company_name || result.data.company_name || result.data.form_data?.step2?.company_name || '';
-            displayClientNameOnTop(compName, currentLoginCrn, currentCompanyUid);
-
-            if (result.data.current_step && result.data.current_step > 1) {
-                goTo(result.data.current_step);
-            }
-
-            // Restore Base64 documents from Database
-            loadSavedDocuments();
-            if (window.LiveBanking) window.LiveBanking.init();
-            if (window.MobileApp) window.MobileApp.init();
-
-            showToast('Welcome to Gringotts Bank Corporate Portal', 'Authentication Successful', 'success');
-        }
-    } catch (err) {
-        showLoginError(err || 'Incorrect verification code. Please try again.');
-        inputs.forEach(inp => inp.value = '');
-        if (inputs[0]) inputs[0].focus();
-    }
+    triggerOtpVerificationSequence(enteredOtp);
 }
 
 function moveToNext(current, nextIndex) {
-    if (current.value.length === 1) {
-        current.classList.remove('pop-animate');
-        void current.offsetWidth; // trigger reflow
-        current.classList.add('pop-animate');
-        const nextInput = document.querySelector(`#otpInputs input:nth-child(${nextIndex + 1})`);
-        if (nextInput) nextInput.focus();
+    handleOtpDigitInput(current, nextIndex);
+}
+
+async function triggerOtpVerificationSequence(enteredOtp) {
+    if (isOtpVerifying) return;
+    isOtpVerifying = true;
+
+    // ── STAGE 1: THE TRIGGER (INPUT COMPLETE) ──
+    // Behavior: The keyboard immediately hides, and the 4 input boxes disable further typing
+    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+        document.activeElement.blur();
     }
+
+    const inputs = Array.from(document.querySelectorAll('#otpInputs input'));
+    inputs.forEach(inp => {
+        inp.disabled = true;
+        inp.setAttribute('readonly', 'true');
+    });
+
+    hideLoginError();
+
+    const otpRow = document.getElementById('otpInputs');
+    const symbolEl = document.getElementById('otpMorphSymbol');
+    const morphIndicator = document.getElementById('otpMorphIndicator');
+    if (symbolEl) symbolEl.textContent = '';
+
+    // ── STAGE 2: CONVERGENCE (MOVING CLOSER) ──
+    // Action: The 4 separate OTP boxes horizontally slide toward the center of the container.
+    // Behavior: As they move inward, gaps close, digits quickly fade out to zero opacity.
+    // Timing: Snappy 300ms ease-in-out.
+    if (otpRow) {
+        otpRow.classList.remove('loading', 'success-state', 'error-state');
+        otpRow.classList.add('converging');
+    }
+
+    await new Promise(r => setTimeout(r, 300));
+
+    // ── STAGE 3: TRANSFORMATION & ROTATION (LOADING STATE) ──
+    // Merged shape morphs into a perfect circle with smooth linear 360-deg clockwise rotation
+    if (otpRow) {
+        otpRow.classList.add('loading');
+    }
+
+    let apiResult = null;
+    let apiError = null;
+
+    try {
+        const [res] = await Promise.all([
+            window.VBApi.verifyOtp(currentLoginCrn, currentLoginEmail, enteredOtp),
+            new Promise(r => setTimeout(r, 650)) // Smooth linear spin window
+        ]);
+        apiResult = res;
+    } catch (err) {
+        apiError = err;
+        await new Promise(r => setTimeout(r, 450));
+    }
+
+    // ── STAGE 4: SUCCESS TRANSITION OR STAGE 5: ERROR STATE ──
+    if (apiResult && apiResult.success && apiResult.data) {
+        // SUCCESS:
+        // 1. Rotation stops gracefully, circle flashes brand green & checkmark pops in
+        if (otpRow) {
+            otpRow.classList.remove('loading');
+            otpRow.classList.add('success-state');
+        }
+        if (symbolEl) {
+            symbolEl.textContent = '✓';
+        }
+
+        // Brief flash of brand success color & checkmark (420ms)
+        await new Promise(r => setTimeout(r, 420));
+
+        // 2. Pure Seamless Portal Transition (No green square, pure silky dissolve)
+        const overlay = document.getElementById('loginOverlay');
+        const loginCard = document.getElementById('customerLoginCard');
+        const mainApp = document.getElementById('mainApp');
+
+        // Apply portal state & populate data immediately so it is ready beneath
+        applySuccessfulLoginData(apiResult);
+
+        if (overlay && loginCard) {
+            overlay.classList.add('pure-transition-exit');
+            loginCard.classList.add('pure-transition-exit');
+            if (mainApp) mainApp.classList.add('pure-transition-enter');
+
+            // Wait for pure cinematic dissolve (430ms)
+            await new Promise(r => setTimeout(r, 430));
+
+            // Hide overlay completely
+            overlay.classList.add('hidden');
+            overlay.classList.remove('pure-transition-exit');
+            loginCard.classList.remove('pure-transition-exit');
+            if (mainApp) mainApp.classList.remove('pure-transition-enter');
+        } else {
+            if (overlay) overlay.classList.add('hidden');
+        }
+
+        // Clean up OTP state
+        if (otpRow) otpRow.classList.remove('converging', 'loading', 'success-state');
+        inputs.forEach(inp => {
+            inp.disabled = false;
+            inp.removeAttribute('readonly');
+        });
+        isOtpVerifying = false;
+    } else {
+        // ERROR STATE:
+        // "If the OTP is invalid, the rotating circle should stop, turn red,
+        //  perform a quick horizontal 'shake' animation, and then split back out
+        //  into the original 4 empty boxes so the user can try again."
+        if (otpRow) {
+            otpRow.classList.remove('loading');
+            otpRow.classList.add('error-state');
+        }
+        if (symbolEl) {
+            symbolEl.textContent = '✕';
+        }
+
+        const errMsg = (apiError && (apiError.message || apiError)) ||
+                       (apiResult && apiResult.message) ||
+                       'Incorrect verification code. Please try again.';
+
+        // Allow shake animation to execute (~550ms)
+        await new Promise(r => setTimeout(r, 650));
+
+        // Split back out into original 4 empty boxes
+        if (otpRow) {
+            otpRow.classList.remove('error-state', 'converging');
+        }
+        if (symbolEl) {
+            symbolEl.textContent = '';
+        }
+
+        inputs.forEach(inp => {
+            inp.value = '';
+            inp.disabled = false;
+            inp.removeAttribute('readonly');
+        });
+
+        showLoginError(errMsg);
+        isOtpVerifying = false;
+
+        // Auto-focus the 1st empty box
+        if (inputs[0]) {
+            inputs[0].focus();
+        }
+    }
+}
+
+function applySuccessfulLoginData(result) {
+    hideLoginError();
+
+    currentAppRef = result.data.application_ref;
+    document.querySelectorAll('.app-ref').forEach(el => {
+        el.textContent = 'Application Reference: ' + currentAppRef;
+    });
+
+    // Sync CRN to company details
+    const step2Crn = document.getElementById('step2_crn');
+    if (step2Crn) step2Crn.value = currentLoginCrn;
+
+    // Restore application state
+    if (result.data.form_data) {
+        populateFormData(result.data.form_data);
+    }
+
+    const resolvedUid = result.company_uid || result.data?.company_uid || ('CUID-' + currentLoginCrn.toUpperCase().replace(/[^A-Z0-9]/g, ''));
+    setCompanyUid(resolvedUid);
+
+    // Display Corporate Client Identity (e.g. test99) prominently on top
+    const compName = result.company_name || result.data.company_name || result.data.form_data?.step2?.company_name || '';
+    displayClientNameOnTop(compName, currentLoginCrn, currentCompanyUid);
+
+    if (result.data.current_step && result.data.current_step > 1) {
+        goTo(result.data.current_step);
+    }
+
+    // Restore Base64 documents from Database
+    loadSavedDocuments();
+    if (window.LiveBanking) window.LiveBanking.init();
+    if (window.MobileApp) window.MobileApp.init();
+
+    showToast('Welcome to Gringotts Bank Corporate Portal', 'Authentication Successful', 'success');
 }
 
 async function resendOtp() {
     if (!currentLoginCrn || !currentLoginEmail) return;
+    if (typeof resetOtpAnimationState === 'function') resetOtpAnimationState();
     try {
         const res = await window.VBApi.requestOtp(currentLoginCrn, currentLoginEmail);
         showToast(`A new verification code has been dispatched.`, 'Code Resent', 'info');

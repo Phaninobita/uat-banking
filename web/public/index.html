@@ -79,12 +79,23 @@
                         <button type="button" onclick="autoFillOtp()" style="font-size: 11px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--brand-primary, #00d2ff); background: rgba(0,210,255,0.12); color: var(--brand-primary, #00d2ff); cursor: pointer; font-weight: 600; transition: all 0.2s;">&#x26A1; Auto-fill</button>
                     </div>
                 </div>
-                <div class="otp-row" id="otpInputs" role="group" aria-label="One-time password input">
-                    <input type="text" maxlength="1" autofocus oninput="moveToNext(this, 1)" aria-label="OTP digit 1">
-                    <input type="text" maxlength="1" oninput="moveToNext(this, 2)" aria-label="OTP digit 2">
-                    <input type="text" maxlength="1" oninput="moveToNext(this, 3)" aria-label="OTP digit 3">
-                    <input type="text" maxlength="1" oninput="moveToNext(this, 4)" aria-label="OTP digit 4">
+                <div class="otp-stage-wrap" id="otpStageWrap">
+                    <div class="otp-row" id="otpInputs" role="group" aria-label="One-time password input">
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autofocus oninput="handleOtpDigitInput(this, 1)" onkeydown="handleOtpKeyDown(event, this, 1)" onpaste="handleOtpPaste(event)" aria-label="OTP digit 1">
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" oninput="handleOtpDigitInput(this, 2)" onkeydown="handleOtpKeyDown(event, this, 2)" onpaste="handleOtpPaste(event)" aria-label="OTP digit 2">
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" oninput="handleOtpDigitInput(this, 3)" onkeydown="handleOtpKeyDown(event, this, 3)" onpaste="handleOtpPaste(event)" aria-label="OTP digit 3">
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" oninput="handleOtpDigitInput(this, 4)" onkeydown="handleOtpKeyDown(event, this, 4)" onpaste="handleOtpPaste(event)" aria-label="OTP digit 4">
+
+                        <!-- Morphing Loading Spinner & Status Symbol -->
+                        <div class="otp-morph-indicator" id="otpMorphIndicator" aria-hidden="true">
+                            <div class="otp-morph-ring"></div>
+                            <div class="otp-morph-badge">
+                                <span class="otp-morph-symbol" id="otpMorphSymbol"></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
                 <button class="btn-login btn-pill-sweep" onclick="handleOtpSubmit()">
                     <span class="btn-label">Verify &amp; Enter Portal &rarr;</span>
                 </button>

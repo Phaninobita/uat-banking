@@ -4336,14 +4336,17 @@
                 font-size: 22px !important;
             }
             .otp-row {
-                gap: 8px !important;
+                --otp-box-w: min(50px, 14vw);
+                --otp-box-h: min(56px, 16vw);
+                --otp-box-gap: 8px;
+                gap: var(--otp-box-gap) !important;
                 margin: 18px 0 !important;
                 width: 100% !important;
                 justify-content: center !important;
             }
             .otp-row input {
-                width: min(50px, 14vw) !important;
-                height: min(56px, 16vw) !important;
+                width: var(--otp-box-w) !important;
+                height: var(--otp-box-h) !important;
                 font-size: 20px !important;
                 border-radius: 12px !important;
             }
@@ -5019,16 +5022,34 @@
             color: #ffffff !important;
         }
 
-        .otp-row {
+        .otp-stage-wrap {
+            position: relative;
+            width: 100%;
             display: flex;
-            gap: 12px;
             justify-content: center;
-            margin: 24px 0;
+            align-items: center;
+            margin: 20px 0;
+            perspective: 1000px;
+        }
+
+        .otp-row {
+            --otp-box-w: 60px;
+            --otp-box-h: 66px;
+            --otp-box-gap: 12px;
+            --otp-shift-outer: calc((var(--otp-box-w) * 1.5) + (var(--otp-box-gap) * 1.5));
+            --otp-shift-inner: calc((var(--otp-box-w) * 0.5) + (var(--otp-box-gap) * 0.5));
+            display: flex;
+            gap: var(--otp-box-gap);
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin: 0;
+            width: 100%;
         }
 
         .otp-row input {
-            width: 60px;
-            height: 66px;
+            width: var(--otp-box-w);
+            height: var(--otp-box-h);
             text-align: center;
             font-size: 26px;
             font-weight: 800;
@@ -5036,9 +5057,17 @@
             background: rgba(255, 255, 255, 0.04) !important;
             border: 1px solid rgba(255, 255, 255, 0.14);
             border-radius: 16px;
-            transition: all var(--duration-fast) var(--ease-standard);
+            transition: transform 300ms ease-in-out,
+                        opacity 300ms ease-in-out,
+                        border-radius 300ms ease-in-out,
+                        color 200ms ease-in-out,
+                        border-color 250ms ease,
+                        background 250ms ease,
+                        box-shadow 250ms ease;
             font-family: monospace;
             box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
+            will-change: transform, opacity, border-radius;
+            z-index: 2;
         }
 
         .otp-row input:focus {
@@ -5052,6 +5081,250 @@
 
         .otp-row input.pop-animate {
             animation: digitPop 0.25s var(--ease-out);
+        }
+
+        /* ── Stage 2: Convergence (Moving Closer) ── */
+        .otp-row.converging input {
+            color: transparent !important;
+            caret-color: transparent !important;
+            border-radius: 33px;
+            border-color: rgba(0, 210, 255, 0.5);
+            background: rgba(0, 210, 255, 0.12) !important;
+            box-shadow: 0 0 16px rgba(0, 210, 255, 0.3);
+            pointer-events: none;
+        }
+
+        .otp-row.converging input:nth-child(1) {
+            transform: translateX(var(--otp-shift-outer)) scale(0.96);
+        }
+        .otp-row.converging input:nth-child(2) {
+            transform: translateX(var(--otp-shift-inner)) scale(0.96);
+        }
+        .otp-row.converging input:nth-child(3) {
+            transform: translateX(calc(-1 * var(--otp-shift-inner))) scale(0.96);
+        }
+        .otp-row.converging input:nth-child(4) {
+            transform: translateX(calc(-1 * var(--otp-shift-outer))) scale(0.96);
+        }
+
+        /* ── Stage 3: Transformation & Infinite Linear Rotation (Loading State) ── */
+        .otp-row.loading input,
+        .otp-row.success-state input,
+        .otp-row.error-state input {
+            opacity: 0;
+            pointer-events: none;
+            color: transparent !important;
+        }
+        .otp-row.loading input:nth-child(1),
+        .otp-row.success-state input:nth-child(1),
+        .otp-row.error-state input:nth-child(1) {
+            transform: translateX(var(--otp-shift-outer)) scale(0.8);
+        }
+        .otp-row.loading input:nth-child(2),
+        .otp-row.success-state input:nth-child(2),
+        .otp-row.error-state input:nth-child(2) {
+            transform: translateX(var(--otp-shift-inner)) scale(0.8);
+        }
+        .otp-row.loading input:nth-child(3),
+        .otp-row.success-state input:nth-child(3),
+        .otp-row.error-state input:nth-child(3) {
+            transform: translateX(calc(-1 * var(--otp-shift-inner))) scale(0.8);
+        }
+        .otp-row.loading input:nth-child(4),
+        .otp-row.success-state input:nth-child(4),
+        .otp-row.error-state input:nth-child(4) {
+            transform: translateX(calc(-1 * var(--otp-shift-outer))) scale(0.8);
+        }
+
+        .otp-morph-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0.6);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 250ms ease, transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .otp-row.loading .otp-morph-indicator,
+        .otp-row.success-state .otp-morph-indicator,
+        .otp-row.error-state .otp-morph-indicator {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .otp-morph-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 3.5px solid rgba(0, 210, 255, 0.18);
+            border-top-color: #00d2ff;
+            border-right-color: #38bdf8;
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.45);
+            animation: otpLinearSpin 0.75s linear infinite;
+            will-change: transform;
+            transition: border-color 300ms ease, box-shadow 300ms ease;
+        }
+
+        .otp-morph-badge {
+            position: absolute;
+            inset: 6px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 210, 255, 0.18) 0%, rgba(10, 20, 42, 0.95) 100%);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 300ms ease;
+            box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .otp-morph-symbol {
+            font-size: 26px;
+            line-height: 1;
+            font-weight: 900;
+            display: inline-block;
+            opacity: 0;
+            transform: scale(0);
+            transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 200ms ease, color 200ms ease;
+        }
+
+        /* ── Stage 4: Success Transition (Entering the App) ── */
+        .otp-row.success-state .otp-morph-ring {
+            animation-play-state: paused;
+            border-color: rgba(16, 185, 129, 0.35);
+            border-top-color: #10b981;
+            border-right-color: #34d399;
+            box-shadow: 0 0 35px rgba(16, 185, 129, 0.7), inset 0 0 15px rgba(16, 185, 129, 0.35);
+        }
+
+        .otp-row.success-state .otp-morph-badge {
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.35) 0%, rgba(6, 78, 59, 0.95) 100%);
+            border-color: #10b981;
+            box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .otp-row.success-state .otp-morph-symbol {
+            color: #10b981;
+            opacity: 1;
+            transform: scale(1.15);
+            text-shadow: 0 0 14px rgba(16, 185, 129, 0.85);
+            animation: checkmarkPop 350ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* Subtle Success Pulse Halo */
+        .otp-row.success-state .otp-morph-indicator::after {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            border-radius: 50%;
+            border: 2px solid rgba(16, 185, 129, 0.7);
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
+            opacity: 0;
+            animation: successPulseRing 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            pointer-events: none;
+        }
+
+        @keyframes successPulseRing {
+            0% { transform: scale(0.85); opacity: 0.9; }
+            100% { transform: scale(1.45); opacity: 0; }
+        }
+
+        /* ── Pure Portal Entry Transition (No Green Square, Pure Silky Dissolve) ── */
+        #loginOverlay {
+            transition: opacity 420ms cubic-bezier(0.16, 1, 0.3, 1),
+                        backdrop-filter 420ms cubic-bezier(0.16, 1, 0.3, 1),
+                        -webkit-backdrop-filter 420ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #loginOverlay.pure-transition-exit {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            backdrop-filter: blur(0px) !important;
+            -webkit-backdrop-filter: blur(0px) !important;
+        }
+
+        #customerLoginCard.pure-transition-exit {
+            transform: scale(1.05) translateY(-8px) !important;
+            opacity: 0 !important;
+            filter: blur(10px) !important;
+            transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1),
+                        opacity 380ms ease,
+                        filter 380ms ease !important;
+            pointer-events: none !important;
+        }
+
+        #mainApp.pure-transition-enter {
+            animation: appPureReveal 450ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes appPureReveal {
+            0% {
+                opacity: 0.8;
+                transform: scale(0.985);
+                filter: blur(2px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+                filter: blur(0px);
+            }
+        }
+
+        /* ── Stage 5: Error State (Red Stop, Shake, Split-out) ── */
+        .otp-row.error-state .otp-morph-indicator {
+            animation: otpShake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+
+        .otp-row.error-state .otp-morph-ring {
+            animation-play-state: paused;
+            border-color: rgba(239, 68, 68, 0.4);
+            border-top-color: #ef4444;
+            border-right-color: #f87171;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.7), inset 0 0 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .otp-row.error-state .otp-morph-badge {
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.3) 0%, rgba(69, 10, 10, 0.95) 100%);
+            border-color: #ef4444;
+            box-shadow: inset 0 0 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .otp-row.error-state .otp-morph-symbol {
+            color: #ef4444;
+            opacity: 1;
+            transform: scale(1.1);
+            text-shadow: 0 0 12px rgba(239, 68, 68, 0.8);
+        }
+
+        /* ── Keyframes for OTP Morphing & Transitions ── */
+        @keyframes otpLinearSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes otpShake {
+            0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+            15% { transform: translate(-50%, -50%) translateX(-14px); }
+            30% { transform: translate(-50%, -50%) translateX(13px); }
+            45% { transform: translate(-50%, -50%) translateX(-10px); }
+            65% { transform: translate(-50%, -50%) translateX(7px); }
+            85% { transform: translate(-50%, -50%) translateX(-3px); }
+        }
+
+        @keyframes checkmarkPop {
+            0% { transform: scale(0); opacity: 0; }
+            65% { transform: scale(1.35); opacity: 1; }
+            100% { transform: scale(1.15); opacity: 1; }
         }
 
         /* ── mal.ai SIGNATURE PILL BUTTON WITH LIGHT SWEEP ── */
