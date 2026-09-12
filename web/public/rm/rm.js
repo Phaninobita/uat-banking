@@ -338,7 +338,7 @@ function renderPipelineTable(invitations) {
         return;
     }
 
-    tbody.innerHTML = invitations.map(inv => {
+    tbody.innerHTML = invitations.map((inv, idx) => {
         const dateStr = inv.created_at ? new Date(inv.created_at).toLocaleDateString("en-GB", {
             day: "2-digit",
             month: "short",
@@ -384,19 +384,13 @@ function renderPipelineTable(invitations) {
                 </td>
                 <td style="text-align:right;">
                     <div class="rm-action-btns">
-                        <button class="rm-btn-action" onclick="copySpecificLink('${encodeURIComponent(inv.invite_link)}')" title="Copy Portal Link">
-                            &#x1F4CB; Link
+                        <button class="rm-btn-action" onclick="openUpdateDetailsByIndex(${idx})" style="color:#38bdf8;" title="Update Customer Email &amp; Details">
+                            &#x270F;&#xFE0F; Update Details
                         </button>
-                        <a href="${inv.invite_link}" target="_blank" class="rm-btn-action" style="color:#38bdf8;" title="Open Customer Portal">
-                            &#x1F680; Portal
-                        </a>
-                        <button class="rm-btn-action" onclick="openRmAuditModal('${cuid}', '${inv.crn}', '${escapeHtml(inv.company_name || '')}')" style="color:#f59e0b;" title="View Omnichannel Compliance Audit Trail">
-                            &#x1F6E1;&#xFE0F; Audit
-                        </button>
-                        <button class="rm-btn-action" onclick="resendInvite('${inv.crn}', '${inv.email}')" title="Resend Notification Email">
+                        <button class="rm-btn-action" onclick="resendInvite('${encodeURIComponent(inv.crn)}', '${encodeURIComponent(inv.email)}')" style="color:#10b981;" title="Resend Notification Email">
                             &#x2709; Resend
                         </button>
-                        <button class="rm-btn-action delete" onclick="deleteInvite('${inv.crn}', '${inv.email}')" title="Revoke Invitation">
+                        <button class="rm-btn-action delete" onclick="deleteInvite('${encodeURIComponent(inv.crn)}', '${encodeURIComponent(inv.email)}')" title="Revoke Invitation">
                             &#x2715;
                         </button>
                     </div>
@@ -448,25 +442,98 @@ function filterPipelineTable() {
     renderPipelineTable(filtered);
 }
 
-function copySpecificLink(encodedLink) {
-    const link = decodeURIComponent(encodedLink);
-    navigator.clipboard.writeText(link).then(() => {
-        showRmToast("Customer Link copied to clipboard!", "success");
-    }).catch(() => {
-        showRmToast("Copied: " + link, "success");
-    });
+function openUpdateDetailsByIndex(idx) {
+    const inv = pipelineData[idx];
+    if (!inv) return;
+    const crnInput = document.getElementById("editCrn");
+    const emailInput = document.getElementById("editEmail");
+    const compInput = document.getElementById("editCompany");
+    const contactInput = document.getElementById("editContact");
+    const phoneInput = document.getElementById("editPhone");
+    const origCrn = document.getElementById("editOriginalCrn");
+    const origEmail = document.getElementById("editOriginalEmail");
+
+    if (origCrn) origCrn.value = inv.crn || '';
+    if (origEmail) origEmail.value = inv.email || '';
+    if (crnInput) crnInput.value = inv.crn || '';
+    if (emailInput) emailInput.value = inv.email || '';
+    if (compInput) compInput.value = inv.company_name || '';
+    if (contactInput) contactInput.value = inv.contact_person || '';
+    if (phoneInput) phoneInput.value = inv.phone || '';
+
+    const modal = document.getElementById("updateDetailsModal");
+    if (modal) modal.style.display = "flex";
 }
 
-async function resendInvite(crn, email) {
+function closeUpdateDetailsModal(ev) {
+    if (ev && ev.target && ev.target.id !== "updateDetailsModal") return;
+    const modal = document.getElementById("updateDetailsModal");
+    if (modal) modal.style.display = "none";
+}
+
+async function handleUpdateDetailsSubmit(ev) {
+    ev.preventDefault();
+    const originalCrn = document.getElementById("editOriginalCrn").value;
+    const originalEmail = document.getElementById("editOriginalEmail").value;
+    const newEmail = document.getElementById("editEmail").value.trim();
+    const companyName = document.getElementById("editCompany").value.trim();
+    const contactPerson = document.getElementById("editContact").value.trim();
+    const phone = document.getElementById("editPhone").value.trim();
+    const resendImmediate = document.getElementById("editResendImmediate").checked;
+
+    const btn = document.getElementById("btnSaveUpdatedDetails");
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = "&#x23F3; Updating Customer Details&hellip;";
+    }
+
+    try {
+        const res = await fetch("/api/v1/rm/update-details", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                originalCrn,
+                originalEmail,
+                newEmail,
+                companyName,
+                contactPerson,
+                phone,
+                resendImmediate
+            })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+            throw new Error(data.error || "Failed to update customer details.");
+        }
+
+        showRmToast(data.message || "Customer details updated successfully.", "success");
+        closeUpdateDetailsModal();
+        fetchInvitations();
+    } catch (err) {
+        showRmToast(err.message, "error");
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = "&#x1F4BE; Save &amp; Update Customer";
+        }
+    }
+}
+
+async function resendInvite(rawCrn, rawEmail) {
+    const crn = decodeURIComponent(rawCrn);
+    const email = decodeURIComponent(rawEmail);
+    showRmToast(`Dispatching invitation email to ${email}...`, "info");
     try {
         const res = await fetch(`/api/v1/rm/resend/${encodeURIComponent(crn)}/${encodeURIComponent(email)}`, {
             method: "POST"
         });
         const data = await res.json();
         if (data.success) {
-            showRmToast(`Reminder email re-dispatched to ${email}.`, "success");
+            showRmToast(data.message || `Invitation email successfully re-dispatched to ${email}.`, "success");
+            fetchInvitations();
         } else {
-            throw new Error(data.error || "Failed to resend.");
+            throw new Error(data.error || "Failed to resend invitation.");
         }
     } catch (err) {
         showRmToast(err.message, "error");

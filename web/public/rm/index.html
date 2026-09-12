@@ -219,7 +219,66 @@
                 </div>
             </section>
         </main>
+    <div id="updateDetailsModal" class="rm-modal-backdrop" style="display:none;" onclick="closeUpdateDetailsModal(event)">
+        <div class="rm-modal-card" style="max-width:540px;" onclick="event.stopPropagation()">
+            <div class="rm-modal-hdr">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:20px;">&#x270F;&#xFE0F;</span>
+                    <div>
+                        <h3 style="margin:0; font-size:16px;">Update Customer Details</h3>
+                        <small style="color:var(--rm-text-muted);">Modify registered email address and corporate onboarding parameters</small>
+                    </div>
+                </div>
+                <button class="rm-modal-close" onclick="closeUpdateDetailsModal()">&#x2715;</button>
+            </div>
+            <form id="rmUpdateDetailsForm" onsubmit="handleUpdateDetailsSubmit(event)" style="padding:20px;">
+                <input type="hidden" id="editOriginalCrn">
+                <input type="hidden" id="editOriginalEmail">
+                
+                <div class="rm-form-group" style="margin-bottom:14px;">
+                    <label for="editCrn" style="font-size:12px; font-weight:600; color:#94a3b8; margin-bottom:6px; display:block;">Commercial Registration No. (CRN)</label>
+                    <input type="text" id="editCrn" class="rm-input" style="font-family:monospace; font-weight:700; opacity:0.85;" readonly>
+                </div>
+
+                <div class="rm-form-group" style="margin-bottom:14px;">
+                    <label for="editEmail" style="font-size:12px; font-weight:600; color:#38bdf8; margin-bottom:6px; display:block;">Customer Registered Email Address *</label>
+                    <input type="email" id="editEmail" class="rm-input" style="border-color:#38bdf8; background:rgba(56,189,248,0.06);" required placeholder="e.g. customer@yopmail.com">
+                    <small style="color:#94a3b8; font-size:11px; margin-top:4px; display:block;">Updating this modifies the authorized login identity and recipient mailbox for this customer.</small>
+                </div>
+
+                <div class="rm-form-group" style="margin-bottom:14px;">
+                    <label for="editCompany" style="font-size:12px; font-weight:600; color:#94a3b8; margin-bottom:6px; display:block;">Company Legal Name *</label>
+                    <input type="text" id="editCompany" class="rm-input" required placeholder="Company Legal Name">
+                </div>
+
+                <div class="rm-form-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+                    <div class="rm-form-group">
+                        <label for="editContact" style="font-size:12px; font-weight:600; color:#94a3b8; margin-bottom:6px; display:block;">Contact Person</label>
+                        <input type="text" id="editContact" class="rm-input" placeholder="Signatory Name">
+                    </div>
+                    <div class="rm-form-group">
+                        <label for="editPhone" style="font-size:12px; font-weight:600; color:#94a3b8; margin-bottom:6px; display:block;">Phone Number</label>
+                        <input type="tel" id="editPhone" class="rm-input" placeholder="+44 20 ...">
+                    </div>
+                </div>
+
+                <div style="margin-bottom:18px; padding:10px 14px; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); border-radius:8px; display:flex; align-items:center; gap:10px;">
+                    <input type="checkbox" id="editResendImmediate" style="width:16px; height:16px; cursor:pointer;" checked>
+                    <label for="editResendImmediate" style="font-size:12.5px; color:#a7f3d0; cursor:pointer; margin:0;">
+                        <strong>Dispatch invitation email</strong> to updated email immediately upon saving
+                    </label>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px;">
+                    <button type="button" class="rm-btn rm-btn-ghost" onclick="closeUpdateDetailsModal()">Cancel</button>
+                    <button type="submit" class="rm-btn rm-btn-primary" id="btnSaveUpdatedDetails" style="background:#0284c7;">
+                        💾 Save &amp; Update Customer
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
+
     <div id="emailPreviewModal" class="rm-modal-backdrop" style="display:none;" onclick="closeEmailPreview(event)">
         <div class="rm-modal-card" onclick="event.stopPropagation()">
             <div class="rm-modal-hdr">

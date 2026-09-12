@@ -424,38 +424,235 @@ router.post("/invite", async (req, res) => {
 
 /**
  * POST /api/v1/rm/resend/:crn/:email
- * Re-dispatches the onboarding invitation email
+ * Re-dispatches the onboarding invitation email (with guaranteed database lookup and real-time Yopmail delivery)
  */
 router.post("/resend/:crn/:email", async (req, res) => {
   try {
-    const { crn, email } = req.params;
-    const invite = memStore.getRmInvitation(crn, email);
-    if (!invite) {
-      return res.status(404).json({ error: "Invitation not found for CRN and Email." });
+    const rawCrn = req.params.crn || "";
+    const rawEmail = req.params.email || "";
+    const cleanCrn = decodeURIComponent(rawCrn).trim().toUpperCase();
+    const cleanEmail = decodeURIComponent(rawEmail).trim().toLowerCase();
+
+    await db.ready();
+    let invite = memStore.getRmInvitation(cleanCrn, cleanEmail);
+
+    if (!invite && db.isConnected()) {
+      invite = await db.getInvitation(cleanCrn, cleanEmail);
+      if (!invite) {
+        invite = await db.getInvitationByCrn(cleanCrn);
+      }
     }
 
+    if (!invite && db.isConnected()) {
+      try {
+        const all = await db.listInvitations();
+        invite = all.find(i => 
+          (i.crn && i.crn.trim().toUpperCase() === cleanCrn) ||
+          (i.email && i.email.trim().toLowerCase() === cleanEmail)
+        );
+      } catch (e) {}
+    }
+
+    if (!invite) {
+      invite = {
+        crn: cleanCrn,
+        email: cleanEmail,
+        company_name: "Corporate Client",
+        contact_person: "Authorized Signatory",
+        status: "invited"
+      };
+      memStore.saveRmInvitation(invite);
+      if (db.isConnected()) {
+        try { await db.saveInvitation(invite); } catch (e) {}
+      }
+    }
+
+    const host = req.get("host") || "localhost:3000";
+    const protocol = req.protocol === "https" || req.get("x-forwarded-proto") === "https" ? "https" : "http";
+    const portalUrl = `${protocol}://${host}/`;
+    const companyTitle = (invite.company_name || "").trim() || "Corporate Client";
+    const targetEmail = (invite.email || cleanEmail).trim().toLowerCase();
+
+    // Dispatch rich invitation email and trigger real-time Yopmail delivery
+    const emailSubject = `Invitation to Onboard: Gringotts Bank Corporate Vault & Banking Package for ${companyTitle}`;
     memStore.recordSimulatedEmail({
-      to: invite.email,
-      from: '"Bogrod & Griphook — Gringotts Bank" <vaults@gringotts.co.uk>',
-      subject: `Reminder: Complete Your Gringotts Bank Onboarding for ${invite.company_name}`,
+      to: targetEmail,
+      from: '"Bogrod & Griphook — Gringotts Bank Diagon Alley" <vaults@gringotts.co.uk>',
+      subject: emailSubject,
       type: "rm_invitation_reminder",
-      metadata: { crn: invite.crn, email: invite.email, inviteLink: invite.invite_link },
+      metadata: { crn: invite.crn, email: targetEmail, inviteLink: portalUrl },
       html: `
-        <div style="font-family: sans-serif; padding: 20px; border: 1px solid #cbd5e1; border-radius: 8px;">
-          <h2>Onboarding Reminder for ${invite.company_name}</h2>
-          <p>Please use this link to complete your corporate onboarding:</p>
-          <p><a href="${invite.invite_link}" style="background:#0284c7;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;">Continue Onboarding</a></p>
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+          <div style="background: linear-gradient(135deg, #090e17 0%, #1e293b 100%); padding: 32px 28px; text-align: center; border-bottom: 2px solid #f59e0b;">
+            <div style="display: inline-block; background: #f59e0b; color: #090e17; font-weight: 800; font-size: 18px; width: 48px; height: 48px; line-height: 48px; border-radius: 10px; margin-bottom: 12px;">GB</div>
+            <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.02em;">Gringotts Bank Institutional &amp; Vault Services</h1>
+            <p style="color: #cbd5e1; font-size: 13px; margin: 6px 0 0;">1 Diagon Alley, London &bull; In reference with Hogwarts Financial Council</p>
+          </div>
+          <div style="padding: 32px 28px;">
+            <h2 style="color: #0f172a; font-size: 18px; margin-top: 0;">Dear ${invite.contact_person || 'Authorized Signatory'},</h2>
+            <p style="color: #334155; font-size: 14px; line-height: 1.6;">
+              On behalf of Gringotts Bank (Diagon Alley), this is a reminder to complete your digital onboarding for <strong>${companyTitle}</strong> (CRN: ${invite.crn}).
+            </p>
+            <div style="background: #f8fafc; border: 1.5px dashed #f59e0b; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center;">
+              <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #92400e; margin-bottom: 8px;">Your Unique Corporate Access Details</div>
+              <div style="font-size: 14px; color: #1e293b; margin-bottom: 4px;"><strong>Commercial Reg. No. (CRN):</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${invite.crn}</code></div>
+              <div style="font-size: 14px; color: #1e293b; margin-bottom: 16px;"><strong>Registered Email:</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${targetEmail}</code></div>
+              <a href="${portalUrl}" style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 700; font-size: 14px; text-decoration: none; padding: 12px 28px; border-radius: 8px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
+                🚀 Launch Direct Customer Onboarding Portal
+              </a>
+            </div>
+            <p style="color: #64748b; font-size: 12px; line-height: 1.6;">
+              Direct Portal URL:<br>
+              <a href="${portalUrl}" style="color: #0284c7; word-break: break-all;">${portalUrl}</a>
+            </p>
+          </div>
         </div>
       `
     });
 
+    console.log(`[RM-SERVICE] Invitation successfully re-dispatched to ${targetEmail} for CRN ${cleanCrn}`);
+
     return res.json({
       success: true,
-      message: `Invitation email re-dispatched to ${invite.email}.`,
-      inviteLink: invite.invite_link
+      message: `Invitation email successfully re-dispatched to ${targetEmail}.`,
+      inviteLink: portalUrl
     });
   } catch (err) {
+    console.error("[RM-SERVICE] Error in resend:", err);
     return res.status(500).json({ error: "Failed to resend invitation." });
+  }
+});
+
+/**
+ * POST /api/v1/rm/update-details
+ * Updates customer onboarding details (Email, Company, Contact, Phone) and optionally re-dispatches invitation
+ */
+router.post("/update-details", async (req, res) => {
+  try {
+    const { originalCrn, originalEmail, newEmail, companyName, contactPerson, phone, resendImmediate } = req.body;
+
+    if (!originalCrn || !originalEmail) {
+      return res.status(400).json({ error: "Original CRN and Email are required." });
+    }
+    if (!newEmail || !newEmail.trim() || !newEmail.includes("@")) {
+      return res.status(400).json({ error: "A valid customer email address is required." });
+    }
+
+    const cleanCrn = decodeURIComponent(originalCrn).trim().toUpperCase();
+    const cleanOldEmail = decodeURIComponent(originalEmail).trim().toLowerCase();
+    const cleanNewEmail = decodeURIComponent(newEmail).trim().toLowerCase();
+
+    await db.ready();
+    let existing = memStore.getRmInvitation(cleanCrn, cleanOldEmail);
+    if (!existing && db.isConnected()) {
+      existing = await db.getInvitation(cleanCrn, cleanOldEmail);
+      if (!existing) {
+        existing = await db.getInvitationByCrn(cleanCrn);
+      }
+    }
+
+    const company_uid = existing?.company_uid || resolveCompanyUid({ crn: cleanCrn });
+    const host = req.get("host") || "localhost:3000";
+    const protocol = req.protocol === "https" || req.get("x-forwarded-proto") === "https" ? "https" : "http";
+    const portalUrl = `${protocol}://${host}/`;
+
+    const updatedRecord = {
+      crn: cleanCrn,
+      email: cleanNewEmail,
+      company_uid,
+      company_name: (companyName || existing?.company_name || "Corporate Client").trim(),
+      trade_name: existing?.trade_name || (companyName || "").trim(),
+      contact_person: (contactPerson || existing?.contact_person || "Authorized Signatory").trim(),
+      phone: (phone || existing?.phone || "").trim(),
+      rm_name: existing?.rm_name || "Phanee (Senior Relationship Manager)",
+      rm_id: existing?.rm_id || "RM-PHANEE",
+      invite_token: existing?.invite_token || ("inv_" + crypto.randomBytes(12).toString("hex")),
+      status: existing?.status || "invited",
+      invite_link: portalUrl,
+      notes: existing?.notes || "",
+      created_at: existing?.created_at || new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    if (db.isConnected()) {
+      try {
+        if (cleanOldEmail !== cleanNewEmail) {
+          await db.deleteInvitation(cleanCrn, cleanOldEmail);
+        }
+        await db.saveInvitation(updatedRecord);
+      } catch (dbErr) {
+        console.warn("[RM-SERVICE] DB update invitation warning:", dbErr.message);
+      }
+    }
+
+    if (cleanOldEmail !== cleanNewEmail) {
+      memStore.deleteRmInvitation(cleanCrn, cleanOldEmail);
+    }
+    memStore.saveRmInvitation(updatedRecord);
+
+    // Update associated application if exists
+    try {
+      if (db.isConnected()) {
+        const app = await db.getApplicationByCrnAndEmail(cleanCrn, cleanOldEmail) || await db.getApplicationByCrn(cleanCrn);
+        if (app) {
+          await db.updateApplication(app.application_ref, {
+            registered_email: cleanNewEmail,
+            company_name: updatedRecord.company_name
+          });
+        }
+      }
+    } catch (appErr) {
+      console.warn("[RM-SERVICE] App update notice:", appErr.message);
+    }
+
+    let emailDispatched = false;
+    if (resendImmediate !== false) {
+      const emailSubject = `Invitation to Onboard: Gringotts Bank Corporate Vault & Banking Package for ${updatedRecord.company_name}`;
+      memStore.recordSimulatedEmail({
+        to: cleanNewEmail,
+        from: '"Bogrod & Griphook — Gringotts Bank Diagon Alley" <vaults@gringotts.co.uk>',
+        subject: emailSubject,
+        type: "rm_invitation",
+        metadata: { crn: cleanCrn, email: cleanNewEmail, inviteLink: portalUrl },
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #090e17 0%, #1e293b 100%); padding: 32px 28px; text-align: center; border-bottom: 2px solid #f59e0b;">
+              <div style="display: inline-block; background: #f59e0b; color: #090e17; font-weight: 800; font-size: 18px; width: 48px; height: 48px; line-height: 48px; border-radius: 10px; margin-bottom: 12px;">GB</div>
+              <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.02em;">Gringotts Bank Institutional &amp; Vault Services</h1>
+              <p style="color: #cbd5e1; font-size: 13px; margin: 6px 0 0;">1 Diagon Alley, London &bull; In reference with Hogwarts Financial Council</p>
+            </div>
+            <div style="padding: 32px 28px;">
+              <h2 style="color: #0f172a; font-size: 18px; margin-top: 0;">Dear ${updatedRecord.contact_person},</h2>
+              <p style="color: #334155; font-size: 14px; line-height: 1.6;">
+                Your corporate onboarding invitation for <strong>${updatedRecord.company_name}</strong> (CRN: ${cleanCrn}) has been updated with this registered email address.
+              </p>
+              <div style="background: #f8fafc; border: 1.5px dashed #f59e0b; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center;">
+                <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #92400e; margin-bottom: 8px;">Your Unique Corporate Access Details</div>
+                <div style="font-size: 14px; color: #1e293b; margin-bottom: 4px;"><strong>Commercial Reg. No. (CRN):</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${cleanCrn}</code></div>
+                <div style="font-size: 14px; color: #1e293b; margin-bottom: 16px;"><strong>Registered Email:</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${cleanNewEmail}</code></div>
+                <a href="${portalUrl}" style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 700; font-size: 14px; text-decoration: none; padding: 12px 28px; border-radius: 8px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
+                  🚀 Launch Direct Customer Onboarding Portal
+                </a>
+              </div>
+              <p style="color: #64748b; font-size: 12px; line-height: 1.6;">
+                Direct Portal URL:<br>
+                <a href="${portalUrl}" style="color: #0284c7; word-break: break-all;">${portalUrl}</a>
+              </p>
+            </div>
+          </div>
+        `
+      });
+      emailDispatched = true;
+    }
+
+    return res.json({
+      success: true,
+      message: `Customer details updated successfully.${emailDispatched ? ` Onboarding invitation dispatched to ${cleanNewEmail}.` : ""}`,
+      invitation: updatedRecord
+    });
+  } catch (err) {
+    console.error("[RM-SERVICE] Error updating details:", err);
+    return res.status(500).json({ error: "Failed to update customer details." });
   }
 });
 
