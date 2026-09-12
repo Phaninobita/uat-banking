@@ -159,12 +159,17 @@ body {
 
 /* ── 1. RM LOGIN SCREEN & AMBIENT AURORA ── */
 .rm-login-wrap {
-    min-height: 100vh;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 100dvh;
+    z-index: 10000;
+    background: var(--rm-bg-root, #020712);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
-    position: relative;
+    padding: 20px;
     overflow: hidden;
 }
 
@@ -256,11 +261,20 @@ body {
                 0 0 45px rgba(0, 210, 255, 0.12);
     width: 100%;
     max-width: 470px;
+    height: 615px;
+    min-height: 615px;
     padding: 44px 38px 36px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     backdrop-filter: blur(28px);
     -webkit-backdrop-filter: blur(28px);
     position: relative;
     overflow: hidden;
+    transform-style: preserve-3d;
+    will-change: transform;
+    transition: transform 0.12s ease-out;
     animation: rmCardGlowBreath 6s ease-in-out infinite;
     z-index: 10;
 }
@@ -300,30 +314,11 @@ body {
     box-shadow: 0 0 24px rgba(0, 210, 255, 0.35);
 }
 
-.rm-badge-row {
-    display: flex;
-    justify-content: center;
-    margin-top: 10px;
-}
-
-.rm-secure-badge {
-    font-size: 10.5px;
-    font-weight: 700;
-    background: rgba(245, 158, 11, 0.12);
-    border: 1px solid rgba(245, 158, 11, 0.4);
-    color: #fbbf24;
-    padding: 3px 10px;
-    border-radius: 999px;
-    letter-spacing: 0.04em;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-}
-
 .rm-login-title {
     font-size: 25px;
     font-weight: 700;
-    margin-bottom: 6px;
+    margin: 0 0 6px 0;
+    line-height: 1.25;
     letter-spacing: -0.6px;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, #ffffff 55%, rgba(255, 255, 255, 0.65) 100%);
     -webkit-background-clip: text;
@@ -334,7 +329,9 @@ body {
 .rm-login-sub {
     color: rgba(255, 255, 255, 0.65);
     font-size: 14px;
+    line-height: 1.4;
     letter-spacing: -0.2px;
+    margin: 0;
 }
 
 .rm-clearance-pill {
@@ -358,7 +355,8 @@ body {
     font-size: 13px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.88) !important;
-    margin-bottom: 8px;
+    margin: 0 0 8px 0;
+    line-height: 1.3;
     letter-spacing: -0.2px;
 }
 
@@ -375,6 +373,7 @@ body {
 
 .rm-input {
     width: 100%;
+    height: 50px;
     padding: 14px 16px;
     background: rgba(255, 255, 255, 0.04) !important;
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -383,6 +382,8 @@ body {
     font-family: inherit;
     font-size: 15px;
     font-weight: 500;
+    line-height: 20px;
+    box-sizing: border-box;
     transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
     outline: none;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);

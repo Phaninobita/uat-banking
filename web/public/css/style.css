@@ -4889,7 +4889,13 @@
                         0 0 45px rgba(0, 210, 255, 0.12);
             width: 100%;
             max-width: 470px;
+            height: 615px;
+            min-height: 615px;
             padding: 44px 38px 36px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             overflow: hidden;
             transform-style: preserve-3d;
             will-change: transform;
@@ -4936,7 +4942,8 @@
         .login-header h1 {
             font-size: 25px;
             font-weight: 700;
-            margin-bottom: 6px;
+            margin: 0 0 6px 0;
+            line-height: 1.25;
             letter-spacing: -0.6px;
             background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, #ffffff 55%, rgba(255, 255, 255, 0.65) 100%);
             -webkit-background-clip: text;
@@ -4947,7 +4954,9 @@
         .login-header p {
             color: rgba(255, 255, 255, 0.65);
             font-size: 14px;
+            line-height: 1.4;
             letter-spacing: -0.2px;
+            margin: 0;
         }
 
         .form-step {
@@ -4976,17 +4985,21 @@
             font-size: 13px;
             font-weight: 600;
             color: rgba(255, 255, 255, 0.88) !important;
-            margin-bottom: 8px;
+            margin: 0 0 8px 0;
+            line-height: 1.3;
             letter-spacing: -0.2px;
         }
 
         .field-group input {
             width: 100%;
+            height: 50px;
             padding: 14px 16px;
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 14px;
             font-size: 15px;
             font-weight: 500;
+            line-height: 20px;
+            box-sizing: border-box;
             color: #ffffff !important;
             background: rgba(255, 255, 255, 0.04) !important;
             transition: all var(--duration-fast) var(--ease-standard);
