@@ -2541,30 +2541,39 @@
             border-radius: var(--radius-lg);
             overflow: hidden;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-            display: grid;
-            grid-template-columns: 340px 1fr;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
             transition: border-color var(--transition), box-shadow var(--transition);
         }
 
         .role-category-card:hover {
-            border-color: rgba(0, 210, 255, 0.3);
+            border-color: rgba(0, 210, 255, 0.35);
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
         }
 
-        .role-category-guide {
-            background: linear-gradient(180deg, rgba(12, 28, 48, 0.75) 0%, rgba(8, 18, 32, 0.9) 100%);
-            border-right: 1px solid var(--border-color);
-            padding: 24px 22px;
+        .role-category-header {
+            padding: 22px 24px 18px;
+            background: linear-gradient(180deg, rgba(14, 30, 52, 0.85) 0%, rgba(9, 20, 36, 0.95) 100%);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
+            gap: 16px;
+        }
+
+        .rch-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            flex-wrap: wrap;
         }
 
         .rcg-badge {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: rgba(0, 210, 255, 0.1);
+            background: rgba(0, 210, 255, 0.12);
             border: 1px solid rgba(0, 210, 255, 0.3);
             color: #38bdf8;
             font-size: 11px;
@@ -2573,45 +2582,61 @@
             border-radius: 999px;
             letter-spacing: 0.04em;
             text-transform: uppercase;
+            margin-bottom: 8px;
             width: fit-content;
-            margin-bottom: 10px;
         }
 
         .rcg-title {
             font-size: 16px;
             font-weight: 700;
             color: #ffffff;
-            margin: 0 0 6px;
+            margin: 0 0 4px;
             letter-spacing: -0.2px;
         }
 
         .rcg-desc {
-            font-size: 12px;
+            font-size: 12.5px;
             color: var(--text-muted);
             line-height: 1.5;
-            margin: 0 0 18px;
+            margin: 0;
+            max-width: 840px;
         }
 
-        .rcg-points {
-            display: flex;
-            flex-direction: column;
+        .rcg-pills-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 12px;
-            margin-bottom: 18px;
         }
 
-        .rcg-point {
+        @media (max-width: 860px) {
+            .rcg-pills-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .rcg-pill {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 10px;
+            padding: 10px 14px;
             display: flex;
-            align-items: flex-start;
-            gap: 10px;
+            align-items: center;
+            gap: 12px;
+            transition: background 0.2s, border-color 0.2s, transform 0.2s;
         }
 
-        .rcg-icon {
-            font-size: 15px;
+        .rcg-pill:hover {
+            background: rgba(0, 210, 255, 0.05);
+            border-color: rgba(0, 210, 255, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .rcg-pill .rcg-icon {
+            font-size: 20px;
             flex-shrink: 0;
-            margin-top: 1px;
         }
 
-        .rcg-point strong {
+        .rcg-pill strong {
             display: block;
             font-size: 12.5px;
             font-weight: 700;
@@ -2619,62 +2644,28 @@
             margin-bottom: 2px;
         }
 
-        .rcg-point span {
-            font-size: 11.5px;
+        .rcg-pill span {
+            font-size: 11px;
             color: #94a3b8;
-            line-height: 1.4;
+            line-height: 1.35;
+            display: block;
         }
 
-        .rcg-tip {
-            margin-top: auto;
-            background: rgba(245, 158, 11, 0.08);
-            border-left: 3px solid #f59e0b;
-            border-radius: 6px;
-            padding: 10px 12px;
-            font-size: 11.5px;
-            color: #fef3c7;
+        .role-category-footer {
+            background: rgba(15, 28, 48, 0.6);
+            border-top: 1px solid var(--border-color);
+            padding: 12px 24px;
+            font-size: 12px;
+            color: #e2e8f0;
             line-height: 1.45;
             display: flex;
-            gap: 8px;
-            align-items: flex-start;
+            align-items: center;
+            gap: 10px;
         }
 
         .rcg-tip-icon {
-            font-size: 14px;
+            font-size: 15px;
             flex-shrink: 0;
-            margin-top: 1px;
-        }
-
-        .role-category-table-pane {
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-            width: 100%;
-            background: rgba(10, 20, 35, 0.4);
-        }
-
-        .role-pane-header {
-            padding: 14px 20px;
-            background: rgba(255, 255, 255, 0.02);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .rph-title {
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #ffffff;
-        }
-
-        .rph-sub {
-            font-size: 11.5px;
-            color: var(--text-muted);
         }
 
         .table-responsive {
@@ -2684,13 +2675,14 @@
 
         table.rtable {
             width: 100%;
+            table-layout: fixed;
             border-collapse: collapse;
         }
 
         table.rtable th {
             padding: 14px 16px;
             text-align: center;
-            background: var(--bg-card);
+            background: rgba(10, 20, 35, 0.7);
             font-weight: 700;
             font-size: 13px;
             color: var(--text-primary);
@@ -2710,6 +2702,7 @@
             font-size: 14px;
             color: var(--text-secondary);
             transition: border-color var(--transition), color var(--transition);
+            vertical-align: middle;
         }
 
         table.rtable td:first-child {
@@ -2717,6 +2710,9 @@
             padding-left: 24px;
             font-weight: 600;
             color: var(--text-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         table.rtable tr:last-child td {
@@ -2724,7 +2720,7 @@
         }
 
         table.rtable tr:hover td {
-            background: var(--bg-hover);
+            background: rgba(0, 210, 255, 0.04);
         }
 
         table.rtable input[type="checkbox"] {

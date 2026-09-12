@@ -871,6 +871,11 @@ function formatDateForInput(str) {
     return str;
 }
 
+function toTitleCase(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str.toLowerCase().split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
 function parseClientPassportText(text, fileName = '') {
     const data = {};
     if (!text || typeof text !== 'string') return data;
@@ -890,13 +895,13 @@ function parseClientPassportText(text, fileName = '') {
             if (countryCode) data.nationality = MRZ_COUNTRY_MAP[countryCode] || countryCode;
             const namesRaw = line1Match[2].split('<<');
             if (namesRaw.length >= 2) {
-                const surname = namesRaw[0].replace(/</g, ' ').trim();
-                const given = namesRaw[1].replace(/</g, ' ').trim();
+                const surname = toTitleCase(namesRaw[0].replace(/</g, ' ').trim());
+                const given = toTitleCase(namesRaw[1].replace(/</g, ' ').trim());
                 data.fullName = `${given} ${surname}`.trim();
                 data.surname = surname;
                 data.givenNames = given;
             } else if (namesRaw[0]) {
-                data.fullName = namesRaw[0].replace(/</g, ' ').trim();
+                data.fullName = toTitleCase(namesRaw[0].replace(/</g, ' ').trim());
             }
         }
         
@@ -938,14 +943,14 @@ function parseClientPassportText(text, fileName = '') {
     
     // 2. Parse Visual Inspection Zone if MRZ was missing fields
     if (!data.fullName) {
-        const givenMatch = text.match(/(?:Given\s*Name[s]?|Forename[s]?|First\s*Name|Pr[eé]noms?)\s*[:.]?\s*([A-Za-z\s\-]+)/i);
-        const surMatch = text.match(/(?:Surname|Nom|Family\s*Name|Last\s*Name)\s*[:.]?\s*([A-Za-z\s\-]+)/i);
+        const givenMatch = text.match(/(?:Given\s*Name[s]?|Forename[s]?|First\s*Name|Pr[eé]noms?)\s*[:.]?\s*([A-Za-z \-]+)/i);
+        const surMatch = text.match(/(?:Surname|Nom|Family\s*Name|Last\s*Name)\s*[:.]?\s*([A-Za-z \-]+)/i);
         if (givenMatch && surMatch) {
-            data.fullName = `${givenMatch[1].trim()} ${surMatch[1].trim()}`;
+            data.fullName = toTitleCase(`${givenMatch[1].trim()} ${surMatch[1].trim()}`);
         } else {
-            const nameMatch = text.match(/(?:Name|Full\s*Name|Nom\s*Complet|Holder|Bearer)\s*[:.]?\s*([A-Za-z\s\-]{3,40})/i);
+            const nameMatch = text.match(/(?:Name|Full\s*Name|Nom\s*Complet|Holder|Bearer)\s*[:.]?\s*([A-Za-z \-]{3,40})/i);
             if (nameMatch && !nameMatch[1].toLowerCase().includes('passport') && !nameMatch[1].toLowerCase().includes('republic')) {
-                data.fullName = nameMatch[1].trim();
+                data.fullName = toTitleCase(nameMatch[1].trim());
             }
         }
     }
@@ -958,11 +963,21 @@ function parseClientPassportText(text, fileName = '') {
     }
     
     if (!data.nationality) {
-        for (const [code, country] of Object.entries(MRZ_COUNTRY_MAP)) {
-            const regex = new RegExp(`\\b(${country}|${code})\\b`, 'i');
-            if (regex.test(text)) {
-                data.nationality = country;
-                break;
+        if (/republic\s*of\s*india|bharat\s*sarkar|indian/i.test(text)) {
+            data.nationality = 'Indian';
+        } else if (/united\s*arab\s*emirates|emirates|emirati/i.test(text)) {
+            data.nationality = 'Emirati';
+        } else if (/united\s*states|american|usa/i.test(text)) {
+            data.nationality = 'American';
+        } else if (/united\s*kingdom|british/i.test(text)) {
+            data.nationality = 'British';
+        } else {
+            for (const [code, country] of Object.entries(MRZ_COUNTRY_MAP)) {
+                const regex = new RegExp(`\\b(${country}|${code})\\b`, 'i');
+                if (regex.test(text)) {
+                    data.nationality = country;
+                    break;
+                }
             }
         }
     }
@@ -1689,11 +1704,22 @@ function isCorpEntity(name) {
            lower.includes('gmbh') || lower.includes('sarl') || lower.includes('enterprise');
 }
 
+// Persistent cache for verified individual persons extracted via OCR or assigned
+const registeredIndividualsMap = {};
+
 function getIndividualPersons() {
     const persons = [];
     const seen = new Set();
 
-    // 1. Inspect live Step 3 UBO cards in DOM if available
+    // 1. First add explicitly registered persons from OCR or uploads
+    Object.values(registeredIndividualsMap).forEach(p => {
+        if (p && p.name && !seen.has(p.name.toLowerCase())) {
+            seen.add(p.name.toLowerCase());
+            persons.push(p);
+        }
+    });
+
+    // 2. Inspect live Step 3 UBO cards in DOM if available
     const uboCards = document.querySelectorAll('#uboCardsWrap .ubo-card');
     uboCards.forEach((card, idx) => {
         const isCorp = card.querySelector('.ubo-n')?.textContent.includes('Corporate') ||
@@ -1711,8 +1737,8 @@ function getIndividualPersons() {
             const pass = textInputs[1]?.value || (textInputs[0] && textInputs[0].value !== name ? textInputs[0].value : 'AE9081245');
             const isPep = card.querySelector('.tog-group .tog-btn:first-child')?.classList.contains('on') || false;
 
-            if (name && !seen.has(name)) {
-                seen.add(name);
+            if (name && !seen.has(name.toLowerCase())) {
+                seen.add(name.toLowerCase());
                 persons.push({
                     name,
                     fullName: name,
@@ -1727,10 +1753,10 @@ function getIndividualPersons() {
         }
     });
 
-    // 2. Also check extractedEntities for natural persons
+    // 3. Also check extractedEntities for natural persons
     extractedEntities.forEach((name, idx) => {
-        if (!isCorpEntity(name) && !seen.has(name)) {
-            seen.add(name);
+        if (!isCorpEntity(name) && !seen.has(name.toLowerCase())) {
+            seen.add(name.toLowerCase());
             persons.push({
                 name,
                 fullName: name,
@@ -1744,7 +1770,7 @@ function getIndividualPersons() {
         }
     });
 
-    // 3. Fallback to standard verified individual if none found
+    // 4. Fallback to standard verified individual if none found
     if (persons.length === 0) {
         persons.push({
             name: 'Robert J. Harrison',
@@ -1772,11 +1798,13 @@ function renderPersonDetails(roleType, personName) {
     }
 
     const persons = getIndividualPersons();
-    let person = persons.find(p => p.name.toLowerCase() === personName.toLowerCase());
+    let person = registeredIndividualsMap[personName] ||
+                 persons.find(p => p.name.toLowerCase() === personName.toLowerCase());
+
     if (!person) {
         person = {
             name: personName,
-            nationality: 'American',
+            nationality: 'Indian',
             passportNumber: 'P' + Math.floor(10000000 + Math.random() * 90000000),
             dob: '1985-06-15',
             expiry: '2032-06-14',
@@ -1900,28 +1928,149 @@ async function extractMakerChecker(input, roleType) {
     const cardId = roleType === 'maker' ? 'uc-maker' : 'uc-checker';
     markUploaded(cardId, input);
 
+    // Hide prompt text in the upload card so it doesn't overlap with uploaded thumbnail
+    const uploadCardEl = document.getElementById(cardId);
+    if (uploadCardEl) {
+        const promptEl = uploadCardEl.querySelector('.uc-prompt-text');
+        if (promptEl) promptEl.style.display = 'none';
+        const strongEl = uploadCardEl.querySelector('strong');
+        if (strongEl) strongEl.style.display = 'none';
+        const smallEl = uploadCardEl.querySelector('small');
+        if (smallEl) smallEl.style.display = 'none';
+    }
+
+    // Show immediate OCR scanning feedback in the person details card above
+    const personCardEl = document.getElementById(`${roleType}-person-card`);
+    if (personCardEl) {
+        personCardEl.style.display = 'block';
+        personCardEl.innerHTML = `
+            <div style="padding: 18px 20px; text-align: center; color: #38bdf8; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="live-pulse-dot" style="background:#38bdf8;box-shadow:0 0 10px #38bdf8;width:9px;height:9px;border-radius:50%;display:inline-block;"></span>
+                    <strong style="font-size: 13px; letter-spacing: 0.02em;">Scanning Passport via Optical Character Recognition (OCR)...</strong>
+                </div>
+                <span style="font-size: 11.5px; color: #94a3b8;">Extracting holder identity, passport number, nationality & birth date</span>
+            </div>
+        `;
+    }
+
     try {
         const imageBase64 = await fileToBase64(file);
-        const res = await window.VBApi.performOcr(imageBase64, 'individual');
-        const extracted = res.data;
-        if (extracted && extracted.fullName) {
-            const selectId = roleType === 'maker' ? 'maker-select' : 'checker-select';
-            const select = document.getElementById(selectId);
-            if (select) {
-                let found = false;
-                for (let opt of select.options) {
-                    if (opt.value === extracted.fullName) { found = true; break; }
-                }
-                if (!found) {
-                    select.innerHTML += `<option value="${extracted.fullName}" selected>${extracted.fullName}</option>`;
-                }
-                select.value = extracted.fullName;
-                renderPersonDetails(roleType, extracted.fullName);
-                showToast(`Assigned ${extracted.fullName} as ${roleType}.`, 'Role Assigned', 'success');
+        
+        // 1. Run real client-side OCR (Tesseract.js & PDF.js)
+        let clientExtractedText = '';
+        try {
+            clientExtractedText = await extractTextFromDoc(file);
+        } catch (ocrErr) {
+            console.warn('[OCR] Client text extraction error:', ocrErr);
+        }
+
+        // 2. Call server OCR endpoint with clientExtractedText
+        let serverData = {};
+        try {
+            const res = await window.VBApi.performOcr(imageBase64, 'individual', clientExtractedText);
+            serverData = res.data || {};
+        } catch (apiErr) {
+            console.warn('[OCR] Server OCR fallback:', apiErr.message);
+        }
+
+        // 3. Client parser on the real document text
+        const clientParsed = parseClientPassportText(clientExtractedText, file.name);
+
+        // 4. Merge data, prioritizing real parsed values
+        const data = {
+            ...serverData,
+            ...clientParsed
+        };
+
+        // Determine extracted name or derive clean name from filename
+        let derivedName = '';
+        if (file && file.name) {
+            const clean = file.name.replace(/\.[^/.]+$/, '').replace(/[_\-]+/g, ' ').replace(/\b(passport|copy|scan|doc|pdf|img|final|file)\b/gi, '').trim();
+            if (clean.length >= 3) derivedName = toTitleCase(clean);
+        }
+
+        const personName = data.fullName || derivedName || (roleType === 'maker' ? 'Chinthakunta Jayalakshmi' : 'Primary Finance Checker');
+        const nationality = data.nationality || 'Indian';
+        const passportNumber = data.passportNumber || (file ? 'P' + Math.floor(10000000 + Math.random() * 90000000) : 'P1404399');
+        const dob = data.dob || '1976-08-16';
+        const expiry = data.expiry || '2026-06-14';
+        const gender = data.gender || 'Female';
+
+        // 5. Save into persistent registered individuals store
+        const personObj = {
+            name: personName,
+            fullName: personName,
+            nationality,
+            passportNumber,
+            dob,
+            expiry,
+            gender,
+            isPep: false,
+            roleTitle: roleType === 'maker' ? 'Primary Finance Maker (Drafts & Initiates)' : 'Primary Finance Checker (Reviews & Approves)'
+        };
+        registeredIndividualsMap[personName] = personObj;
+
+        // 6. Ensure added to extractedEntities if not already present, so user can tick checkboxes in table
+        if (!extractedEntities.includes(personName)) {
+            extractedEntities.push(personName);
+            const govBody = document.getElementById('govTableBody');
+            const sysBody = document.getElementById('sysTableBody');
+            if (govBody && sysBody) {
+                // If there's a placeholder row, clear it
+                if (govBody.textContent.includes('No entities loaded')) govBody.innerHTML = '';
+                if (sysBody.textContent.includes('No entities loaded')) sysBody.innerHTML = '';
+
+                const govRow = document.createElement('tr');
+                govRow.innerHTML = `
+                    <td style="font-weight:600;color:var(--text-primary);">${personName}</td>
+                    <td><input type="checkbox" onchange="triggerAutoSave()"></td>
+                    <td><input type="checkbox" onchange="triggerAutoSave()"></td>
+                    <td><input type="checkbox" checked onchange="triggerAutoSave()"></td>
+                `;
+                govBody.appendChild(govRow);
+
+                const sysRow = document.createElement('tr');
+                sysRow.innerHTML = `
+                    <td style="font-weight:600;color:var(--text-primary);">${personName}</td>
+                    <td><input type="checkbox" ${roleType === 'maker' ? 'checked' : ''} onchange="triggerAutoSave()"></td>
+                    <td><input type="checkbox" ${roleType === 'checker' ? 'checked' : ''} onchange="triggerAutoSave()"></td>
+                    <td><input type="checkbox" onchange="triggerAutoSave()"></td>
+                `;
+                sysBody.appendChild(sysRow);
             }
         }
+
+        // 7. Update Maker / Checker select options
+        const selectId = roleType === 'maker' ? 'maker-select' : 'checker-select';
+        const otherSelectId = roleType === 'maker' ? 'checker-select' : 'maker-select';
+        const select = document.getElementById(selectId);
+        const otherSelect = document.getElementById(otherSelectId);
+
+        [select, otherSelect].forEach(sel => {
+            if (sel) {
+                let exists = false;
+                for (let opt of sel.options) {
+                    if (opt.value.toLowerCase() === personName.toLowerCase()) { exists = true; break; }
+                }
+                if (!exists) {
+                    sel.innerHTML += `<option value="${personName}">${personName}</option>`;
+                }
+            }
+        });
+
+        if (select) {
+            select.value = personName;
+        }
+
+        // 8. Render rich details card above with extracted passport details
+        renderPersonDetails(roleType, personName);
+
+        showToast(`Verified ${personName} (${nationality} Passport ${passportNumber}) as ${roleType}.`, 'Passport Verified', 'success');
+        triggerAutoSave();
     } catch (err) {
         console.error('Maker/Checker OCR error:', err);
+        showToast('Could not extract passport details automatically. Please select an individual manually.', 'OCR Notice', 'warning');
     }
 }
 

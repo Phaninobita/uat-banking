@@ -89,12 +89,12 @@ function parseDocumentText(text) {
 
   // Visual Passport Inspection labels (useful if MRZ was blurry or cropped)
   if (!data.fullName) {
-    const givenMatch = cleanText.match(/(?:Given\s*Name[s]?|Forename[s]?|First\s*Name|Pr[eé]noms?)\s*[:.]?\s*([A-Za-z\s\-]+)/i);
-    const surMatch = cleanText.match(/(?:Surname|Nom|Family\s*Name|Last\s*Name)\s*[:.]?\s*([A-Za-z\s\-]+)/i);
+    const givenMatch = cleanText.match(/(?:Given\s*Name[s]?|Forename[s]?|First\s*Name|Pr[eé]noms?)\s*[:.]?\s*([A-Za-z \-]+)/i);
+    const surMatch = cleanText.match(/(?:Surname|Nom|Family\s*Name|Last\s*Name)\s*[:.]?\s*([A-Za-z \-]+)/i);
     if (givenMatch && surMatch) {
       data.fullName = `${givenMatch[1].trim()} ${surMatch[1].trim()}`;
     } else {
-      const nameMatch = cleanText.match(/(?:Name|Full\s*Name|Nom\s*Complet|Holder|Bearer)\s*[:.]?\s*([A-Za-z\s\-]{3,40})/i);
+      const nameMatch = cleanText.match(/(?:Name|Full\s*Name|Nom\s*Complet|Holder|Bearer)\s*[:.]?\s*([A-Za-z \-]{3,40})/i);
       if (nameMatch && !nameMatch[1].toLowerCase().includes("passport")) {
         data.fullName = nameMatch[1].trim();
       }

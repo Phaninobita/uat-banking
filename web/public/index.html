@@ -700,117 +700,113 @@
                 <div class="role-categories-stack">
                     <!-- Section 1: Corporate Governance Roles -->
                     <div class="role-category-card">
-                        <div class="role-category-guide">
-                            <div class="rcg-badge">🏛️ Statutory Governance</div>
-                            <h3 class="rcg-title">Corporate Governance Roles</h3>
-                            <p class="rcg-desc">Designate statutory capacities for verified individuals and entities as mandated by company bylaws and regulatory compliance.</p>
+                        <div class="role-category-header">
+                            <div class="rch-top-row">
+                                <div>
+                                    <div class="rcg-badge">🏛️ Statutory Governance</div>
+                                    <h3 class="rcg-title">Corporate Governance Roles Matrix</h3>
+                                    <p class="rcg-desc">Designate statutory capacities for verified individuals and entities as mandated by company bylaws and regulatory compliance.</p>
+                                </div>
+                            </div>
                             
-                            <div class="rcg-points">
-                                <div class="rcg-point">
+                            <div class="rcg-pills-row">
+                                <div class="rcg-pill">
                                     <span class="rcg-icon">👔</span>
                                     <div>
                                         <strong>Board Member</strong>
-                                        <span>Fiduciary governance, corporate policy oversight, and statutory board resolutions.</span>
+                                        <span>Fiduciary governance & statutory oversight</span>
                                     </div>
                                 </div>
-                                <div class="rcg-point">
+                                <div class="rcg-pill">
                                     <span class="rcg-icon">🏢</span>
                                     <div>
                                         <strong>Senior Management</strong>
-                                        <span>Executive C-Suite leadership managing daily business and commercial operations.</span>
+                                        <span>Executive C-Suite business leadership</span>
                                     </div>
                                 </div>
-                                <div class="rcg-point">
+                                <div class="rcg-pill">
                                     <span class="rcg-icon">✍️</span>
                                     <div>
                                         <strong>Authorised Signatory</strong>
-                                        <span>Empowered to execute contracts, bind the company, and authorize bank mandates.</span>
+                                        <span>Executes contracts & bank mandates</span>
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="rcg-tip">
-                                <span class="rcg-tip-icon">💡</span>
-                                <span><strong>Requirement:</strong> At least one Authorised Signatory is required to execute the banking mandate.</span>
-                            </div>
                         </div>
 
-                        <div class="role-category-table-pane">
-                            <div class="role-pane-header">
-                                <span class="rph-title">Governance Assignment Matrix</span>
-                                <span class="rph-sub">Tick statutory roles applicable to each verified entity</span>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="rtable" id="govTable" aria-label="Corporate governance roles assignment">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Board Member <span class="role-desc">Sits on board</span></th>
-                                            <th>Senior Management <span class="role-desc">C-suite</span></th>
-                                            <th>Authorised Signatory <span class="role-desc">Signs on behalf</span></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="govTableBody"></tbody>
-                                </table>
-                            </div>
+                        <div class="table-responsive">
+                            <table class="rtable" id="govTable" aria-label="Corporate governance roles assignment">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 37%;">Legal Entity / Person Name</th>
+                                        <th style="width: 21%;">Board Member <span class="role-desc">Sits on board</span></th>
+                                        <th style="width: 21%;">Senior Management <span class="role-desc">C-suite</span></th>
+                                        <th style="width: 21%;">Authorised Signatory <span class="role-desc">Signs & binds</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="govTableBody"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="role-category-footer">
+                            <span class="rcg-tip-icon">💡</span>
+                            <span><strong>Mandate Requirement:</strong> At least one Authorised Signatory is required to bind the entity and execute the banking mandate.</span>
                         </div>
                     </div>
 
                     <!-- Section 2: System Access Roles -->
                     <div class="role-category-card">
-                        <div class="role-category-guide">
-                            <div class="rcg-badge">🔐 Treasury & Security</div>
-                            <h3 class="rcg-title">System Access & Security</h3>
-                            <p class="rcg-desc">Configure role-based access controls (RBAC) and payment authorization tiers across First National Bank online portal.</p>
+                        <div class="role-category-header">
+                            <div class="rch-top-row">
+                                <div>
+                                    <div class="rcg-badge">🔐 Treasury & Security</div>
+                                    <h3 class="rcg-title">Portal System Access & Security Matrix</h3>
+                                    <p class="rcg-desc">Configure role-based access controls (RBAC) and payment authorization tiers across the First National Bank corporate online portal.</p>
+                                </div>
+                            </div>
                             
-                            <div class="rcg-points">
-                                <div class="rcg-point">
+                            <div class="rcg-pills-row">
+                                <div class="rcg-pill">
                                     <span class="rcg-icon">📤</span>
                                     <div>
                                         <strong>Admin Maker</strong>
-                                        <span>Drafts and initiates wire payments, payroll batches, and currency exchanges.</span>
+                                        <span>Drafts & initiates wire payments, payroll & FX</span>
                                     </div>
                                 </div>
-                                <div class="rcg-point">
+                                <div class="rcg-pill">
                                     <span class="rcg-icon">🔍</span>
                                     <div>
                                         <strong>Admin Checker</strong>
-                                        <span>Independently reviews, authenticates, and approves payments prior to release.</span>
+                                        <span>Independently reviews & releases funds</span>
                                     </div>
                                 </div>
-                                <div class="rcg-point">
+                                <div class="rcg-pill">
                                     <span class="rcg-icon">🔑</span>
                                     <div>
                                         <strong>Superuser</strong>
-                                        <span>Master administrative rights, user permission management, and token controls.</span>
+                                        <span>Master user management & token controls</span>
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="rcg-tip">
-                                <span class="rcg-tip-icon">🛡️</span>
-                                <span><strong>Four-Eyes Principle:</strong> Dual control ensures no single user can both initiate and release corporate funds.</span>
-                            </div>
                         </div>
 
-                        <div class="role-category-table-pane">
-                            <div class="role-pane-header">
-                                <span class="rph-title">Portal Access Matrix</span>
-                                <span class="rph-sub">Define system permissions & transaction authorization</span>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="rtable" id="sysTable" aria-label="System access roles assignment">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Admin Maker <span class="role-desc">Creates & initiates</span></th>
-                                            <th>Admin Checker <span class="role-desc">Reviews & approves</span></th>
-                                            <th>Superuser <span class="role-desc">Full admin access</span></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="sysTableBody"></tbody>
-                                </table>
-                            </div>
+                        <div class="table-responsive">
+                            <table class="rtable" id="sysTable" aria-label="System access roles assignment">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 37%;">Legal Entity / Person Name</th>
+                                        <th style="width: 21%;">Admin Maker <span class="role-desc">Creates & initiates</span></th>
+                                        <th style="width: 21%;">Admin Checker <span class="role-desc">Reviews & approves</span></th>
+                                        <th style="width: 21%;">Superuser <span class="role-desc">Full admin access</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sysTableBody"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="role-category-footer">
+                            <span class="rcg-tip-icon">🛡️</span>
+                            <span><strong>Four-Eyes Principle:</strong> Dual control ensures no single user can both initiate and release corporate funds. Maker and Checker must be distinct verified individuals.</span>
                         </div>
                     </div>
                 </div>
@@ -850,15 +846,21 @@
                                 <input type="file" id="f-maker" accept=".pdf,.jpg,.png" onchange="extractMakerChecker(this, 'maker')" aria-label="Upload Maker passport or ID">
                                 <div class="opt-badge">Optional</div>
                                 <div class="uc-icon" style="font-size: 20px;" aria-hidden="true">&#x1F464;</div>
-                                <strong>Upload new Maker Passport / ID</strong>
-                                <small>If assigning a new person</small>
+                                <span class="file-status"></span>
+                                <div class="uc-prompt-text">
+                                    <strong>Upload new Maker Passport / ID</strong>
+                                    <small>If assigning a new person</small>
+                                </div>
                             </div>
                             <div class="upload-card" id="uc-checker" onclick="triggerUpload('f-checker')" style="padding: 16px; border-style: dashed;">
                                 <input type="file" id="f-checker" accept=".pdf,.jpg,.png" onchange="extractMakerChecker(this, 'checker')" aria-label="Upload Checker passport or ID">
                                 <div class="opt-badge">Optional</div>
                                 <div class="uc-icon" style="font-size: 20px;" aria-hidden="true">&#x1F464;</div>
-                                <strong>Upload new Checker Passport / ID</strong>
-                                <small>If assigning a new person</small>
+                                <span class="file-status"></span>
+                                <div class="uc-prompt-text">
+                                    <strong>Upload new Checker Passport / ID</strong>
+                                    <small>If assigning a new person</small>
+                                </div>
                             </div>
                         </div>
                         <p style="font-size: 13px; color: var(--text-muted); margin-top: 12px; font-style: italic;">
