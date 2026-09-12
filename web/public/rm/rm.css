@@ -432,9 +432,9 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
+    width: auto;
     height: 52px;
-    padding: 0 24px;
+    padding: 0 28px;
     border-radius: 999px;
     border: 1px solid rgba(0, 210, 255, 0.55);
     overflow: hidden;
@@ -610,7 +610,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 32px;
+    padding: 0 40px;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     position: sticky;
@@ -734,10 +734,17 @@ body {
 /* ── MAIN CONTENT ── */
 .rm-content {
     flex: 1;
-    max-width: 1400px;
+    max-width: 1720px;
     width: 100%;
     margin: 0 auto;
-    padding: 32px;
+    padding: 32px 40px;
+}
+
+@media (min-width: 1920px) {
+    .rm-content {
+        max-width: 1840px;
+        padding: 36px 48px;
+    }
 }
 
 .rm-page-header {
@@ -745,6 +752,12 @@ body {
     align-items: center;
     justify-content: space-between;
     margin-bottom: 28px;
+}
+
+.rm-header-actions .rm-btn-primary {
+    height: 44px;
+    padding: 0 22px;
+    font-size: 13.5px;
 }
 
 .rm-page-title {
@@ -951,10 +964,25 @@ body {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 12px;
-    margin-top: 10px;
+    gap: 14px;
+    margin-top: 16px;
     border-top: 1px solid var(--rm-border);
-    padding-top: 20px;
+    padding-top: 22px;
+}
+
+.rm-form-actions .rm-btn-primary {
+    min-width: 280px;
+    height: 48px;
+    padding: 0 28px;
+    font-size: 14px;
+}
+
+.rm-form-actions .rm-btn-ghost {
+    height: 48px;
+    padding: 0 24px;
+    border-radius: 999px;
+    font-size: 13.5px;
+    font-weight: 600;
 }
 
 /* ── SUCCESS BOX & MAGIC LINK ── */

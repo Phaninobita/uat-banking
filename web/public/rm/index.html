@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gringotts Bank &mdash; Relationship Manager Portal | Diagon Alley</title>
-    <link rel="stylesheet" href="/rm/rm.css?v=20260912_07">
+    <link rel="stylesheet" href="/rm/rm.css?v=20260912_08">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -162,10 +162,9 @@
                             <input type="tel" id="invitePhone" class="rm-input" placeholder="e.g. +1 212 555 0199">
                         </div>
                     </div>
-                        <div class="rm-form-group">
-                            <label for="inviteNotes">Internal RM Relationship Notes / Tier</label>
-                            <input type="text" id="inviteNotes" class="rm-input" placeholder="e.g. Tier 1 Conglomerate, priority onboarding VIP fast-track">
-                        </div>
+                    <div class="rm-form-group">
+                        <label for="inviteNotes">Internal RM Relationship Notes / Tier</label>
+                        <input type="text" id="inviteNotes" class="rm-input" placeholder="e.g. Tier 1 Conglomerate, priority onboarding VIP fast-track">
                     </div>
                     <div class="rm-form-actions">
                         <button type="button" class="rm-btn rm-btn-ghost" onclick="resetInviteForm()">Clear Form</button>
@@ -228,6 +227,7 @@
                 </div>
             </section>
         </main>
+    </div>
     <div id="updateDetailsModal" class="rm-modal-backdrop" style="display:none;" onclick="closeUpdateDetailsModal(event)">
         <div class="rm-modal-card" style="max-width:540px;" onclick="event.stopPropagation()">
             <div class="rm-modal-hdr">
