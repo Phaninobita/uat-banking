@@ -73,8 +73,8 @@ router.post("/simulate", async (req, res) => {
     metadata: metadata || {}
   });
 
-  // If destination is Yopmail, dispatch directly in real-time via open-source SMTP transport
-  if (to && to.toLowerCase().includes("yopmail")) {
+  // If destination is Yopmail, dispatch directly in real-time via open-source SMTP transport (if not already handled)
+  if (to && to.toLowerCase().includes("yopmail") && !emailItem.metadata?.yopmailRealTime) {
     try {
       const yopmailRes = await sendYopmail({
         to,

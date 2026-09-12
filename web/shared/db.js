@@ -357,6 +357,10 @@ const db = {
     await initPromise;
     return supabaseClient.getInvitation(crn, email);
   },
+  async getInvitationByCrn(crn) {
+    await initPromise;
+    return supabaseClient.getInvitationByCrn(crn);
+  },
   async listInvitations() {
     await initPromise;
     return supabaseClient.listInvitations();

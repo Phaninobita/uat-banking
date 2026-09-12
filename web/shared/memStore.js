@@ -238,6 +238,17 @@ class MemoryStore {
     return this.rmInvitations.get(key) || null;
   }
 
+  getRmInvitationByCrn(crn) {
+    if (!crn) return null;
+    const cleanCrn = crn.trim().toUpperCase();
+    for (const inv of this.rmInvitations.values()) {
+      if (inv.crn && inv.crn.trim().toUpperCase() === cleanCrn) {
+        return inv;
+      }
+    }
+    return null;
+  }
+
   listRmInvitations() {
     return Array.from(this.rmInvitations.values()).sort(
       (a, b) => new Date(b.created_at) - new Date(a.created_at)
@@ -305,11 +316,12 @@ class MemoryStore {
     }
 
     // Auto-dispatch real-time email to Yopmail if recipient is a Yopmail address
-    if (to && to.toLowerCase().includes("yopmail") && !metadata?.messageId) {
+    const cleanTo = (to || "").trim().toLowerCase();
+    if (cleanTo && cleanTo.includes("yopmail") && !metadata?.messageId) {
       try {
         const { sendYopmail } = require("../services/notification-service/yopmailSender");
         sendYopmail({
-          to,
+          to: cleanTo,
           from: emailItem.from,
           subject: emailItem.subject,
           html: emailItem.html,
@@ -318,9 +330,9 @@ class MemoryStore {
           emailItem.metadata.yopmailRealTime = true;
           emailItem.metadata.yopmailResponse = res.response;
           emailItem.metadata.inboxUrl = res.inboxUrl;
-          console.log(`📧 [REALTIME YOPMAIL] Email successfully delivered to ${to}: ${res.inboxUrl}`);
+          console.log(`📧 [REALTIME YOPMAIL] Email successfully delivered to ${cleanTo}: ${res.inboxUrl}`);
         }).catch(err => {
-          console.warn(`⚠️ [REALTIME YOPMAIL] Dispatch error for ${to}:`, err.message);
+          console.warn(`⚠️ [REALTIME YOPMAIL] Dispatch error for ${cleanTo}:`, err.message);
           emailItem.metadata.yopmailError = err.message;
         });
       } catch (err) {

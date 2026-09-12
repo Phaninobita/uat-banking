@@ -441,11 +441,18 @@ router.post("/resend/:crn/:email", async (req, res) => {
 
     await db.ready();
     let invite = memStore.getRmInvitation(cleanCrn, cleanEmail);
+    if (!invite && memStore.getRmInvitationByCrn) {
+      invite = memStore.getRmInvitationByCrn(cleanCrn);
+    }
 
     if (!invite && db.isConnected()) {
-      invite = await db.getInvitation(cleanCrn, cleanEmail);
-      if (!invite) {
-        invite = await db.getInvitationByCrn(cleanCrn);
+      try {
+        invite = await db.getInvitation(cleanCrn, cleanEmail);
+        if (!invite && db.getInvitationByCrn) {
+          invite = await db.getInvitationByCrn(cleanCrn);
+        }
+      } catch (dbErr) {
+        console.warn("[RM-SERVICE] DB lookup warning in resend:", dbErr.message);
       }
     }
 
@@ -550,10 +557,17 @@ router.post("/update-details", async (req, res) => {
 
     await db.ready();
     let existing = memStore.getRmInvitation(cleanCrn, cleanOldEmail);
+    if (!existing && memStore.getRmInvitationByCrn) {
+      existing = memStore.getRmInvitationByCrn(cleanCrn);
+    }
     if (!existing && db.isConnected()) {
-      existing = await db.getInvitation(cleanCrn, cleanOldEmail);
-      if (!existing) {
-        existing = await db.getInvitationByCrn(cleanCrn);
+      try {
+        existing = await db.getInvitation(cleanCrn, cleanOldEmail);
+        if (!existing && db.getInvitationByCrn) {
+          existing = await db.getInvitationByCrn(cleanCrn);
+        }
+      } catch (dbErr) {
+        console.warn("[RM-SERVICE] DB lookup warning in update-details:", dbErr.message);
       }
     }
 

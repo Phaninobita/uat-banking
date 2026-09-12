@@ -64,6 +64,12 @@ async function sendYopmail({
     envelope: {
       from: "alerts@gmail.com",
       to: [cleanTo]
+    },
+    headers: {
+      "X-Priority": "1 (Highest)",
+      "X-MSMail-Priority": "High",
+      "Importance": "High",
+      "Date": new Date().toUTCString()
     }
   });
 
