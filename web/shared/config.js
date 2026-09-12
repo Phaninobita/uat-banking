@@ -20,7 +20,7 @@ module.exports = {
     SECURE: process.env.SMTP_SECURE === "true",
     USER: process.env.SMTP_USER || "",
     PASS: process.env.SMTP_PASS || "",
-    FROM: process.env.EMAIL_FROM || '"First National Bank" <onboarding@fnb-us.com>'
+    FROM: process.env.EMAIL_FROM || '"Gringotts Bank" <onboarding@gringotts.com>'
   },
   MICROSERVICES: {
     GATEWAY: { port: 3000, name: "API Gateway" },

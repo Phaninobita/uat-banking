@@ -115,8 +115,8 @@ router.post("/request-otp", async (req, res) => {
   // Record into simulated email buffer
   const emailItem = memStore.recordSimulatedEmail({
     to: cleanEmail,
-    from: '"First National Bank Auth Service" <onboarding@fnb-us.com>',
-    subject: `First National Bank — Verification Code for ${companyTitle}: ${randomCode}`,
+    from: '"Gringotts Bank Auth Service" <onboarding@gringotts.com>',
+    subject: `Gringotts Bank — Verification Code for ${companyTitle}: ${randomCode}`,
     text: `Your verification code for ${companyTitle} (CRN ${cleanCrn}) is: ${randomCode}`,
     code: randomCode,
     type: "otp",
@@ -124,9 +124,9 @@ router.post("/request-otp", async (req, res) => {
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; color: #0f172a;">
         <div style="text-align: center; margin-bottom: 20px;">
-          <div style="display: inline-block; background: linear-gradient(135deg, #0ea5e9, #4f46e5); color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; box-shadow: 0 4px 12px rgba(14,165,233,0.3);">AB</div>
-          <h2 style="color: #0f172a; margin: 12px 0 2px; font-size: 20px; font-weight: 700;">First National Bank Identity Verification</h2>
-          <p style="color: #64748b; font-size: 13px; margin: 0;">Identity Verification for <strong>${companyTitle}</strong></p>
+          <div style="display: inline-block; background: linear-gradient(135deg, #0ea5e9, #4f46e5); color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; box-shadow: 0 4px 12px rgba(14,165,233,0.3);">GB</div>
+          <h2 style="color: #0f172a; margin: 12px 0 2px; font-size: 20px; font-weight: 700;">Gringotts Bank Identity Verification</h2>
+          <p style="color: #64748b; font-size: 13px; margin: 0;">1 Diagon Alley, London &bull; Identity Verification for <strong>${companyTitle}</strong></p>
         </div>
         <p style="color: #334155; font-size: 14px; line-height: 1.5;">Hello,</p>
         <p style="color: #334155; font-size: 14px; line-height: 1.5;">Use the following verification code to access your corporate onboarding application for <strong>${companyTitle}</strong> (CRN: <strong>${cleanCrn}</strong>):</p>
@@ -383,11 +383,11 @@ router.post("/mobile/biometric", async (req, res) => {
     token,
     user: {
       name: "Alexander J. Vance",
-      company: "First National Holdings Inc",
+      company: "Gringotts Commercial Client",
       crn: activeCrn,
       email: activeEmail,
       application_ref: appRef,
-      tier: "FNB Corporate Gold"
+      tier: "Gringotts Vault Corporate Gold"
     },
     service: "auth-service"
   });

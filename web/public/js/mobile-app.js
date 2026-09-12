@@ -25,17 +25,17 @@
                 <!-- Slide-down iOS Push Notification -->
                 <div id="mobilePushToast" class="mobile-push-toast">
                     <div class="m-push-hdr">
-                        <span id="mPushTitle" class="m-push-title">First National Bank Security</span>
+                        <span id="mPushTitle" class="m-push-title">Gringotts Bank Security</span>
                         <span id="mPushTime" class="m-push-time">now</span>
                     </div>
-                    <div id="mPushBody" class="m-push-body">Welcome to First National Bank Mobile.</div>
+                    <div id="mPushBody" class="m-push-body">Welcome to Gringotts Bank Mobile (Diagon Alley).</div>
                 </div>
 
                 <!-- 1. Biometric Lock Screen -->
                 <div id="mLockView" class="m-lock-screen" style="display:${this.isUnlocked ? 'none' : 'flex'};">
-                    <div class="m-lock-logo">AB</div>
-                    <h2 style="margin:0 0 4px;font-size:20px;font-weight:800;">FNB Mobile</h2>
-                    <p style="color:#94a3b8;font-size:12px;margin:0 0 16px;">Corporate Treasury &amp; Clearing</p>
+                    <div class="m-lock-logo">GB</div>
+                    <h2 style="margin:0 0 4px;font-size:20px;font-weight:800;">Gringotts Mobile</h2>
+                    <p style="color:#94a3b8;font-size:12px;margin:0 0 16px;">Diagon Alley &bull; Hogwarts Vaults &amp; Clearing</p>
                     
                     <div id="mobileFaceIdRadar" class="faceid-radar">
                         <span style="font-size:36px;">&#x1F464;</span>

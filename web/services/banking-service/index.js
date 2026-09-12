@@ -241,7 +241,7 @@ router.post("/transfer", async (req, res) => {
   // Send simulated notification
   memStore.recordSimulatedEmail({
     to: "finance@corporate.com",
-    from: '"First National Bank Operations Desk" <operations@fnb-us.com>',
+    from: '"Gringotts Bank Operations Desk" <operations@gringotts.com>',
     subject: `Transfer Executed: ${txRecord.currency} ${txRecord.amount.toLocaleString()} to ${counterpartyName}`,
     type: "transfer_executed",
     metadata: { txRef, amount: numAmount },

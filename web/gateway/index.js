@@ -74,7 +74,7 @@ app.get("/api/v1/gateway/health", (req, res) => {
   res.json({
     status: "healthy",
     gateway: {
-      name: "First National Bank API Gateway",
+      name: "Gringotts Bank API Gateway (Diagon Alley)",
       version: "2.4.0",
       port: config.PORT,
       uptime: `${hours}h ${minutes}m ${seconds}s`,

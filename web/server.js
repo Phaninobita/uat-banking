@@ -13,7 +13,7 @@ const PORT = config.PORT || 3000;
 
 const server = gatewayApp.listen(PORT, "0.0.0.0", () => {
   console.log("==========================================================");
-  console.log("🏦 FIRST NATIONAL BANK — LIVE CORE BANKING & ONBOARDING PLATFORM");
+  console.log("🏦 GRINGOTTS BANK — LIVE CORE BANKING & VAULT PLATFORM (DIAGON ALLEY)");
   console.log("==========================================================");
   console.log(`🚀 API Gateway active on: http://localhost:${PORT}`);
   console.log(`⚡ Microservices Mesh Status:`);

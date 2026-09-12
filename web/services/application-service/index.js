@@ -375,27 +375,27 @@ router.post("/save", requireAuth, async (req, res) => {
       const recipientEmail = (existingRecord && existingRecord.registered_email) || (req.user && req.user.email) || "admin@corporate.com";
       memStore.recordSimulatedEmail({
         to: recipientEmail,
-        from: '"First National Bank Corporate Onboarding" <onboarding@fnb-us.com>',
-        subject: `First National Bank — Corporate Application Received (${application_ref})`,
+        from: '"Gringotts Bank Corporate Onboarding" <onboarding@gringotts.com>',
+        subject: `Gringotts Bank — Corporate Application Received (${application_ref})`,
         type: "application_submitted",
         metadata: { application_ref, company_uid: resolvedCompanyUid },
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; color: #0f172a;">
             <div style="text-align: center; margin-bottom: 20px;">
-              <div style="display: inline-block; background: linear-gradient(135deg, #10b981, #0ea5e9); color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">AB</div>
-              <h2 style="color: #0f172a; margin: 12px 0 2px; font-size: 20px; font-weight: 700;">First National Bank Corporate Portal</h2>
-              <p style="color: #64748b; font-size: 13px; margin: 0;">Application Submission Confirmation</p>
+              <div style="display: inline-block; background: linear-gradient(135deg, #10b981, #0ea5e9); color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">GB</div>
+              <h2 style="color: #0f172a; margin: 12px 0 2px; font-size: 20px; font-weight: 700;">Gringotts Bank Corporate Portal</h2>
+              <p style="color: #64748b; font-size: 13px; margin: 0;">1 Diagon Alley, London &bull; Application Confirmation</p>
             </div>
             <p style="color: #334155; font-size: 14px; line-height: 1.5;">Dear Corporate Customer,</p>
-            <p style="color: #334155; font-size: 14px; line-height: 1.5;">Your corporate account application for <strong>${targetComp}</strong> (Corporate ID: <strong>${resolvedCompanyUid}</strong>) has been received and logged into our compliance verification queue.</p>
+            <p style="color: #334155; font-size: 14px; line-height: 1.5;">Your corporate account application for <strong>${targetComp}</strong> (Corporate ID: <strong>${resolvedCompanyUid}</strong>) has been received and logged into our vault compliance verification queue.</p>
             <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; padding: 16px; margin: 18px 0; text-align: center;">
               <span style="font-size: 11px; color: #166534; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;">Application Reference</span><br>
               <span style="font-size: 24px; font-weight: 800; color: #15803d; letter-spacing: 1px; font-family: monospace;">${application_ref}</span>
             </div>
-            <p style="color: #475569; font-size: 13px; line-height: 1.5;">Our compliance and onboarding desk will complete the verification within 1–2 business days. Your assigned Relationship Manager is <strong>Michael Vance</strong> (m.vance@fnb-us.com &bull; +1 212 555 0190).</p>
+            <p style="color: #475569; font-size: 13px; line-height: 1.5;">Our compliance and onboarding desk will complete the verification within 1–2 business days. Your assigned Relationship Manager is <strong>Bogrod &amp; Griphook</strong> (vaults@gringotts.co.uk &bull; +44 20 7946 0190 &bull; 1 Diagon Alley, London).</p>
           </div>
         `,
-        text: `First National Bank: Application ${application_ref} received successfully.`
+        text: `Gringotts Bank: Application ${application_ref} received successfully at Diagon Alley.`
       });
     } else if (resolvedStep !== existingRecord.current_step) {
       logAuditEvent({

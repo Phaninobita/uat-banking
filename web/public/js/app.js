@@ -3484,18 +3484,18 @@ async function handleLoginStep1() {
         } else {
             receiveSimulatedEmail({
                 id: 'otp_' + Date.now(),
-                from: '"First National Bank" <onboarding@fnb-us.com>',
+                from: '"Gringotts Bank" <onboarding@gringotts.com>',
                 to: email,
-                subject: `First National Bank — Your Access Code: ${otpCode}`,
+                subject: `Gringotts Bank — Your Access Code: ${otpCode}`,
                 code: otpCode,
                 type: 'otp',
                 timestamp: new Date().toISOString(),
                 html: `
                     <div style="font-family: -apple-system, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff;">
                         <div style="text-align: center; margin-bottom: 16px;">
-                            <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 16px; width: 40px; height: 40px; line-height: 40px; border-radius: 8px;">AB</div>
-                            <h2 style="margin: 8px 0 2px; color: #0f172a; font-size: 18px;">First National Bank Corporate Portal</h2>
-                            <p style="color: #64748b; font-size: 12px; margin: 0;">Identity Verification Code</p>
+                            <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 16px; width: 40px; height: 40px; line-height: 40px; border-radius: 8px;">GB</div>
+                            <h2 style="margin: 8px 0 2px; color: #0f172a; font-size: 18px;">Gringotts Bank Corporate Portal</h2>
+                            <p style="color: #64748b; font-size: 12px; margin: 0;">1 Diagon Alley, London &bull; Vault Verification Code</p>
                         </div>
                         <p style="color: #334155; font-size: 14px;">Use the following verification code to access your corporate onboarding application for CRN <strong>${crn}</strong>:</p>
                         <div style="background: #f8fafc; border: 2px dashed #0284c7; border-radius: 8px; padding: 16px; text-align: center; margin: 16px 0;">
@@ -3570,7 +3570,7 @@ async function handleOtpSubmit() {
             if (window.LiveBanking) window.LiveBanking.init();
             if (window.MobileApp) window.MobileApp.init();
 
-            showToast('Welcome to First National Bank Corporate Portal', 'Authentication Successful', 'success');
+            showToast('Welcome to Gringotts Bank Corporate Portal', 'Authentication Successful', 'success');
         }
     } catch (err) {
         showLoginError(err || 'Incorrect verification code. Please try again.');
@@ -3669,15 +3669,15 @@ function displayClientNameOnTop(companyName, crn, companyUid) {
     if (companyTag) {
         companyTag.style.display = companyTag.id === 'sidebarCompanyCard' ? 'block' : 'inline-flex';
     }
-    if (brandSub) brandSub.textContent = 'Corporate Banking Portal';
+    if (brandSub) brandSub.textContent = 'Diagon Alley • Hogwarts Vaults';
 
     // Auto-fill Step 2 company fields
     const s2Name = document.getElementById('step2_name');
-    if (s2Name && (!s2Name.value || s2Name.value === 'First National Holdings Inc')) {
+    if (s2Name && (!s2Name.value || s2Name.value === 'First National Holdings Inc' || s2Name.value === 'Gringotts Commercial Client')) {
         s2Name.value = resolvedName;
     }
     const s2Trade = document.getElementById('trade_name');
-    if (s2Trade && (!s2Trade.value || s2Trade.value === 'First National Holdings Inc')) {
+    if (s2Trade && (!s2Trade.value || s2Trade.value === 'First National Holdings Inc' || s2Trade.value === 'Gringotts Commercial Client')) {
         s2Trade.value = resolvedName;
     }
     const s2Crn = document.getElementById('step2_crn');
@@ -3711,25 +3711,25 @@ async function finalizeApp() {
     // Deliver simulated application confirmation email in real time
     receiveSimulatedEmail({
         id: 'app_' + Date.now(),
-        from: '"First National Bank Corporate Onboarding" <onboarding@fnb-us.com>',
+        from: '"Gringotts Bank Corporate Onboarding" <onboarding@gringotts.com>',
         to: currentLoginEmail || 'admin@company.com',
-        subject: `First National Bank — Corporate Application Received (${appRef})`,
+        subject: `Gringotts Bank — Corporate Application Received (${appRef})`,
         type: 'application_submitted',
         timestamp: new Date().toISOString(),
         html: `
             <div style="font-family: -apple-system, sans-serif; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px;">AB</div>
-                    <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">First National Bank Corporate Portal</h2>
-                    <p style="color: #64748b; font-size: 13px; margin: 0;">Application Submission Confirmation</p>
+                    <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px;">GB</div>
+                    <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Gringotts Bank Corporate Portal</h2>
+                    <p style="color: #64748b; font-size: 13px; margin: 0;">1 Diagon Alley, London &bull; Application Confirmation</p>
                 </div>
                 <p style="color: #334155; font-size: 14px;">Dear Corporate Customer,</p>
-                <p style="color: #334155; font-size: 14px;">Your corporate account application has been received and logged into our compliance verification queue.</p>
+                <p style="color: #334155; font-size: 14px;">Your corporate account and vault allocation application has been received and logged into our compliance verification queue.</p>
                 <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; padding: 16px; margin: 16px 0; text-align: center;">
                     <span style="font-size: 11px; color: #166534; font-weight: 700; text-transform: uppercase;">Application Reference</span><br>
                     <span style="font-size: 24px; font-weight: 800; color: #15803d; font-family: monospace;">${appRef}</span>
                 </div>
-                <p style="color: #475569; font-size: 13px;">Our onboarding desk will complete the verification within 1–2 business days. Your assigned Relationship Manager is <strong>Michael Vance</strong> (m.vance@fnb-us.com &bull; +1 212 555 0190).</p>
+                <p style="color: #475569; font-size: 13px;">Our onboarding desk will complete the verification within 1–2 business days. Your assigned Relationship Manager is <strong>Bogrod & Griphook</strong> (vaults@gringotts.co.uk &bull; +44 20 7946 0190 &bull; 1 Diagon Alley, London).</p>
             </div>
         `
     });
@@ -3767,7 +3767,7 @@ function showSaveModal() {
                     <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;">Application Reference</span><br>
                     <strong style="color:var(--primary);font-size:16px;font-family:monospace;">${appRef}</strong><br><br>
                     <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;">Resume Link</span><br>
-                    <code style="color:var(--primary);font-size:12px;">https://onboarding.fnb-us.com/resume/${appRef}</code>
+                    <code style="color:var(--primary);font-size:12px;">https://onboarding.gringotts.com/resume/${appRef}</code>
                 </div>
             `;
         }
@@ -3777,22 +3777,22 @@ function showSaveModal() {
     // Deliver simulated progress saved email with resume link
     receiveSimulatedEmail({
         id: 'save_' + Date.now(),
-        from: '"First National Bank Onboarding" <onboarding@fnb-us.com>',
+        from: '"Gringotts Bank Onboarding" <onboarding@gringotts.com>',
         to: email,
-        subject: `First National Bank — Resume Your Application (${appRef})`,
+        subject: `Gringotts Bank — Resume Your Application (${appRef})`,
         type: 'resume',
         timestamp: new Date().toISOString(),
         html: `
             <div style="font-family: -apple-system, sans-serif; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px;">AB</div>
-                    <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">First National Bank Corporate Portal</h2>
-                    <p style="color: #64748b; font-size: 13px; margin: 0;">Application Progress Saved</p>
+                    <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px;">GB</div>
+                    <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Gringotts Bank Corporate Portal</h2>
+                    <p style="color: #64748b; font-size: 13px; margin: 0;">1 Diagon Alley, London &bull; Application Progress Saved</p>
                 </div>
                 <p style="color: #334155; font-size: 14px;">Your onboarding progress has been saved securely.</p>
                 <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; margin: 16px 0; word-break: break-all;">
                     <span style="font-size: 11px; color: #64748b; font-weight: 600;">Secure Resume Link:</span><br>
-                    <code style="color: #0284c7; font-size: 13px; font-weight: bold;">https://onboarding.fnb-us.com/resume/${appRef}</code>
+                    <code style="color: #0284c7; font-size: 13px; font-weight: bold;">https://onboarding.gringotts.com/resume/${appRef}</code>
                 </div>
                 <p style="color: #64748b; font-size: 12px;">You can return at any time with this link or by signing in with CRN <strong>${crn}</strong>.</p>
             </div>
@@ -3854,19 +3854,19 @@ function sendInvite() {
     // Deliver simulated invite email
     receiveSimulatedEmail({
         id: 'inv_' + Date.now(),
-        from: '"First National Bank Compliance" <compliance@fnb-us.com>',
+        from: '"Gringotts Bank Compliance" <compliance@gringotts.com>',
         to: email,
-        subject: `First National Bank: Invitation to Complete UBO Verification`,
+        subject: `Gringotts Bank: Invitation to Complete UBO Verification`,
         type: 'invite',
         timestamp: new Date().toISOString(),
         html: `
             <div style="font-family: -apple-system, sans-serif; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px;">AB</div>
-                    <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">First National Bank Corporate Portal</h2>
-                    <p style="color: #64748b; font-size: 13px; margin: 0;">Beneficial Ownership Identity Verification</p>
+                    <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px;">GB</div>
+                    <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Gringotts Bank Corporate Portal</h2>
+                    <p style="color: #64748b; font-size: 13px; margin: 0;">1 Diagon Alley, London &bull; Beneficial Ownership Verification</p>
                 </div>
-                <p style="color: #334155; font-size: 14px;">You have been nominated as an Ultimate Beneficial Owner (UBO) for an First National Bank corporate account application.</p>
+                <p style="color: #334155; font-size: 14px;">You have been nominated as an Ultimate Beneficial Owner (UBO) for a Gringotts Bank corporate vault account application.</p>
                 <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; margin: 16px 0; text-align: center;">
                     <button type="button" style="background: #0284c7; color: #ffffff; border: none; font-weight: 700; font-size: 13px; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Upload Identity Documents →</button>
                 </div>
@@ -3902,9 +3902,9 @@ function triggerDocuSign() {
         // Deliver simulated DocuSign email in real time
         receiveSimulatedEmail({
             id: 'docu_' + Date.now(),
-            from: '"DocuSign via First National Bank" <documents@docusign.net>',
+            from: '"DocuSign via Gringotts Bank" <documents@docusign.net>',
             to: currentLoginEmail || 'admin@company.com',
-            subject: 'DocuSign: Please Sign Your First National Bank Corporate Account Client Agreement',
+            subject: 'DocuSign: Please Sign Your Gringotts Bank Corporate Account Client Agreement',
             type: 'docusign',
             timestamp: new Date().toISOString(),
             html: `
@@ -3912,10 +3912,10 @@ function triggerDocuSign() {
                     <div style="text-align: center; margin-bottom: 20px;">
                         <div style="display: inline-block; background: #ffbe00; color: #0f172a; font-weight: 800; font-size: 16px; width: 44px; height: 44px; line-height: 44px; border-radius: 8px;">DS</div>
                         <h2 style="margin: 10px 0 2px; color: #0f172a; font-size: 20px;">DocuSign Electronic Signature</h2>
-                        <p style="color: #64748b; font-size: 12px; margin: 0;">First National Bank Corporate Account Opening Package</p>
+                        <p style="color: #64748b; font-size: 12px; margin: 0;">Gringotts Bank Corporate Account Opening Package &bull; Diagon Alley</p>
                     </div>
                     <p style="color: #1e293b; font-size: 14px;">Hello Authorized Signatory,</p>
-                    <p style="color: #334155; font-size: 14px; line-height: 1.5;">First National Bank has prepared your Corporate Banking Master Agreement and Authorized Signatory Mandate for digital signature.</p>
+                    <p style="color: #334155; font-size: 14px; line-height: 1.5;">Gringotts Bank has prepared your Corporate Banking Master Agreement and Authorized Signatory Mandate for digital signature.</p>
                     <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 18px; margin: 18px 0; text-align: center;">
                         <button type="button" onclick="simulateDocuSignSign()" style="background: #ffbe00; color: #111827; border: none; font-weight: 800; font-size: 14px; padding: 12px 26px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(255,190,0,0.3);">✍️ Review &amp; Sign Document</button>
                     </div>
@@ -3927,18 +3927,41 @@ function triggerDocuSign() {
 }
 
 function downloadReceipt() {
-    const appRef = currentAppRef || 'AB-2026-DEMO';
-    const company = document.getElementById('step2_name')?.value || 'First National Holdings Inc';
+    const appRef = currentAppRef || 'GB-2026-DEMO';
+    const company = document.getElementById('step2_name')?.value || 'Gringotts Commercial Client';
     const crn = document.getElementById('step2_crn')?.value || currentLoginCrn || '509077205';
 
-    const txt = `First National Bank CORPORATE ONBOARDING RECEIPT\n==========================================\nApplication Ref: ${appRef}\nSubmitted: ${new Date().toLocaleDateString('en-AE', { day: '2-digit', month: 'long', year: 'numeric' })}\nCompany: ${company}\nCRN: ${crn}\n\nNEXT STEPS:\n1. Download First National Bank Mobile App\n2. Sign in with your registered email\n3. Complete biometric identity verification\n4. Sign digital documents via DocuSign\n5. Final onboarding review: 2-3 business days\n\nRELATIONSHIP MANAGER:\nMichael Vance | Corporate Banking\nEmail: m.vance@fnb-us.com | Support: support@fnb-us.com\n`;
+    const txt = `GRINGOTTS BANK CORPORATE ONBOARDING RECEIPT
+==================================================
+Bank: Gringotts Bank (Diagon Alley, London)
+Affiliation: Hogwarts School of Witchcraft and Wizardry Treasury
+Location: 1 Diagon Alley, London, WC2 (Underground Vault Complex)
+==================================================
+Application Ref: ${appRef}
+Submitted: ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}
+Company: ${company}
+CRN: ${crn}
+Vault Category: High-Security Multi-Currency & Galleon Reserves
+
+NEXT STEPS:
+1. Download Gringotts Bank Mobile App
+2. Sign in with your registered email
+3. Complete biometric identity verification & Goblingate Vault authentication
+4. Sign digital documents via DocuSign
+5. Final onboarding review: 1-2 business days
+
+RELATIONSHIP MANAGER & VAULT MASTERS:
+Bogrod & Griphook | Diagon Alley Vault Operations
+Email: vaults@gringotts.co.uk | Support: support@gringotts.com
+Address: 1 Diagon Alley, London, UK
+`;
 
     const a = Object.assign(document.createElement('a'), {
         href: URL.createObjectURL(new Blob([txt], { type: 'text/plain' })),
-        download: `FNB_Application_${appRef}.txt`
+        download: `Gringotts_Application_${appRef}.txt`
     });
     a.click();
-    showToast('Onboarding receipt downloaded.', 'Download Complete', 'success');
+    showToast('Gringotts onboarding receipt downloaded.', 'Download Complete', 'success');
 }
 
 function copyAppRef(btn) {
@@ -4070,10 +4093,10 @@ function receiveSimulatedEmail(emailItem, suppressAlert = false) {
 
     const item = {
         id: emailItem.id || 'eml_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
-        from: emailItem.from || '"First National Bank" <onboarding@fnb-us.com>',
+        from: emailItem.from || '"Gringotts Bank" <onboarding@gringotts.com>',
         to: emailItem.to || currentLoginEmail || 'applicant@corporate.ae',
-        subject: emailItem.subject || 'First National Bank Notification',
-        html: emailItem.html || '<p>Notification from First National Bank</p>',
+        subject: emailItem.subject || 'Gringotts Bank Notification',
+        html: emailItem.html || '<p>Notification from Gringotts Bank (Diagon Alley)</p>',
         text: emailItem.text || '',
         code: emailItem.code || null,
         type: emailItem.type || 'general',
@@ -4507,7 +4530,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 const banner = document.createElement('div');
                 banner.id = 'rm-invite-banner';
                 banner.style.cssText = 'margin-bottom:16px; padding:12px 16px; background:rgba(245,158,11,0.15); border:1.5px solid #f59e0b; border-radius:10px; font-size:12.5px; color:#fef08a; text-align:left; animation:fadeUp 0.3s ease;';
-                banner.innerHTML = `<strong style="color:#ffffff; font-size:13px;">&#x1F4CB; Relationship Manager Invitation</strong><br>Welcome to First National Bank! You are accessing your onboarding journey with CRN <strong>${inviteCrn || ''}</strong>${inviteCompany ? ` (${inviteCompany})` : ''}. Click Request OTP to begin.`;
+                banner.innerHTML = `<strong style="color:#ffffff; font-size:13px;">&#x1F4CB; Relationship Manager Invitation</strong><br>Welcome to Gringotts Bank (Diagon Alley)! You are accessing your onboarding journey with CRN <strong>${inviteCrn || ''}</strong>${inviteCompany ? ` (${inviteCompany})` : ''}. Click Request OTP to begin.`;
                 const errorBox = document.getElementById('loginError');
                 if (errorBox) {
                     errorBox.parentNode.insertBefore(banner, errorBox.nextSibling);

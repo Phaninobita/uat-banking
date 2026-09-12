@@ -366,24 +366,24 @@ router.post("/invite", async (req, res) => {
     });
 
     // Dispatch simulated VIP corporate invitation email
-    const emailSubject = `Invitation to Onboard: First National Bank Corporate Banking Package for ${inviteRecord.company_name}`;
+    const emailSubject = `Invitation to Onboard: Gringotts Bank Corporate Vault & Banking Package for ${inviteRecord.company_name}`;
     memStore.recordSimulatedEmail({
       to: cleanEmail,
-      from: '"Michael Vance — First National Bank Corporate Banking" <m.vance@fnb-us.com>',
+      from: '"Bogrod & Griphook — Gringotts Bank Diagon Alley" <vaults@gringotts.co.uk>',
       subject: emailSubject,
       type: "rm_invitation",
       metadata: { crn: cleanCrn, email: cleanEmail, inviteLink },
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
           <div style="background: linear-gradient(135deg, #090e17 0%, #1e293b 100%); padding: 32px 28px; text-align: center; border-bottom: 2px solid #f59e0b;">
-            <div style="display: inline-block; background: #f59e0b; color: #090e17; font-weight: 800; font-size: 18px; width: 48px; height: 48px; line-height: 48px; border-radius: 10px; margin-bottom: 12px;">AB</div>
-            <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.02em;">First National Bank Institutional Banking</h1>
-            <p style="color: #cbd5e1; font-size: 13px; margin: 6px 0 0;">Dedicated Relationship Manager Executive Service</p>
+            <div style="display: inline-block; background: #f59e0b; color: #090e17; font-weight: 800; font-size: 18px; width: 48px; height: 48px; line-height: 48px; border-radius: 10px; margin-bottom: 12px;">GB</div>
+            <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.02em;">Gringotts Bank Institutional &amp; Vault Services</h1>
+            <p style="color: #cbd5e1; font-size: 13px; margin: 6px 0 0;">1 Diagon Alley, London &bull; In reference with Hogwarts Financial Council</p>
           </div>
           <div style="padding: 32px 28px;">
             <h2 style="color: #0f172a; font-size: 18px; margin-top: 0;">Dear ${inviteRecord.contact_person},</h2>
             <p style="color: #334155; font-size: 14px; line-height: 1.6;">
-              On behalf of First National Bank Corporate Banking, it is our pleasure to invite <strong>${inviteRecord.company_name}</strong> (CRN: ${cleanCrn}) to complete digital onboarding for our multi-currency corporate banking accounts and treasury solutions.
+              On behalf of Gringotts Bank (Diagon Alley), it is our pleasure to invite <strong>${inviteRecord.company_name}</strong> (CRN: ${cleanCrn}) to complete digital onboarding for our multi-currency corporate banking accounts, Galleon reserves, and Hogwarts treasury solutions.
             </p>
             <div style="background: #f8fafc; border: 1.5px dashed #f59e0b; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center;">
               <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #92400e; margin-bottom: 8px;">Your Unique Corporate Access Details</div>
@@ -400,9 +400,9 @@ router.post("/invite", async (req, res) => {
             <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;">
             <div style="display: flex; align-items: center; gap: 14px;">
               <div>
-                <strong style="color: #0f172a; font-size: 13px;">Michael Vance</strong><br>
-                <span style="font-size: 12px; color: #64748b;">Senior Vice President — Institutional & Corporate Banking</span><br>
-                <span style="font-size: 11px; color: #94a3b8;">📞 +1 212 555 0199 · ✉️ m.vance@fnb-us.com</span>
+                <strong style="color: #0f172a; font-size: 13px;">Bogrod &amp; Griphook</strong><br>
+                <span style="font-size: 12px; color: #64748b;">Senior Vault Masters — Diagon Alley Branch &bull; Gringotts Bank</span><br>
+                <span style="font-size: 11px; color: #94a3b8;">📞 +44 20 7946 0190 · ✉️ vaults@gringotts.co.uk</span>
               </div>
             </div>
           </div>
@@ -436,8 +436,8 @@ router.post("/resend/:crn/:email", async (req, res) => {
 
     memStore.recordSimulatedEmail({
       to: invite.email,
-      from: '"Michael Vance — First National Bank" <m.vance@fnb-us.com>',
-      subject: `Reminder: Complete Your First National Bank Onboarding for ${invite.company_name}`,
+      from: '"Bogrod & Griphook — Gringotts Bank" <vaults@gringotts.co.uk>',
+      subject: `Reminder: Complete Your Gringotts Bank Onboarding for ${invite.company_name}`,
       type: "rm_invitation_reminder",
       metadata: { crn: invite.crn, email: invite.email, inviteLink: invite.invite_link },
       html: `

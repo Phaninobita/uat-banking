@@ -261,8 +261,8 @@ class MemoryStore {
     const emailItem = {
       id: "eml_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7),
       to: to || "applicant@corporate.com",
-      from: from || '"First National Bank" <onboarding@fnb-us.com>',
-      subject: subject || "First National Bank Notification",
+      from: from || '"Gringotts Bank" <onboarding@gringotts.com>',
+      subject: subject || "Gringotts Bank Notification",
       html: html || "",
       text: text || "",
       code: code || null,

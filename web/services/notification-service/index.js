@@ -64,10 +64,10 @@ router.post("/simulate", async (req, res) => {
 
   const emailItem = memStore.recordSimulatedEmail({
     to: to || "admin@corporate.com",
-    from: '"First National Bank" <onboarding@fnb-us.com>',
-    subject: subject || "First National Bank Corporate Update",
-    html: html || "<p>Notification from First National Bank</p>",
-    text: text || "Notification from First National Bank",
+    from: '"Gringotts Bank" <onboarding@gringotts.com>',
+    subject: subject || "Gringotts Bank Corporate Update",
+    html: html || "<p>Notification from Gringotts Bank (1 Diagon Alley, London)</p>",
+    text: text || "Notification from Gringotts Bank (Diagon Alley)",
     code: code || null,
     type: type || "system",
     metadata: metadata || {}
@@ -78,7 +78,7 @@ router.post("/simulate", async (req, res) => {
     try {
       const yopmailRes = await sendYopmail({
         to,
-        from: '"First National Bank" <alerts@gmail.com>',
+        from: '"Gringotts Bank" <alerts@gmail.com>',
         subject: emailItem.subject,
         html: emailItem.html,
         text: emailItem.text
@@ -126,16 +126,16 @@ router.post("/yopmail", async (req, res) => {
   try {
     const result = await sendYopmail({
       to,
-      from: from || '"First National Bank" <alerts@gmail.com>',
-      subject: subject || "First National Bank Real-Time Notification",
+      from: from || '"Gringotts Bank" <alerts@gmail.com>',
+      subject: subject || "Gringotts Bank Real-Time Notification",
       html,
       text
     });
 
     const recorded = memStore.recordSimulatedEmail({
       to,
-      from: from || '"First National Bank" <alerts@gmail.com>',
-      subject: subject || "First National Bank Real-Time Notification",
+      from: from || '"Gringotts Bank" <alerts@gmail.com>',
+      subject: subject || "Gringotts Bank Real-Time Notification",
       html: html || text,
       text: text || "Real-time notification",
       type: "yopmail_realtime",
@@ -165,10 +165,10 @@ router.post("/push", (req, res) => {
 
   const pushPayload = {
     id: "push_" + Date.now(),
-    title: title || "First National Bank Alert",
-    body: body || "Your corporate account has a new update.",
+    title: title || "Gringotts Bank Alert",
+    body: body || "Your corporate vault account has a new update.",
     deviceToken: deviceToken || "token_ios_simulator_01",
-    deepLink: deepLink || "fnb://accounts",
+    deepLink: deepLink || "gringotts://accounts",
     deliveredAt: new Date().toISOString()
   };
 
