@@ -100,9 +100,12 @@ if (require.main === module) {
     text: `Your one-time security code is: 849201. Sent at ${timestamp} via open-source Nodemailer.`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 500px; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
-        <div style="border-bottom: 2px solid #0b3954; padding-bottom: 12px; margin-bottom: 16px;">
-          <h2 style="color: #0b3954; margin: 0;">Gringotts Bank</h2>
-          <span style="font-size: 12px; color: #64748b;">Diagon Alley &bull; Real-Time Vault Dispatch</span>
+        <div style="border-bottom: 2px solid rgba(217, 119, 6, 0.5); padding-bottom: 12px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+          <img src="http://localhost:3000/images/bank-crest.jpg" alt="Gringotts Bank Logo" style="height: 44px; width: 44px; object-fit: cover; border-radius: 10px; border: 1.5px solid rgba(217, 119, 6, 0.65); flex-shrink: 0;">
+          <div>
+            <h2 style="color: #0b3954; margin: 0; font-size: 20px;">Gringotts Bank</h2>
+            <span style="font-size: 12px; color: #64748b;">Diagon Alley &bull; Real-Time Vault Dispatch</span>
+          </div>
         </div>
         <p style="color: #334155; font-size: 15px;">Hello,</p>
         <p style="color: #334155; font-size: 14px;">Here is your verification code requested at <strong>${timestamp}</strong>:</p>

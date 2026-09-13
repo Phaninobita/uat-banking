@@ -548,7 +548,7 @@ router.post("/invite", requireRmAuth, async (req, res) => {
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
           <div style="background: linear-gradient(135deg, #090e17 0%, #1e293b 100%); padding: 32px 28px; text-align: center; border-bottom: 2px solid #f59e0b;">
-            <div style="display: inline-block; background: #f59e0b; color: #090e17; font-weight: 800; font-size: 18px; width: 48px; height: 48px; line-height: 48px; border-radius: 10px; margin-bottom: 12px;">GB</div>
+              <img src="/images/bank-crest.jpg" alt="Gringotts Bank Logo" style="height: 52px; width: 52px; object-fit: cover; border-radius: 12px; border: 1.5px solid rgba(217, 119, 6, 0.65); display: block;">
             <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.02em;">Gringotts Bank Institutional &amp; Vault Services</h1>
             <p style="color: #cbd5e1; font-size: 13px; margin: 6px 0 0;">Diagon Alley &bull; In reference with Hogwarts Financial Council</p>
           </div>
@@ -663,7 +663,7 @@ router.post("/resend/:crn/:email", requireRmAuth, async (req, res) => {
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
           <div style="background: linear-gradient(135deg, #090e17 0%, #1e293b 100%); padding: 32px 28px; text-align: center; border-bottom: 2px solid #f59e0b;">
-            <div style="display: inline-block; background: #f59e0b; color: #090e17; font-weight: 800; font-size: 18px; width: 48px; height: 48px; line-height: 48px; border-radius: 10px; margin-bottom: 12px;">GB</div>
+              <img src="/images/bank-crest.jpg" alt="Gringotts Bank Logo" style="height: 52px; width: 52px; object-fit: cover; border-radius: 12px; border: 1.5px solid rgba(217, 119, 6, 0.65); display: block; margin-bottom: 12px;">
             <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.02em;">Gringotts Bank Institutional &amp; Vault Services</h1>
             <p style="color: #cbd5e1; font-size: 13px; margin: 6px 0 0;">Diagon Alley &bull; In reference with Hogwarts Financial Council</p>
           </div>
@@ -803,7 +803,7 @@ router.post("/update-details", requireRmAuth, async (req, res) => {
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
             <div style="background: linear-gradient(135deg, #090e17 0%, #1e293b 100%); padding: 32px 28px; text-align: center; border-bottom: 2px solid #f59e0b;">
-              <div style="display: inline-block; background: #f59e0b; color: #090e17; font-weight: 800; font-size: 18px; width: 48px; height: 48px; line-height: 48px; border-radius: 10px; margin-bottom: 12px;">GB</div>
+              <img src="/images/bank-crest.jpg" alt="Gringotts Bank Logo" style="height: 52px; width: 52px; object-fit: cover; border-radius: 12px; border: 1.5px solid rgba(217, 119, 6, 0.65); display: block; margin-bottom: 12px;">
               <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.02em;">Gringotts Bank Institutional &amp; Vault Services</h1>
               <p style="color: #cbd5e1; font-size: 13px; margin: 6px 0 0;">Diagon Alley &bull; In reference with Hogwarts Financial Council</p>
             </div>

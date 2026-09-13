@@ -3501,7 +3501,7 @@ async function handleLoginStep1() {
                 html: `
                     <div style="font-family: -apple-system, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff;">
                         <div style="text-align: center; margin-bottom: 16px;">
-                            <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 16px; width: 40px; height: 40px; line-height: 40px; border-radius: 8px;">GB</div>
+                            <img src="/images/bank-crest.jpg" alt="Gringotts Bank Logo" style="height: 48px; width: 48px; object-fit: cover; border-radius: 12px; border: 1.5px solid rgba(217, 119, 6, 0.65); display: inline-block; margin-bottom: 6px;">
                             <h2 style="margin: 8px 0 2px; color: #0f172a; font-size: 18px;">Gringotts Bank Corporate Portal</h2>
                             <p style="color: #64748b; font-size: 12px; margin: 0;">Diagon Alley &bull; Vault Verification Code</p>
                         </div>
@@ -3978,7 +3978,7 @@ async function finalizeApp() {
         html: `
             <div style="font-family: -apple-system, sans-serif; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px;">GB</div>
+                    <img src="/images/bank-crest.jpg" alt="Gringotts Bank Logo" style="height: 48px; width: 48px; object-fit: cover; border-radius: 12px; border: 1.5px solid rgba(217, 119, 6, 0.65); display: inline-block; margin-bottom: 6px;">
                     <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Gringotts Bank Corporate Portal</h2>
                     <p style="color: #64748b; font-size: 13px; margin: 0;">Diagon Alley &bull; Application Confirmation</p>
                 </div>
@@ -4044,7 +4044,7 @@ function showSaveModal() {
         html: `
             <div style="font-family: -apple-system, sans-serif; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px;">GB</div>
+                    <img src="/images/bank-crest.jpg" alt="Gringotts Bank Logo" style="height: 48px; width: 48px; object-fit: cover; border-radius: 12px; border: 1.5px solid rgba(217, 119, 6, 0.65); display: inline-block; margin-bottom: 6px;">
                     <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Gringotts Bank Corporate Portal</h2>
                     <p style="color: #64748b; font-size: 13px; margin: 0;">Diagon Alley &bull; Application Progress Saved</p>
                 </div>
@@ -4121,7 +4121,7 @@ function sendInvite() {
         html: `
             <div style="font-family: -apple-system, sans-serif; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <div style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 800; font-size: 18px; width: 44px; height: 44px; line-height: 44px; border-radius: 10px;">GB</div>
+                    <img src="/images/bank-crest.jpg" alt="Gringotts Bank Logo" style="height: 48px; width: 48px; object-fit: cover; border-radius: 12px; border: 1.5px solid rgba(217, 119, 6, 0.65); display: inline-block; margin-bottom: 6px;">
                     <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Gringotts Bank Corporate Portal</h2>
                     <p style="color: #64748b; font-size: 13px; margin: 0;">Diagon Alley &bull; Beneficial Ownership Verification</p>
                 </div>
