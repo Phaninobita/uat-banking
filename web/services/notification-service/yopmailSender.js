@@ -50,9 +50,9 @@ async function sendYopmail({
     secure: false, // opportunistic STARTTLS
     ignoreTLS: true,
     name: "gmail.com",
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000
+    connectionTimeout: 3500,
+    greetingTimeout: 3500,
+    socketTimeout: 5000
   });
 
   const info = await transporter.sendMail({

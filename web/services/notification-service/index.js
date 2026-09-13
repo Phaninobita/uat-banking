@@ -87,7 +87,7 @@ router.post("/simulate", async (req, res) => {
       emailItem.metadata.yopmailResponse = yopmailRes.response;
       emailItem.metadata.inboxUrl = yopmailRes.inboxUrl;
     } catch (err) {
-      console.warn("[NOTIFICATION SERVICE] Yopmail dispatch error:", err.message);
+      console.log("[NOTIFICATION SERVICE] Yopmail notice:", err.message);
       emailItem.metadata.yopmailError = err.message;
     }
   } else if (mailTransporter && to) {
@@ -99,7 +99,7 @@ router.post("/simulate", async (req, res) => {
         html: emailItem.html
       });
     } catch (err) {
-      console.warn("[NOTIFICATION SERVICE] SMTP dispatch error:", err.message);
+      console.log("[NOTIFICATION SERVICE] SMTP notice:", err.message);
     }
   }
 

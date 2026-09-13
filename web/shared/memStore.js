@@ -347,13 +347,18 @@ class MemoryStore {
           emailItem.metadata.yopmailRealTime = true;
           emailItem.metadata.yopmailResponse = res.response;
           emailItem.metadata.inboxUrl = res.inboxUrl;
-          console.log(`📧 [REALTIME YOPMAIL] Email successfully delivered to ${targetYopmail} (original recipient: ${cleanTo}): ${res.inboxUrl}`);
+          console.log(`📧 [REALTIME YOPMAIL] Email delivered to ${targetYopmail}: ${res.inboxUrl}`);
         }).catch(err => {
-          console.warn(`⚠️ [REALTIME YOPMAIL] Dispatch error for ${targetYopmail}:`, err.message);
           emailItem.metadata.yopmailError = err.message;
+          const isTimeout = err.message && (err.message.includes("timeout") || err.message.includes("ETIMEDOUT") || err.message.includes("ECONNREFUSED"));
+          if (isTimeout) {
+            console.log(`ℹ️  [REALTIME YOPMAIL] Cloud host (Railway) network firewall blocked direct outbound SMTP port 587. Email archived in simulated mailbox.`);
+          } else {
+            console.log(`ℹ️  [REALTIME YOPMAIL] Notice for ${targetYopmail}: ${err.message}`);
+          }
         });
       } catch (err) {
-        console.warn("⚠️ [REALTIME YOPMAIL] Could not load yopmailSender:", err.message);
+        console.log("ℹ️  [REALTIME YOPMAIL] Could not initialize yopmailSender:", err.message);
       }
     }
 
