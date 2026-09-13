@@ -202,6 +202,17 @@ class MemoryStore {
     return this.getApplicationByUidAndId(companyUid, null);
   }
 
+  getApplicationByCrn(crn) {
+    if (!crn) return null;
+    const cleanCrn = crn.trim().toUpperCase();
+    for (const app of this.applications.values()) {
+      if (app.crn && app.crn.trim().toUpperCase() === cleanCrn) {
+        return app;
+      }
+    }
+    return null;
+  }
+
   saveRmInvitation(invite) {
     const crn = (invite.crn || "").trim().toUpperCase();
     const email = (invite.email || "").trim().toLowerCase();

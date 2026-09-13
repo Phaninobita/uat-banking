@@ -98,6 +98,11 @@ async function handleSupabaseRestQuery(text, params = []) {
       const invite = await supabaseClient.getInvitationByCrn(crn);
       return { rows: invite && invite.company_uid ? [{ company_uid: invite.company_uid }] : [] };
     }
+    if (sqlUpper.startsWith("SELECT") && (sqlUpper.includes("CRN =") || sqlUpper.includes("CRN="))) {
+      const crn = params[0];
+      const invite = await supabaseClient.getInvitationByCrn(crn);
+      return { rows: invite ? [invite] : [] };
+    }
     if (sqlUpper.startsWith("SELECT")) {
       const list = await supabaseClient.listInvitations();
       return { rows: list };
@@ -140,6 +145,10 @@ async function handleSupabaseRestQuery(text, params = []) {
     }
     if (sqlUpper.startsWith("SELECT") && sqlUpper.includes("CRN =") && sqlUpper.includes("REGISTERED_EMAIL")) {
       const app = await supabaseClient.getApplicationByCrnAndEmail(params[0], params[1]);
+      return { rows: app ? [app] : [] };
+    }
+    if (sqlUpper.startsWith("SELECT") && (sqlUpper.includes("CRN =") || sqlUpper.includes("CRN="))) {
+      const app = await supabaseClient.getApplicationByCrn(params[0]);
       return { rows: app ? [app] : [] };
     }
     if (sqlUpper.startsWith("SELECT") && sqlUpper.includes("COMPANY_UID =")) {
@@ -359,6 +368,14 @@ const db = {
   },
   async getInvitationByCrn(crn) {
     await initPromise;
+    if (useDatabase && engineType === "postgres" && pool) {
+      try {
+        const res = await pool.query("SELECT * FROM rm_customer_invitations WHERE UPPER(TRIM(crn)) = $1 LIMIT 1", [crn.trim().toUpperCase()]);
+        return res.rows && res.rows.length > 0 ? res.rows[0] : null;
+      } catch (err) {
+        console.warn("[DATABASE] pool.query error in getInvitationByCrn:", err.message);
+      }
+    }
     return supabaseClient.getInvitationByCrn(crn);
   },
   async listInvitations() {
@@ -385,6 +402,18 @@ const db = {
   async getApplicationByCrnAndEmail(crn, email) {
     await initPromise;
     return supabaseClient.getApplicationByCrnAndEmail(crn, email);
+  },
+  async getApplicationByCrn(crn) {
+    await initPromise;
+    if (useDatabase && engineType === "postgres" && pool) {
+      try {
+        const res = await pool.query("SELECT * FROM corporate_onboarding_applications WHERE UPPER(TRIM(crn)) = $1 LIMIT 1", [crn.trim().toUpperCase()]);
+        return res.rows && res.rows.length > 0 ? res.rows[0] : null;
+      } catch (err) {
+        console.warn("[DATABASE] pool.query error in getApplicationByCrn:", err.message);
+      }
+    }
+    return supabaseClient.getApplicationByCrn(crn);
   },
   async getApplicationByUid(uid) {
     await initPromise;

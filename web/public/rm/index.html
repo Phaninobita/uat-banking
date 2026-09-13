@@ -133,8 +133,9 @@
                     <div class="rm-grid-2">
                         <div class="rm-form-group">
                             <label for="inviteCrn">Commercial Registration No. (CRN) <span class="rm-req">*</span></label>
-                            <input type="text" id="inviteCrn" class="rm-input" placeholder="e.g. 10029481 or CRN-509077205" required>
-                            <small class="rm-hint">Commercial registration number for corporate verification</small>
+                            <input type="text" id="inviteCrn" class="rm-input" placeholder="e.g. 10029481 or CRN-509077205" required autocomplete="off">
+                            <div id="crnFeedback" class="crn-feedback" style="display:none;"></div>
+                            <small class="rm-hint" id="crnHint">Commercial registration number for corporate verification</small>
                         </div>
                         <div class="rm-form-group">
                             <label for="inviteEmail">Customer Corporate Email <span class="rm-req">*</span></label>

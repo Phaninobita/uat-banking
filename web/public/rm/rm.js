@@ -22,6 +22,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (idInput) idInput.addEventListener("input", hideAlert);
     if (pwdInput) pwdInput.addEventListener("input", hideAlert);
 
+    // Real-time duplicate CRN checking
+    const inviteCrnInput = document.getElementById("inviteCrn");
+    if (inviteCrnInput) {
+        let crnTimer = null;
+        inviteCrnInput.addEventListener("input", () => {
+            clearTimeout(crnTimer);
+            crnTimer = setTimeout(checkCrnInputAvailability, 280);
+        });
+        inviteCrnInput.addEventListener("blur", checkCrnInputAvailability);
+    }
+
     // ── mal.ai INTERACTIVE 3D CARD TILT & GLARE TRACKING ──
     const rmLoginWrap = document.getElementById("rmLoginView");
     const rmCard = document.getElementById("rmLoginCard");
@@ -236,6 +247,68 @@ function handleRmSignOut() {
     showRmToast("RM Executive Session terminated.", "info");
 }
 
+function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// ── REAL-TIME CRN AVAILABILITY CHECK ──
+async function checkCrnInputAvailability() {
+    const crnInput = document.getElementById("inviteCrn");
+    const feedback = document.getElementById("crnFeedback");
+    const hint = document.getElementById("crnHint");
+    if (!crnInput || !feedback) return;
+
+    const val = crnInput.value.trim().toUpperCase();
+    if (!val) {
+        feedback.style.display = "none";
+        feedback.innerHTML = "";
+        crnInput.classList.remove("is-invalid", "is-valid");
+        if (hint) hint.style.display = "block";
+        return;
+    }
+
+    // 1. Instant local check against loaded pipelineData
+    const localMatch = pipelineData.find(inv => (inv.crn || "").trim().toUpperCase() === val);
+    if (localMatch) {
+        crnInput.classList.add("is-invalid");
+        crnInput.classList.remove("is-valid");
+        feedback.style.display = "block";
+        feedback.className = "crn-feedback error";
+        feedback.innerHTML = `⚠️ <strong>Duplicate CRN:</strong> Already registered for <strong>${escapeHtml(localMatch.company_name || 'Existing Client')}</strong> (${escapeHtml(localMatch.email || '')}). Use 'Update Details' or 'Resend' in the pipeline table below.`;
+        if (hint) hint.style.display = "none";
+        return;
+    }
+
+    // 2. Server verification check
+    try {
+        const res = await rmFetch(`/api/v1/rm/check-crn/${encodeURIComponent(val)}`);
+        const data = await res.json();
+        if (data.exists && data.existing) {
+            crnInput.classList.add("is-invalid");
+            crnInput.classList.remove("is-valid");
+            feedback.style.display = "block";
+            feedback.className = "crn-feedback error";
+            feedback.innerHTML = `⚠️ <strong>Duplicate CRN:</strong> Already registered for <strong>${escapeHtml(data.existing.company_name || 'Corporate Entity')}</strong> (${escapeHtml(data.existing.email || '')}).`;
+            if (hint) hint.style.display = "none";
+        } else {
+            crnInput.classList.remove("is-invalid");
+            crnInput.classList.add("is-valid");
+            feedback.style.display = "block";
+            feedback.className = "crn-feedback success";
+            feedback.innerHTML = `✓ CRN <strong>${escapeHtml(val)}</strong> is available for new invitation`;
+            if (hint) hint.style.display = "none";
+        }
+    } catch (e) {
+        // Silently continue if network check fails
+    }
+}
+
 // ── CUSTOMER INVITATION DISPATCH ──
 async function handleDispatchInvite(ev) {
     ev.preventDefault();
@@ -247,6 +320,27 @@ async function handleDispatchInvite(ev) {
     const contactPerson = document.getElementById("inviteContact").value.trim();
     const phone = document.getElementById("invitePhone").value.trim();
     const notes = document.getElementById("inviteNotes").value.trim();
+
+    const cleanCrn = crn.toUpperCase();
+    const crnInput = document.getElementById("inviteCrn");
+    const feedback = document.getElementById("crnFeedback");
+
+    // Client-side pre-check against loaded pipeline data
+    const localExisting = pipelineData.find(inv => (inv.crn || "").trim().toUpperCase() === cleanCrn);
+    if (localExisting) {
+        showRmToast(`Duplicate CRN: "${cleanCrn}" already exists for ${localExisting.company_name || 'Client'}. Please use 'Update Details' or 'Resend' in the pipeline table below.`, "error");
+        if (crnInput) {
+            crnInput.classList.add("is-invalid");
+            crnInput.classList.remove("is-valid");
+            crnInput.focus();
+        }
+        if (feedback) {
+            feedback.style.display = "block";
+            feedback.className = "crn-feedback error";
+            feedback.innerHTML = `⚠️ <strong>Duplicate CRN:</strong> Already registered for <strong>${escapeHtml(localExisting.company_name || 'Client')}</strong> (${escapeHtml(localExisting.email || '')}). Use 'Update Details' or 'Resend' instead.`;
+        }
+        return;
+    }
 
     const submitBtn = document.getElementById("btnDispatchInvite");
     if (submitBtn) {
@@ -271,12 +365,32 @@ async function handleDispatchInvite(ev) {
 
         const data = await res.json();
         if (!res.ok || !data.success) {
+            if (data.code === "DUPLICATE_CRN" || res.status === 409) {
+                if (crnInput) {
+                    crnInput.classList.add("is-invalid");
+                    crnInput.classList.remove("is-valid");
+                    crnInput.focus();
+                }
+                if (feedback) {
+                    feedback.style.display = "block";
+                    feedback.className = "crn-feedback error";
+                    feedback.innerHTML = `⚠️ <strong>Duplicate CRN:</strong> ${escapeHtml(data.error || 'An onboarding record already exists for this CRN.')}`;
+                }
+            }
             throw new Error(data.error || "Failed to issue corporate onboarding invitation.");
         }
 
         // Show Success Box with generated link
         displayGeneratedInvite(data.invitation, data.inviteLink);
         showRmToast(`Corporate onboarding invitation issued to ${email} for CRN ${crn}.`, "success");
+
+        if (crnInput) {
+            crnInput.classList.remove("is-invalid", "is-valid");
+        }
+        if (feedback) {
+            feedback.style.display = "none";
+            feedback.innerHTML = "";
+        }
 
         // Refresh pipeline table
         fetchInvitations();
@@ -327,6 +441,19 @@ function resetInviteForm() {
     document.getElementById("rmInviteForm").reset();
     const successCard = document.getElementById("inviteSuccessCard");
     if (successCard) successCard.style.display = "none";
+    const feedback = document.getElementById("crnFeedback");
+    if (feedback) {
+        feedback.style.display = "none";
+        feedback.innerHTML = "";
+    }
+    const crnInput = document.getElementById("inviteCrn");
+    if (crnInput) {
+        crnInput.classList.remove("is-invalid", "is-valid");
+    }
+    const hint = document.getElementById("crnHint");
+    if (hint) {
+        hint.style.display = "block";
+    }
 }
 
 function focusInviteForm() {

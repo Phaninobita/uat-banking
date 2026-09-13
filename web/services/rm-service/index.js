@@ -299,6 +299,71 @@ router.get("/invitations", requireRmAuth, async (req, res) => {
 });
 
 /**
+ * GET /api/v1/rm/check-crn/:crn
+ * Validate whether a CRN is available or already registered/invited (Requires RM Auth)
+ */
+router.get("/check-crn/:crn", requireRmAuth, async (req, res) => {
+  try {
+    const rawCrn = req.params.crn || "";
+    const cleanCrn = decodeURIComponent(rawCrn).trim().toUpperCase();
+    if (!cleanCrn) {
+      return res.json({ exists: false, crn: "" });
+    }
+
+    await db.ready();
+    let existing = memStore.getRmInvitationByCrn ? memStore.getRmInvitationByCrn(cleanCrn) : null;
+
+    if (!existing && db.isConnected()) {
+      try {
+        existing = await db.getInvitationByCrn(cleanCrn);
+      } catch (e) {}
+      if (!existing) {
+        try {
+          const allInvs = await db.listInvitations();
+          existing = allInvs.find(i => i.crn && i.crn.trim().toUpperCase() === cleanCrn) || null;
+        } catch (e) {}
+      }
+    }
+
+    if (!existing) {
+      if (memStore.getApplicationByCrn) {
+        existing = memStore.getApplicationByCrn(cleanCrn);
+      }
+      if (!existing && db.isConnected()) {
+        try {
+          existing = await db.getApplicationByCrn(cleanCrn);
+        } catch (e) {}
+        if (!existing) {
+          try {
+            const allApps = await db.listApplications();
+            existing = allApps.find(a => a.crn && a.crn.trim().toUpperCase() === cleanCrn) || null;
+          } catch (e) {}
+        }
+      }
+    }
+
+    if (existing) {
+      return res.json({
+        exists: true,
+        crn: cleanCrn,
+        existing: {
+          crn: cleanCrn,
+          company_name: existing.company_name || existing.companyName || "",
+          email: existing.email || existing.registered_email || "",
+          company_uid: existing.company_uid || "",
+          status: existing.status || "invited",
+          current_step: existing.current_step || 1
+        }
+      });
+    }
+
+    return res.json({ exists: false, crn: cleanCrn });
+  } catch (err) {
+    return res.status(500).json({ error: "Failed to check CRN availability." });
+  }
+});
+
+/**
  * POST /api/v1/rm/invite
  * Create and dispatch a new customer onboarding invitation link (Requires RM Auth)
  * Composite Primary Key: (crn, email), Canonical Corporate Key: company_uid
@@ -320,6 +385,66 @@ router.post("/invite", requireRmAuth, async (req, res) => {
     const cleanCrn = crn.trim().toUpperCase();
     const cleanEmail = email.trim().toLowerCase();
     const cleanTrade = (tradeName || trade_name || "").trim();
+
+    // ── Enforce Duplicate CRN Validation ──
+    await db.ready();
+    let existingInvite = memStore.getRmInvitationByCrn ? memStore.getRmInvitationByCrn(cleanCrn) : null;
+    if (!existingInvite && db.isConnected()) {
+      try {
+        existingInvite = await db.getInvitationByCrn(cleanCrn);
+      } catch (dbErr) {
+        console.warn("[RM-SERVICE] Notice checking duplicate CRN in DB invitations:", dbErr.message);
+      }
+      if (!existingInvite) {
+        try {
+          const allInvs = await db.listInvitations();
+          existingInvite = allInvs.find(i => i.crn && i.crn.trim().toUpperCase() === cleanCrn) || null;
+        } catch (e) {}
+      }
+    }
+
+    let existingApp = null;
+    if (memStore.getApplicationByCrn) {
+      existingApp = memStore.getApplicationByCrn(cleanCrn);
+    }
+    if (!existingApp && db.isConnected()) {
+      try {
+        existingApp = await db.getApplicationByCrn(cleanCrn);
+      } catch (dbErr) {
+        console.warn("[RM-SERVICE] Notice checking duplicate CRN in DB applications:", dbErr.message);
+      }
+      if (!existingApp) {
+        try {
+          const allApps = await db.listApplications();
+          existingApp = allApps.find(a => a.crn && a.crn.trim().toUpperCase() === cleanCrn) || null;
+        } catch (e) {}
+      }
+    }
+
+    const existingRecord = existingInvite || existingApp;
+    if (existingRecord) {
+      const existingCompany = (existingRecord.company_name || existingRecord.companyName || companyName || "Existing Corporate Entity").trim();
+      const existingEmail = (existingRecord.email || existingRecord.registered_email || "").trim();
+      const existingUid = existingRecord.company_uid || "";
+      const existingStatus = existingRecord.status || "invited";
+      const existingStep = existingRecord.current_step || 1;
+
+      console.warn(`[RM-SERVICE] ⚠️ Invitation dispatch rejected: CRN "${cleanCrn}" already exists for "${existingCompany}" (${existingEmail}).`);
+
+      return res.status(409).json({
+        success: false,
+        error: `Duplicate CR Number: An onboarding invitation or application already exists for CRN "${cleanCrn}" (${existingCompany}${existingEmail ? " · " + existingEmail : ""}). Please use "Update Details" or "Resend" in the pipeline table below.`,
+        code: "DUPLICATE_CRN",
+        existing: {
+          crn: cleanCrn,
+          company_name: existingCompany,
+          email: existingEmail,
+          company_uid: existingUid,
+          status: existingStatus,
+          current_step: existingStep
+        }
+      });
+    }
 
     // Enforce 1:1 Corporate UID resolution: lookup from DB or memStore, else generate canonical CUID
     let companyUid = "";

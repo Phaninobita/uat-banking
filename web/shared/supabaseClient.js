@@ -265,6 +265,16 @@ class SupabaseClient {
     return null;
   }
 
+  async getApplicationByCrn(crn) {
+    if (!crn) return null;
+    const cleanCrn = encodeURIComponent(crn.trim().toUpperCase());
+    const res = await this.request(`corporate_onboarding_applications?crn=eq.${cleanCrn}&select=*&limit=1`);
+    if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+      return res.data[0];
+    }
+    return null;
+  }
+
   async getApplicationByUid(company_uid) {
     if (!company_uid) return null;
     const cleanUid = encodeURIComponent(company_uid.trim().toUpperCase());
