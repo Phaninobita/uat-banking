@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gringotts Bank | Corporate Onboarding</title>
 <link rel="icon" type="image/png" href="logo.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -30,20 +28,6 @@
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    /* View modes for previewing specific sections directly */
-    body[data-view="vaults"] .hero,
-    body[data-view="vaults"] .ticker {
-        display: none !important;
-    }
-    body[data-view="sigil"] .hero,
-    body[data-view="sigil"] .ticker,
-    body[data-view="sigil"] .vault-section {
-        display: none !important;
-    }
-    body[data-view="sigil"] .sigil-container {
-        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%) !important;
-    }
-
     html { scroll-behavior: smooth; }
 
     body {
@@ -63,11 +47,26 @@
 
     a { color: inherit; text-decoration: none; }
 
+    /* Hide broken images gracefully */
+    img { display: inline-block; }
+    img.broken { display: none !important; }
+
     /* ---------- Scrollbar ---------- */
     ::-webkit-scrollbar { width: 10px; }
     ::-webkit-scrollbar-track { background: var(--gringotts-dark); }
     ::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 5px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
+
+    /* ---------- Ambient Orbs Canvas ---------- */
+    #orbs {
+        position: fixed; inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        display: block;
+        width: 100%; height: 100%;
+        opacity: .85;
+    }
+    main, nav, header, section, footer { position: relative; z-index: 1; }
 
     /* ---------- Preloader ---------- */
     #preloader {
@@ -103,6 +102,11 @@
     .preloader-logo img {
         height: 100px; width: auto;
         filter: drop-shadow(0 0 15px rgba(34, 211, 238, 0.6));
+        animation: preloaderLogoPulse 2s ease-in-out infinite;
+    }
+    @keyframes preloaderLogoPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.06); }
     }
     .preloader-bar {
         width: 220px; height: 2px; margin: 26px auto 0;
@@ -115,7 +119,7 @@
     }
 
     /* ---------- Custom Cursor ---------- */
-    .cursor-dot, .cursor-ring {
+    .cursor-dot, .cursor-ring, .cursor-trail {
         position: fixed; top: 0; left: 0; z-index: 9999;
         pointer-events: none; border-radius: 50%;
         transform: translate(-50%, -50%);
@@ -136,8 +140,16 @@
         border-color: var(--cyan-bright);
     }
     .cursor-ring.is-down { transform: translate(-50%, -50%) scale(.8); }
+
+    .cursor-trail {
+        width: 4px; height: 4px;
+        background: var(--cyan);
+        box-shadow: 0 0 8px var(--cyan);
+        opacity: 0;
+    }
+
     @media (hover: none), (pointer: coarse) {
-        .cursor-dot, .cursor-ring { display: none; }
+        .cursor-dot, .cursor-ring, .cursor-trail { display: none; }
         body { cursor: auto; }
     }
 
@@ -177,8 +189,16 @@
         height: 44px; width: auto;
         filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.7));
         transition: transform 0.3s ease;
+        animation: logoHeartbeat 3.6s ease-in-out infinite;
     }
-    .logo:hover img { transform: scale(1.05); }
+    @keyframes logoHeartbeat {
+        0%, 100% { transform: scale(1); }
+        20% { transform: scale(1.06); }
+        30% { transform: scale(.98); }
+        40% { transform: scale(1.04); }
+        50% { transform: scale(1); }
+    }
+    .logo:hover img { animation: none; transform: scale(1.12); }
 
     .nav-links { display: flex; gap: 38px; align-items: center; }
     .nav-links a {
@@ -186,14 +206,24 @@
         text-transform: uppercase; color: #b9bec9;
         position: relative; padding: 6px 0;
         transition: color .3s ease;
+        display: inline-block;
     }
     .nav-links a::after {
         content: ""; position: absolute; left: 0; bottom: 0;
         width: 0%; height: 1px; background: var(--cyan);
         transition: width .35s cubic-bezier(.6,.2,.2,1);
     }
+    .nav-links a::before {
+        content: ""; position: absolute; left: 50%; bottom: -2px;
+        width: 0; height: 4px; border-radius: 50%;
+        background: var(--cyan); opacity: 0;
+        filter: blur(6px);
+        transform: translateX(-50%);
+        transition: opacity .3s ease, width .4s ease;
+    }
     .nav-links a:hover { color: var(--cyan-bright); }
     .nav-links a:hover::after { width: 100%; }
+    .nav-links a:hover::before { opacity: .8; width: 60%; }
 
     .nav-right { display: flex; align-items: center; gap: 18px; }
 
@@ -248,6 +278,7 @@
         transition: color .35s ease, box-shadow .35s ease, background .35s ease, transform .3s ease;
         will-change: transform;
         box-shadow: 0 0 20px rgba(34, 211, 238, 0.25);
+        isolation: isolate;
     }
     .btn-gold::before {
         content: ""; position: absolute; inset: 0;
@@ -256,11 +287,20 @@
         transition: opacity .4s ease;
         z-index: -1;
     }
+    .btn-gold::after {
+        content: ""; position: absolute; top: 0; left: -120%;
+        width: 60%; height: 100%;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.55), transparent);
+        transform: skewX(-20deg);
+        transition: left .8s cubic-bezier(.2,.9,.25,1);
+        pointer-events: none;
+    }
     .btn-gold:hover {
         box-shadow: 0 0 32px rgba(34, 211, 238, 0.55), 0 0 60px rgba(34, 211, 238, 0.25);
         transform: translateY(-1px);
     }
     .btn-gold:hover::before { opacity: 1; }
+    .btn-gold:hover::after { left: 130%; }
     .btn-gold span { position: relative; z-index: 1; }
     .btn-gold:active { transform: scale(.96); }
 
@@ -269,9 +309,33 @@
         padding: 13px 32px; border: 1px solid rgba(255,255,255,.16); border-radius: 8px;
         font-family: 'Lato', sans-serif; font-weight: 700; font-size: 12px;
         cursor: none; letter-spacing: 1.5px; text-transform: uppercase;
-        transition: border-color .35s ease, color .35s ease, background .35s ease;
+        transition: border-color .35s ease, color .35s ease, background .35s ease, transform .3s ease;
+        position: relative; overflow: hidden;
     }
-    .btn-ghost:hover { border-color: var(--cyan); color: var(--cyan-bright); background: rgba(34, 211, 238, 0.06); }
+    .btn-ghost:hover { border-color: var(--cyan); color: var(--cyan-bright); background: rgba(34, 211, 238, 0.06); transform: translateY(-1px); }
+
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.45);
+        transform: scale(0);
+        animation: rippleAnim .7s ease-out;
+        pointer-events: none;
+    }
+    @keyframes rippleAnim {
+        to { transform: scale(4); opacity: 0; }
+    }
+
+    .btn-loader {
+        display: inline-block;
+        width: 14px; height: 14px;
+        border: 2px solid rgba(4, 18, 31, 0.35);
+        border-top-color: #04121f;
+        border-radius: 50%;
+        animation: spin .8s linear infinite;
+        vertical-align: -2px;
+        margin-left: 10px;
+    }
 
     /* ---------- Hero ---------- */
     .hero {
@@ -291,25 +355,38 @@
         background: radial-gradient(circle, rgba(34, 211, 238, 0.14) 0%, rgba(34, 211, 238, 0) 62%);
         z-index: -2; pointer-events: none;
         filter: blur(10px);
+        animation: heroGlowBreathe 6s ease-in-out infinite;
+    }
+    @keyframes heroGlowBreathe {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.12); opacity: .75; }
     }
     #dust { position: absolute; inset: 0; z-index: -1; display: block; width: 100%; height: 100%; }
 
+    /* Hero title - solid white with cyan glow (removed the gradient that was hiding text) */
     .hero h1 {
         font-size: clamp(2.4rem, 7vw, 5.4rem);
         margin-bottom: 22px;
         line-height: 1.08;
         letter-spacing: 1px;
         color: #ffffff;
+        text-shadow:
+            0 0 20px rgba(34, 211, 238, 0.35),
+            0 0 60px rgba(34, 211, 238, 0.15);
+        animation: heroTitleGlow 4s ease-in-out infinite;
+    }
+    @keyframes heroTitleGlow {
+        0%, 100% { text-shadow: 0 0 20px rgba(34, 211, 238, 0.35), 0 0 60px rgba(34, 211, 238, 0.15); }
+        50% { text-shadow: 0 0 30px rgba(34, 211, 238, 0.55), 0 0 80px rgba(34, 211, 238, 0.3); }
     }
     .hero h1 .char { display: inline-block; will-change: transform, opacity; }
+
     .hero p.hero-subtitle {
         font-size: clamp(1rem, 1.6vw, 1.35rem);
         max-width: 700px; color: #a9b0bd; letter-spacing: 1px; line-height: 1.8;
-        opacity: 0;
     }
     .hero-actions {
         display: flex; gap: 18px; margin-top: 44px; flex-wrap: wrap; justify-content: center;
-        opacity: 0;
     }
     .hero-badge {
         display: inline-flex; align-items: center; gap: 10px;
@@ -318,7 +395,6 @@
         font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
         color: var(--cyan-bright); margin-bottom: 30px;
         background: rgba(34, 211, 238, 0.06);
-        opacity: 0;
     }
     .hero-badge .pulse {
         width: 7px; height: 7px; border-radius: 50%; background: var(--cyan-bright);
@@ -334,11 +410,15 @@
     .scroll-cue {
         position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
         display: flex; flex-direction: column; align-items: center; gap: 12px;
-        opacity: 0;
     }
     .scroll-cue .mouse {
         width: 24px; height: 40px; border: 1px solid rgba(34, 211, 238, 0.5); border-radius: 14px;
         position: relative;
+        animation: mouseBounce 1.8s ease-in-out infinite;
+    }
+    @keyframes mouseBounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-4px); }
     }
     .scroll-cue .mouse::after {
         content: ""; position: absolute; top: 7px; left: 50%; margin-left: -1.5px;
@@ -353,6 +433,11 @@
     .scroll-cue span {
         font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: #6e7480;
         font-family: 'Lato', sans-serif; font-weight: 600;
+        animation: cueText 2.4s ease-in-out infinite;
+    }
+    @keyframes cueText {
+        0%, 100% { opacity: .5; letter-spacing: 4px; }
+        50% { opacity: 1; letter-spacing: 6px; }
     }
 
     /* ---------- Ticker ---------- */
@@ -361,19 +446,39 @@
         border-top: 1px solid rgba(34, 211, 238, 0.18);
         border-bottom: 1px solid rgba(34, 211, 238, 0.18);
         padding: 16px 0;
+        position: relative;
     }
     .ticker-track {
         display: flex; width: max-content;
         animation: marquee 34s linear infinite;
+        will-change: transform;
     }
     .ticker:hover .ticker-track { animation-play-state: paused; }
     .ticker-track span {
         font-family: 'Lato', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 3px;
         text-transform: uppercase; color: #4e5462; padding: 0 34px;
         display: flex; align-items: center; gap: 34px; white-space: nowrap;
+        transition: color .3s ease;
     }
-    .ticker-track span::after { content: "◆"; color: var(--cyan); font-size: 8px; }
+    .ticker-track span:hover { color: var(--cyan-bright); }
+    .ticker-track span::after { content: "◆"; color: var(--cyan); font-size: 8px; animation: sparkPulse 2s ease-in-out infinite; }
+    @keyframes sparkPulse {
+        0%, 100% { opacity: .5; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.4); }
+    }
     @keyframes marquee { to { transform: translateX(-50%); } }
+
+    /* ---------- Section Titles (masked reveal) ---------- */
+    .mask-title {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+    }
+    .mask-title .mask-inner {
+        display: inline-block;
+        transform: translateY(110%);
+        will-change: transform;
+    }
 
     /* ---------- Vault Section ---------- */
     .vault-section {
@@ -418,6 +523,7 @@
         transition: border-color .4s ease, box-shadow .4s ease;
         transform-style: preserve-3d;
         overflow: hidden;
+        isolation: isolate;
     }
     .vault-card-inner::before {
         content: ""; position: absolute; inset: 0;
@@ -425,7 +531,17 @@
                     rgba(34, 211, 238, 0.18), transparent 55%);
         opacity: 0; transition: opacity .4s ease; pointer-events: none;
     }
+    .vault-card-inner::after {
+        content: ""; position: absolute; top: -50%; left: -60%;
+        width: 50%; height: 200%;
+        background: linear-gradient(120deg, transparent 20%, rgba(103,232,249,0.18) 50%, transparent 80%);
+        transform: rotate(20deg);
+        transition: left .9s cubic-bezier(.2,.9,.25,1);
+        pointer-events: none;
+        z-index: 3;
+    }
     .vault-card-inner:hover::before { opacity: 1; }
+    .vault-card-inner:hover::after { left: 130%; }
     .vault-card-inner:hover {
         border-color: rgba(34, 211, 238, 0.75);
         box-shadow: 0 30px 80px rgba(0,0,0,.7), 0 0 40px rgba(34, 211, 238, 0.15);
@@ -462,6 +578,18 @@
         display: block; height: 100%; width: 0%;
         background: linear-gradient(90deg, #0e7490, var(--cyan-bright));
         box-shadow: 0 0 10px var(--cyan);
+        position: relative;
+    }
+    .vault-progress span::after {
+        content: ""; position: absolute; right: 0; top: 50%;
+        width: 8px; height: 8px; margin-top: -4px; border-radius: 50%;
+        background: var(--cyan-bright);
+        box-shadow: 0 0 14px var(--cyan-bright), 0 0 24px var(--cyan);
+        animation: progressDot 1.4s ease-in-out infinite;
+    }
+    @keyframes progressDot {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.6); opacity: .6; }
     }
 
     /* ---------- Onboarding ---------- */
@@ -477,6 +605,11 @@
         width: 700px; height: 700px; border-radius: 50%;
         background: radial-gradient(circle, rgba(34, 211, 238, 0.08), transparent 65%);
         pointer-events: none;
+        animation: onboardingOrb 12s ease-in-out infinite;
+    }
+    @keyframes onboardingOrb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(-40px, 40px) scale(1.15); }
     }
     .onboarding-grid {
         display: grid; grid-template-columns: 1fr 1fr;
@@ -487,7 +620,7 @@
     .security-text p {
         font-size: 1.08rem; line-height: 2; color: #a2a8b4; margin-bottom: 38px;
     }
-    .security-text p .hl { color: var(--cyan-bright); }
+    .security-text p .hl { color: var(--cyan-bright); text-shadow: 0 0 12px rgba(34, 211, 238, 0.5); }
 
     .stat-row {
         display: flex; gap: 46px; margin-bottom: 42px; flex-wrap: wrap;
@@ -495,6 +628,14 @@
     .stat .num {
         font-family: 'Lato', sans-serif; font-weight: 700; font-size: 2rem; color: var(--cyan-bright);
         display: block; line-height: 1;
+        transition: transform .3s ease, text-shadow .3s ease;
+        text-shadow: 0 0 18px rgba(34, 211, 238, 0.4);
+    }
+    .stat .num.pulse { animation: statPulse .5s ease; }
+    @keyframes statPulse {
+        0% { transform: scale(1); }
+        40% { transform: scale(1.15); text-shadow: 0 0 30px rgba(34, 211, 238, 0.9); }
+        100% { transform: scale(1); }
     }
     .stat .lbl {
         font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #5d6472;
@@ -528,7 +669,6 @@
         fill: var(--cyan); opacity: .8;
     }
 
-    /* The rotating snake — centerpiece */
     .sigil-snake-wrap {
         position: absolute;
         top: 50%; left: 50%;
@@ -546,7 +686,28 @@
                 drop-shadow(0 0 40px rgba(14, 165, 233, 0.35));
         transform-origin: 50% 50%;
     }
-    /* Decorative inner halo */
+    /* CSS-drawn fallback snake (shown if logo.png is missing) */
+    .sigil-snake-fallback {
+        display: none;
+        width: 70%; height: 70%;
+        border-radius: 50%;
+        border: 6px solid var(--cyan);
+        position: relative;
+        box-shadow: 0 0 40px rgba(34, 211, 238, 0.6), inset 0 0 30px rgba(34, 211, 238, 0.4);
+    }
+    .sigil-snake-fallback::before,
+    .sigil-snake-fallback::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        background: var(--cyan-bright);
+        box-shadow: 0 0 20px var(--cyan-bright);
+    }
+    .sigil-snake-fallback::before { width: 14px; height: 14px; top: 8%; left: 50%; transform: translateX(-50%); }
+    .sigil-snake-fallback::after { width: 20px; height: 20px; bottom: -12px; left: 50%; transform: translateX(-50%); }
+    .sigil-snake-wrap.broken .sigil-snake { display: none; }
+    .sigil-snake-wrap.broken .sigil-snake-fallback { display: block; }
+
     .sigil-halo {
         position: absolute;
         top: 50%; left: 50%;
@@ -569,6 +730,11 @@
         font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: #4d5464;
         font-family: 'Lato', sans-serif; font-weight: 600; white-space: nowrap;
         z-index: 4;
+        animation: hintPulse 2.8s ease-in-out infinite;
+    }
+    @keyframes hintPulse {
+        0%, 100% { opacity: .4; letter-spacing: 4px; }
+        50% { opacity: 1; letter-spacing: 5.5px; }
     }
 
     /* ---------- Footer ---------- */
@@ -584,11 +750,27 @@
     .footer-grid h4 {
         font-family: 'Lato', sans-serif; font-weight: 700; color: var(--cyan-bright);
         font-size: 12px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 22px;
+        position: relative; display: inline-block;
+    }
+    .footer-grid h4::after {
+        content: ""; position: absolute; left: 0; bottom: -8px;
+        width: 24px; height: 2px; background: var(--cyan);
+        box-shadow: 0 0 10px var(--cyan);
     }
     .footer-grid p { color: #6d7482; line-height: 1.9; font-size: .92rem; }
     .footer-grid ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
-    .footer-grid ul a { color: #6d7482; font-size: .92rem; transition: color .3s ease, padding-left .3s ease; }
-    .footer-grid ul a:hover { color: var(--cyan-bright); padding-left: 6px; }
+    .footer-grid ul a {
+        color: #6d7482; font-size: .92rem;
+        transition: color .3s ease, padding-left .3s ease, text-shadow .3s ease;
+        position: relative;
+    }
+    .footer-grid ul a:hover { color: var(--cyan-bright); padding-left: 8px; text-shadow: 0 0 12px rgba(34, 211, 238, 0.5); }
+    .footer-grid ul a::before {
+        content: "▸"; position: absolute; left: -12px; opacity: 0;
+        transition: opacity .3s ease, transform .3s ease;
+        transform: translateX(-4px);
+    }
+    .footer-grid ul a:hover::before { opacity: 1; transform: translateX(0); }
     .footer-bottom {
         max-width: 1200px; margin: 60px auto 0; padding-top: 26px;
         border-top: 1px solid rgba(255,255,255,.06);
@@ -601,6 +783,7 @@
     .footer-logo img {
         height: 40px; width: auto;
         filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.5));
+        animation: logoHeartbeat 4s ease-in-out infinite;
     }
 
     /* ---------- Back to top ---------- */
@@ -615,8 +798,12 @@
         opacity: 0; pointer-events: none; transform: translateY(18px) scale(.85);
         transition: opacity .4s ease, transform .4s ease, background .3s ease, box-shadow .3s ease;
     }
-    .to-top.show { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+    .to-top.show { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); animation: toTopPulse 3s ease-in-out infinite; }
     .to-top:hover { background: var(--cyan); color: #04121f; box-shadow: 0 0 22px rgba(34, 211, 238, 0.55); }
+    @keyframes toTopPulse {
+        0%, 100% { box-shadow: 0 0 0 rgba(34,211,238,0); }
+        50% { box-shadow: 0 0 22px rgba(34,211,238,0.5); }
+    }
 
     /* ---------- Modal ---------- */
     .modal {
@@ -648,6 +835,11 @@
     .modal-panel::before {
         content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
         background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+        animation: modalTopShine 3s ease-in-out infinite;
+    }
+    @keyframes modalTopShine {
+        0%, 100% { opacity: .6; }
+        50% { opacity: 1; box-shadow: 0 0 20px var(--cyan); }
     }
     .modal-close {
         position: absolute; top: 16px; right: 16px;
@@ -665,6 +857,7 @@
     .field label {
         display: block; font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
         color: #5d6472; margin-bottom: 9px; font-family: 'Lato', sans-serif; font-weight: 600;
+        transition: color .3s ease;
     }
     .field input, .field select {
         width: 100%; padding: 13px 14px;
@@ -678,13 +871,15 @@
     .field select option { background: #0d1b2e; }
     .field input:focus, .field select:focus {
         border-color: var(--cyan);
-        box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15);
+        box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15), 0 0 20px rgba(34, 211, 238, 0.25);
         background: rgba(34, 211, 238, 0.04);
     }
+    .field:focus-within label { color: var(--cyan-bright); text-shadow: 0 0 10px rgba(34, 211, 238, 0.5); }
     .field.invalid input { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15); }
 
     .modal-actions { display: flex; gap: 14px; margin-top: 30px; }
     .modal-actions .btn-gold { flex: 1; padding: 15px; }
+    .modal-actions .btn-gold.loading { pointer-events: none; opacity: .85; }
 
     .modal-success {
         position: absolute; inset: 0;
@@ -711,7 +906,6 @@
     .modal-success h4 { font-family: 'Cinzel', serif; color: var(--cyan-bright); font-size: 1.35rem; }
     .modal-success p { color: #7b828f; font-size: .9rem; line-height: 1.7; max-width: 300px; }
 
-    /* ---------- Click sparkles ---------- */
     .spark {
         position: fixed; width: 5px; height: 5px; border-radius: 50%;
         background: var(--cyan-bright); pointer-events: none; z-index: 9998;
@@ -745,16 +939,23 @@
         .hero-actions .btn-gold, .hero-actions .btn-ghost { width: 100%; }
         .modal-panel { padding: 40px 24px 32px; }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+        * { animation-duration: .001s !important; animation-iteration-count: 1 !important; transition-duration: .001s !important; }
+    }
 </style>
 </head>
 <body>
+
+<!-- ============ AMBIENT BACKGROUND ORBS ============ -->
+<canvas id="orbs"></canvas>
 
 <!-- ============ PRELOADER ============ -->
 <div id="preloader">
     <div class="preloader-inner">
         <div class="preloader-ring"></div>
         <div class="preloader-logo">
-            <img src="logo.png" alt="Gringotts Logo">
+            <img src="logo.png" alt="Gringotts Logo" data-fallback="hide">
             GRINGOTTS
         </div>
         <div class="preloader-bar"><span></span></div>
@@ -764,6 +965,9 @@
 <!-- ============ CURSOR ============ -->
 <div class="cursor-dot"></div>
 <div class="cursor-ring"></div>
+<div class="cursor-trail" id="cursorTrail1"></div>
+<div class="cursor-trail" id="cursorTrail2"></div>
+<div class="cursor-trail" id="cursorTrail3"></div>
 
 <!-- ============ SCROLL PROGRESS ============ -->
 <div class="scroll-progress" id="progressBar"></div>
@@ -771,14 +975,14 @@
 <!-- ============ NAV ============ -->
 <nav id="nav">
     <div class="logo scramble" data-text="GRINGOTTS">
-        <img src="logo.png" alt="Gringotts Logo">
+        <img src="logo.png" alt="Gringotts Logo" data-fallback="hide">
         GRINGOTTS
     </div>
     <div class="nav-links">
-        <a href="#vaults">Vaults</a>
-        <a href="#security">Security</a>
-        <a href="#legacy">Legacy</a>
-        <a href="#contact">Contact</a>
+        <a href="#vaults" class="nav-link magnetic">Vaults</a>
+        <a href="#security" class="nav-link magnetic">Security</a>
+        <a href="#legacy" class="nav-link magnetic">Legacy</a>
+        <a href="#contact" class="nav-link magnetic">Contact</a>
     </div>
     <div class="nav-right">
         <button class="btn-gold magnetic open-vault"><span>Open Vault</span></button>
@@ -802,16 +1006,16 @@
     <div class="hero-glow" id="heroGlow"></div>
     <canvas id="dust"></canvas>
 
-    <div class="hero-badge"><span class="pulse"></span> Est. 1474 · Diagon Alley</div>
+    <div class="hero-badge hero-anim"><span class="pulse"></span> Est. 1474 · Diagon Alley</div>
     <h1 class="hero-title" id="heroTitle">The Safest Place on Earth</h1>
-    <p class="hero-subtitle">Unimpeachable security. Ancient magic. Modern wealth management.</p>
+    <p class="hero-subtitle hero-anim">Unimpeachable security. Ancient magic. Modern wealth management.</p>
 
-    <div class="hero-actions">
-        <button class="btn-gold magnetic open-vault"><span>Open Your Vault</span></button>
-        <button class="btn-ghost magnetic" id="exploreBtn">Explore Vaults</button>
+    <div class="hero-actions hero-anim">
+        <button class="btn-gold magnetic ripple-btn open-vault"><span>Open Your Vault</span></button>
+        <button class="btn-ghost magnetic ripple-btn" id="exploreBtn">Explore Vaults</button>
     </div>
 
-    <div class="scroll-cue">
+    <div class="scroll-cue hero-anim">
         <div class="mouse"></div>
         <span>Scroll</span>
     </div>
@@ -831,8 +1035,8 @@
 
 <!-- ============ VAULTS ============ -->
 <section class="vault-section" id="vaults">
-    <h2 class="vault-header scramble" data-text="Our Vault Services">
-        Our Vault Services
+    <h2 class="vault-header mask-title scramble" data-text="Our Vault Services">
+        <span class="mask-inner">Our Vault Services</span>
         <small>Levels One through Seven Hundred</small>
     </h2>
 
@@ -842,7 +1046,7 @@
                 <div class="vault-num">VAULT — 001</div>
                 <h3>Standard Vaults</h3>
                 <p>Protected by top-tier goblin security and physical brass locks. Ideal for personal artifacts, family heirlooms, and standard galleon reserves.</p>
-                <a href="#" class="vault-link open-vault">Learn More <span class="arrow">→</span></a>
+                <a href="#" class="vault-link">Learn More <span class="arrow">→</span></a>
             </div>
         </div>
         <div class="vault-card">
@@ -850,7 +1054,7 @@
                 <div class="vault-num">VAULT — 002</div>
                 <h3>High-Security Vaults</h3>
                 <p>Located in the deepest subterranean levels. Protected by blood-magic identification, layered enchantments, and physical magical beasts.</p>
-                <a href="#" class="vault-link open-vault">Learn More <span class="arrow">→</span></a>
+                <a href="#" class="vault-link">Learn More <span class="arrow">→</span></a>
             </div>
         </div>
         <div class="vault-card">
@@ -858,7 +1062,7 @@
                 <div class="vault-num">VAULT — 003</div>
                 <h3>Corporate Holdings</h3>
                 <p>Dedicated infrastructure for business acquisitions, seamless magical transfers, and cross-border currency conversion algorithms.</p>
-                <a href="#" class="vault-link open-vault">Learn More <span class="arrow">→</span></a>
+                <a href="#" class="vault-link">Learn More <span class="arrow">→</span></a>
             </div>
         </div>
         <div class="vault-card">
@@ -866,7 +1070,7 @@
                 <div class="vault-num">VAULT — 004</div>
                 <h3>Curse-Breaker Advisory</h3>
                 <p>Consult with our elite in-house curse-breakers to manage cursed estates, hexed artifacts, and complex inheritance laws.</p>
-                <a href="#" class="vault-link open-vault">Learn More <span class="arrow">→</span></a>
+                <a href="#" class="vault-link">Learn More <span class="arrow">→</span></a>
             </div>
         </div>
         <div class="vault-card">
@@ -874,7 +1078,7 @@
                 <div class="vault-num">VAULT — 005</div>
                 <h3>Dragon Reserve</h3>
                 <p>For assets that breathe. Temperature-controlled, flame-rated chambers overseen by our longest-serving guardians. Insurance included.</p>
-                <a href="#" class="vault-link open-vault">Learn More <span class="arrow">→</span></a>
+                <a href="#" class="vault-link">Learn More <span class="arrow">→</span></a>
             </div>
         </div>
     </div>
@@ -886,7 +1090,9 @@
 <section class="onboarding" id="security">
     <div class="onboarding-grid">
         <div class="security-text" id="legacy">
-            <h2 class="split-text scramble" data-text="Forge Your Legacy">Forge Your Legacy</h2>
+            <h2 class="split-text scramble mask-title" data-text="Forge Your Legacy">
+                <span class="mask-inner">Forge Your Legacy</span>
+            </h2>
             <p class="fade-text">
                 Opening a vault at Gringotts requires more than just capital. It requires <span class="hl">trust</span>.
                 Our onboarding process involves biometric magical signature verification and binding contracts
@@ -908,12 +1114,11 @@
                 </div>
             </div>
 
-            <button class="btn-gold magnetic fade-text open-vault"><span>Initiate Binding Contract</span></button>
+            <button class="btn-gold magnetic fade-text ripple-btn open-vault"><span>Initiate Binding Contract</span></button>
         </div>
 
         <div class="sigil-reveal">
             <div class="sigil-container" id="sigil">
-                <!-- Rotating rings + text (behind the snake) -->
                 <svg class="sigil-svg" viewBox="0 0 400 400">
                     <defs>
                         <path id="circlePath" d="M200,200 m-155,0 a155,155 0 1,1 310,0 a155,155 0 1,1 -310,0"/>
@@ -932,12 +1137,11 @@
                     </text>
                 </svg>
 
-                <!-- Glowing halo -->
                 <div class="sigil-halo"></div>
 
-                <!-- The rotating snake (your logo) -->
                 <div class="sigil-snake-wrap" id="snakeWrap">
-                    <img src="logo.png" alt="Snake Emblem" class="sigil-snake" id="snakeImg">
+                    <img src="logo.png" alt="Snake Emblem" class="sigil-snake" id="snakeImg" data-fallback="snake">
+                    <div class="sigil-snake-fallback"></div>
                 </div>
 
                 <div class="sigil-hint">Touch the sigil</div>
@@ -949,14 +1153,14 @@
 <!-- ============ FOOTER ============ -->
 <footer id="contact">
     <div class="footer-grid">
-        <div>
+        <div class="footer-col">
             <div class="footer-logo">
-                <img src="logo.png" alt="Gringotts Logo">
+                <img src="logo.png" alt="Gringotts Logo" data-fallback="hide">
                 <div class="logo" style="font-size:20px;">GRINGOTTS</div>
             </div>
             <p>Diagon Alley, London. The oldest wizarding bank in the known world — safeguarding fortunes, secrets, and the occasional cursed heirloom since 1474.</p>
         </div>
-        <div>
+        <div class="footer-col">
             <h4>Services</h4>
             <ul>
                 <li><a href="#vaults">Personal Vaults</a></li>
@@ -965,7 +1169,7 @@
                 <li><a href="#vaults">Currency Exchange</a></li>
             </ul>
         </div>
-        <div>
+        <div class="footer-col">
             <h4>Bank</h4>
             <ul>
                 <li><a href="#security">Security</a></li>
@@ -1013,7 +1217,7 @@
             </div>
 
             <div class="modal-actions">
-                <button type="submit" class="btn-gold"><span>Seal the Contract</span></button>
+                <button type="submit" class="btn-gold ripple-btn" id="submitBtn"><span>Seal the Contract</span></button>
             </div>
         </form>
 
@@ -1023,7 +1227,7 @@
                 <path d="M30 51 L44 65 L71 37"/>
             </svg>
             <h4>Contract Sealed</h4>
-            <p>Your magical signature has been recorded. Redirecting to your secure vault portal...</p>
+            <p>Your magical signature has been recorded. Welcome to Gringotts.</p>
         </div>
     </div>
 </div>
@@ -1034,17 +1238,31 @@
 
 <script>
 /* =====================================================
-   0. CONFIG & UTILITIES
+   0. UTILITIES
    ===================================================== */
-const PORTAL_URL = 'https://phanee.up.railway.app/';
-
 gsap.registerPlugin(ScrollTrigger);
 
 const isTouch = window.matchMedia('(hover: none), (pointer: coarse)').matches;
 const $  = (s, c = document) => c.querySelector(s);
 const $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
 
+/* ---------- Broken image handling ---------- */
+/* Hide images that fail to load, and activate snake fallback */
+document.querySelectorAll('img[data-fallback]').forEach(img => {
+    img.addEventListener('error', () => {
+        const mode = img.dataset.fallback;
+        if (mode === 'hide') {
+            img.classList.add('broken');
+        } else if (mode === 'snake') {
+            const wrap = img.closest('.sigil-snake-wrap');
+            if (wrap) wrap.classList.add('broken');
+        }
+    });
+});
+
+/* Split a heading into individual <span class="char"> elements */
 function splitChars(el) {
+    if (!el) return [];
     const text = el.textContent.trim();
     el.textContent = '';
     const frag = document.createDocumentFragment();
@@ -1060,6 +1278,7 @@ function splitChars(el) {
 }
 
 function scramble(el) {
+    if (!el) return;
     const original = el.dataset.text || el.textContent.trim();
     el.dataset.text = original;
     const pool = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789•◆/\\';
@@ -1080,24 +1299,62 @@ function scramble(el) {
 }
 
 /* =====================================================
-   1. PRELOADER → HERO INTRO
+   1. HERO INTRO (ROBUST) — text always visible eventually
    ===================================================== */
 const heroChars = splitChars($('#heroTitle'));
 
+/* Set initial state via GSAP so the timeline animates TO visible.
+   If GSAP ever fails to play the timeline, we force-play it after a fallback. */
+const heroAnimEls = $$('.hero-anim');
 const heroIntro = gsap.timeline({ paused: true });
+
 heroIntro
-    .from(heroChars, {
-        yPercent: 120, opacity: 0, rotateX: -80,
-        duration: 1.1, ease: 'power4.out', stagger: 0.028
-    })
-    .to('.hero-badge', { opacity: 1, y: 0, duration: .8, ease: 'power3.out' }, '-=0.75')
-    .to('.hero-subtitle', { opacity: 1, duration: .9, ease: 'power2.out' }, '-=0.55')
-    .to('.hero-actions', { opacity: 1, y: 0, duration: .8, ease: 'power3.out' }, '-=0.6')
-    .to('.scroll-cue', { opacity: 1, duration: .7 }, '-=0.4');
+    .fromTo(heroChars,
+        { yPercent: 120, opacity: 0, rotateX: -80 },
+        { yPercent: 0, opacity: 1, rotateX: 0, duration: 1.1, ease: 'power4.out', stagger: 0.028 }
+    )
+    .fromTo('.hero-badge',
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: .8, ease: 'power3.out' },
+        '-=0.75'
+    )
+    .fromTo('.hero-subtitle',
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: .9, ease: 'power2.out' },
+        '-=0.55'
+    )
+    .fromTo('.hero-actions',
+        { opacity: 0, y: 26 },
+        { opacity: 1, y: 0, duration: .8, ease: 'power3.out' },
+        '-=0.6'
+    )
+    .fromTo('.scroll-cue',
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: .7 },
+        '-=0.4'
+    );
 
-gsap.set('.hero-badge', { y: 20 });
-gsap.set('.hero-actions', { y: 26 });
+/* Immediately apply the "from" state so hero text is hidden at first paint */
+gsap.set(heroChars, { yPercent: 120, opacity: 0, rotateX: -80 });
+gsap.set('.hero-badge', { opacity: 0, y: 20 });
+gsap.set('.hero-subtitle', { opacity: 0, y: 20 });
+gsap.set('.hero-actions', { opacity: 0, y: 26 });
+gsap.set('.scroll-cue', { opacity: 0, y: 20 });
 
+let heroPlayed = false;
+function playHero() {
+    if (heroPlayed) return;
+    heroPlayed = true;
+    heroIntro.play();
+}
+
+/* Hard fallback: if preloader never finishes within 4s, reveal hero */
+gsap.delayedCall(4, playHero);
+setTimeout(playHero, 4200); // belt-and-suspenders
+
+/* =====================================================
+   2. PRELOADER
+   ===================================================== */
 let preloaderDone = false;
 function runPreloader() {
     if (preloaderDone) return;
@@ -1110,51 +1367,41 @@ function runPreloader() {
           opacity: 0, duration: .7, ease: 'power2.inOut',
           onComplete: () => { $('#preloader').style.display = 'none'; }
       }, '-=0.25')
-      .add(() => heroIntro.play(), '-=0.45');
+      .add(playHero, '-=0.45');
 }
 
-if (window.location.search.includes('view=')) {
-    const vMatch = window.location.search.match(/view=([a-z]+)/);
-    if (vMatch && vMatch[1]) {
-        document.body.setAttribute('data-view', vMatch[1]);
-    }
-}
-
-if (window.location.search.includes('skip_preloader')) {
-    preloaderDone = true;
-    const p = $('#preloader');
-    if (p) p.style.display = 'none';
-    heroIntro.progress(1);
-    if (window.location.search.includes('scroll_to=')) {
-        setTimeout(() => {
-            const targetId = window.location.search.split('scroll_to=')[1].split('&')[0];
-            const el = document.getElementById(targetId);
-            if (el) {
-                window.scrollTo(0, el.offsetTop);
-                ScrollTrigger.refresh();
-            }
-        }, 100);
-    }
-} else {
-    window.addEventListener('load', () => setTimeout(runPreloader, 300));
-    setTimeout(runPreloader, 3200);
-}
+window.addEventListener('load', () => setTimeout(runPreloader, 300));
+setTimeout(runPreloader, 2600); // fallback if 'load' is slow
 
 /* =====================================================
-   2. CUSTOM CURSOR
+   3. CUSTOM CURSOR
    ===================================================== */
 if (!isTouch) {
     const dot  = $('.cursor-dot');
     const ring = $('.cursor-ring');
+    const trails = [$('#cursorTrail1'), $('#cursorTrail2'), $('#cursorTrail3')];
 
     const dotX  = gsap.quickTo(dot,  'x', { duration: 0.12, ease: 'power3' });
     const dotY  = gsap.quickTo(dot,  'y', { duration: 0.12, ease: 'power3' });
     const ringX = gsap.quickTo(ring, 'x', { duration: 0.5,  ease: 'power3' });
     const ringY = gsap.quickTo(ring, 'y', { duration: 0.5,  ease: 'power3' });
+    const trailX = trails.map(t => t ? gsap.quickTo(t, 'x', { duration: 0.45, ease: 'power3' }) : null);
+    const trailY = trails.map(t => t ? gsap.quickTo(t, 'y', { duration: 0.45, ease: 'power3' }) : null);
 
     window.addEventListener('mousemove', e => {
         dotX(e.clientX); dotY(e.clientY);
         ringX(e.clientX); ringY(e.clientY);
+        trailX.forEach(fn => fn && fn(e.clientX));
+        trailY.forEach(fn => fn && fn(e.clientY));
+    });
+
+    let trailVisible = false;
+    window.addEventListener('mousemove', () => {
+        if (trailVisible) return;
+        trailVisible = true;
+        trails.forEach((t, i) => {
+            if (t) gsap.to(t, { opacity: .55 - i * 0.15, duration: .6, delay: i * 0.05 });
+        });
     });
 
     document.addEventListener('mousedown', () => ring.classList.add('is-down'));
@@ -1169,12 +1416,12 @@ if (!isTouch) {
     });
 
     document.addEventListener('click', e => {
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 12; i++) {
             const s = document.createElement('div');
             s.className = 'spark';
             document.body.appendChild(s);
-            const angle = (Math.PI * 2 * i) / 10 + Math.random();
-            const dist = 40 + Math.random() * 60;
+            const angle = (Math.PI * 2 * i) / 12 + Math.random();
+            const dist = 40 + Math.random() * 70;
             gsap.set(s, { x: e.clientX, y: e.clientY, scale: 1 });
             gsap.to(s, {
                 x: e.clientX + Math.cos(angle) * dist,
@@ -1188,10 +1435,79 @@ if (!isTouch) {
 }
 
 /* =====================================================
-   3. CYAN DUST CANVAS (hero)
+   4. AMBIENT BACKGROUND ORBS
+   ===================================================== */
+(function ambientOrbs() {
+    const canvas = $('#orbs');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let W = 0, H = 0, orbs = [];
+
+    const sprite = document.createElement('canvas');
+    sprite.width = sprite.height = 256;
+    const sctx = sprite.getContext('2d');
+    const grad = sctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+    grad.addColorStop(0, 'rgba(34, 211, 238, 0.55)');
+    grad.addColorStop(0.35, 'rgba(34, 211, 238, 0.15)');
+    grad.addColorStop(1, 'rgba(34, 211, 238, 0.0)');
+    sctx.fillStyle = grad;
+    sctx.fillRect(0, 0, 256, 256);
+
+    function resize() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        buildOrbs();
+    }
+
+    function buildOrbs() {
+        const count = Math.max(4, Math.floor(W / 400));
+        orbs = Array.from({ length: count }, () => ({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            r: 180 + Math.random() * 220,
+            vx: (Math.random() - 0.5) * 0.14,
+            vy: (Math.random() - 0.5) * 0.14,
+            a: 0.2 + Math.random() * 0.3,
+            phase: Math.random() * Math.PI * 2
+        }));
+    }
+
+    let t = 0;
+    function frame() {
+        ctx.clearRect(0, 0, W, H);
+        t += 0.006;
+
+        for (const o of orbs) {
+            o.x += o.vx;
+            o.y += o.vy;
+            if (o.x < -o.r) o.x = W + o.r;
+            if (o.x > W + o.r) o.x = -o.r;
+            if (o.y < -o.r) o.y = H + o.r;
+            if (o.y > H + o.r) o.y = -o.r;
+
+            const pulse = 0.75 + 0.25 * Math.sin(t * 2 + o.phase);
+            ctx.globalAlpha = o.a * pulse;
+            ctx.drawImage(sprite, o.x - o.r, o.y - o.r, o.r * 2, o.r * 2);
+        }
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(frame);
+    }
+
+    resize();
+    window.addEventListener('resize', resize);
+    frame();
+})();
+
+/* =====================================================
+   5. CYAN DUST CANVAS (hero)
    ===================================================== */
 (function cyanDust() {
     const canvas = $('#dust');
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let W = 0, H = 0, particles = [];
     const mouse = { x: -9999, y: -9999 };
@@ -1279,11 +1595,11 @@ if (!isTouch) {
 })();
 
 /* =====================================================
-   4. HERO MOUSE PARALLAX
+   6. HERO MOUSE PARALLAX
    ===================================================== */
 if (!isTouch) {
     const glow = $('#heroGlow');
-    const heroContent = [$('.hero-badge'), $('#heroTitle'), $('.hero-subtitle'), $('.hero-actions')];
+    const heroContent = [$('.hero-badge'), $('#heroTitle'), $('.hero-subtitle'), $('.hero-actions')].filter(Boolean);
 
     const gx = gsap.quickTo(glow, 'x', { duration: 1.1, ease: 'power3' });
     const gy = gsap.quickTo(glow, 'y', { duration: 1.1, ease: 'power3' });
@@ -1307,7 +1623,7 @@ if (!isTouch) {
 }
 
 /* =====================================================
-   5. SCROLL PROGRESS + NAV + BACK TO TOP
+   7. SCROLL PROGRESS + NAV + BACK TO TOP
    ===================================================== */
 const progressBar = $('#progressBar');
 const nav = $('#nav');
@@ -1317,7 +1633,8 @@ let lastY = window.scrollY;
 function onScroll() {
     const y = window.scrollY;
     const max = document.documentElement.scrollHeight - window.innerHeight;
-    progressBar.style.width = (max > 0 ? (y / max) * 100 : 0) + '%';
+    const pct = max > 0 ? y / max : 0;
+    progressBar.style.width = (pct * 100) + '%';
 
     nav.classList.toggle('scrolled', y > 60);
 
@@ -1327,12 +1644,18 @@ function onScroll() {
     lastY = y;
 
     toTop.classList.toggle('show', y > 600);
+
+    const hueShift = Math.round(pct * 25);
+    document.body.style.backgroundColor = `hsl(${210 + hueShift}, 55%, ${4 + pct * 3}%)`;
 }
 window.addEventListener('scroll', onScroll, { passive: true });
 onScroll();
 
 toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
+/* =====================================================
+   8. MAGNETIC (buttons + nav links)
+   ===================================================== */
 if (!isTouch) {
     $$('.magnetic').forEach(el => {
         el.addEventListener('mousemove', e => {
@@ -1348,7 +1671,24 @@ if (!isTouch) {
 }
 
 /* =====================================================
-   6. MOBILE MENU
+   9. RIPPLES
+   ===================================================== */
+$$('.ripple-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+        const r = btn.getBoundingClientRect();
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        const size = Math.max(r.width, r.height);
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = (e.clientX - r.left - size / 2) + 'px';
+        ripple.style.top  = (e.clientY - r.top  - size / 2) + 'px';
+        btn.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 800);
+    });
+});
+
+/* =====================================================
+   10. MOBILE MENU
    ===================================================== */
 const burger = $('#burger');
 const mobileMenu = $('#mobileMenu');
@@ -1365,7 +1705,7 @@ $$('#mobileMenu a').forEach(a => a.addEventListener('click', () => {
 }));
 
 /* =====================================================
-   7. HERO SCROLL PARALLAX + FADE
+   11. HERO SCROLL PARALLAX + FADE
    ===================================================== */
 gsap.to('#heroBg', {
     yPercent: 26, ease: 'none',
@@ -1377,89 +1717,130 @@ gsap.to('.hero-badge, .hero-title, .hero-subtitle, .hero-actions, .scroll-cue', 
 });
 
 /* =====================================================
-   8. TICKER
+   12. TICKER
    ===================================================== */
 (function buildTicker() {
     const track = $('#tickerTrack');
+    if (!track) return;
     track.innerHTML += track.innerHTML;
 })();
 
+gsap.to('.ticker-track', {
+    yPercent: -8,
+    ease: 'none',
+    scrollTrigger: {
+        trigger: '.ticker',
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: true
+    }
+});
+
 /* =====================================================
-   9. HORIZONTAL VAULT SCROLL
+   13. MASK TITLE REVEALS
+   ===================================================== */
+$$('.mask-title').forEach(el => {
+    const inner = el.querySelector('.mask-inner');
+    if (!inner) return;
+    gsap.to(inner, {
+        y: 0,
+        duration: 1.1,
+        ease: 'power4.out',
+        scrollTrigger: {
+            trigger: el,
+            start: 'top 85%'
+        }
+    });
+});
+
+/* =====================================================
+   14. HORIZONTAL VAULT SCROLL + IDLE FLOAT
    ===================================================== */
 const vaultContainer = $('#vaultContainer');
 const vaultProgress = $('#vaultProgress');
 const vaultCards = $$('.vault-card');
 
-const getScrollDistance = () => vaultContainer.scrollWidth - window.innerWidth;
+if (vaultContainer) {
+    const getScrollDistance = () => vaultContainer.scrollWidth - window.innerWidth;
 
-const horizontalTween = gsap.to(vaultContainer, {
-    x: () => -getScrollDistance(),
-    ease: 'none',
-    scrollTrigger: {
-        trigger: '.vault-section',
-        pin: true,
-        anticipatePin: 1,
-        scrub: 1,
-        start: 'top top',
-        end: () => '+=' + getScrollDistance(),
-        invalidateOnRefresh: true,
-        onUpdate: self => {
-            vaultProgress.style.width = (self.progress * 100) + '%';
-        }
-    }
-});
-
-vaultCards.forEach(card => {
-    gsap.fromTo(card,
-        { y: 90, opacity: 0.15, scale: 0.88 },
-        {
-            y: 0, opacity: 1, scale: 1, ease: 'none',
-            scrollTrigger: {
-                trigger: card,
-                containerAnimation: horizontalTween,
-                start: 'left 98%',
-                end: 'left 55%',
-                scrub: true
+    const horizontalTween = gsap.to(vaultContainer, {
+        x: () => -getScrollDistance(),
+        ease: 'none',
+        scrollTrigger: {
+            trigger: '.vault-section',
+            pin: true,
+            anticipatePin: 1,
+            scrub: 1,
+            start: 'top top',
+            end: () => '+=' + getScrollDistance(),
+            invalidateOnRefresh: true,
+            onUpdate: self => {
+                if (vaultProgress) vaultProgress.style.width = (self.progress * 100) + '%';
             }
         }
-    );
-});
+    });
 
-if (!isTouch) {
-    vaultCards.forEach(card => {
-        const inner = card.querySelector('.vault-card-inner');
+    vaultCards.forEach((card, i) => {
+        gsap.fromTo(card,
+            { y: 90, opacity: 0.15, scale: 0.88 },
+            {
+                y: 0, opacity: 1, scale: 1, ease: 'none',
+                scrollTrigger: {
+                    trigger: card,
+                    containerAnimation: horizontalTween,
+                    start: 'left 98%',
+                    end: 'left 55%',
+                    scrub: true
+                }
+            }
+        );
 
-        card.addEventListener('mousemove', e => {
-            const r = card.getBoundingClientRect();
-            const px = (e.clientX - r.left) / r.width;
-            const py = (e.clientY - r.top) / r.height;
-
-            gsap.to(inner, {
-                rotateY: (px - 0.5) * 16,
-                rotateX: -(py - 0.5) * 16,
-                duration: 0.5,
-                ease: 'power2.out',
-                transformPerspective: 1200,
-                transformOrigin: 'center'
-            });
-
-            inner.style.setProperty('--mx', (px * 100) + '%');
-            inner.style.setProperty('--my', (py * 100) + '%');
-        });
-
-        card.addEventListener('mouseleave', () => {
-            gsap.to(inner, {
-                rotateX: 0, rotateY: 0,
-                duration: 0.9,
-                ease: 'elastic.out(1, 0.5)'
-            });
+        gsap.to(card, {
+            y: -10,
+            duration: 2.6 + Math.random() * 1.2,
+            yoyo: true,
+            repeat: -1,
+            ease: 'sine.inOut',
+            delay: i * 0.25
         });
     });
+
+    if (!isTouch) {
+        vaultCards.forEach(card => {
+            const inner = card.querySelector('.vault-card-inner');
+            if (!inner) return;
+
+            card.addEventListener('mousemove', e => {
+                const r = card.getBoundingClientRect();
+                const px = (e.clientX - r.left) / r.width;
+                const py = (e.clientY - r.top) / r.height;
+
+                gsap.to(inner, {
+                    rotateY: (px - 0.5) * 16,
+                    rotateX: -(py - 0.5) * 16,
+                    duration: 0.5,
+                    ease: 'power2.out',
+                    transformPerspective: 1200,
+                    transformOrigin: 'center'
+                });
+
+                inner.style.setProperty('--mx', (px * 100) + '%');
+                inner.style.setProperty('--my', (py * 100) + '%');
+            });
+
+            card.addEventListener('mouseleave', () => {
+                gsap.to(inner, {
+                    rotateX: 0, rotateY: 0,
+                    duration: 0.9,
+                    ease: 'elastic.out(1, 0.5)'
+                });
+            });
+        });
+    }
 }
 
 /* =====================================================
-   10. ONBOARDING REVEALS + COUNTERS
+   15. ONBOARDING REVEALS + COUNTERS
    ===================================================== */
 gsap.from('.split-text', {
     y: 90, opacity: 0, duration: 1, ease: 'power3.out',
@@ -1490,6 +1871,10 @@ $$('.num').forEach(el => {
                     el.textContent = raw
                         ? Math.floor(obj.val).toString()
                         : Math.floor(obj.val).toLocaleString() + suffix;
+                },
+                onComplete: () => {
+                    el.classList.add('pulse');
+                    setTimeout(() => el.classList.remove('pulse'), 600);
                 }
             });
         }
@@ -1503,32 +1888,27 @@ gsap.to('.sigil-container', {
 });
 
 /* =====================================================
-   11. SIGIL — rotating rings + ROTATING SNAKE
+   16. SIGIL — rotating rings + snake
    ===================================================== */
 (function sigilMagic() {
     const container = $('#sigil');
     const snake     = $('#snakeImg');
     if (!container || !snake) return;
 
-    /* ----- Rotating rings (perpetual) ----- */
     const outer = gsap.to('#ringOuter', { rotate: 360,  duration: 42, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
     const mid   = gsap.to('#ringMid',   { rotate: -360, duration: 28, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
     const ringTweens = [outer, mid];
 
-    /* ----- The snake: continuous slow spin as the resting state -----
-       Because each full turn returns to 0°, the animation always looks
-       like it "comes back to the same state" on every revolution. */
     const snakeSpin = gsap.to(snake, {
         rotate: 360,
-        duration: 18,          // slow, elegant idle rotation
+        duration: 18,
         repeat: -1,
         ease: 'none',
         transformOrigin: '50% 50%',
         paused: true
     });
 
-    /* Subtle breathing scale on the snake */
-    const snakeBreath = gsap.to(snake, {
+    gsap.to(snake, {
         scale: 1.06,
         duration: 2.4,
         yoyo: true,
@@ -1537,31 +1917,23 @@ gsap.to('.sigil-container', {
         transformOrigin: '50% 50%'
     });
 
-    /* Only start the snake motion once the sigil has been revealed */
-    if (document.body.getAttribute('data-view') === 'sigil') {
-        snakeSpin.play();
-        gsap.set(snake, { rotate: 0, scale: 1, opacity: 1 });
-    } else {
-        ScrollTrigger.create({
-            trigger: '.onboarding',
-            start: 'top 55%',
-            once: true,
-            onEnter: () => {
-                snakeSpin.play();
-                // A grand entrance: snake spins up, then settles into idle
-                gsap.fromTo(snake,
-                    { rotate: -180, scale: 0.4, opacity: 0 },
-                    {
-                        rotate: 0, scale: 1, opacity: 1,
-                        duration: 1.6, ease: 'back.out(1.4)',
-                        onComplete: () => snakeSpin.play()
-                    }
-                );
-            }
-        });
-    }
+    ScrollTrigger.create({
+        trigger: '.onboarding',
+        start: 'top 55%',
+        once: true,
+        onEnter: () => {
+            snakeSpin.play();
+            gsap.fromTo(snake,
+                { rotate: -180, scale: 0.4, opacity: 0 },
+                {
+                    rotate: 0, scale: 1, opacity: 1,
+                    duration: 1.6, ease: 'back.out(1.4)',
+                    onComplete: () => snakeSpin.play()
+                }
+            );
+        }
+    });
 
-    /* ----- Hover: rings & snake speed up ----- */
     container.addEventListener('mouseenter', () => {
         ringTweens.forEach(t => gsap.to(t, { timeScale: 3.2, duration: .6, ease: 'power2.out' }));
         gsap.to(snakeSpin, { timeScale: 3.5, duration: .6, ease: 'power2.out' });
@@ -1575,13 +1947,11 @@ gsap.to('.sigil-container', {
         gsap.to('.sigil-svg text', { opacity: .8, duration: .4 });
     });
 
-    /* ----- Click: dramatic double spin that returns to rest ----- */
     let spinning = false;
     container.addEventListener('click', () => {
         if (spinning) return;
         spinning = true;
 
-        // Visual flash on the sigil
         gsap.fromTo(container,
             { filter: 'drop-shadow(0 0 0px rgba(34,211,238,0))' },
             {
@@ -1590,10 +1960,8 @@ gsap.to('.sigil-container', {
             }
         );
 
-        // Boost the idle spin temporarily so it feels reactive
         gsap.to(snakeSpin, { timeScale: 6, duration: .3, ease: 'power2.out' });
 
-        // A full 720° flourish that ends on the same resting angle
         gsap.timeline({
             onComplete: () => {
                 gsap.to(snakeSpin, { timeScale: 1, duration: .6, ease: 'power2.out' });
@@ -1614,7 +1982,6 @@ gsap.to('.sigil-container', {
         }, '-=0.4');
     });
 
-    /* ----- Mouse tilt parallax ----- */
     if (!isTouch) {
         container.addEventListener('mousemove', e => {
             const r = container.getBoundingClientRect();
@@ -1645,11 +2012,28 @@ gsap.to('.sigil-container', {
 })();
 
 /* =====================================================
-   12. OPEN VAULT REDIRECT & MODAL
+   17. FOOTER REVEALS
+   ===================================================== */
+gsap.from('.footer-col', {
+    y: 40, opacity: 0, duration: .8, stagger: 0.15, ease: 'power3.out',
+    scrollTrigger: { trigger: 'footer', start: 'top 85%' }
+});
+gsap.from('.footer-grid h4', {
+    x: -20, opacity: 0, duration: .7, stagger: 0.12, ease: 'power3.out',
+    scrollTrigger: { trigger: 'footer', start: 'top 80%' }
+});
+gsap.from('.footer-grid ul li', {
+    x: -16, opacity: 0, duration: .6, stagger: 0.05, ease: 'power2.out',
+    scrollTrigger: { trigger: 'footer', start: 'top 78%' }
+});
+
+/* =====================================================
+   18. MODAL
    ===================================================== */
 const modal = $('#modal');
 const vaultForm = $('#vaultForm');
 const modalSuccess = $('#modalSuccess');
+const submitBtn = $('#submitBtn');
 
 function openModal() {
     modal.classList.add('open');
@@ -1658,6 +2042,8 @@ function openModal() {
     vaultForm.style.opacity = 1;
     vaultForm.reset();
     $$('.field').forEach(f => f.classList.remove('invalid'));
+    submitBtn.classList.remove('loading');
+    submitBtn.innerHTML = '<span>Seal the Contract</span>';
 }
 function closeModal() {
     modal.classList.remove('open');
@@ -1665,14 +2051,12 @@ function closeModal() {
     setTimeout(() => modalSuccess.classList.remove('show'), 400);
 }
 
-// Redirect immediately when clicking "Open Vault"
 $$('.open-vault').forEach(btn => btn.addEventListener('click', e => {
     e.preventDefault();
-    if (typeof mobileMenu !== 'undefined' && mobileMenu) mobileMenu.classList.remove('open');
-    if (typeof burger !== 'undefined' && burger) burger.classList.remove('open');
-    window.location.href = PORTAL_URL;
+    mobileMenu.classList.remove('open');
+    burger.classList.remove('open');
+    openModal();
 }));
-
 $$('[data-close]').forEach(el => el.addEventListener('click', closeModal));
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
@@ -1696,12 +2080,14 @@ vaultForm.addEventListener('submit', e => {
 
     if (!valid) return;
 
-    gsap.to(vaultForm, { opacity: 0, duration: .35, ease: 'power2.in' });
-    setTimeout(() => modalSuccess.classList.add('show'), 260);
+    submitBtn.classList.add('loading');
+    submitBtn.innerHTML = '<span>Sealing</span><span class="btn-loader"></span>';
+
     setTimeout(() => {
-        closeModal();
-        window.location.href = PORTAL_URL;
-    }, 1500);
+        gsap.to(vaultForm, { opacity: 0, duration: .35, ease: 'power2.in' });
+        setTimeout(() => modalSuccess.classList.add('show'), 260);
+        setTimeout(closeModal, 3400);
+    }, 900);
 });
 
 $$('.field input').forEach(inp => {
@@ -1709,14 +2095,17 @@ $$('.field input').forEach(inp => {
 });
 
 /* =====================================================
-   13. SCRAMBLE TEXT ON HOVER
+   19. SCRAMBLE TEXT ON HOVER
    ===================================================== */
 $$('.scramble').forEach(el => {
-    el.addEventListener('mouseenter', () => scramble(el));
+    el.addEventListener('mouseenter', () => {
+        const target = el.querySelector('.mask-inner') || el;
+        scramble(target);
+    });
 });
 
 /* =====================================================
-   14. SMOOTH ANCHOR SCROLLING
+   20. SMOOTH ANCHOR SCROLLING
    ===================================================== */
 $$('a[href^="#"]').forEach(link => {
     link.addEventListener('click', e => {
@@ -1729,13 +2118,16 @@ $$('a[href^="#"]').forEach(link => {
     });
 });
 
-$('#exploreBtn').addEventListener('click', () => {
-    const t = document.querySelector('#vaults');
-    window.scrollTo({ top: t.offsetTop, behavior: 'smooth' });
-});
+const exploreBtn = $('#exploreBtn');
+if (exploreBtn) {
+    exploreBtn.addEventListener('click', () => {
+        const t = document.querySelector('#vaults');
+        if (t) window.scrollTo({ top: t.offsetTop, behavior: 'smooth' });
+    });
+}
 
 /* =====================================================
-   15. RESIZE REFRESH
+   21. RESIZE REFRESH
    ===================================================== */
 let resizeTimer;
 window.addEventListener('resize', () => {
