@@ -82,10 +82,9 @@ async function checkCrnAndEmailBinding(cleanCrn, cleanEmail) {
   const recordForCrn = existingInviteForCrn || existingAppForCrn;
   const registeredEmailForCrn = (recordForCrn?.email || recordForCrn?.registered_email || "").trim().toLowerCase();
   if (registeredEmailForCrn && registeredEmailForCrn !== cleanEmail) {
-    const maskedEmail = registeredEmailForCrn.replace(/^(.)(.*)(@.*)$/, "$1***$3");
     return {
       ok: false,
-      error: `Access Denied: Commercial Registration Number "${cleanCrn}" is already registered to another corporate email address (${maskedEmail}). Please sign in using your authorized company email or contact your Relationship Manager.`,
+      error: "Wrong email or CRN was entered. Please contact RM for further assistance.",
       code: "CRN_EMAIL_MISMATCH"
     };
   }
@@ -112,7 +111,7 @@ async function checkCrnAndEmailBinding(cleanCrn, cleanEmail) {
   if (registeredCrnForEmail && registeredCrnForEmail !== cleanCrn) {
     return {
       ok: false,
-      error: `Access Denied: The corporate email address "${cleanEmail}" is already registered against Commercial Registration Number "${registeredCrnForEmail}". Both CRN and Email must match your registered corporate profile.`,
+      error: "Wrong email or CRN was entered. Please contact RM for further assistance.",
       code: "CRN_EMAIL_MISMATCH"
     };
   }
