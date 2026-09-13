@@ -4035,6 +4035,69 @@ body[data-theme="rose"],
             font-weight: 800;
         }
 
+        /* ══════════════════════════════════════════════════════════════
+           POST-SUBMISSION EXECUTIVE PORTAL MODE (7 STAGES REMOVED)
+           ══════════════════════════════════════════════════════════════ */
+        body.application-submitted .portal-sidebar,
+        .portal-app-shell.application-submitted .portal-sidebar,
+        #mainApp.application-submitted .portal-sidebar,
+        .application-submitted aside.portal-sidebar {
+            display: none !important;
+            width: 0 !important;
+            min-width: 0 !important;
+            max-width: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            overflow: hidden !important;
+        }
+
+        body.application-submitted .portal-main-column,
+        .portal-app-shell.application-submitted .portal-main-column,
+        #mainApp.application-submitted .portal-main-column,
+        .application-submitted .portal-main-column {
+            width: 100% !important;
+            max-width: 100% !important;
+            flex: 1 1 100% !important;
+            margin: 0 !important;
+        }
+
+        body.application-submitted .btn-sidebar-hamburger,
+        .portal-app-shell.application-submitted .btn-sidebar-hamburger,
+        .application-submitted .btn-sidebar-hamburger {
+            display: none !important;
+        }
+
+        body.application-submitted .topbar-breadcrumb,
+        .portal-app-shell.application-submitted .topbar-breadcrumb,
+        .application-submitted .topbar-breadcrumb {
+            display: none !important;
+        }
+
+        body.application-submitted .topbar-brand-submitted,
+        .portal-app-shell.application-submitted .topbar-brand-submitted,
+        .application-submitted .topbar-brand-submitted {
+            display: inline-flex !important;
+        }
+
+        body.application-submitted .topbar-submitted-pill,
+        .portal-app-shell.application-submitted .topbar-submitted-pill,
+        .application-submitted .topbar-submitted-pill {
+            display: inline-flex !important;
+        }
+
+        body.application-submitted .topbar-company-tag,
+        .portal-app-shell.application-submitted .topbar-company-tag,
+        .application-submitted .topbar-company-tag {
+            display: inline-flex !important;
+        }
+
+        body.application-submitted .success-wrap {
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
         .btn {
             padding: 12px 24px;
             border: none;

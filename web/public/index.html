@@ -440,20 +440,49 @@
                     <!-- SLIM EXECUTIVE TOPBAR -->
                     <header class="portal-topbar" role="banner">
                         <div class="topbar-left">
+                            <!-- Executive Bank Brand Mark (Visible when 7-stage sidebar is removed) -->
+                            <div class="topbar-brand-submitted" id="topbarBrandSubmitted" style="display:none; align-items:center; gap:10px;">
+                                <div class="sidebar-logo-mark" style="width:60px;height:32px;background:#eef2f6;border:1.5px solid rgba(56,130,220,0.6);border-radius:8px;overflow:hidden;box-shadow:0 0 10px rgba(56,130,220,0.45);flex-shrink:0;">
+                                    <img src="/images/bank-logo-dragon.png?v=2" alt="Gringotts Bank Logo" class="sidebar-logo-img" style="width:100%;height:100%;object-fit:cover;display:block;">
+                                </div>
+                                <div style="display:flex; flex-direction:column; justify-content:center;">
+                                    <span style="font-weight:800; font-size:13.5px; color:#ffffff; display:block; line-height:1.2; letter-spacing:-0.2px;">Gringotts Bank</span>
+                                    <small style="color:rgba(255,255,255,0.5); font-size:10.5px; line-height:1.1;">Diagon Alley &bull; Corporate Portal</small>
+                                </div>
+                            </div>
+
                             <button type="button" class="btn-sidebar-hamburger" id="btnSidebarToggle" onclick="toggleSidebarDrawer()" aria-label="Toggle Sidebar Menu">
                                 <span class="hamburger-bar"></span>
                                 <span class="hamburger-bar"></span>
                                 <span class="hamburger-bar"></span>
                             </button>
-                            <div class="topbar-breadcrumb">
+
+                            <div class="topbar-breadcrumb" id="topbarBreadcrumb">
                                 <span class="topbar-dot" aria-hidden="true"></span>
                                 <span class="topbar-step-pill" id="hdr-step-label">Step 1 of 7</span>
                                 <span class="topbar-sep">&bull;</span>
                                 <span class="topbar-title" id="hdrStepTitle">Document Vault</span>
                             </div>
+
+                            <!-- Submitted status badge in topbar -->
+                            <div class="topbar-submitted-pill" id="topbarSubmittedPill" style="display:none; align-items:center; gap:8px;">
+                                <span class="topbar-step-pill" style="background:rgba(16,185,129,0.18); border-color:rgba(16,185,129,0.4); color:#34d399; font-weight:700;">
+                                    <span class="live-pulse-dot" style="width:6px;height:6px;background:#10b981;box-shadow:0 0 8px #10b981;border-radius:50%;display:inline-block;margin-right:4px;"></span>
+                                    Application Submitted
+                                </span>
+                                <span class="topbar-sep">&bull;</span>
+                                <span class="topbar-title" style="color:var(--text-secondary);font-size:12.5px;" id="topbarSubmittedMeta">Compliance Verification In Progress</span>
+                            </div>
                         </div>
 
                         <div class="topbar-right">
+                            <!-- Corporate Identity badge when submitted -->
+                            <div class="topbar-company-tag" id="topbarCompanyTag" style="display:none; align-items:center; gap:8px; padding:4px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(0,210,255,0.2); border-radius:999px;">
+                                <span style="font-size:12px;">🏢</span>
+                                <span id="topbarCompanyNameDisplay" style="font-size:12px; font-weight:700; color:#ffffff;">Corporate Client</span>
+                                <span id="topbarCrnDisplay" style="font-size:10.5px; font-family:monospace; color:#38bdf8; background:rgba(0,210,255,0.12); padding:1px 6px; border-radius:4px;">CRN: 509077205</span>
+                            </div>
+
                             <button type="button" class="btn-hdr-action btn-hdr-rework" id="reworkToggle" onclick="toggleReworkMode()" title="Simulate compliance return for correction">
                                 <span class="hdr-btn-icon">&#x1F504;</span>
                                 <span class="tt-label">Simulate Rework</span>

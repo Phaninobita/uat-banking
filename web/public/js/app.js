@@ -24,6 +24,7 @@ function setCompanyUid(uid) {
 window.setCompanyUid = setCompanyUid;
 let currentAppRef = null;
 let isReworkMode = false;
+let isApplicationSubmitted = false;
 let uboCount = 0;
 let uploadBoxCount = 1;
 let extractedEntities = [];
@@ -162,6 +163,7 @@ function toggleReworkMode() {
     const submitBtn = document.getElementById('finalSubmitBtn');
 
     if (isReworkMode) {
+        if (typeof setSubmittedViewState === 'function') setSubmittedViewState(false);
         if (btn) { btn.classList.add('active'); btn.innerHTML = '&#x1F527; <span class="tt-label">Exit Rework</span>'; }
         if (banner) banner.classList.add('active');
         if (submitBtn) submitBtn.textContent = '✅ Resubmit for Review';
@@ -235,6 +237,68 @@ function toggleSidebarDrawer(force) {
     }
 }
 window.toggleSidebarDrawer = toggleSidebarDrawer;
+
+// ── POST-SUBMISSION VIEW STATE CONTROLLER ──
+function setSubmittedViewState(isSubmitted) {
+    isApplicationSubmitted = Boolean(isSubmitted);
+    const portalSidebar = document.getElementById('portalSidebar');
+    const stepper = document.getElementById('stepper');
+    const portalShell = document.querySelector('.portal-app-shell');
+    const mainApp = document.getElementById('mainApp');
+    const topbarBrandSubmitted = document.getElementById('topbarBrandSubmitted');
+    const topbarBreadcrumb = document.getElementById('topbarBreadcrumb');
+    const topbarSubmittedPill = document.getElementById('topbarSubmittedPill');
+    const topbarCompanyTag = document.getElementById('topbarCompanyTag');
+    const btnSidebarToggle = document.getElementById('btnSidebarToggle');
+    const reviewBody = document.getElementById('reviewBody');
+    const successState = document.getElementById('successState');
+
+    if (isSubmitted) {
+        document.body.classList.add('application-submitted');
+        if (mainApp) mainApp.classList.add('application-submitted');
+        if (portalShell) portalShell.classList.add('application-submitted');
+
+        // Remove / hide the 7 stages on the left completely
+        if (portalSidebar) portalSidebar.style.display = 'none';
+        if (stepper) stepper.style.display = 'none';
+        if (btnSidebarToggle) btnSidebarToggle.style.display = 'none';
+
+        // Update topbar for submitted state
+        if (topbarBrandSubmitted) topbarBrandSubmitted.style.display = 'flex';
+        if (topbarBreadcrumb) topbarBreadcrumb.style.display = 'none';
+        if (topbarSubmittedPill) topbarSubmittedPill.style.display = 'flex';
+        if (topbarCompanyTag) {
+            topbarCompanyTag.style.display = 'flex';
+            const nameEl = document.getElementById('topbarCompanyNameDisplay');
+            const crnEl = document.getElementById('topbarCrnDisplay');
+            const compName = document.getElementById('hdrCompanyName')?.textContent || 'Corporate Client';
+            if (nameEl) nameEl.textContent = compName;
+            if (crnEl && currentLoginCrn) crnEl.textContent = 'CRN: ' + currentLoginCrn;
+        }
+
+        if (reviewBody) reviewBody.style.display = 'none';
+        if (successState) successState.style.display = 'block';
+    } else {
+        document.body.classList.remove('application-submitted');
+        if (mainApp) mainApp.classList.remove('application-submitted');
+        if (portalShell) portalShell.classList.remove('application-submitted');
+
+        // Restore 7 stages on the left
+        if (portalSidebar) portalSidebar.style.display = '';
+        if (stepper) stepper.style.display = '';
+        if (btnSidebarToggle) btnSidebarToggle.style.display = '';
+
+        // Restore topbar
+        if (topbarBrandSubmitted) topbarBrandSubmitted.style.display = 'none';
+        if (topbarBreadcrumb) topbarBreadcrumb.style.display = 'flex';
+        if (topbarSubmittedPill) topbarSubmittedPill.style.display = 'none';
+        if (topbarCompanyTag) topbarCompanyTag.style.display = 'none';
+
+        if (reviewBody) reviewBody.style.display = 'block';
+        if (successState) successState.style.display = 'none';
+    }
+}
+window.setSubmittedViewState = setSubmittedViewState;
 
 // ── NAVIGATION & STEPPER (FAST & NON-DESTRUCTIVE) ──
 function goTo(step) {
@@ -313,6 +377,12 @@ function goTo(step) {
         } else if (step === 6) {
             initFATCA_CRS_States();
         } else if (step === 7) {
+            if (!isApplicationSubmitted) {
+                const reviewBody = document.getElementById('reviewBody');
+                const successState = document.getElementById('successState');
+                if (reviewBody) reviewBody.style.display = 'block';
+                if (successState) successState.style.display = 'none';
+            }
             updateReviewSection();
         }
 
@@ -3835,9 +3905,18 @@ function applySuccessfulLoginData(result) {
     const compName = result.company_name || result.data.company_name || result.data.form_data?.step2?.company_name || '';
     displayClientNameOnTop(compName, currentLoginCrn, currentCompanyUid);
 
-    if (result.data.current_step && result.data.current_step > 1) {
-        goTo(result.data.current_step);
+    // Reset submitted view state so 7 stages on the left are restored
+    setSubmittedViewState(false);
+
+    // If application was previously submitted, reset status in DB to draft so a fresh demo run can proceed cleanly
+    if (result.data && (result.data.status === 'submitted' || result.data.status === 'completed')) {
+        if (window.VBApi && window.VBApi.isAuthenticated()) {
+            window.VBApi.saveApplication(1, 'draft', result.data.form_data || {}).catch(() => {});
+        }
     }
+
+    // Always make user come from start (Step 1: Document Vault) upon logging in
+    goTo(1);
 
     // Restore Base64 documents from Database
     loadSavedDocuments();
@@ -3994,10 +4073,9 @@ async function finalizeApp() {
     });
 
     updateReviewSection();
-    const reviewBody = document.getElementById('reviewBody');
-    const successState = document.getElementById('successState');
-    if (reviewBody) reviewBody.style.display = 'none';
-    if (successState) successState.style.display = 'block';
+
+    // Remove the 7 stages on the left and show the submitted state
+    setSubmittedViewState(true);
 
     document.querySelectorAll('.step-pill').forEach(p => {
         p.classList.remove('active');
@@ -4060,6 +4138,8 @@ function showSaveModal() {
 }
 
 function handleSignOut() {
+    setSubmittedViewState(false);
+    goTo(1);
     if (window.VBApi) {
         window.VBApi.clearToken();
     }
@@ -4723,9 +4803,21 @@ window.addEventListener('DOMContentLoaded', async () => {
                 const compName = record.company_name || record.form_data?.step2?.company_name || '';
                 displayClientNameOnTop(compName, record.crn, currentCompanyUid);
 
-                // Navigate to saved step
-                if (record.current_step && record.current_step > 1) {
-                    goTo(record.current_step);
+                // Rehydrate submission state or navigate to saved step
+                if (record.status === 'submitted') {
+                    setSubmittedViewState(true);
+                    goTo(7);
+                    const reviewBody = document.getElementById('reviewBody');
+                    const successState = document.getElementById('successState');
+                    if (reviewBody) reviewBody.style.display = 'none';
+                    if (successState) successState.style.display = 'block';
+                } else {
+                    setSubmittedViewState(false);
+                    if (record.current_step && record.current_step > 1) {
+                        goTo(record.current_step);
+                    } else {
+                        goTo(1);
+                    }
                 }
 
                 // Restore Base64 documents from Database table application_documents
