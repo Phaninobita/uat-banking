@@ -382,7 +382,7 @@ router.post("/save", requireAuth, async (req, res) => {
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; color: #0f172a;">
             <div style="text-align: center; margin-bottom: 20px;">
-              <img src="/images/bank-crest.jpg" alt="Gringotts Bank Logo" style="height: 52px; width: 52px; object-fit: cover; border-radius: 12px; border: 1.5px solid rgba(217, 119, 6, 0.65); display: inline-block; margin-bottom: 6px;">
+              <img src="/images/bank-logo-vault.png" alt="Gringotts Bank Logo" style="height: 52px; width: 52px; object-fit: contain; border-radius: 50%; border: none; display: inline-block; margin-bottom: 6px;">
               <h2 style="color: #0f172a; margin: 12px 0 2px; font-size: 20px; font-weight: 700;">Gringotts Bank Corporate Portal</h2>
               <p style="color: #64748b; font-size: 13px; margin: 0;">Diagon Alley &bull; Application Confirmation</p>
             </div>

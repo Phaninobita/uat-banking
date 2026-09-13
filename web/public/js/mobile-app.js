@@ -34,7 +34,7 @@
                 <!-- 1. Biometric Lock Screen -->
                 <div id="mLockView" class="m-lock-screen" style="display:${this.isUnlocked ? 'none' : 'flex'};">
                     <div class="m-lock-logo" aria-label="Gringotts Bank Logo">
-                        <img src="/images/bank-crest.jpg" alt="Gringotts Bank Logo" class="m-lock-logo-img">
+                        <img src="/images/bank-logo-vault.png" alt="Gringotts Bank Logo" class="m-lock-logo-img">
                     </div>
                     <h2 style="margin:0 0 4px;font-size:20px;font-weight:800;">Gringotts Mobile</h2>
                     <p style="color:#94a3b8;font-size:12px;margin:0 0 16px;">Diagon Alley &bull; Hogwarts Vaults &amp; Clearing</p>
@@ -546,3 +546,4 @@
 
     window.MobileApp = MobileApp;
 })();
+
