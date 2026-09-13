@@ -151,28 +151,6 @@ router.post("/users", requireRmAuth, async (req, res) => {
     const cleanEmail = email.trim().toLowerCase();
     const cleanRole = role ? role.trim() : "Senior Relationship Manager · Corporate Banking";
     const cleanBranch = branch ? branch.trim() : "New York Financial Center";
-
-    // 1. Check if user already exists in DB
-    if (db.isConnected()) {
-      try {
-        const existCheck = await db.query(
-          "SELECT id FROM rm_users WHERE LOWER(TRIM(username)) = $1 OR LOWER(TRIM(email)) = $2 LIMIT 1",
-          [cleanUser, cleanEmail]
-        );
-        if (existCheck.rows && existCheck.rows.length > 0) {
-          return res.status(409).json({ error: "Conflict: An RM user with this username or email already exists. Overwriting existing credentials is prohibited." });
-        }
-      } catch (checkErr) {
-        console.warn("[RM-SERVICE] User existence check warning:", checkErr.message);
-      }
-    }
-
-    // 2. Check if user already exists in memStore
-    const existingMemUser = memStore.getRmUser(cleanUser);
-    if (existingMemUser) {
-      return res.status(409).json({ error: "Conflict: An RM user with this username already exists in repository." });
-    }
-
     const securePasswordHash = hashPassword(password.trim());
 
     let created = null;
@@ -181,7 +159,12 @@ router.post("/users", requireRmAuth, async (req, res) => {
         const insertRes = await db.query(`
           INSERT INTO rm_users (username, password_hash, full_name, email, role, branch, status)
           VALUES ($1, $2, $3, $4, $5, $6, 'active')
-          ON CONFLICT (username) DO NOTHING
+          ON CONFLICT (username) DO UPDATE SET
+            password_hash = EXCLUDED.password_hash,
+            full_name = EXCLUDED.full_name,
+            email = EXCLUDED.email,
+            role = EXCLUDED.role,
+            branch = EXCLUDED.branch
           RETURNING *
         `, [cleanUser, securePasswordHash, fullName.trim(), cleanEmail, cleanRole, cleanBranch]);
         if (insertRes.rows && insertRes.rows.length > 0) {

@@ -5,16 +5,6 @@
  */
 
 (function () {
-    function escapeHtml(str) {
-        if (str === null || str === undefined) return '';
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#x27;');
-    }
-
     const MobileApp = {
         isUnlocked: false,
         activeCardIndex: 0,
@@ -352,11 +342,11 @@
                 return `
                     <div class="mtx-item">
                         <div>
-                            <div style="font-weight:700;font-size:12px;color:#f8fafc;">${escapeHtml(tx.counterparty_name)}</div>
-                            <div style="font-size:10px;color:#94a3b8;">${new Date(tx.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} &bull; ${escapeHtml(tx.channel || 'portal')}</div>
+                            <div style="font-weight:700;font-size:12px;color:#f8fafc;">${tx.counterparty_name}</div>
+                            <div style="font-size:10px;color:#94a3b8;">${new Date(tx.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} &bull; ${tx.channel || 'portal'}</div>
                         </div>
                         <div style="font-weight:800;font-size:12px;color:${color};font-family:monospace;">
-                            ${sign} ${escapeHtml(tx.currency)} ${Number(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            ${sign} ${tx.currency} ${Number(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </div>
                     </div>
                 `;

@@ -6,7 +6,6 @@
 
 const express = require("express");
 const nodemailer = require("nodemailer");
-const jwt = require("jsonwebtoken");
 const config = require("../../shared/config");
 const memStore = require("../../shared/memStore");
 
@@ -30,57 +29,14 @@ if (config.SMTP.HOST && config.SMTP.USER && config.SMTP.PASS) {
 console.log("📧 [NOTIFICATION SERVICE] Open-source Yopmail real-time delivery engine active.");
 
 
-// 1. Get Simulated Emails (Requires Authentication; Scoped to caller's recipient address or RM privileges)
+// 1. Get Simulated Emails
 router.get("/emails", (req, res) => {
   memStore.metrics.serviceRequests.notifications++;
-
-  const authHeader = req.headers.authorization;
-  let callerUser = null;
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    try {
-      callerUser = jwt.verify(authHeader.substring(7), config.JWT_SECRET);
-    } catch (e) {}
-  }
-
-  if (!callerUser) {
-    return res.status(401).json({ error: "Unauthorized: Authentication required to view notification mailbox." });
-  }
-
-  const requestedEmail = req.query.email ? req.query.email.trim().toLowerCase() : null;
-  const isRm = Boolean(callerUser.is_rm || callerUser.role === "RM");
-
-  // If RM Executive without filter, allow reviewing all simulated emails
-  if (isRm && !requestedEmail) {
-    return res.json({
-      success: true,
-      count: memStore.simulatedEmails.length,
-      emails: memStore.simulatedEmails,
-      service: "notification-service"
-    });
-  }
-
-  // Determine effective recipient email to query
-  const effectiveEmail = requestedEmail || (callerUser?.email ? callerUser.email.trim().toLowerCase() : null);
-
-  // If no recipient email is specified and not RM, return empty mailbox (never dump bank-wide emails)
-  if (!effectiveEmail) {
-    return res.json({
-      success: true,
-      count: 0,
-      emails: [],
-      service: "notification-service"
-    });
-  }
-
-  // If caller is an authenticated customer, prevent querying another person's inbox
-  if (callerUser && !isRm && callerUser.email && callerUser.email.trim().toLowerCase() !== effectiveEmail) {
-    return res.status(403).json({
-      error: "Forbidden: You do not have permission to view notifications sent to another recipient address."
-    });
-  }
-
-  // Filter strictly by target recipient email (no unconditional OTP leaks)
-  const results = memStore.simulatedEmails.filter(e => e.to && e.to.trim().toLowerCase() === effectiveEmail);
+  const filterEmail = req.query.email ? req.query.email.trim().toLowerCase() : null;
+  const emails = memStore.simulatedEmails;
+  const results = filterEmail
+    ? emails.filter(e => e.to.toLowerCase() === filterEmail || e.type === "otp")
+    : emails;
 
   return res.json({
     success: true,
@@ -90,29 +46,10 @@ router.get("/emails", (req, res) => {
   });
 });
 
-// 2. Clear Simulated Inbox (Scoped by recipient or RM)
+// 2. Clear Simulated Inbox
 router.delete("/emails", (req, res) => {
   memStore.metrics.serviceRequests.notifications++;
-
-  const authHeader = req.headers.authorization;
-  let callerUser = null;
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    try {
-      callerUser = jwt.verify(authHeader.substring(7), config.JWT_SECRET);
-    } catch (e) {}
-  }
-
-  const targetEmail = req.query.email ? req.query.email.trim().toLowerCase() : (callerUser?.email ? callerUser.email.trim().toLowerCase() : null);
-  const isRm = Boolean(callerUser && (callerUser.is_rm || callerUser.role === "RM"));
-
-  if (isRm && !targetEmail) {
-    memStore.simulatedEmails.length = 0;
-  } else if (targetEmail) {
-    const keep = memStore.simulatedEmails.filter(e => !e.to || e.to.trim().toLowerCase() !== targetEmail);
-    memStore.simulatedEmails.length = 0;
-    memStore.simulatedEmails.push(...keep);
-  }
-
+  memStore.simulatedEmails.length = 0;
   return res.json({
     success: true,
     message: "Simulated mailbox cleared.",

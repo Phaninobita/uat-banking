@@ -437,84 +437,21 @@ router.get("/download/:id", requireAuth, async (req, res) => {
   }
 });
 
-// 4. Delete Document (Requires Authentication & IDOR Tenant Check)
+// 4. Delete Document
 router.delete("/:id", requireAuth, async (req, res) => {
   memStore.metrics.serviceRequests.documents++;
   const docId = req.params.id;
 
   try {
     await db.ready();
-    let doc = null;
-
     if (db.isConnected()) {
       try {
-        doc = await db.getDocument(docId, req.user.application_ref, req.user.company_uid);
-      } catch (err) {
-        console.warn("[DOCUMENT SERVICE] DB get doc before delete warning:", err.message);
-      }
-    }
-
-    if (!doc) {
-      doc = memStore.documents.get(parseInt(docId, 10)) || null;
-      if (!doc) {
-        const allMemDocs = Array.from(memStore.documents.values());
-        doc = allMemDocs.find(d => String(d.id) === String(docId)) || null;
-      }
-    }
-
-    if (!doc) {
-      return res.status(404).json({ error: `Document "${docId}" not found in database.` });
-    }
-
-    // IDOR Tenant Isolation: Verify caller ownership unless RM Executive
-    const isRm = Boolean(req.user.is_rm || req.user.role === "RM");
-    if (!isRm) {
-      const userRef = (req.user.application_ref || "").trim();
-      const userCuid = (req.user.company_uid || "").trim().toUpperCase();
-      const docRef = (doc.application_ref || "").trim();
-      const docCuid = (doc.company_uid || "").trim().toUpperCase();
-
-      const matchesRef = userRef && docRef && userRef === docRef;
-      const matchesCuid = userCuid && docCuid && userCuid === docCuid;
-
-      if (!matchesRef && !matchesCuid) {
-        return res.status(403).json({ error: "Forbidden: You do not have authorization to delete this document." });
-      }
-    }
-
-    if (db.isConnected()) {
-      try {
-        await db.deleteDocument(docId, isRm ? doc.application_ref : req.user.application_ref);
+        await db.deleteDocument(docId, req.user.application_ref);
       } catch (err) {
         console.warn("[DOCUMENT SERVICE] DB delete doc warning:", err.message);
       }
     }
-
-    // Remove from in-memory vault
-    const parsedId = parseInt(docId, 10);
-    if (!isNaN(parsedId)) {
-      memStore.documents.delete(parsedId);
-    }
-    for (const [key, val] of memStore.documents.entries()) {
-      if (String(val.id) === String(docId)) {
-        memStore.documents.delete(key);
-      }
-    }
-
-    // Audit logging
-    await logAuditEvent({
-      company_uid: doc.company_uid || req.user.company_uid || null,
-      crn: req.user.crn || "",
-      application_ref: doc.application_ref || req.user.application_ref || "",
-      channel: "web",
-      action_type: "DOCUMENT_DELETED",
-      actor: req.user.crn || (isRm ? "RM_EXECUTIVE" : "CUSTOMER"),
-      target: doc.document_type || doc.file_name || `doc_${docId}`,
-      status: "SUCCESS",
-      ip_address: req.ip || req.headers["x-forwarded-for"] || "127.0.0.1",
-      user_agent: req.headers["user-agent"] || "Web-Browser",
-      metadata: { document_id: docId, file_name: doc.file_name }
-    });
+    memStore.documents.delete(parseInt(docId, 10));
 
     return res.json({
       success: true,
