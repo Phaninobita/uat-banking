@@ -155,9 +155,6 @@ app.use("/api/application", appService.router);
 app.use("/api/documents", docService.router);
 app.use("/api/emails", notifService.router);
 
-// Static Web Assets
-app.use(express.static(path.join(__dirname, "..", "public")));
-
 // Route /site, /landing, /home specifically to Gringotts Marketing & Wealth Website
 app.get(["/site", "/site/*", "/landing", "/home"], (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "site", "index.html"));
@@ -167,6 +164,14 @@ app.get(["/site", "/site/*", "/landing", "/home"], (req, res) => {
 app.get(["/rm", "/rm/*"], (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "rm", "index.html"));
 });
+
+// Route /customer and /customer/* specifically to Customer Banking Portal
+app.get(["/customer", "/customer/*"], (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public", "customer", "index.html"));
+});
+
+// Static Web Assets
+app.use(express.static(path.join(__dirname, "..", "public")));
 
 // Fallback for Customer Portal SPA or root
 app.get("*", (req, res, next) => {
