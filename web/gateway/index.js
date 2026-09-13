@@ -158,6 +158,11 @@ app.use("/api/emails", notifService.router);
 // Static Web Assets
 app.use(express.static(path.join(__dirname, "..", "public")));
 
+// Route /site, /landing, /home specifically to Gringotts Marketing & Wealth Website
+app.get(["/site", "/site/*", "/landing", "/home"], (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public", "site", "index.html"));
+});
+
 // Route /rm and /rm/* specifically to Relationship Manager (RM) Executive Portal
 app.get(["/rm", "/rm/*"], (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "rm", "index.html"));
