@@ -4,14 +4,161 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gringotts Bank &mdash; Corporate &amp; Vault Account Portal | Diagon Alley</title>
-    <link rel="stylesheet" href="/css/style.css?v=20260913_03">
+    <link rel="stylesheet" href="/css/style.css?v=20260913_05">
     <script>
-        // Anti-flicker: if already authenticated, keep overlay hidden during initial render & rehydration
+        const THEME_PALETTES = {
+            cyan: {
+                '--brand-primary': '#00d2ff',
+                '--brand-secondary': '#0ea5e9',
+                '--brand-tertiary': '#38bdf8',
+                '--brand-primary-strong': '#00172e',
+                '--brand-secondary-strong': '#002b52',
+                '--brand-tertiary-strong': '#03497d',
+                '--brand-glow': 'rgba(0, 210, 255, 0.45)',
+                '--brand-glow-subtle': 'rgba(0, 210, 255, 0.18)',
+                '--pill-glow': 'rgba(0, 210, 255, 0.35)',
+                '--border-glass-glow': 'rgba(0, 210, 255, 0.55)',
+                '--primary': '#00d2ff',
+                '--primary-dark': '#0284c7',
+                '--primary-light': '#38bdf8',
+                '--primary-bg': 'rgba(0, 210, 255, 0.15)',
+                '--primary-grad': 'linear-gradient(16.7deg, #00d2ff 9.6%, #0284c7 36.3%, #00172e 92.5%)'
+            },
+            gold: {
+                '--brand-primary': '#fbbf24',
+                '--brand-secondary': '#f59e0b',
+                '--brand-tertiary': '#fde047',
+                '--brand-primary-strong': '#241400',
+                '--brand-secondary-strong': '#451a03',
+                '--brand-tertiary-strong': '#78350f',
+                '--brand-glow': 'rgba(251, 191, 36, 0.55)',
+                '--brand-glow-subtle': 'rgba(251, 191, 36, 0.22)',
+                '--pill-glow': 'rgba(251, 191, 36, 0.42)',
+                '--border-glass-glow': 'rgba(251, 191, 36, 0.65)',
+                '--primary': '#fbbf24',
+                '--primary-dark': '#d97706',
+                '--primary-light': '#fde047',
+                '--primary-bg': 'rgba(251, 191, 36, 0.18)',
+                '--primary-grad': 'linear-gradient(16.7deg, #fbbf24 9.6%, #d97706 36.3%, #241400 92.5%)'
+            },
+            purple: {
+                '--brand-primary': '#c084fc',
+                '--brand-secondary': '#a855f7',
+                '--brand-tertiary': '#e879f9',
+                '--brand-primary-strong': '#19052b',
+                '--brand-secondary-strong': '#2e1065',
+                '--brand-tertiary-strong': '#581c87',
+                '--brand-glow': 'rgba(192, 132, 252, 0.55)',
+                '--brand-glow-subtle': 'rgba(192, 132, 252, 0.22)',
+                '--pill-glow': 'rgba(192, 132, 252, 0.42)',
+                '--border-glass-glow': 'rgba(192, 132, 252, 0.65)',
+                '--primary': '#c084fc',
+                '--primary-dark': '#7e22ce',
+                '--primary-light': '#e879f9',
+                '--primary-bg': 'rgba(168, 85, 247, 0.18)',
+                '--primary-grad': 'linear-gradient(16.7deg, #c084fc 9.6%, #7e22ce 36.3%, #19052b 92.5%)'
+            },
+            mint: {
+                '--brand-primary': '#00f2a9',
+                '--brand-secondary': '#10b981',
+                '--brand-tertiary': '#6ee7b7',
+                '--brand-primary-strong': '#012217',
+                '--brand-secondary-strong': '#064e3b',
+                '--brand-tertiary-strong': '#047857',
+                '--brand-glow': 'rgba(0, 242, 169, 0.55)',
+                '--brand-glow-subtle': 'rgba(0, 242, 169, 0.22)',
+                '--pill-glow': 'rgba(0, 242, 169, 0.42)',
+                '--border-glass-glow': 'rgba(0, 242, 169, 0.65)',
+                '--primary': '#00f2a9',
+                '--primary-dark': '#059669',
+                '--primary-light': '#6ee7b7',
+                '--primary-bg': 'rgba(0, 242, 169, 0.18)',
+                '--primary-grad': 'linear-gradient(16.7deg, #00f2a9 9.6%, #059669 36.3%, #012217 92.5%)'
+            },
+            rose: {
+                '--brand-primary': '#fb7185',
+                '--brand-secondary': '#f43f5e',
+                '--brand-tertiary': '#fda4af',
+                '--brand-primary-strong': '#2b0610',
+                '--brand-secondary-strong': '#4c0519',
+                '--brand-tertiary-strong': '#881337',
+                '--brand-glow': 'rgba(251, 113, 133, 0.55)',
+                '--brand-glow-subtle': 'rgba(251, 113, 133, 0.22)',
+                '--pill-glow': 'rgba(251, 113, 133, 0.42)',
+                '--border-glass-glow': 'rgba(251, 113, 133, 0.65)',
+                '--primary': '#fb7185',
+                '--primary-dark': '#e11d48',
+                '--primary-light': '#fda4af',
+                '--primary-bg': 'rgba(251, 113, 133, 0.18)',
+                '--primary-grad': 'linear-gradient(16.7deg, #fb7185 9.6%, #e11d48 36.3%, #2b0610 92.5%)'
+            }
+        };
+
+        function applyTheme(theme) {
+            var vars = THEME_PALETTES[theme] || THEME_PALETTES.cyan;
+            var root = document.documentElement;
+            root.setAttribute('data-theme', theme);
+            if (document.body) document.body.setAttribute('data-theme', theme);
+            for (var k in vars) {
+                root.style.setProperty(k, vars[k]);
+            }
+        }
+
+        // Anti-flicker & Early Theme Hydration
         try {
-            if (localStorage.getItem('vb_auth_token')) {
+            var savedTheme = localStorage.getItem('gringotts_login_theme') || 'cyan';
+            applyTheme(savedTheme);
+            if (localStorage.getItem('gb_auth_token') || localStorage.getItem('vb_auth_token')) {
                 document.documentElement.classList.add('has-auth-token');
             }
         } catch (e) {}
+
+        function switchLoginTheme(theme) {
+            applyTheme(theme);
+            try { localStorage.setItem('gringotts_login_theme', theme); } catch (e) {}
+            document.querySelectorAll('.theme-swatch-btn').forEach(function(btn) {
+                btn.classList.toggle('active', btn.getAttribute('data-theme-id') === theme);
+            });
+        }
+
+        function previewRingAnimation() {
+            var s1 = document.getElementById('lStep1');
+            var s2 = document.getElementById('lStep2');
+            if (s1 && s2 && !s1.classList.contains('hidden')) {
+                s1.classList.add('hidden');
+                s2.classList.remove('hidden');
+            }
+            var otpRow = document.getElementById('otpInputs');
+            var symbolEl = document.getElementById('otpMorphSymbol');
+            if (!otpRow) return;
+
+            otpRow.classList.remove('loading', 'success-state', 'error-state', 'converging');
+            if (symbolEl) symbolEl.textContent = '';
+            void otpRow.offsetWidth;
+
+            otpRow.classList.add('converging');
+            setTimeout(function() {
+                otpRow.classList.add('loading');
+                setTimeout(function() {
+                    otpRow.classList.remove('loading');
+                    otpRow.classList.add('success-state');
+                    if (symbolEl) symbolEl.textContent = '✓';
+
+                    setTimeout(function() {
+                        otpRow.classList.remove('success-state', 'converging');
+                        if (symbolEl) symbolEl.textContent = '';
+                    }, 2400);
+                }, 850);
+            }, 300);
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            var currentTheme = document.documentElement.getAttribute('data-theme') || 'cyan';
+            applyTheme(currentTheme);
+            document.querySelectorAll('.theme-swatch-btn').forEach(function(btn) {
+                btn.classList.toggle('active', btn.getAttribute('data-theme-id') === currentTheme);
+            });
+        });
     </script>
 </head>
 <body>
@@ -40,6 +187,34 @@
 
     <!-- LOGIN OVERLAY -->
     <div id="loginOverlay" role="dialog" aria-label="Login to Corporate Portal">
+        <!-- Interactive Theme Palette Switcher Bar (Local Preview) -->
+        <div class="theme-preview-pill-bar" id="themePreviewBar" role="toolbar" aria-label="Color Palette Switcher">
+            <span class="theme-bar-title">🎨 Theme:</span>
+            <button type="button" class="theme-swatch-btn active" data-theme-id="cyan" onclick="switchLoginTheme('cyan')" title="Electric Cyan (Current Default)">
+                <span class="swatch-dot" style="background: linear-gradient(135deg, #00d2ff, #0284c7); box-shadow: 0 0 7px #00d2ff;"></span>
+                <span class="swatch-name">Cyan</span>
+            </button>
+            <button type="button" class="theme-swatch-btn" data-theme-id="gold" onclick="switchLoginTheme('gold')" title="Imperial Vault Gold (Swiss Vault & Gringotts Reserve)">
+                <span class="swatch-dot" style="background: linear-gradient(135deg, #fbbf24, #d97706); box-shadow: 0 0 7px #fbbf24;"></span>
+                <span class="swatch-name">Imperial Gold</span>
+            </button>
+            <button type="button" class="theme-swatch-btn" data-theme-id="purple" onclick="switchLoginTheme('purple')" title="Royal Violet (Hyper-Fintech Amethyst)">
+                <span class="swatch-dot" style="background: linear-gradient(135deg, #c084fc, #a855f7); box-shadow: 0 0 7px #c084fc;"></span>
+                <span class="swatch-name">Royal Violet</span>
+            </button>
+            <button type="button" class="theme-swatch-btn" data-theme-id="mint" onclick="switchLoginTheme('mint')" title="Cyber Mint (Neo-Emerald / High-Tech)">
+                <span class="swatch-dot" style="background: linear-gradient(135deg, #00f2a9, #10b981); box-shadow: 0 0 7px #00f2a9;"></span>
+                <span class="swatch-name">Cyber Mint</span>
+            </button>
+            <button type="button" class="theme-swatch-btn" data-theme-id="rose" onclick="switchLoginTheme('rose')" title="Luminous Rose (Luxury Velvet Ruby)">
+                <span class="swatch-dot" style="background: linear-gradient(135deg, #fb7185, #f43f5e); box-shadow: 0 0 7px #fb7185;"></span>
+                <span class="swatch-name">Luminous Rose</span>
+            </button>
+            <button type="button" class="theme-test-btn" onclick="previewRingAnimation()" title="Play live spinner & 360-degree success ring animation">
+                <span>⚡ Test Ring</span>
+            </button>
+        </div>
+
         <!-- Ambient Aurora Mesh Background Elements (mal.ai inspired) -->
         <div class="login-aurora-bg" aria-hidden="true">
             <div class="aurora-glow glow-1"></div>

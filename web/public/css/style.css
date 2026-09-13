@@ -2,22 +2,22 @@
 
 /* ── First National Bank — Vibrant Design System ── */
 :root {
-    /* ── Electric Cyber Cyan & Sapphire Azure Design Tokens (mal.ai architecture) ── */
+    /* ── Electric Cyber Cyan & Sapphire Azure Design Tokens (Default) ── */
     --brand-primary: #00d2ff;
     --brand-secondary: #0ea5e9;
     --brand-tertiary: #38bdf8;
     --brand-primary-strong: #00172e;
     --brand-secondary-strong: #002b52;
     --brand-tertiary-strong: #03497d;
-    --brand-glow: rgba(0, 210, 255, 0.4);
-    --brand-glow-subtle: rgba(0, 210, 255, 0.16);
+    --brand-glow: rgba(0, 210, 255, 0.45);
+    --brand-glow-subtle: rgba(0, 210, 255, 0.18);
     --pill-glow: rgba(0, 210, 255, 0.35);
     --page-bg: #020712;
     --section-bg: #030d1e;
     --surface-glass: rgba(2, 13, 30, 0.85);
     --surface-glass-card: rgba(255, 255, 255, 0.04);
     --border-glass: rgba(255, 255, 255, 0.12);
-    --border-glass-glow: rgba(0, 210, 255, 0.45);
+    --border-glass-glow: rgba(0, 210, 255, 0.55);
     --ease-standard: cubic-bezier(0.2, 0, 0, 1);
     --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
     --duration-fast: 150ms;
@@ -87,6 +87,116 @@
     --toast-error: #ef4444;
     --toast-warning: #f59e0b;
     --toast-info: #06b6d4;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PREMIUM LUXURY PALETTES (LOCAL PREVIEW)
+   ══════════════════════════════════════════════════════════════ */
+
+/* Theme 1: Electric Cyan / Azure Sapphire (Current Default) */
+:root,
+html[data-theme="cyan"],
+body[data-theme="cyan"],
+[data-theme="cyan"] {
+    --brand-primary: #00d2ff !important;
+    --brand-secondary: #0ea5e9 !important;
+    --brand-tertiary: #38bdf8 !important;
+    --brand-primary-strong: #00172e !important;
+    --brand-secondary-strong: #002b52 !important;
+    --brand-tertiary-strong: #03497d !important;
+    --brand-glow: rgba(0, 210, 255, 0.45) !important;
+    --brand-glow-subtle: rgba(0, 210, 255, 0.18) !important;
+    --pill-glow: rgba(0, 210, 255, 0.35) !important;
+    --border-glass-glow: rgba(0, 210, 255, 0.55) !important;
+    --primary: #00d2ff !important;
+    --primary-dark: #0284c7 !important;
+    --primary-light: #38bdf8 !important;
+    --primary-bg: rgba(0, 210, 255, 0.15) !important;
+    --primary-grad: linear-gradient(16.7deg, #00d2ff 9.6%, #0284c7 36.3%, #00172e 92.5%) !important;
+}
+
+/* Theme 2: Imperial Vault Gold (Gringotts Goblin Vault & Swiss Private Reserve) */
+html[data-theme="gold"],
+body[data-theme="gold"],
+[data-theme="gold"] {
+    --brand-primary: #fbbf24 !important;
+    --brand-secondary: #f59e0b !important;
+    --brand-tertiary: #fde047 !important;
+    --brand-primary-strong: #241400 !important;
+    --brand-secondary-strong: #451a03 !important;
+    --brand-tertiary-strong: #78350f !important;
+    --brand-glow: rgba(251, 191, 36, 0.55) !important;
+    --brand-glow-subtle: rgba(251, 191, 36, 0.22) !important;
+    --pill-glow: rgba(251, 191, 36, 0.42) !important;
+    --border-glass-glow: rgba(251, 191, 36, 0.65) !important;
+    --primary: #fbbf24 !important;
+    --primary-dark: #d97706 !important;
+    --primary-light: #fde047 !important;
+    --primary-bg: rgba(251, 191, 36, 0.18) !important;
+    --primary-grad: linear-gradient(16.7deg, #fbbf24 9.6%, #d97706 36.3%, #241400 92.5%) !important;
+}
+
+/* Theme 3: Royal Amethyst / Hyper-Fintech Violet (Modern Monzo / Revolut Metal) */
+html[data-theme="purple"],
+body[data-theme="purple"],
+[data-theme="purple"] {
+    --brand-primary: #c084fc !important;
+    --brand-secondary: #a855f7 !important;
+    --brand-tertiary: #e879f9 !important;
+    --brand-primary-strong: #19052b !important;
+    --brand-secondary-strong: #2e1065 !important;
+    --brand-tertiary-strong: #581c87 !important;
+    --brand-glow: rgba(192, 132, 252, 0.55) !important;
+    --brand-glow-subtle: rgba(192, 132, 252, 0.22) !important;
+    --pill-glow: rgba(192, 132, 252, 0.42) !important;
+    --border-glass-glow: rgba(192, 132, 252, 0.65) !important;
+    --primary: #c084fc !important;
+    --primary-dark: #7e22ce !important;
+    --primary-light: #e879f9 !important;
+    --primary-bg: rgba(168, 85, 247, 0.18) !important;
+    --primary-grad: linear-gradient(16.7deg, #c084fc 9.6%, #7e22ce 36.3%, #19052b 92.5%) !important;
+}
+
+/* Theme 4: Luminescent Cyber Mint / Neo Emerald (Terminal Green / High-Tech Crypto) */
+html[data-theme="mint"],
+body[data-theme="mint"],
+[data-theme="mint"] {
+    --brand-primary: #00f2a9 !important;
+    --brand-secondary: #10b981 !important;
+    --brand-tertiary: #6ee7b7 !important;
+    --brand-primary-strong: #012217 !important;
+    --brand-secondary-strong: #064e3b !important;
+    --brand-tertiary-strong: #047857 !important;
+    --brand-glow: rgba(0, 242, 169, 0.55) !important;
+    --brand-glow-subtle: rgba(0, 242, 169, 0.22) !important;
+    --pill-glow: rgba(0, 242, 169, 0.42) !important;
+    --border-glass-glow: rgba(0, 242, 169, 0.65) !important;
+    --primary: #00f2a9 !important;
+    --primary-dark: #059669 !important;
+    --primary-light: #6ee7b7 !important;
+    --primary-bg: rgba(0, 242, 169, 0.18) !important;
+    --primary-grad: linear-gradient(16.7deg, #00f2a9 9.6%, #059669 36.3%, #012217 92.5%) !important;
+}
+
+/* Theme 5: Luminous Rose / Velvet Crimson (Cartier / Luxury Private Wealth) */
+html[data-theme="rose"],
+body[data-theme="rose"],
+[data-theme="rose"] {
+    --brand-primary: #fb7185 !important;
+    --brand-secondary: #f43f5e !important;
+    --brand-tertiary: #fda4af !important;
+    --brand-primary-strong: #2b0610 !important;
+    --brand-secondary-strong: #4c0519 !important;
+    --brand-tertiary-strong: #881337 !important;
+    --brand-glow: rgba(251, 113, 133, 0.55) !important;
+    --brand-glow-subtle: rgba(251, 113, 133, 0.22) !important;
+    --pill-glow: rgba(251, 113, 133, 0.42) !important;
+    --border-glass-glow: rgba(251, 113, 133, 0.65) !important;
+    --primary: #fb7185 !important;
+    --primary-dark: #e11d48 !important;
+    --primary-light: #fda4af !important;
+    --primary-bg: rgba(251, 113, 133, 0.18) !important;
+    --primary-grad: linear-gradient(16.7deg, #fb7185 9.6%, #e11d48 36.3%, #2b0610 92.5%) !important;
 }
 
 
@@ -4722,22 +4832,22 @@
             0%, 100% {
                 box-shadow: 0 32px 80px rgba(0, 0, 0, 0.85),
                             inset 0 1px 0 rgba(255, 255, 255, 0.16),
-                            0 0 45px rgba(0, 210, 255, 0.12);
+                            0 0 45px var(--brand-glow-subtle, rgba(0, 210, 255, 0.12));
             }
             50% {
                 box-shadow: 0 36px 90px rgba(0, 0, 0, 0.9),
                             inset 0 1px 0 rgba(255, 255, 255, 0.22),
-                            0 0 65px rgba(0, 210, 255, 0.22);
+                            0 0 65px var(--brand-glow, rgba(0, 210, 255, 0.22));
             }
         }
 
         @keyframes logoPulse {
             0%, 100% {
-                box-shadow: 0 0 25px rgba(0, 210, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+                box-shadow: 0 0 25px var(--brand-glow, rgba(0, 210, 255, 0.4)), inset 0 1px 0 rgba(255, 255, 255, 0.4);
                 transform: scale(1);
             }
             50% {
-                box-shadow: 0 0 40px rgba(0, 210, 255, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+                box-shadow: 0 0 40px var(--brand-glow, rgba(0, 210, 255, 0.7)), inset 0 1px 0 rgba(255, 255, 255, 0.6);
                 transform: scale(1.03);
             }
         }
@@ -4819,7 +4929,7 @@
             height: 750px;
             top: -150px;
             left: 10%;
-            background: radial-gradient(50% 50% at 50% 50%, rgba(0, 210, 255, 0.28) 0%, rgba(2, 132, 199, 0.16) 45%, transparent 75%);
+            background: radial-gradient(50% 50% at 50% 50%, var(--brand-glow, rgba(0, 210, 255, 0.28)) 0%, var(--brand-secondary, rgba(2, 132, 199, 0.16)) 45%, transparent 75%);
             filter: blur(65px);
             animation: auroraDrift1 18s ease-in-out infinite alternate, auroraPulse 8s ease-in-out infinite;
         }
@@ -4829,7 +4939,7 @@
             height: 900px;
             bottom: -200px;
             right: 5%;
-            background: radial-gradient(50% 50% at 50% 50%, rgba(14, 165, 233, 0.24) 0%, rgba(0, 23, 46, 0.25) 48%, transparent 75%);
+            background: radial-gradient(50% 50% at 50% 50%, var(--brand-secondary, rgba(14, 165, 233, 0.24)) 0%, var(--brand-primary-strong, rgba(0, 23, 46, 0.25)) 48%, transparent 75%);
             filter: blur(80px);
             animation: auroraDrift2 22s ease-in-out infinite alternate, auroraPulse 10s ease-in-out infinite 3s;
         }
@@ -4840,7 +4950,7 @@
             top: 40%;
             left: 45%;
             transform: translate(-50%, -50%);
-            background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 65%);
+            background: radial-gradient(circle, var(--brand-glow-subtle, rgba(56, 189, 248, 0.15)) 0%, transparent 65%);
             filter: blur(55px);
             animation: auroraPulse 6s ease-in-out infinite 1s;
         }
@@ -4849,7 +4959,7 @@
             position: absolute;
             width: 600px;
             height: 1800px;
-            background: linear-gradient(180deg, rgba(0, 210, 255, 0.08) 0%, rgba(2, 132, 199, 0.04) 50%, transparent 100%);
+            background: linear-gradient(180deg, var(--brand-glow-subtle, rgba(0, 210, 255, 0.08)) 0%, rgba(2, 132, 199, 0.04) 50%, transparent 100%);
             pointer-events: none;
             mix-blend-mode: plus-lighter;
         }
@@ -4889,7 +4999,7 @@
             -webkit-backdrop-filter: blur(28px);
             box-shadow: 0 32px 80px rgba(0, 0, 0, 0.85),
                         inset 0 1px 0 rgba(255, 255, 255, 0.16),
-                        0 0 45px rgba(0, 210, 255, 0.12);
+                        0 0 45px var(--brand-glow-subtle, rgba(0, 210, 255, 0.12));
             width: 100%;
             max-width: 470px;
             height: 615px;
@@ -4912,7 +5022,7 @@
             left: 0;
             right: 0;
             height: 1.5px;
-            background: linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.65), rgba(255, 255, 255, 0.9), rgba(0, 210, 255, 0.65), transparent);
+            background: linear-gradient(90deg, transparent, var(--brand-glow, rgba(0, 210, 255, 0.65)), rgba(255, 255, 255, 0.9), var(--brand-glow, rgba(0, 210, 255, 0.65)), transparent);
             pointer-events: none;
             z-index: 20;
             transition: background 0.08s ease-out, opacity 0.3s ease;
@@ -4928,7 +5038,7 @@
             width: 56px;
             height: 56px;
             background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary-strong) 55%, var(--brand-primary-strong) 100%);
-            border: 1px solid rgba(0, 210, 255, 0.5);
+            border: 1px solid var(--border-glass-glow, rgba(0, 210, 255, 0.5));
             border-radius: 16px;
             display: inline-flex;
             align-items: center;
@@ -4939,7 +5049,7 @@
             margin-bottom: 16px;
             animation: logoPulse 4s ease-in-out infinite;
             letter-spacing: -0.5px;
-            box-shadow: 0 0 24px rgba(0, 210, 255, 0.35);
+            box-shadow: 0 0 24px var(--brand-glow, rgba(0, 210, 255, 0.35));
         }
 
         .login-header h1 {
@@ -5018,7 +5128,7 @@
             outline: none;
             border-color: var(--brand-primary);
             background: rgba(255, 255, 255, 0.07) !important;
-            box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.25), 0 0 20px rgba(0, 210, 255, 0.15);
+            box-shadow: 0 0 0 3px var(--brand-glow-subtle, rgba(0, 210, 255, 0.25)), 0 0 20px var(--brand-glow-subtle, rgba(0, 210, 255, 0.15));
             color: #ffffff !important;
         }
 
@@ -5073,8 +5183,8 @@
         .otp-row input:focus {
             outline: none;
             border-color: var(--brand-primary);
-            background: rgba(0, 210, 255, 0.08) !important;
-            box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.3), 0 0 24px rgba(0, 210, 255, 0.25);
+            background: var(--brand-glow-subtle, rgba(0, 210, 255, 0.08)) !important;
+            box-shadow: 0 0 0 3px var(--brand-glow, rgba(0, 210, 255, 0.3)), 0 0 24px var(--brand-glow-subtle, rgba(0, 210, 255, 0.25));
             color: #ffffff !important;
             transform: scale(1.02);
         }
@@ -5088,9 +5198,9 @@
             color: transparent !important;
             caret-color: transparent !important;
             border-radius: 33px;
-            border-color: rgba(0, 210, 255, 0.5);
-            background: rgba(0, 210, 255, 0.12) !important;
-            box-shadow: 0 0 16px rgba(0, 210, 255, 0.3);
+            border-color: var(--border-glass-glow, rgba(0, 210, 255, 0.5));
+            background: var(--brand-glow-subtle, rgba(0, 210, 255, 0.12)) !important;
+            box-shadow: 0 0 16px var(--brand-glow, rgba(0, 210, 255, 0.3));
             pointer-events: none;
         }
 
@@ -5165,10 +5275,10 @@
             position: absolute;
             inset: 0;
             border-radius: 50%;
-            border: 3.5px solid rgba(0, 210, 255, 0.18);
-            border-top-color: #00d2ff;
-            border-right-color: #38bdf8;
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.45);
+            border: 3.5px solid var(--brand-glow-subtle, rgba(0, 210, 255, 0.18));
+            border-top-color: var(--brand-primary, #00d2ff);
+            border-right-color: var(--brand-tertiary, #38bdf8);
+            box-shadow: 0 0 20px var(--brand-glow, rgba(0, 210, 255, 0.45));
             animation: otpLinearSpin 0.75s linear infinite;
             will-change: transform;
             transition: border-color 300ms ease, box-shadow 300ms ease;
@@ -5178,8 +5288,8 @@
             position: absolute;
             inset: 6px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(0, 210, 255, 0.18) 0%, rgba(10, 20, 42, 0.95) 100%);
-            border: 1px solid rgba(0, 210, 255, 0.3);
+            background: radial-gradient(circle, var(--brand-glow-subtle, rgba(0, 210, 255, 0.18)) 0%, rgba(10, 20, 42, 0.95) 100%);
+            border: 1px solid var(--border-glass-glow, rgba(0, 210, 255, 0.3));
             backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
@@ -5201,22 +5311,22 @@
         /* ── Stage 4: Success Transition (Entering the App) ── */
         .otp-row.success-state .otp-morph-ring {
             animation: none;
-            border: 3.5px solid #00d2ff !important;
-            border-color: #00d2ff !important;
-            box-shadow: 0 0 35px rgba(0, 210, 255, 0.85), inset 0 0 15px rgba(0, 210, 255, 0.4);
+            border: 3.5px solid var(--brand-primary, #00d2ff) !important;
+            border-color: var(--brand-primary, #00d2ff) !important;
+            box-shadow: 0 0 35px var(--brand-glow, rgba(0, 210, 255, 0.85)), inset 0 0 15px var(--brand-glow-subtle, rgba(0, 210, 255, 0.4));
         }
 
         .otp-row.success-state .otp-morph-badge {
-            background: radial-gradient(circle, rgba(0, 210, 255, 0.35) 0%, rgba(10, 20, 42, 0.95) 100%);
-            border: 1.5px solid rgba(0, 210, 255, 0.6);
-            box-shadow: inset 0 0 15px rgba(0, 210, 255, 0.4);
+            background: radial-gradient(circle, var(--brand-glow-subtle, rgba(0, 210, 255, 0.35)) 0%, rgba(10, 20, 42, 0.95) 100%);
+            border: 1.5px solid var(--border-glass-glow, rgba(0, 210, 255, 0.6));
+            box-shadow: inset 0 0 15px var(--brand-glow-subtle, rgba(0, 210, 255, 0.4));
         }
 
         .otp-row.success-state .otp-morph-symbol {
-            color: #00d2ff;
+            color: var(--brand-primary, #00d2ff);
             opacity: 1;
             transform: scale(1.15);
-            text-shadow: 0 0 14px rgba(0, 210, 255, 0.85);
+            text-shadow: 0 0 14px var(--brand-glow, rgba(0, 210, 255, 0.85));
             animation: checkmarkPop 350ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
@@ -5226,8 +5336,8 @@
             position: absolute;
             inset: -8px;
             border-radius: 50%;
-            border: 2px solid rgba(0, 210, 255, 0.7);
-            box-shadow: 0 0 25px rgba(0, 210, 255, 0.5);
+            border: 2px solid var(--brand-primary, rgba(0, 210, 255, 0.7));
+            box-shadow: 0 0 25px var(--brand-glow, rgba(0, 210, 255, 0.5));
             opacity: 0;
             animation: successPulseRing 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             pointer-events: none;
@@ -5337,7 +5447,7 @@
             height: 52px;
             padding: 0 24px;
             border-radius: 999px;
-            border: 1px solid rgba(0, 210, 255, 0.55);
+            border: 1px solid var(--border-glass-glow, rgba(0, 210, 255, 0.55));
             overflow: hidden;
             font-size: 15px;
             font-weight: 600;
@@ -5346,7 +5456,7 @@
             color: #ffffff;
             cursor: pointer;
             background: linear-gradient(16.7deg, var(--brand-primary) 9.6%, var(--brand-secondary-strong) 36.3%, var(--brand-primary-strong) 92.5%);
-            box-shadow: inset 0 -8px 20px rgba(0, 210, 255, 0.32), 0 8px 24px rgba(0, 23, 46, 0.6);
+            box-shadow: inset 0 -8px 20px var(--pill-glow, rgba(0, 210, 255, 0.32)), 0 8px 24px var(--brand-primary-strong, rgba(0, 23, 46, 0.6));
             transition: transform var(--duration-fast) var(--ease-standard),
                         border-color var(--duration-medium) var(--ease-standard),
                         box-shadow var(--duration-medium) var(--ease-standard),
@@ -5390,8 +5500,8 @@
         .btn-pill-sweep:hover,
         .btn-login:hover {
             transform: translateY(-2px);
-            border-color: rgba(0, 210, 255, 0.9);
-            box-shadow: inset 0 -8px 20px #00d2ff, 0 12px 36px rgba(0, 210, 255, 0.45);
+            border-color: var(--brand-primary, rgba(0, 210, 255, 0.9));
+            box-shadow: inset 0 -8px 20px var(--brand-primary, #00d2ff), 0 12px 36px var(--brand-glow, rgba(0, 210, 255, 0.45));
         }
 
         .btn-pill-sweep:active,
@@ -5564,6 +5674,133 @@
             color: #a5b4fc;
             text-decoration: none;
             font-weight: 500;
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           INTERACTIVE LOCAL THEME SWITCHER BAR
+           ══════════════════════════════════════════════════════════════ */
+        .theme-preview-pill-bar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10005;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 14px 6px 16px;
+            border-radius: 999px;
+            background: rgba(4, 13, 28, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            transition: all 0.25s ease;
+            font-family: var(--font, sans-serif);
+        }
+
+        .theme-preview-pill-bar:hover {
+            border-color: rgba(255, 255, 255, 0.28);
+            box-shadow: 0 18px 48px rgba(0, 0, 0, 0.75);
+        }
+
+        .theme-bar-title {
+            font-size: 11.5px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.85);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-right: 4px;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        .theme-swatch-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.82);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+            user-select: none;
+            outline: none;
+        }
+
+        .theme-swatch-btn:hover {
+            background: rgba(255, 255, 255, 0.14);
+            color: #ffffff;
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .theme-swatch-btn.active {
+            background: rgba(255, 255, 255, 0.18);
+            color: #ffffff;
+            border-color: var(--brand-primary, #00d2ff);
+            box-shadow: 0 0 16px var(--brand-glow, rgba(0, 210, 255, 0.35)), inset 0 0 8px var(--brand-glow-subtle, rgba(0, 210, 255, 0.2));
+        }
+
+        .swatch-dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        .swatch-name {
+            line-height: 1;
+        }
+
+        .theme-test-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--brand-glow-subtle, rgba(0, 210, 255, 0.14));
+            border: 1px solid var(--border-glass-glow, rgba(0, 210, 255, 0.5));
+            color: var(--brand-primary, #00d2ff);
+            font-size: 11.5px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 999px;
+            cursor: pointer;
+            margin-left: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-test-btn:hover {
+            background: var(--brand-primary, #00d2ff);
+            color: #00172e;
+            box-shadow: 0 0 16px var(--brand-glow, rgba(0, 210, 255, 0.5));
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 820px) {
+            .theme-preview-pill-bar {
+                top: 10px;
+                padding: 4px 8px;
+                max-width: 96%;
+                gap: 5px;
+                overflow-x: auto;
+            }
+            .theme-bar-title {
+                display: none;
+            }
+            .swatch-name {
+                display: none;
+            }
+            .theme-swatch-btn {
+                padding: 6px 8px;
+            }
         }
 
         /* ── LIGHT MODE OVERRIDES FOR LOGIN OVERLAY ── */

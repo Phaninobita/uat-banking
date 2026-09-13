@@ -9,7 +9,7 @@ const totalSteps = 7;
 const stepProgress = [0, 14, 28, 43, 57, 71, 86, 100];
 let currentLoginCrn = '';
 let currentLoginEmail = '';
-let currentCompanyUid = (typeof localStorage !== 'undefined' && localStorage.getItem('vb_company_uid')) || '';
+let currentCompanyUid = (typeof localStorage !== 'undefined' && (localStorage.getItem('gb_company_uid') || localStorage.getItem('vb_company_uid'))) || '';
 window.currentCompanyUid = currentCompanyUid;
 
 function setCompanyUid(uid) {
@@ -17,8 +17,8 @@ function setCompanyUid(uid) {
     currentCompanyUid = uid;
     window.currentCompanyUid = uid;
     try {
-        localStorage.setItem('vb_company_uid', uid);
-        sessionStorage.setItem('vb_company_uid', uid);
+        localStorage.setItem('gb_company_uid', uid);
+        sessionStorage.setItem('gb_company_uid', uid);
     } catch (e) {}
 }
 window.setCompanyUid = setCompanyUid;

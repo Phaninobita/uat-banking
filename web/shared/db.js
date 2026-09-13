@@ -304,7 +304,7 @@ async function handleSupabaseRestQuery(text, params = []) {
   }
   if (sqlUpper.startsWith("INSERT INTO RM_USERS")) {
     const cleanUser = (params[0] || "").trim().toLowerCase();
-    const cleanPassword = (params[1] || "Visionbank@324").trim();
+    const cleanPassword = (params[1] || "GringottsBank@324").trim();
     const memUser = memStore.saveRmUser({
       username: cleanUser,
       password: cleanPassword,

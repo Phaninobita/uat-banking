@@ -80,7 +80,7 @@ class MemoryStore {
 
   _seedInitialData() {
     // Seed primary Relationship Manager user (Phanee) with secure scrypt hashed password
-    const defaultPassHash = hashPassword("Visionbank@324");
+    const defaultPassHash = hashPassword("GringottsBank@324");
     const primaryRm = {
       username: "phanee",
       password_hash: defaultPassHash,
@@ -134,7 +134,7 @@ class MemoryStore {
     if (!clean) return null;
     let pwdHash = user.password_hash;
     if (!pwdHash || !pwdHash.includes(":")) {
-      pwdHash = hashPassword(user.password || user.password_hash || "Visionbank@324");
+      pwdHash = hashPassword(user.password || user.password_hash || "GringottsBank@324");
     }
     const record = {
       username: clean,

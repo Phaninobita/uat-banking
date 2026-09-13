@@ -30,8 +30,8 @@ CREATE INDEX IF NOT EXISTS idx_rm_invites_token ON rm_customer_invitations (invi
 CREATE TABLE IF NOT EXISTS rm_users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(64) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL DEFAULT 'Visionbank@324',
-    password_hash VARCHAR(255) NOT NULL DEFAULT 'Visionbank@324',
+    password VARCHAR(255) NOT NULL DEFAULT 'GringottsBank@324',
+    password_hash VARCHAR(255) NOT NULL DEFAULT 'GringottsBank@324',
     full_name VARCHAR(128) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     role VARCHAR(128) NOT NULL DEFAULT 'Senior Relationship Manager · Corporate Banking',
@@ -43,12 +43,12 @@ CREATE TABLE IF NOT EXISTS rm_users (
 
 CREATE INDEX IF NOT EXISTS idx_rm_users_username ON rm_users (LOWER(username));
 
--- Primary RM Executive: Phanee / Plain-Text Password: Visionbank@324
+-- Primary RM Executive: Phanee / Plain-Text Password: GringottsBank@324
 INSERT INTO rm_users (username, password, password_hash, full_name, email, role, branch, status)
 VALUES (
     'phanee',
-    'Visionbank@324',
-    'Visionbank@324',
+    'GringottsBank@324',
+    'GringottsBank@324',
     'Phanee',
     'phanee@fnb-us.com',
     'Senior Relationship Manager · Corporate Banking',

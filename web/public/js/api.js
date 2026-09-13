@@ -11,8 +11,10 @@
 (function () {
     const TOKEN_KEY = 'apex_session_token';
     const REF_KEY = 'apex_application_ref';
-    const LEGACY_TOKEN_KEY = 'vb_session_token';
-    const LEGACY_REF_KEY = 'vb_application_ref';
+    const LEGACY_TOKEN_KEY = 'gb_session_token';
+    const LEGACY_REF_KEY = 'gb_application_ref';
+    const OLD_LEGACY_TOKEN_KEY = 'vb_session_token';
+    const OLD_LEGACY_REF_KEY = 'vb_application_ref';
 
     const ApexApi = {
         getToken() {
@@ -20,6 +22,8 @@
                    localStorage.getItem(TOKEN_KEY) ||
                    sessionStorage.getItem(LEGACY_TOKEN_KEY) ||
                    localStorage.getItem(LEGACY_TOKEN_KEY) ||
+                   sessionStorage.getItem(OLD_LEGACY_TOKEN_KEY) ||
+                   localStorage.getItem(OLD_LEGACY_TOKEN_KEY) ||
                    null;
         },
 
@@ -32,8 +36,8 @@
                     if (parts.length === 3) {
                         const payload = JSON.parse(atob(parts[1]));
                         if (payload.company_uid) {
-                            localStorage.setItem('vb_company_uid', payload.company_uid);
-                            sessionStorage.setItem('vb_company_uid', payload.company_uid);
+                            localStorage.setItem('gb_company_uid', payload.company_uid);
+                            sessionStorage.setItem('gb_company_uid', payload.company_uid);
                             if (typeof window !== 'undefined') window.currentCompanyUid = payload.company_uid;
                         }
                     }
@@ -44,8 +48,8 @@
                 localStorage.setItem(REF_KEY, appRef);
             }
             if (companyUid) {
-                localStorage.setItem('vb_company_uid', companyUid);
-                sessionStorage.setItem('vb_company_uid', companyUid);
+                localStorage.setItem('gb_company_uid', companyUid);
+                sessionStorage.setItem('gb_company_uid', companyUid);
                 if (typeof window !== 'undefined') window.currentCompanyUid = companyUid;
             }
         },
@@ -59,6 +63,10 @@
             sessionStorage.removeItem(LEGACY_REF_KEY);
             localStorage.removeItem(LEGACY_TOKEN_KEY);
             localStorage.removeItem(LEGACY_REF_KEY);
+            sessionStorage.removeItem(OLD_LEGACY_TOKEN_KEY);
+            sessionStorage.removeItem(OLD_LEGACY_REF_KEY);
+            localStorage.removeItem(OLD_LEGACY_TOKEN_KEY);
+            localStorage.removeItem(OLD_LEGACY_REF_KEY);
         },
 
         getCompanyUid() {
@@ -66,7 +74,8 @@
                 return window.currentCompanyUid;
             }
             if (typeof localStorage !== 'undefined') {
-                const stored = localStorage.getItem('vb_company_uid') || sessionStorage.getItem('vb_company_uid');
+                const stored = localStorage.getItem('gb_company_uid') || sessionStorage.getItem('gb_company_uid') ||
+                               localStorage.getItem('vb_company_uid') || sessionStorage.getItem('vb_company_uid');
                 if (stored) return stored;
                 const token = localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
                 if (token) {
