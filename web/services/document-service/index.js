@@ -262,24 +262,22 @@ router.post("/upload", requireAuth, async (req, res) => {
   }
 });
 
-// 2. Retrieve All Documents for an Application (includes Base64 preview)
-router.get("/list/:applicationRef?", async (req, res) => {
+// 2. Retrieve All Documents for an Application (Requires Authentication & Tenant Check)
+router.get("/list/:applicationRef?", requireAuth, async (req, res) => {
   memStore.metrics.serviceRequests.documents++;
   let activeAppRef = req.params.applicationRef || req.query.application_ref || req.query.appRef || "";
   let companyUid = req.query.company_uid || req.query.companyUid || "";
 
-  // Attempt to decode optional Bearer auth token if present
-  const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    try {
-      const jwt = require("jsonwebtoken");
-      const decoded = jwt.verify(authHeader.split(" ")[1], config.jwtSecret);
-      req.user = decoded;
-      if (!activeAppRef && decoded.application_ref) activeAppRef = decoded.application_ref;
-      if (!companyUid && decoded.company_uid) companyUid = decoded.company_uid;
-    } catch (e) {
-      // Optional auth: continue without blocking
+  // Authorization Check: RM executives have full access; applicants may only access their own documents
+  if (!req.user.is_rm && req.user.role !== "RM") {
+    if (activeAppRef && req.user.application_ref && activeAppRef !== req.user.application_ref) {
+      return res.status(403).json({ error: "Forbidden: Access to documents of another application is denied." });
     }
+    if (companyUid && req.user.company_uid && companyUid.toUpperCase() !== req.user.company_uid.toUpperCase()) {
+      return res.status(403).json({ error: "Forbidden: Access to documents of another organization is denied." });
+    }
+    if (!activeAppRef && req.user.application_ref) activeAppRef = req.user.application_ref;
+    if (!companyUid && req.user.company_uid) companyUid = req.user.company_uid;
   }
 
   // If companyUid still empty but activeAppRef exists, resolve company_uid from application record
@@ -311,6 +309,16 @@ router.get("/list/:applicationRef?", async (req, res) => {
       );
     }
 
+    // Additional safeguard: Filter out documents not belonging to customer if not RM
+    if (!req.user.is_rm && req.user.role !== "RM") {
+      const userRef = req.user.application_ref;
+      const userCuid = (req.user.company_uid || "").toUpperCase();
+      docs = docs.filter(d => 
+        (userRef && d.application_ref === userRef) ||
+        (userCuid && d.company_uid && d.company_uid.toUpperCase() === userCuid)
+      );
+    }
+
     return res.json({
       success: true,
       count: docs.length,
@@ -324,8 +332,8 @@ router.get("/list/:applicationRef?", async (req, res) => {
   }
 });
 
-// 3. Download Document (Decodes Base64 to binary buffer from Database and sends with correct headers)
-router.get("/download/:id", async (req, res) => {
+// 3. Download Document (Requires Authentication & Tenant IDOR Check)
+router.get("/download/:id", requireAuth, async (req, res) => {
   memStore.metrics.serviceRequests.documents++;
   const docId = req.params.id;
   let appRef = (req.query.appRef || req.query.application_ref || "").trim();
@@ -380,6 +388,21 @@ router.get("/download/:id", async (req, res) => {
 
     if (!doc || !doc.file_data_base64) {
       return res.status(404).json({ error: `Document "${docId}" not found in database.` });
+    }
+
+    // IDOR Protection: Verify caller ownership unless RM Executive
+    if (!req.user.is_rm && req.user.role !== "RM") {
+      const userRef = req.user.application_ref;
+      const userCuid = (req.user.company_uid || "").trim().toUpperCase();
+      const docRef = doc.application_ref;
+      const docCuid = (doc.company_uid || "").trim().toUpperCase();
+
+      const matchesRef = userRef && docRef && userRef === docRef;
+      const matchesCuid = userCuid && docCuid && userCuid === docCuid;
+
+      if (!matchesRef && !matchesCuid) {
+        return res.status(403).json({ error: "Forbidden: You do not have authorization to access or download this document." });
+      }
     }
 
     // If client requested JSON with base64

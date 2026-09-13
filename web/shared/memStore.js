@@ -4,6 +4,7 @@
  */
 
 const crypto = require("crypto");
+const { hashPassword } = require("./security");
 
 class MemoryStore {
   constructor() {
@@ -78,11 +79,11 @@ class MemoryStore {
   }
 
   _seedInitialData() {
-    // Seed primary Relationship Manager user (Phanee) with explicit plain-text password
+    // Seed primary Relationship Manager user (Phanee) with secure scrypt hashed password
+    const defaultPassHash = hashPassword("Visionbank@324");
     const primaryRm = {
       username: "phanee",
-      password: "Visionbank@324",
-      password_hash: "Visionbank@324",
+      password_hash: defaultPassHash,
       full_name: "Phanee",
       email: "phanee@fnb-us.com",
       role: "Senior Relationship Manager · Corporate Banking",
@@ -131,11 +132,13 @@ class MemoryStore {
   saveRmUser(user) {
     const clean = (user.username || "").trim().toLowerCase();
     if (!clean) return null;
-    const plainPassword = user.password || user.password_hash || "Visionbank@324";
+    let pwdHash = user.password_hash;
+    if (!pwdHash || !pwdHash.includes(":")) {
+      pwdHash = hashPassword(user.password || user.password_hash || "Visionbank@324");
+    }
     const record = {
       username: clean,
-      password: plainPassword,
-      password_hash: plainPassword,
+      password_hash: pwdHash,
       full_name: user.full_name || user.name || clean,
       email: (user.email || `${clean}@fnb-us.com`).trim().toLowerCase(),
       role: user.role || "Senior Relationship Manager · Corporate Banking",

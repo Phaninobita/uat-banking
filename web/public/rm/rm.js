@@ -104,6 +104,22 @@ function showRmToast(message, type = "success") {
     }, 4000);
 }
 
+// ── AUTHENTICATED FETCH HELPER ──
+async function rmFetch(url, options = {}) {
+    options.headers = options.headers || {};
+    const token = currentRmToken || localStorage.getItem("fnb_rm_token");
+    if (token) {
+        options.headers["Authorization"] = `Bearer ${token}`;
+    }
+    const res = await fetch(url, options);
+    if (res.status === 401) {
+        handleRmSignOut();
+        showRmToast("RM Executive session expired. Please sign in again.", "error");
+        throw new Error("Unauthorized: RM session expired.");
+    }
+    return res;
+}
+
 // ── AUTHENTICATION ──
 function checkRmAuthSession() {
     if (currentRmToken) {
@@ -239,7 +255,7 @@ async function handleDispatchInvite(ev) {
     }
 
     try {
-        const res = await fetch("/api/v1/rm/invite", {
+        const res = await rmFetch("/api/v1/rm/invite", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -324,7 +340,7 @@ function focusInviteForm() {
 async function fetchInvitations() {
     const tbody = document.getElementById("pipelineTableBody");
     try {
-        const res = await fetch("/api/v1/rm/invitations");
+        const res = await rmFetch("/api/v1/rm/invitations");
         const data = await res.json();
         if (data.success && Array.isArray(data.invitations)) {
             pipelineData = data.invitations;
@@ -504,7 +520,7 @@ async function handleUpdateDetailsSubmit(ev) {
     }
 
     try {
-        const res = await fetch("/api/v1/rm/update-details", {
+        const res = await rmFetch("/api/v1/rm/update-details", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -541,7 +557,7 @@ async function resendInvite(rawCrn, rawEmail) {
     const email = decodeURIComponent(rawEmail);
     showRmToast(`Dispatching invitation email to ${email}...`, "info");
     try {
-        const res = await fetch(`/api/v1/rm/resend/${encodeURIComponent(crn)}/${encodeURIComponent(email)}`, {
+        const res = await rmFetch(`/api/v1/rm/resend/${encodeURIComponent(crn)}/${encodeURIComponent(email)}`, {
             method: "POST"
         });
         const data = await res.json();
@@ -562,7 +578,7 @@ async function deleteInvite(crn, email) {
     }
 
     try {
-        const res = await fetch(`/api/v1/rm/invitations/${encodeURIComponent(crn)}/${encodeURIComponent(email)}`, {
+        const res = await rmFetch(`/api/v1/rm/invitations/${encodeURIComponent(crn)}/${encodeURIComponent(email)}`, {
             method: "DELETE"
         });
         const data = await res.json();
@@ -623,7 +639,7 @@ async function refreshRmAudit() {
     try {
         const { companyUid, crn } = activeRmAuditTarget;
         const q = companyUid ? `company_uid=${encodeURIComponent(companyUid)}` : `crn=${encodeURIComponent(crn)}`;
-        const res = await fetch(`/api/v1/rm/audit-trail?${q}`);
+        const res = await rmFetch(`/api/v1/rm/audit-trail?${q}`);
         const data = await res.json();
 
         const logs = data.auditTrail || [];

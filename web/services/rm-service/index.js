@@ -6,11 +6,34 @@
 
 const express = require("express");
 const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
+const config = require("../../shared/config");
 const memStore = require("../../shared/memStore");
 const db = require("../../shared/db");
 const { resolveCompanyUid, logAuditEvent, getAuditTrail } = require("../../shared/audit");
+const { hashPassword, verifyPassword, escapeHtml } = require("../../shared/security");
 
 const router = express.Router();
+
+// Middleware: Require Authenticated RM Executive Session
+function requireRmAuth(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Unauthorized: RM Executive authentication session required." });
+  }
+
+  const token = authHeader.substring(7);
+  try {
+    const decoded = jwt.verify(token, config.JWT_SECRET);
+    if (!decoded.is_rm && decoded.role !== "RM" && !decoded.rm_id) {
+      return res.status(403).json({ error: "Forbidden: RM Executive privileges required." });
+    }
+    req.rmUser = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: "Unauthorized: Invalid or expired RM session token." });
+  }
+}
 
 // Telemetry tracker
 router.use((req, res, next) => {
@@ -60,13 +83,11 @@ router.post("/login", async (req, res) => {
     });
   }
 
-  // 3. Password check (Plain-text verification)
+  // 3. Password check using constant-time cryptographic verification
   const inputPassword = (password || "").trim();
-  const storedPassword = (userRecord.password || userRecord.password_hash || "Visionbank@324").trim();
+  const storedPasswordHash = (userRecord.password_hash || userRecord.password || "").trim();
 
-  const isMatch = (inputPassword === storedPassword) ||
-                  (inputPassword.toLowerCase() === storedPassword.toLowerCase()) ||
-                  (storedPassword === "Visionbank@324" && (inputPassword === "Visionbank@324" || inputPassword.toLowerCase() === "visionbank@324"));
+  const isMatch = verifyPassword(inputPassword, storedPasswordHash);
 
   if (!isMatch) {
     return res.status(401).json({
@@ -75,7 +96,27 @@ router.post("/login", async (req, res) => {
     });
   }
 
-  const sessionToken = "rm_sess_" + crypto.randomBytes(16).toString("hex");
+  // Upgrade legacy plaintext password to secure scrypt hash
+  if (storedPasswordHash && !storedPasswordHash.includes(":")) {
+    const upgradedHash = hashPassword(inputPassword);
+    userRecord.password_hash = upgradedHash;
+    if (db.isConnected()) {
+      db.query("UPDATE rm_users SET password_hash = $1 WHERE LOWER(TRIM(username)) = $2", [upgradedHash, cleanUser]).catch(() => {});
+    }
+  }
+
+  const sessionToken = jwt.sign(
+    {
+      rm_id: "RM-" + userRecord.username.toUpperCase(),
+      username: userRecord.username,
+      name: userRecord.full_name || "Phanee",
+      role: userRecord.role || "Senior Relationship Manager · Corporate Banking",
+      email: userRecord.email,
+      is_rm: true
+    },
+    config.JWT_SECRET,
+    { expiresIn: "8h" }
+  );
 
   const rmProfile = {
     rm_id: "RM-" + userRecord.username.toUpperCase(),
@@ -97,9 +138,9 @@ router.post("/login", async (req, res) => {
 
 /**
  * POST /api/v1/rm/users
- * Provision additional Relationship Managers or staff members into rm_users table
+ * Provision additional Relationship Managers or staff members into rm_users table (Requires RM Auth)
  */
-router.post("/users", async (req, res) => {
+router.post("/users", requireRmAuth, async (req, res) => {
   try {
     const { username, password, fullName, email, role, branch } = req.body;
     if (!username || !password || !fullName || !email) {
@@ -110,6 +151,7 @@ router.post("/users", async (req, res) => {
     const cleanEmail = email.trim().toLowerCase();
     const cleanRole = role ? role.trim() : "Senior Relationship Manager · Corporate Banking";
     const cleanBranch = branch ? branch.trim() : "New York Financial Center";
+    const securePasswordHash = hashPassword(password.trim());
 
     let created = null;
     if (db.isConnected()) {
@@ -124,7 +166,7 @@ router.post("/users", async (req, res) => {
             role = EXCLUDED.role,
             branch = EXCLUDED.branch
           RETURNING *
-        `, [cleanUser, password.trim(), fullName.trim(), cleanEmail, cleanRole, cleanBranch]);
+        `, [cleanUser, securePasswordHash, fullName.trim(), cleanEmail, cleanRole, cleanBranch]);
         if (insertRes.rows && insertRes.rows.length > 0) {
           created = insertRes.rows[0];
         }
@@ -135,8 +177,7 @@ router.post("/users", async (req, res) => {
 
     const memRecord = memStore.saveRmUser({
       username: cleanUser,
-      password: password.trim(),
-      password_hash: password.trim(),
+      password_hash: securePasswordHash,
       full_name: fullName.trim(),
       email: cleanEmail,
       role: cleanRole,
@@ -155,9 +196,9 @@ router.post("/users", async (req, res) => {
 
 /**
  * GET /api/v1/rm/invitations
- * Retrieve all customer invitations & cross-reference onboarding progress
+ * Retrieve all customer invitations & cross-reference onboarding progress (Requires RM Auth)
  */
-router.get("/invitations", async (req, res) => {
+router.get("/invitations", requireRmAuth, async (req, res) => {
   try {
     let invitations = [];
     await db.ready();
@@ -259,10 +300,10 @@ router.get("/invitations", async (req, res) => {
 
 /**
  * POST /api/v1/rm/invite
- * Create and dispatch a new customer onboarding invitation link
+ * Create and dispatch a new customer onboarding invitation link (Requires RM Auth)
  * Composite Primary Key: (crn, email), Canonical Corporate Key: company_uid
  */
-router.post("/invite", async (req, res) => {
+router.post("/invite", requireRmAuth, async (req, res) => {
   try {
     const { crn, email, companyName, tradeName, trade_name, contactPerson, phone, notes, company_uid } = req.body;
 
@@ -430,9 +471,9 @@ router.post("/invite", async (req, res) => {
 
 /**
  * POST /api/v1/rm/resend/:crn/:email
- * Re-dispatches the onboarding invitation email (with guaranteed database lookup and real-time Yopmail delivery)
+ * Re-dispatches the onboarding invitation email (Requires RM Auth)
  */
-router.post("/resend/:crn/:email", async (req, res) => {
+router.post("/resend/:crn/:email", requireRmAuth, async (req, res) => {
   try {
     const rawCrn = req.params.crn || "";
     const rawEmail = req.params.email || "";
@@ -538,9 +579,9 @@ router.post("/resend/:crn/:email", async (req, res) => {
 
 /**
  * POST /api/v1/rm/update-details
- * Updates customer onboarding details (Email, Company, Contact, Phone) and optionally re-dispatches invitation
+ * Updates customer onboarding details (Email, Company, Contact, Phone) and optionally re-dispatches invitation (Requires RM Auth)
  */
-router.post("/update-details", async (req, res) => {
+router.post("/update-details", requireRmAuth, async (req, res) => {
   try {
     const { originalCrn, originalEmail, newEmail, companyName, contactPerson, phone, resendImmediate } = req.body;
 
@@ -678,9 +719,9 @@ router.post("/update-details", async (req, res) => {
 
 /**
  * DELETE /api/v1/rm/invitations/:crn/:email
- * Revokes customer invitation
+ * Revokes customer invitation (Requires RM Auth)
  */
-router.delete("/invitations/:crn/:email", async (req, res) => {
+router.delete("/invitations/:crn/:email", requireRmAuth, async (req, res) => {
   try {
     const { crn, email } = req.params;
     const cleanCrn = crn.trim().toUpperCase();
@@ -760,9 +801,9 @@ router.get("/verify-invite", async (req, res) => {
 
 /**
  * GET /api/v1/rm/audit-trail
- * Query complete audit trail by company_uid or crn for the RM command center
+ * Query complete audit trail by company_uid or crn for the RM command center (Requires RM Auth)
  */
-router.get("/audit-trail", async (req, res) => {
+router.get("/audit-trail", requireRmAuth, async (req, res) => {
   try {
     const { company_uid, crn, limit } = req.query;
     if (!company_uid && !crn) {
@@ -789,6 +830,7 @@ router.get("/audit-trail", async (req, res) => {
 });
 
 module.exports = {
-  router
+  router,
+  requireRmAuth
 };
 

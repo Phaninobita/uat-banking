@@ -10,6 +10,8 @@ const crypto = require("crypto");
 const config = require("../../shared/config");
 const memStore = require("../../shared/memStore");
 const db = require("../../shared/db");
+const { requireAuth } = require("../auth-service");
+const { logAuditEvent } = require("../../shared/audit");
 
 const router = express.Router();
 
@@ -39,8 +41,8 @@ function getLiveFxRates() {
   return rates;
 }
 
-// 1. Get Live Corporate Accounts
-router.get("/accounts", async (req, res) => {
+// 1. Get Live Corporate Accounts (Requires Authentication)
+router.get("/accounts", requireAuth, async (req, res) => {
   memStore.metrics.serviceRequests.banking++;
 
   try {
@@ -55,6 +57,14 @@ router.get("/accounts", async (req, res) => {
 
     if (!accounts || accounts.length === 0) {
       accounts = Array.from(memStore.accounts.values());
+    }
+
+    // Filter accounts by caller's company if user is not RM executive and accounts have company_uid
+    if (!req.user.is_rm && req.user.role !== "RM" && req.user.company_uid) {
+      const matching = accounts.filter(a => !a.company_uid || a.company_uid === req.user.company_uid);
+      if (matching.length > 0) {
+        accounts = matching;
+      }
     }
 
     // Calculate total liquidity in AED
@@ -79,8 +89,8 @@ router.get("/accounts", async (req, res) => {
   }
 });
 
-// 2. Get Live Transactions Ledger
-router.get("/transactions", async (req, res) => {
+// 2. Get Live Transactions Ledger (Requires Authentication)
+router.get("/transactions", requireAuth, async (req, res) => {
   memStore.metrics.serviceRequests.banking++;
   const limit = parseInt(req.query.limit || "20", 10);
   let txs = [];
@@ -121,8 +131,8 @@ router.get("/fx-rates", (req, res) => {
   });
 });
 
-// 4. Execute Instant Corporate Wire Transfer (SWIFT GPI / Central Bank FTS)
-router.post("/transfer", async (req, res) => {
+// 4. Execute Instant Corporate Wire Transfer (SWIFT GPI / Central Bank FTS) (Requires Authentication)
+router.post("/transfer", requireAuth, async (req, res) => {
   memStore.metrics.serviceRequests.banking++;
   const {
     fromAccount,
@@ -168,13 +178,20 @@ router.post("/transfer", async (req, res) => {
     return res.status(404).json({ error: "Source corporate account not found." });
   }
 
+  // Authorization Check: Caller must own the corporate account or have RM Executive privileges
+  if (!req.user.is_rm && req.user.role !== "RM") {
+    if (acc.company_uid && req.user.company_uid && acc.company_uid.toUpperCase() !== req.user.company_uid.toUpperCase()) {
+      return res.status(403).json({ error: "Forbidden: You do not have authorization to transfer funds from this account." });
+    }
+  }
+
   const currentAvailable = parseFloat(acc.available_balance || acc.balance || 0);
   if (currentAvailable < numAmount) {
     return res.status(400).json({ error: "Insufficient available balance in corporate account." });
   }
 
-  const newBalance = Number((parseFloat(acc.balance) - numAmount).toFixed(2));
-  const newAvail = Number((currentAvailable - numAmount).toFixed(2));
+  let newBalance = Number((parseFloat(acc.balance) - numAmount).toFixed(2));
+  let newAvail = Number((currentAvailable - numAmount).toFixed(2));
 
   // Generate SWIFT GPI Tracking reference
   const txRef = "TX-FTS-" + crypto.randomBytes(4).toString("hex").toUpperCase();
@@ -199,13 +216,19 @@ router.post("/transfer", async (req, res) => {
     timestamp: new Date().toISOString()
   };
 
-  // Update in Database if connected
+  // Update in Database atomically if connected (prevents concurrent race conditions)
   if (db.isConnected()) {
     try {
-      await db.query(
-        "UPDATE corporate_accounts SET balance = $1, available_balance = $2, updated_at = NOW() WHERE account_number = $3",
-        [newBalance, newAvail, accountNum]
+      const updateRes = await db.query(
+        "UPDATE corporate_accounts SET balance = balance - $1, available_balance = available_balance - $1, updated_at = NOW() WHERE account_number = $2 AND available_balance >= $1 RETURNING *",
+        [numAmount, accountNum]
       );
+      if (!updateRes.rows || updateRes.rows.length === 0) {
+        return res.status(400).json({ error: "Insufficient available balance in corporate account." });
+      }
+      const updatedRow = updateRes.rows[0];
+      newBalance = parseFloat(updatedRow.balance);
+      newAvail = parseFloat(updatedRow.available_balance);
 
       await db.query(
         `INSERT INTO account_transactions (
@@ -238,6 +261,26 @@ router.post("/transfer", async (req, res) => {
   memStore.accounts.set(accountNum, acc);
   memStore.transactions.unshift(txRecord);
 
+  // Record Audit Trail Event
+  await logAuditEvent({
+    company_uid: req.user.company_uid || acc.company_uid || "CUID-CORP",
+    crn: req.user.crn,
+    channel: channel || "portal",
+    action_type: "WIRE_TRANSFER",
+    actor: req.user.email || req.user.name || "Authorized Signatory",
+    target: counterpartyName,
+    status: "SUCCESS",
+    ip_address: req.ip || req.headers["x-forwarded-for"] || "127.0.0.1",
+    user_agent: req.headers["user-agent"] || "Banking-Service",
+    metadata: {
+      account_number: accountNum,
+      amount: numAmount,
+      currency: currency || acc.currency,
+      txRef,
+      counterparty_iban: counterpartyIban
+    }
+  });
+
   // Send simulated notification
   memStore.recordSimulatedEmail({
     to: "finance@corporate.com",
@@ -269,8 +312,8 @@ router.post("/transfer", async (req, res) => {
   });
 });
 
-// 5. Mobile App Summary Feed (Tailored for the upcoming Mobile Bank App)
-router.get(["/mobile/summary", "/summary"], (req, res) => {
+// 5. Mobile App Summary Feed (Tailored for the upcoming Mobile Bank App) (Requires Authentication)
+router.get(["/mobile/summary", "/summary"], requireAuth, (req, res) => {
   memStore.metrics.serviceRequests.banking++;
   const accounts = Array.from(memStore.accounts.values());
   const primaryAccount = accounts[0] || {};

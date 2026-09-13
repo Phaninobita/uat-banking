@@ -488,11 +488,18 @@ router.post("/audit", requireAuth, async (req, res) => {
   }
 });
 
-// 5. Dual-Key Application Record Query: SELECT * FROM corporate_onboarding_applications WHERE company_uid = $1 AND id = $2
-router.get("/record/:company_uid/:id", async (req, res) => {
+// 5. Dual-Key Application Record Query: SELECT * FROM corporate_onboarding_applications WHERE company_uid = $1 AND id = $2 (Requires Auth & Tenant Check)
+router.get("/record/:company_uid/:id", requireAuth, async (req, res) => {
   const { company_uid, id } = req.params;
   if (!company_uid || !id) {
     return res.status(400).json({ error: "Both company_uid and id are required parameters." });
+  }
+
+  // Tenant Isolation Check: Applicant may only access their own company record; RM executives have full oversight
+  const userCuid = (req.user.company_uid || "").trim().toUpperCase();
+  const targetCuid = (company_uid || "").trim().toUpperCase();
+  if (!req.user.is_rm && req.user.role !== "RM" && userCuid !== targetCuid) {
+    return res.status(403).json({ error: "Forbidden: Access to corporate application record denied." });
   }
 
   try {
@@ -529,11 +536,18 @@ router.get("/record/:company_uid/:id", async (req, res) => {
   }
 });
 
-// 6. Corporate Application Record Query by Corporate UID: SELECT * FROM corporate_onboarding_applications WHERE company_uid = $1
-router.get("/by-uid/:company_uid", async (req, res) => {
+// 6. Corporate Application Record Query by Corporate UID (Requires Auth & Tenant Check)
+router.get("/by-uid/:company_uid", requireAuth, async (req, res) => {
   const { company_uid } = req.params;
   if (!company_uid) {
     return res.status(400).json({ error: "company_uid parameter is required." });
+  }
+
+  // Tenant Isolation Check: Applicant may only access their own company record; RM executives have full oversight
+  const userCuid = (req.user.company_uid || "").trim().toUpperCase();
+  const targetCuid = (company_uid || "").trim().toUpperCase();
+  if (!req.user.is_rm && req.user.role !== "RM" && userCuid !== targetCuid) {
+    return res.status(403).json({ error: "Forbidden: Access to corporate application record denied." });
   }
 
   try {
