@@ -659,70 +659,16 @@
         pointer-events: none;
     }
     .sigil-container:hover::before { opacity: 1; transform: scale(1.08); }
-    .sigil-svg { width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+    .sigil-svg { width: 100%; height: 100%; overflow: visible; }
     .sigil-svg .ring { fill: none; stroke: var(--cyan); }
     .sigil-svg .ring-1 { stroke-width: 1; stroke-dasharray: 3 9; opacity: .7; }
     .sigil-svg .ring-2 { stroke-width: 1.2; stroke-dasharray: 60 18; opacity: .55; }
     .sigil-svg .ring-3 { stroke-width: 1; opacity: .3; }
+    .sigil-svg .star { fill: none; stroke: var(--cyan-bright); stroke-width: 1.2; opacity: .8; }
+    .sigil-svg .core { fill: var(--cyan); opacity: .9; }
     .sigil-svg text {
         font-family: 'Cinzel', serif; font-size: 15px; letter-spacing: 6px;
         fill: var(--cyan); opacity: .8;
-    }
-
-    .sigil-snake-wrap {
-        position: absolute;
-        top: 50%; left: 50%;
-        width: 58%; height: 58%;
-        margin: -29% 0 0 -29%;
-        display: flex; align-items: center; justify-content: center;
-        z-index: 3;
-        pointer-events: none;
-        will-change: transform;
-    }
-    .sigil-snake {
-        width: 100%; height: 100%;
-        object-fit: contain;
-        filter: drop-shadow(0 0 22px rgba(34, 211, 238, 0.75))
-                drop-shadow(0 0 40px rgba(14, 165, 233, 0.35));
-        transform-origin: 50% 50%;
-    }
-    /* CSS-drawn fallback snake (shown if logo.png is missing) */
-    .sigil-snake-fallback {
-        display: none;
-        width: 70%; height: 70%;
-        border-radius: 50%;
-        border: 6px solid var(--cyan);
-        position: relative;
-        box-shadow: 0 0 40px rgba(34, 211, 238, 0.6), inset 0 0 30px rgba(34, 211, 238, 0.4);
-    }
-    .sigil-snake-fallback::before,
-    .sigil-snake-fallback::after {
-        content: "";
-        position: absolute;
-        border-radius: 50%;
-        background: var(--cyan-bright);
-        box-shadow: 0 0 20px var(--cyan-bright);
-    }
-    .sigil-snake-fallback::before { width: 14px; height: 14px; top: 8%; left: 50%; transform: translateX(-50%); }
-    .sigil-snake-fallback::after { width: 20px; height: 20px; bottom: -12px; left: 50%; transform: translateX(-50%); }
-    .sigil-snake-wrap.broken .sigil-snake { display: none; }
-    .sigil-snake-wrap.broken .sigil-snake-fallback { display: block; }
-
-    .sigil-halo {
-        position: absolute;
-        top: 50%; left: 50%;
-        width: 66%; height: 66%;
-        margin: -33% 0 0 -33%;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(34, 211, 238, 0.18), transparent 65%);
-        filter: blur(6px);
-        z-index: 1;
-        pointer-events: none;
-        animation: haloPulse 4s ease-in-out infinite;
-    }
-    @keyframes haloPulse {
-        0%, 100% { opacity: .6; transform: scale(1); }
-        50%      { opacity: 1;  transform: scale(1.06); }
     }
 
     .sigil-hint {
@@ -1130,19 +1076,16 @@
                     <g id="ringMid">
                         <circle class="ring ring-2" cx="200" cy="200" r="130"/>
                     </g>
+                    <g id="starGroup">
+                        <polygon class="star" points="200,80 226,168 318,168 244,222 272,310 200,258 128,310 156,222 82,168 174,168"/>
+                        <circle class="core" cx="200" cy="200" r="6"/>
+                    </g>
                     <text>
                         <textPath href="#circlePath" startOffset="0">
                             FORTIUS QUO FIDELIUS • GRINGOTTS • FORTIUS QUO FIDELIUS •
                         </textPath>
                     </text>
                 </svg>
-
-                <div class="sigil-halo"></div>
-
-                <div class="sigil-snake-wrap" id="snakeWrap">
-                    <img src="logo.png" alt="Snake Emblem" class="sigil-snake" id="snakeImg" data-fallback="snake">
-                    <div class="sigil-snake-fallback"></div>
-                </div>
 
                 <div class="sigil-hint">Touch the sigil</div>
             </div>
@@ -1247,15 +1190,11 @@ const $  = (s, c = document) => c.querySelector(s);
 const $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
 
 /* ---------- Broken image handling ---------- */
-/* Hide images that fail to load, and activate snake fallback */
+/* Hide images that fail to load */
 document.querySelectorAll('img[data-fallback]').forEach(img => {
     img.addEventListener('error', () => {
-        const mode = img.dataset.fallback;
-        if (mode === 'hide') {
+        if (img.dataset.fallback === 'hide') {
             img.classList.add('broken');
-        } else if (mode === 'snake') {
-            const wrap = img.closest('.sigil-snake-wrap');
-            if (wrap) wrap.classList.add('broken');
         }
     });
 });
@@ -1888,98 +1827,43 @@ gsap.to('.sigil-container', {
 });
 
 /* =====================================================
-   16. SIGIL — rotating rings + snake
+   16. SIGIL — perpetual rotation + interactivity
    ===================================================== */
 (function sigilMagic() {
     const container = $('#sigil');
-    const snake     = $('#snakeImg');
-    if (!container || !snake) return;
+    if (!container) return;
 
-    const outer = gsap.to('#ringOuter', { rotate: 360,  duration: 42, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
+    const outer = gsap.to('#ringOuter', { rotate: 360, duration: 42, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
     const mid   = gsap.to('#ringMid',   { rotate: -360, duration: 28, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
-    const ringTweens = [outer, mid];
+    const star  = gsap.to('#starGroup', { rotate: 360, duration: 60, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
 
-    const snakeSpin = gsap.to(snake, {
-        rotate: 360,
-        duration: 18,
-        repeat: -1,
-        ease: 'none',
-        transformOrigin: '50% 50%',
-        paused: true
-    });
-
-    gsap.to(snake, {
-        scale: 1.06,
-        duration: 2.4,
-        yoyo: true,
-        repeat: -1,
-        ease: 'sine.inOut',
-        transformOrigin: '50% 50%'
-    });
-
-    ScrollTrigger.create({
-        trigger: '.onboarding',
-        start: 'top 55%',
-        once: true,
-        onEnter: () => {
-            snakeSpin.play();
-            gsap.fromTo(snake,
-                { rotate: -180, scale: 0.4, opacity: 0 },
-                {
-                    rotate: 0, scale: 1, opacity: 1,
-                    duration: 1.6, ease: 'back.out(1.4)',
-                    onComplete: () => snakeSpin.play()
-                }
-            );
-        }
-    });
+    const tweens = [outer, mid, star];
 
     container.addEventListener('mouseenter', () => {
-        ringTweens.forEach(t => gsap.to(t, { timeScale: 3.2, duration: .6, ease: 'power2.out' }));
-        gsap.to(snakeSpin, { timeScale: 3.5, duration: .6, ease: 'power2.out' });
-        gsap.to(container, { scale: 1.04, duration: .6, ease: 'power2.out' });
+        tweens.forEach(t => gsap.to(t, { timeScale: 3.2, duration: .6, ease: 'power2.out' }));
+        gsap.to('.sigil-svg .star', { opacity: 1, duration: .4 });
         gsap.to('.sigil-svg text', { opacity: 1, duration: .4 });
+        gsap.to(container, { scale: 1.04, duration: .6, ease: 'power2.out' });
     });
     container.addEventListener('mouseleave', () => {
-        ringTweens.forEach(t => gsap.to(t, { timeScale: 1, duration: .8, ease: 'power2.out' }));
-        gsap.to(snakeSpin, { timeScale: 1, duration: .8, ease: 'power2.out' });
-        gsap.to(container, { scale: 1, duration: .6, ease: 'power2.out' });
+        tweens.forEach(t => gsap.to(t, { timeScale: 1, duration: .8, ease: 'power2.out' }));
+        gsap.to('.sigil-svg .star', { opacity: .8, duration: .4 });
         gsap.to('.sigil-svg text', { opacity: .8, duration: .4 });
+        gsap.to(container, { scale: 1, duration: .6, ease: 'power2.out' });
     });
 
-    let spinning = false;
     container.addEventListener('click', () => {
-        if (spinning) return;
-        spinning = true;
-
         gsap.fromTo(container,
-            { filter: 'drop-shadow(0 0 0px rgba(34,211,238,0))' },
+            { filter: 'drop-shadow(0 0 0px rgba(34, 211, 238, 0))' },
             {
-                filter: 'drop-shadow(0 0 34px rgba(34,211,238,0.9))',
+                filter: 'drop-shadow(0 0 34px rgba(34, 211, 238, 0.85))',
                 duration: .35, yoyo: true, repeat: 1, ease: 'power2.out'
             }
         );
-
-        gsap.to(snakeSpin, { timeScale: 6, duration: .3, ease: 'power2.out' });
-
-        gsap.timeline({
-            onComplete: () => {
-                gsap.to(snakeSpin, { timeScale: 1, duration: .6, ease: 'power2.out' });
-                spinning = false;
-            }
-        })
-        .to(snake, {
-            rotate: '+=720',
-            scale: 1.18,
-            duration: 1.4,
-            ease: 'power3.inOut',
-            transformOrigin: '50% 50%'
-        })
-        .to(snake, {
-            scale: 1,
-            duration: .5,
-            ease: 'power2.out'
-        }, '-=0.4');
+        gsap.fromTo('#starGroup',
+            { scale: 1 },
+            { scale: 1.18, duration: .28, yoyo: true, repeat: 1, ease: 'power2.inOut', transformOrigin: '50% 50%' }
+        );
     });
 
     if (!isTouch) {
@@ -1994,19 +1878,9 @@ gsap.to('.sigil-container', {
                 ease: 'power2.out',
                 transformPerspective: 900
             });
-            gsap.to('.sigil-snake-wrap', {
-                rotateY: px * 24,
-                rotateX: -py * 24,
-                x: px * 14,
-                y: py * 14,
-                duration: .6,
-                ease: 'power2.out',
-                transformPerspective: 900
-            });
         });
         container.addEventListener('mouseleave', () => {
-            gsap.to('.sigil-svg', { rotateX: 0, rotateY: 0, duration: 1, ease: 'elastic.out(1,0.5)' });
-            gsap.to('.sigil-snake-wrap', { rotateX: 0, rotateY: 0, x: 0, y: 0, duration: 1, ease: 'elastic.out(1,0.5)' });
+            gsap.to('.sigil-svg', { rotateX: 0, rotateY: 0, duration: 1, ease: 'elastic.out(1, 0.5)' });
         });
     }
 })();
