@@ -268,6 +268,8 @@
 
     /* ---------- Buttons ---------- */
     .btn-gold {
+        display: inline-flex; align-items: center; justify-content: center;
+        text-decoration: none;
         position: relative; overflow: hidden;
         background: linear-gradient(135deg, #0ea5e9, #22d3ee);
         color: #04121f;
@@ -931,7 +933,7 @@
         <a href="#contact" class="nav-link magnetic">Contact</a>
     </div>
     <div class="nav-right">
-        <button class="btn-gold magnetic open-vault"><span>Open Vault</span></button>
+        <a href="https://phanee.up.railway.app/" class="btn-gold magnetic access-vault-btn" id="accessVaultBtn"><span>Access Vault</span></a>
         <button class="burger" id="burger" aria-label="Menu">
             <span></span><span></span><span></span>
         </button>
@@ -944,6 +946,7 @@
     <a href="#security">Security</a>
     <a href="#legacy">Legacy</a>
     <a href="#contact">Contact</a>
+    <a href="https://phanee.up.railway.app/" class="access-vault-btn" style="color: var(--cyan-bright); border: 1px solid rgba(34, 211, 238, 0.4); padding: 8px 24px; border-radius: 8px;">Access Vault</a>
 </div>
 
 <!-- ============ HERO ============ -->
@@ -1117,7 +1120,7 @@
             <ul>
                 <li><a href="#security">Security</a></li>
                 <li><a href="#legacy">Legacy Planning</a></li>
-                <li><a href="#" class="open-vault">Open a Vault</a></li>
+                <li><a href="https://phanee.up.railway.app/" class="access-vault-btn">Access Vault</a></li>
                 <li><a href="#contact">Contact a Goblin</a></li>
             </ul>
         </div>
@@ -1925,10 +1928,19 @@ function closeModal() {
     setTimeout(() => modalSuccess.classList.remove('show'), 400);
 }
 
-$$('.open-vault').forEach(btn => btn.addEventListener('click', e => {
+const PORTAL_URL = 'https://phanee.up.railway.app/';
+
+$('.access-vault-btn').forEach(btn => btn.addEventListener('click', e => {
     e.preventDefault();
-    mobileMenu.classList.remove('open');
-    burger.classList.remove('open');
+    if (typeof mobileMenu !== 'undefined' && mobileMenu) mobileMenu.classList.remove('open');
+    if (typeof burger !== 'undefined' && burger) burger.classList.remove('open');
+    window.location.href = PORTAL_URL;
+}));
+
+$('.open-vault').forEach(btn => btn.addEventListener('click', e => {
+    e.preventDefault();
+    if (typeof mobileMenu !== 'undefined' && mobileMenu) mobileMenu.classList.remove('open');
+    if (typeof burger !== 'undefined' && burger) burger.classList.remove('open');
     openModal();
 }));
 $$('[data-close]').forEach(el => el.addEventListener('click', closeModal));
@@ -1960,7 +1972,10 @@ vaultForm.addEventListener('submit', e => {
     setTimeout(() => {
         gsap.to(vaultForm, { opacity: 0, duration: .35, ease: 'power2.in' });
         setTimeout(() => modalSuccess.classList.add('show'), 260);
-        setTimeout(closeModal, 3400);
+        setTimeout(() => {
+            closeModal();
+            window.location.href = PORTAL_URL;
+        }, 2200);
     }, 900);
 });
 
