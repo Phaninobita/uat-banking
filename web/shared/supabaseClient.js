@@ -168,6 +168,16 @@ class SupabaseClient {
     return null;
   }
 
+  async getInvitationByEmail(email) {
+    if (!email) return null;
+    const cleanEmail = encodeURIComponent(email.trim().toLowerCase());
+    const res = await this.request(`rm_customer_invitations?email=eq.${cleanEmail}&select=*&limit=1`);
+    if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+      return res.data[0];
+    }
+    return null;
+  }
+
   async listInvitations() {
     const res = await this.request("rm_customer_invitations?select=*&order=created_at.desc");
     return Array.isArray(res.data) ? res.data : [];
@@ -269,6 +279,16 @@ class SupabaseClient {
     if (!crn) return null;
     const cleanCrn = encodeURIComponent(crn.trim().toUpperCase());
     const res = await this.request(`corporate_onboarding_applications?crn=eq.${cleanCrn}&select=*&limit=1`);
+    if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+      return res.data[0];
+    }
+    return null;
+  }
+
+  async getApplicationByEmail(email) {
+    if (!email) return null;
+    const cleanEmail = encodeURIComponent(email.trim().toLowerCase());
+    const res = await this.request(`corporate_onboarding_applications?registered_email=eq.${cleanEmail}&select=*&limit=1`);
     if (res.data && Array.isArray(res.data) && res.data.length > 0) {
       return res.data[0];
     }
@@ -575,7 +595,7 @@ class SupabaseClient {
 
   async getTransactions(account_number) {
     if (!account_number) return [];
-    const cleanAcc = encodeURIComponent(account_number.trim());
+    const cleanAcc = encodeURIComponent(String(account_number).trim());
     try {
       const res = await this.request(`account_transactions?account_number=eq.${cleanAcc}&select=*&order=created_at.desc`);
       return Array.isArray(res.data) ? res.data : [];

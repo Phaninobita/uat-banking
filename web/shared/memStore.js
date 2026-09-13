@@ -213,6 +213,18 @@ class MemoryStore {
     return null;
   }
 
+  getApplicationByEmail(email) {
+    if (!email) return null;
+    const cleanEmail = email.trim().toLowerCase();
+    for (const app of this.applications.values()) {
+      const appEmail = (app.registered_email || app.email || (app.form_data && (app.form_data.email || app.form_data.step1?.email || app.form_data.step2?.email)) || "").trim().toLowerCase();
+      if (appEmail === cleanEmail) {
+        return app;
+      }
+    }
+    return null;
+  }
+
   saveRmInvitation(invite) {
     const crn = (invite.crn || "").trim().toUpperCase();
     const email = (invite.email || "").trim().toLowerCase();
@@ -257,6 +269,17 @@ class MemoryStore {
     const cleanCrn = crn.trim().toUpperCase();
     for (const inv of this.rmInvitations.values()) {
       if (inv.crn && inv.crn.trim().toUpperCase() === cleanCrn) {
+        return inv;
+      }
+    }
+    return null;
+  }
+
+  getRmInvitationByEmail(email) {
+    if (!email) return null;
+    const cleanEmail = email.trim().toLowerCase();
+    for (const inv of this.rmInvitations.values()) {
+      if (inv.email && inv.email.trim().toLowerCase() === cleanEmail) {
         return inv;
       }
     }

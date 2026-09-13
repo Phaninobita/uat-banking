@@ -54,6 +54,77 @@ async function getRmCustomerInvitation(crn, email) {
   return memStore.getRmInvitation(cleanCrn, cleanEmail);
 }
 
+// Helper: Check bidirectional binding between CRN and Email
+async function checkCrnAndEmailBinding(cleanCrn, cleanEmail) {
+  // 1. Direct match: Exact pair already exists in invitations
+  const exactInvite = await getRmCustomerInvitation(cleanCrn, cleanEmail);
+  if (exactInvite) {
+    return { ok: true, rmInvite: exactInvite, isNew: false };
+  }
+
+  // 2. Check if this CRN is already registered to another email in invitations or applications
+  let existingInviteForCrn = null;
+  if (memStore.getRmInvitationByCrn) {
+    existingInviteForCrn = memStore.getRmInvitationByCrn(cleanCrn);
+  }
+  if (!existingInviteForCrn && db.isConnected() && db.getInvitationByCrn) {
+    try { existingInviteForCrn = await db.getInvitationByCrn(cleanCrn); } catch (e) {}
+  }
+
+  let existingAppForCrn = null;
+  if (memStore.getApplicationByCrn) {
+    existingAppForCrn = memStore.getApplicationByCrn(cleanCrn);
+  }
+  if (!existingAppForCrn && db.isConnected() && db.getApplicationByCrn) {
+    try { existingAppForCrn = await db.getApplicationByCrn(cleanCrn); } catch (e) {}
+  }
+
+  const recordForCrn = existingInviteForCrn || existingAppForCrn;
+  const registeredEmailForCrn = (recordForCrn?.email || recordForCrn?.registered_email || "").trim().toLowerCase();
+  if (registeredEmailForCrn && registeredEmailForCrn !== cleanEmail) {
+    const maskedEmail = registeredEmailForCrn.replace(/^(.)(.*)(@.*)$/, "$1***$3");
+    return {
+      ok: false,
+      error: `Access Denied: Commercial Registration Number "${cleanCrn}" is already registered to another corporate email address (${maskedEmail}). Please sign in using your authorized company email or contact your Relationship Manager.`,
+      code: "CRN_EMAIL_MISMATCH"
+    };
+  }
+
+  // 3. Check if this Email is already registered to another CRN in invitations or applications
+  let existingInviteForEmail = null;
+  if (memStore.getRmInvitationByEmail) {
+    existingInviteForEmail = memStore.getRmInvitationByEmail(cleanEmail);
+  }
+  if (!existingInviteForEmail && db.isConnected() && db.getInvitationByEmail) {
+    try { existingInviteForEmail = await db.getInvitationByEmail(cleanEmail); } catch (e) {}
+  }
+
+  let existingAppForEmail = null;
+  if (memStore.getApplicationByEmail) {
+    existingAppForEmail = memStore.getApplicationByEmail(cleanEmail);
+  }
+  if (!existingAppForEmail && db.isConnected() && db.getApplicationByEmail) {
+    try { existingAppForEmail = await db.getApplicationByEmail(cleanEmail); } catch (e) {}
+  }
+
+  const recordForEmail = existingInviteForEmail || existingAppForEmail;
+  const registeredCrnForEmail = (recordForEmail?.crn || "").trim().toUpperCase();
+  if (registeredCrnForEmail && registeredCrnForEmail !== cleanCrn) {
+    return {
+      ok: false,
+      error: `Access Denied: The corporate email address "${cleanEmail}" is already registered against Commercial Registration Number "${registeredCrnForEmail}". Both CRN and Email must match your registered corporate profile.`,
+      code: "CRN_EMAIL_MISMATCH"
+    };
+  }
+
+  return {
+    ok: true,
+    rmInvite: (registeredEmailForCrn === cleanEmail ? existingInviteForCrn : null) || (registeredCrnForEmail === cleanCrn ? existingInviteForEmail : null),
+    existingApp: existingAppForCrn || existingAppForEmail,
+    isNew: !recordForCrn && !recordForEmail
+  };
+}
+
 // 1. Request OTP (4-digit verification code) — Strictly guarded by RM Database
 router.post("/request-otp", async (req, res) => {
   memStore.metrics.serviceRequests.auth++;
@@ -68,42 +139,32 @@ router.post("/request-otp", async (req, res) => {
     return res.status(400).json({ error: "Please enter a valid registered email address." });
   }
 
-  const cleanCrn = crn.trim();
+  const cleanCrn = crn.trim().toUpperCase();
   const cleanEmail = email.trim().toLowerCase();
 
-  // Look up invitation in RM database or memory store
-  let rmInvite = await getRmCustomerInvitation(cleanCrn, cleanEmail);
-  if (!rmInvite) {
-    if (memStore.getRmInvitationByCrn) {
-      rmInvite = memStore.getRmInvitationByCrn(cleanCrn);
-    }
-    if (!rmInvite && db.isConnected() && db.getInvitationByCrn) {
-      try {
-        rmInvite = await db.getInvitationByCrn(cleanCrn);
-      } catch (e) {}
-    }
+  // Validate bilateral pairing between CRN and corporate Email
+  const binding = await checkCrnAndEmailBinding(cleanCrn, cleanEmail);
+  if (!binding.ok) {
+    return res.status(403).json({
+      error: binding.error,
+      code: binding.code
+    });
   }
 
-  // Automatically provision invitation for ANY entered email and CRN so OTP always triggers
+  let rmInvite = binding.rmInvite;
+  // For a newly onboarding corporate client (neither CRN nor email exists in DB), auto-provision invitation
   if (!rmInvite) {
     rmInvite = {
       crn: cleanCrn,
       email: cleanEmail,
-      company_name: "Corporate Client",
-      contact_person: "Authorized Signatory",
-      phone: "+1 212 555 0199",
-      company_uid: resolveCompanyUid(null, cleanCrn),
+      company_name: binding.existingApp?.company_name || "Corporate Client",
+      contact_person: binding.existingApp?.contact_person || "Authorized Signatory",
+      phone: binding.existingApp?.phone || "+1 212 555 0199",
+      company_uid: resolveCompanyUid(binding.existingApp?.company_uid, cleanCrn),
       status: "invited",
       created_at: new Date().toISOString()
     };
     memStore.createRmInvitation(rmInvite);
-    if (db.isConnected()) {
-      try { await db.saveInvitation(rmInvite); } catch (e) {}
-    }
-  } else if (rmInvite.email && rmInvite.email.toLowerCase() !== cleanEmail) {
-    // If an invitation exists for this CRN under another email, associate the newly entered email
-    rmInvite.email = cleanEmail;
-    memStore.saveRmInvitation(rmInvite);
     if (db.isConnected()) {
       try { await db.saveInvitation(rmInvite); } catch (e) {}
     }
@@ -180,7 +241,7 @@ router.post("/verify-otp", async (req, res) => {
     return res.status(400).json({ error: "CRN, Email, and OTP code are required." });
   }
 
-  const cleanCrn = crn.trim();
+  const cleanCrn = crn.trim().toUpperCase();
   const cleanEmail = email.trim().toLowerCase();
   const cleanOtp = otp.toString().trim();
   const key = `${cleanCrn}:${cleanEmail}`;
@@ -201,23 +262,31 @@ router.post("/verify-otp", async (req, res) => {
     return res.status(401).json({ error: "Invalid or expired verification code (Use demo code 1111)." });
   }
 
-  // Strict check on RM database record existence during verify
-  let rmInvite = storedOtpData ? storedOtpData.rmInvite : null;
-  if (!rmInvite) {
-    rmInvite = await getRmCustomerInvitation(cleanCrn, cleanEmail);
+  // Strict check on RM database record existence and CRN-Email pairing during verify
+  const binding = await checkCrnAndEmailBinding(cleanCrn, cleanEmail);
+  if (!binding.ok) {
+    return res.status(403).json({
+      error: binding.error,
+      code: binding.code
+    });
   }
-  if (!rmInvite && memStore.getRmInvitationByCrn) {
-    rmInvite = memStore.getRmInvitationByCrn(cleanCrn);
-  }
+
+  let rmInvite = storedOtpData ? storedOtpData.rmInvite : binding.rmInvite;
   if (!rmInvite) {
     rmInvite = {
       crn: cleanCrn,
       email: cleanEmail,
-      company_name: "Corporate Client",
-      contact_person: "Authorized Signatory",
-      company_uid: resolveCompanyUid(null, cleanCrn),
-      status: "invited"
+      company_name: binding.existingApp?.company_name || "Corporate Client",
+      contact_person: binding.existingApp?.contact_person || "Authorized Signatory",
+      phone: binding.existingApp?.phone || "+1 212 555 0199",
+      company_uid: resolveCompanyUid(binding.existingApp?.company_uid, cleanCrn),
+      status: "invited",
+      created_at: new Date().toISOString()
     };
+    memStore.createRmInvitation(rmInvite);
+    if (db.isConnected()) {
+      try { await db.saveInvitation(rmInvite); } catch (e) {}
+    }
   }
 
   memStore.otpStore.delete(key);

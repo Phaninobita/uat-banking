@@ -317,14 +317,70 @@ async function handleSupabaseRestQuery(text, params = []) {
     return { rows: [memUser] };
   }
 
-  // 6. corporate_accounts & account_transactions
+  // 6. account_transactions
+  if (sqlUpper.startsWith("INSERT INTO ACCOUNT_TRANSACTIONS")) {
+    return { rows: [{ id: Date.now() }] };
+  }
+
+  if (sqlUpper.includes("FROM ACCOUNT_TRANSACTIONS")) {
+    const userCuid = params.length > 1 ? String(params[0] || "").trim().toUpperCase() : null;
+    const limit = parseInt(params[params.length - 1], 10) || 20;
+    let list = memStore.transactions;
+    if (userCuid) {
+      const callerAccounts = new Set();
+      for (const acc of memStore.accounts.values()) {
+        if (!acc.company_uid || acc.company_uid.toUpperCase() === userCuid) {
+          callerAccounts.add(acc.account_number);
+        }
+      }
+      list = list.filter(t => 
+        (t.company_uid && t.company_uid.toUpperCase() === userCuid) ||
+        (t.account_number && callerAccounts.has(t.account_number))
+      );
+    }
+    return { rows: list.slice(0, limit) };
+  }
+
+  // 7. corporate_accounts
   if (sqlUpper.includes("FROM CORPORATE_ACCOUNTS")) {
+    if (sqlUpper.includes("ACCOUNT_NUMBER =") || sqlUpper.includes("ACCOUNT_NUMBER=")) {
+      const accNum = String(params[0] || "").trim();
+      let acc = memStore.accounts.get(accNum);
+      if (!acc) {
+        for (const a of memStore.accounts.values()) {
+          if (a.account_number === accNum) { acc = a; break; }
+        }
+      }
+      return { rows: acc ? [acc] : [] };
+    }
     const accounts = await supabaseClient.getAccounts(params[0]);
+    if (!accounts || accounts.length === 0) {
+      return { rows: Array.from(memStore.accounts.values()) };
+    }
     return { rows: accounts };
   }
-  if (sqlUpper.includes("FROM ACCOUNT_TRANSACTIONS")) {
-    const txs = await supabaseClient.getTransactions(params[0]);
-    return { rows: txs };
+
+  if (sqlUpper.startsWith("UPDATE CORPORATE_ACCOUNTS")) {
+    // UPDATE corporate_accounts SET balance = balance - $1, available_balance = available_balance - $1, updated_at = NOW() WHERE account_number = $2 AND available_balance >= $1 RETURNING *
+    const deductAmount = parseFloat(params[0]);
+    const accNum = String(params[1] || "").trim();
+    let acc = memStore.accounts.get(accNum);
+    if (!acc) {
+      for (const a of memStore.accounts.values()) {
+        if (a.account_number === accNum) { acc = a; break; }
+      }
+    }
+    if (acc) {
+      const avail = parseFloat(acc.available_balance || acc.balance || 0);
+      if (avail >= deductAmount) {
+        acc.balance = Number((parseFloat(acc.balance) - deductAmount).toFixed(2));
+        acc.available_balance = Number((avail - deductAmount).toFixed(2));
+        acc.updated_at = new Date().toISOString();
+        memStore.accounts.set(acc.account_number, acc);
+        return { rows: [acc] };
+      }
+    }
+    return { rows: [] };
   }
 
   console.warn(`[SUPABASE ROUTER] Unhandled query pattern: "${text.substring(0, 80)}..."`);
@@ -378,6 +434,18 @@ const db = {
     }
     return supabaseClient.getInvitationByCrn(crn);
   },
+  async getInvitationByEmail(email) {
+    await initPromise;
+    if (useDatabase && engineType === "postgres" && pool) {
+      try {
+        const res = await pool.query("SELECT * FROM rm_customer_invitations WHERE LOWER(TRIM(email)) = $1 LIMIT 1", [email.trim().toLowerCase()]);
+        return res.rows && res.rows.length > 0 ? res.rows[0] : null;
+      } catch (err) {
+        console.warn("[DATABASE] pool.query error in getInvitationByEmail:", err.message);
+      }
+    }
+    return supabaseClient.getInvitationByEmail(email);
+  },
   async listInvitations() {
     await initPromise;
     return supabaseClient.listInvitations();
@@ -401,6 +469,14 @@ const db = {
   },
   async getApplicationByCrnAndEmail(crn, email) {
     await initPromise;
+    if (useDatabase && engineType === "postgres" && pool) {
+      try {
+        const res = await pool.query("SELECT * FROM corporate_onboarding_applications WHERE UPPER(TRIM(crn)) = $1 AND LOWER(TRIM(registered_email)) = $2 LIMIT 1", [crn.trim().toUpperCase(), email.trim().toLowerCase()]);
+        return res.rows && res.rows.length > 0 ? res.rows[0] : null;
+      } catch (err) {
+        console.warn("[DATABASE] pool.query error in getApplicationByCrnAndEmail:", err.message);
+      }
+    }
     return supabaseClient.getApplicationByCrnAndEmail(crn, email);
   },
   async getApplicationByCrn(crn) {
@@ -414,6 +490,18 @@ const db = {
       }
     }
     return supabaseClient.getApplicationByCrn(crn);
+  },
+  async getApplicationByEmail(email) {
+    await initPromise;
+    if (useDatabase && engineType === "postgres" && pool) {
+      try {
+        const res = await pool.query("SELECT * FROM corporate_onboarding_applications WHERE LOWER(TRIM(registered_email)) = $1 LIMIT 1", [email.trim().toLowerCase()]);
+        return res.rows && res.rows.length > 0 ? res.rows[0] : null;
+      } catch (err) {
+        console.warn("[DATABASE] pool.query error in getApplicationByEmail:", err.message);
+      }
+    }
+    return supabaseClient.getApplicationByEmail(email);
   },
   async getApplicationByUid(uid) {
     await initPromise;

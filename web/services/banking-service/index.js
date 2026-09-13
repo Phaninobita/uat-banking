@@ -59,12 +59,31 @@ router.get("/accounts", requireAuth, async (req, res) => {
       accounts = Array.from(memStore.accounts.values());
     }
 
-    // Filter accounts by caller's company if user is not RM executive and accounts have company_uid
+    // Filter accounts by caller's company if user is not RM executive
     if (!req.user.is_rm && req.user.role !== "RM" && req.user.company_uid) {
-      const matching = accounts.filter(a => !a.company_uid || a.company_uid === req.user.company_uid);
-      if (matching.length > 0) {
-        accounts = matching;
+      const callerCuid = req.user.company_uid.toUpperCase();
+      let matching = accounts.filter(a => a.company_uid && a.company_uid.toUpperCase() === callerCuid);
+      if (matching.length === 0) {
+        const compName = req.user.company_name || "Corporate Treasury";
+        const hash = crypto.createHash("md5").update(callerCuid).digest("hex").substring(0, 8);
+        const generatedAccNum = "70" + parseInt(hash, 16).toString().substring(0, 8);
+        const autoAcc = {
+          id: Date.now(),
+          company_uid: callerCuid,
+          account_number: generatedAccNum,
+          iban: `AE29033000${generatedAccNum}`,
+          currency: "AED",
+          account_name: `${compName} Operational Treasury`,
+          account_type: "Corporate Checking",
+          balance: 1000000.00,
+          available_balance: 1000000.00,
+          status: "active",
+          created_at: new Date().toISOString()
+        };
+        memStore.accounts.set(generatedAccNum, autoAcc);
+        matching = [autoAcc];
       }
+      accounts = matching;
     }
 
     // Calculate total liquidity in AED
@@ -89,20 +108,40 @@ router.get("/accounts", requireAuth, async (req, res) => {
   }
 });
 
-// 2. Get Live Transactions Ledger (Requires Authentication)
+// 2. Get Live Transactions Ledger (Requires Authentication & Tenant Isolation)
 router.get("/transactions", requireAuth, async (req, res) => {
   memStore.metrics.serviceRequests.banking++;
   const limit = parseInt(req.query.limit || "20", 10);
   let txs = [];
 
+  const isRm = Boolean(req.user.is_rm || req.user.role === "RM");
+  const userCuid = (req.user.company_uid || "").trim().toUpperCase();
+
   if (db.isConnected()) {
     try {
-      const result = await db.query(
-        "SELECT * FROM account_transactions ORDER BY created_at DESC LIMIT $1",
-        [limit]
-      );
-      if (result.rows && result.rows.length > 0) {
-        txs = result.rows;
+      if (isRm || !userCuid) {
+        // RM Executives have central administrative oversight
+        const result = await db.query(
+          "SELECT * FROM account_transactions ORDER BY created_at DESC LIMIT $1",
+          [limit]
+        );
+        if (result.rows && result.rows.length > 0) {
+          txs = result.rows;
+        }
+      } else {
+        // Multi-Tenant Isolation: Only query transactions belonging to this company's accounts or company_uid
+        const result = await db.query(
+          `SELECT t.* FROM account_transactions t
+           WHERE (t.company_uid IS NOT NULL AND UPPER(t.company_uid) = $1)
+              OR t.account_number IN (
+                SELECT account_number FROM corporate_accounts WHERE UPPER(company_uid) = $1
+              )
+           ORDER BY t.created_at DESC LIMIT $2`,
+          [userCuid, limit]
+        );
+        if (result.rows && result.rows.length > 0) {
+          txs = result.rows;
+        }
       }
     } catch (dbErr) {
       console.warn("[BANKING SERVICE] DB transactions fetch fallback:", dbErr.message);
@@ -110,7 +149,21 @@ router.get("/transactions", requireAuth, async (req, res) => {
   }
 
   if (!txs || txs.length === 0) {
-    txs = memStore.transactions.slice(0, limit);
+    if (isRm || !userCuid) {
+      txs = memStore.transactions.slice(0, limit);
+    } else {
+      // Find accounts belonging to caller's company in memory
+      const callerAccounts = new Set();
+      for (const acc of memStore.accounts.values()) {
+        if (!acc.company_uid || acc.company_uid.toUpperCase() === userCuid) {
+          callerAccounts.add(acc.account_number);
+        }
+      }
+      txs = memStore.transactions.filter(t =>
+        (t.company_uid && t.company_uid.toUpperCase() === userCuid) ||
+        (t.account_number && callerAccounts.has(t.account_number))
+      ).slice(0, limit);
+    }
   }
 
   return res.json({
@@ -153,7 +206,20 @@ router.post("/transfer", requireAuth, async (req, res) => {
     return res.status(400).json({ error: "Beneficiary Name and IBAN are required." });
   }
 
-  const accountNum = fromAccount || "7029841001";
+  let accountNum = fromAccount;
+  if (!accountNum && req.user.company_uid) {
+    const callerCuid = req.user.company_uid.toUpperCase();
+    for (const a of memStore.accounts.values()) {
+      if (a.company_uid && a.company_uid.toUpperCase() === callerCuid) {
+        accountNum = a.account_number;
+        break;
+      }
+    }
+  }
+  if (!accountNum) {
+    accountNum = "7029841001";
+  }
+
   let acc = null;
 
   if (db.isConnected()) {
@@ -172,6 +238,29 @@ router.post("/transfer", requireAuth, async (req, res) => {
 
   if (!acc) {
     acc = memStore.accounts.get(accountNum);
+  }
+
+  // If no account exists yet for this corporate entity, provision their operational treasury account
+  if (!acc && req.user.company_uid) {
+    const callerCuid = req.user.company_uid.toUpperCase();
+    const compName = req.user.company_name || "Corporate Treasury";
+    const hash = crypto.createHash("md5").update(callerCuid).digest("hex").substring(0, 8);
+    const generatedAccNum = (accountNum && accountNum !== "7029841001") ? accountNum : ("70" + parseInt(hash, 16).toString().substring(0, 8));
+    acc = {
+      id: Date.now(),
+      company_uid: callerCuid,
+      account_number: generatedAccNum,
+      iban: `AE29033000${generatedAccNum}`,
+      currency: currency || "AED",
+      account_name: `${compName} Operational Treasury`,
+      account_type: "Corporate Checking",
+      balance: 1000000.00,
+      available_balance: 1000000.00,
+      status: "active",
+      created_at: new Date().toISOString()
+    };
+    accountNum = generatedAccNum;
+    memStore.accounts.set(generatedAccNum, acc);
   }
 
   if (!acc) {
@@ -197,11 +286,14 @@ router.post("/transfer", requireAuth, async (req, res) => {
   const txRef = "TX-FTS-" + crypto.randomBytes(4).toString("hex").toUpperCase();
   const swiftUetr = crypto.randomUUID();
 
+  const targetCompanyUid = req.user.company_uid || acc.company_uid || null;
+
   const txRecord = {
     id: Date.now(),
     transaction_ref: txRef,
     swift_uetr: swiftUetr,
     account_number: accountNum,
+    company_uid: targetCompanyUid,
     type: "debit",
     amount: numAmount,
     currency: currency || acc.currency,
@@ -232,13 +324,15 @@ router.post("/transfer", requireAuth, async (req, res) => {
 
       await db.query(
         `INSERT INTO account_transactions (
-          transaction_ref, account_id, account_number, type, amount, currency,
+          transaction_ref, swift_uetr, account_id, account_number, company_uid, type, amount, currency,
           counterparty_name, counterparty_iban, description, category, status, channel, created_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW())`,
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW())`,
         [
           txRef,
+          swiftUetr,
           acc.id || null,
           accountNum,
+          targetCompanyUid,
           "debit",
           numAmount,
           currency || acc.currency,
@@ -312,12 +406,28 @@ router.post("/transfer", requireAuth, async (req, res) => {
   });
 });
 
-// 5. Mobile App Summary Feed (Tailored for the upcoming Mobile Bank App) (Requires Authentication)
+// 5. Mobile App Summary Feed (Tailored for the upcoming Mobile Bank App) (Requires Authentication & Tenant Isolation)
 router.get(["/mobile/summary", "/summary"], requireAuth, (req, res) => {
   memStore.metrics.serviceRequests.banking++;
-  const accounts = Array.from(memStore.accounts.values());
+  const userCuid = (req.user.company_uid || "").trim().toUpperCase();
+  const isRm = Boolean(req.user.is_rm || req.user.role === "RM");
+
+  let accounts = Array.from(memStore.accounts.values());
+  if (!isRm && userCuid) {
+    const matching = accounts.filter(a => !a.company_uid || a.company_uid.toUpperCase() === userCuid);
+    if (matching.length > 0) accounts = matching;
+  }
   const primaryAccount = accounts[0] || {};
-  const recentTransactions = memStore.transactions.slice(0, 5);
+
+  let recentTransactions = memStore.transactions;
+  if (!isRm && userCuid) {
+    const userAccountNumbers = new Set(accounts.map(a => a.account_number));
+    recentTransactions = recentTransactions.filter(t =>
+      (t.company_uid && t.company_uid.toUpperCase() === userCuid) ||
+      (t.account_number && userAccountNumbers.has(t.account_number))
+    );
+  }
+  recentTransactions = recentTransactions.slice(0, 5);
 
   const virtualCards = [
     {
