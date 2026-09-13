@@ -3501,7 +3501,7 @@ async function handleLoginStep1() {
                 html: `
                     <div style="font-family: -apple-system, sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff;">
                         <div style="text-align: center; margin-bottom: 16px;">
-                            <img src="/images/bank-logo-dragon.png" alt="Gringotts Bank Logo" style="height: 52px; width: 52px; object-fit: contain; border-radius: 50%; border: none; display: inline-block; margin-bottom: 6px;">
+                            <img src="/images/bank-logo-dragon.png?v=2" alt="Gringotts Bank Logo" style="height: 46px; width: 90px; object-fit: cover; border-radius: 12px; border: 1.5px solid rgba(56, 130, 220, 0.5); display: inline-block; margin-bottom: 6px; box-shadow: 0 0 10px rgba(56, 130, 220, 0.35);">
                             <h2 style="margin: 8px 0 2px; color: #0f172a; font-size: 18px;">Gringotts Bank Corporate Portal</h2>
                             <p style="color: #64748b; font-size: 12px; margin: 0;">Diagon Alley &bull; Vault Verification Code</p>
                         </div>
@@ -3978,7 +3978,7 @@ async function finalizeApp() {
         html: `
             <div style="font-family: -apple-system, sans-serif; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <img src="/images/bank-logo-dragon.png" alt="Gringotts Bank Logo" style="height: 52px; width: 52px; object-fit: contain; border-radius: 50%; border: none; display: inline-block; margin-bottom: 6px;">
+                    <img src="/images/bank-logo-dragon.png?v=2" alt="Gringotts Bank Logo" style="height: 46px; width: 90px; object-fit: cover; border-radius: 12px; border: 1.5px solid rgba(56, 130, 220, 0.5); display: inline-block; margin-bottom: 6px; box-shadow: 0 0 10px rgba(56, 130, 220, 0.35);">
                     <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Gringotts Bank Corporate Portal</h2>
                     <p style="color: #64748b; font-size: 13px; margin: 0;">Diagon Alley &bull; Application Confirmation</p>
                 </div>
@@ -4044,7 +4044,7 @@ function showSaveModal() {
         html: `
             <div style="font-family: -apple-system, sans-serif; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <img src="/images/bank-logo-dragon.png" alt="Gringotts Bank Logo" style="height: 52px; width: 52px; object-fit: contain; border-radius: 50%; border: none; display: inline-block; margin-bottom: 6px;">
+                    <img src="/images/bank-logo-dragon.png?v=2" alt="Gringotts Bank Logo" style="height: 46px; width: 90px; object-fit: cover; border-radius: 12px; border: 1.5px solid rgba(56, 130, 220, 0.5); display: inline-block; margin-bottom: 6px; box-shadow: 0 0 10px rgba(56, 130, 220, 0.35);">
                     <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Gringotts Bank Corporate Portal</h2>
                     <p style="color: #64748b; font-size: 13px; margin: 0;">Diagon Alley &bull; Application Progress Saved</p>
                 </div>
@@ -4121,7 +4121,7 @@ function sendInvite() {
         html: `
             <div style="font-family: -apple-system, sans-serif; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <img src="/images/bank-logo-dragon.png" alt="Gringotts Bank Logo" style="height: 52px; width: 52px; object-fit: contain; border-radius: 50%; border: none; display: inline-block; margin-bottom: 6px;">
+                    <img src="/images/bank-logo-dragon.png?v=2" alt="Gringotts Bank Logo" style="height: 46px; width: 90px; object-fit: cover; border-radius: 12px; border: 1.5px solid rgba(56, 130, 220, 0.5); display: inline-block; margin-bottom: 6px; box-shadow: 0 0 10px rgba(56, 130, 220, 0.35);">
                     <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Gringotts Bank Corporate Portal</h2>
                     <p style="color: #64748b; font-size: 13px; margin: 0;">Diagon Alley &bull; Beneficial Ownership Verification</p>
                 </div>

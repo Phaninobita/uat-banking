@@ -101,7 +101,7 @@ if (require.main === module) {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 500px; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
         <div style="border-bottom: 2px solid rgba(217, 119, 6, 0.5); padding-bottom: 12px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
-          <img src="http://localhost:3000/images/bank-logo-dragon.png" alt="Gringotts Bank Logo" style="height: 44px; width: 44px; object-fit: contain; border-radius: 50%; border: none; flex-shrink: 0;">
+          <img src="http://localhost:3000/images/bank-logo-dragon.png?v=2" alt="Gringotts Bank Logo" style="height: 40px; width: 78px; object-fit: cover; border-radius: 10px; border: 1.5px solid rgba(56, 130, 220, 0.5); flex-shrink: 0; box-shadow: 0 0 10px rgba(56, 130, 220, 0.35);">
           <div>
             <h2 style="color: #0b3954; margin: 0; font-size: 20px;">Gringotts Bank</h2>
             <span style="font-size: 12px; color: #64748b;">Diagon Alley &bull; Real-Time Vault Dispatch</span>
