@@ -3,16 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gringotts Bank | Corporate Onboarding &amp; Vault Services</title>
+<title>Gringotts Bank | Corporate Onboarding</title>
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400;600;700&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
     :root {
-        /* New Corporate Navy + Cyan Theme (matching RM & Customer Portal) */
-        --gringotts-gold: #22d3ee;         /* renamed but used as primary accent (cyan) */
+        --gringotts-gold: #22d3ee;
         --gold-bright: #67e8f9;
         --cyan: #22d3ee;
         --cyan-bright: #67e8f9;
@@ -31,6 +30,20 @@
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
+    /* View modes for previewing specific sections directly */
+    body[data-view="vaults"] .hero,
+    body[data-view="vaults"] .ticker {
+        display: none !important;
+    }
+    body[data-view="sigil"] .hero,
+    body[data-view="sigil"] .ticker,
+    body[data-view="sigil"] .vault-section {
+        display: none !important;
+    }
+    body[data-view="sigil"] .sigil-container {
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%) !important;
+    }
+
     html { scroll-behavior: smooth; }
 
     body {
@@ -39,7 +52,7 @@
             radial-gradient(circle at 20% 0%, rgba(34, 211, 238, 0.08), transparent 45%),
             radial-gradient(circle at 85% 90%, rgba(14, 165, 233, 0.06), transparent 55%);
         color: var(--text-light);
-        font-family: 'Lato', 'Plus Jakarta Sans', sans-serif;
+        font-family: 'Lato', sans-serif;
         overflow-x: hidden;
         cursor: none;
     }
@@ -87,22 +100,9 @@
         text-indent: 8px;
         display: flex; flex-direction: column; align-items: center; gap: 15px;
     }
-    .preloader-logo-wrap {
-        width: 140px; height: 72px;
-        background: #eef2f6;
-        border: 1.5px solid rgba(56, 130, 220, 0.7);
-        border-radius: 16px;
-        display: inline-flex; align-items: center; justify-content: center;
-        overflow: hidden;
-        box-shadow: 0 0 20px rgba(34, 211, 238, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.95);
-        animation: rmPulse 3.5s ease-in-out infinite;
-    }
-    .preloader-logo-wrap img {
-        width: 100%; height: 100%; object-fit: cover; display: block;
-    }
-    @keyframes rmPulse {
-        0%, 100% { box-shadow: 0 0 16px rgba(34, 211, 238, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.9); transform: scale(1); }
-        50% { box-shadow: 0 0 30px rgba(34, 211, 238, 0.9), 0 0 50px rgba(14, 165, 233, 0.5), inset 0 1px 0 rgba(255, 255, 255, 1); transform: scale(1.02); }
+    .preloader-logo img {
+        height: 100px; width: auto;
+        filter: drop-shadow(0 0 15px rgba(34, 211, 238, 0.6));
     }
     .preloader-bar {
         width: 220px; height: 2px; margin: 26px auto 0;
@@ -161,45 +161,26 @@
         border-bottom: 1px solid transparent;
     }
     nav.scrolled {
-        background: rgba(6, 13, 26, 0.85);
+        background: rgba(6, 13, 26, 0.82);
         backdrop-filter: blur(14px);
         border-bottom-color: rgba(34, 211, 238, 0.18);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
     }
     nav.nav-hidden { transform: translateY(-100%); }
 
     .logo {
-        font-size: 20px; font-weight: 700; letter-spacing: 2px;
+        font-size: 22px; font-weight: 700; letter-spacing: 3px;
         color: var(--text-light);
         cursor: none;
-        display: flex; align-items: center; gap: 14px;
+        display: flex; align-items: center; gap: 15px;
     }
-    .logo-badge {
-        width: 62px; height: 32px;
-        background: #eef2f6;
-        border: 1.5px solid rgba(56, 130, 220, 0.7);
-        border-radius: 8px;
-        display: inline-flex; align-items: center; justify-content: center;
-        overflow: hidden;
-        box-shadow: 0 0 12px rgba(34, 211, 238, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.95);
-        flex-shrink: 0;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    .logo img {
+        height: 44px; width: auto;
+        filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.7));
+        transition: transform 0.3s ease;
     }
-    .logo-badge img {
-        width: 100%; height: 100%; object-fit: cover; display: block;
-    }
-    .logo:hover .logo-badge {
-        transform: scale(1.05);
-        box-shadow: 0 0 20px rgba(34, 211, 238, 0.8), inset 0 1px 0 #ffffff;
-    }
-    .logo-name {
-        font-family: 'Cinzel', serif; font-size: 18px; font-weight: 700;
-        letter-spacing: 2px;
-        background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
-        -webkit-background-clip: text; background-clip: text; color: transparent;
-    }
+    .logo:hover img { transform: scale(1.05); }
 
-    .nav-links { display: flex; gap: 34px; align-items: center; }
+    .nav-links { display: flex; gap: 38px; align-items: center; }
     .nav-links a {
         font-family: 'Lato', sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 1.5px;
         text-transform: uppercase; color: #b9bec9;
@@ -214,26 +195,12 @@
     .nav-links a:hover { color: var(--cyan-bright); }
     .nav-links a:hover::after { width: 100%; }
 
-    .nav-right { display: flex; align-items: center; gap: 14px; }
-    .nav-rm-btn {
-        padding: 9px 18px; font-size: 11.5px;
-        border: 1px solid rgba(34, 211, 238, 0.3); border-radius: 6px;
-        background: rgba(34, 211, 238, 0.05);
-        color: #e2e8f0; font-family: 'Lato', sans-serif; font-weight: 600;
-        letter-spacing: 1px; text-transform: uppercase; cursor: none;
-        transition: all 0.3s ease;
-    }
-    .nav-rm-btn:hover {
-        border-color: var(--cyan); color: var(--cyan-bright);
-        background: rgba(34, 211, 238, 0.12);
-        box-shadow: 0 0 15px rgba(34, 211, 238, 0.3);
-    }
+    .nav-right { display: flex; align-items: center; gap: 18px; }
 
-    /* Hamburger */
     .burger {
         display: none; width: 42px; height: 42px;
         background: transparent; border: 1px solid rgba(34, 211, 238, 0.35);
-        border-radius: 6px; cursor: none;
+        border-radius: 3px; cursor: none;
         flex-direction: column; justify-content: center; align-items: center; gap: 5px;
         transition: border-color .3s ease;
     }
@@ -246,18 +213,17 @@
     .burger.open span:nth-child(2) { opacity: 0; }
     .burger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
 
-    /* Mobile menu */
     .mobile-menu {
         position: fixed; inset: 0; z-index: 990;
         background: rgba(6, 13, 26, 0.97);
         backdrop-filter: blur(10px);
-        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px;
         clip-path: circle(0% at 100% 0%);
         transition: clip-path .7s cubic-bezier(.76,0,.24,1);
     }
     .mobile-menu.open { clip-path: circle(150% at 100% 0%); }
     .mobile-menu a {
-        font-family: 'Cinzel', serif; font-size: 22px; letter-spacing: 3px;
+        font-family: 'Cinzel', serif; font-size: 26px; letter-spacing: 4px;
         color: #cfd3db; text-transform: uppercase;
         opacity: 0; transform: translateY(24px);
         transition: color .3s ease;
@@ -265,10 +231,9 @@
     .mobile-menu a:hover { color: var(--cyan); }
     .mobile-menu.open a { animation: menuIn .6s forwards; }
     .mobile-menu.open a:nth-child(1) { animation-delay: .18s; }
-    .mobile-menu.open a:nth-child(2) { animation-delay: .24s; }
-    .mobile-menu.open a:nth-child(3) { animation-delay: .30s; }
-    .mobile-menu.open a:nth-child(4) { animation-delay: .36s; }
-    .mobile-menu.open a:nth-child(5) { animation-delay: .42s; }
+    .mobile-menu.open a:nth-child(2) { animation-delay: .26s; }
+    .mobile-menu.open a:nth-child(3) { animation-delay: .34s; }
+    .mobile-menu.open a:nth-child(4) { animation-delay: .42s; }
     @keyframes menuIn { to { opacity: 1; transform: translateY(0); } }
 
     /* ---------- Buttons ---------- */
@@ -283,7 +248,6 @@
         transition: color .35s ease, box-shadow .35s ease, background .35s ease, transform .3s ease;
         will-change: transform;
         box-shadow: 0 0 20px rgba(34, 211, 238, 0.25);
-        display: inline-flex; align-items: center; justify-content: center;
     }
     .btn-gold::before {
         content: ""; position: absolute; inset: 0;
@@ -305,10 +269,9 @@
         padding: 13px 32px; border: 1px solid rgba(255,255,255,.16); border-radius: 8px;
         font-family: 'Lato', sans-serif; font-weight: 700; font-size: 12px;
         cursor: none; letter-spacing: 1.5px; text-transform: uppercase;
-        transition: border-color .35s ease, color .35s ease, background .35s ease, box-shadow .35s ease;
-        display: inline-flex; align-items: center; justify-content: center;
+        transition: border-color .35s ease, color .35s ease, background .35s ease;
     }
-    .btn-ghost:hover { border-color: var(--cyan); color: var(--cyan-bright); background: rgba(34, 211, 238, 0.06); box-shadow: 0 0 16px rgba(34, 211, 238, 0.2); }
+    .btn-ghost:hover { border-color: var(--cyan); color: var(--cyan-bright); background: rgba(34, 211, 238, 0.06); }
 
     /* ---------- Hero ---------- */
     .hero {
@@ -319,8 +282,7 @@
     }
     .hero-bg {
         position: absolute; top: -12%; left: -12%; width: 124%; height: 124%;
-        background:
-            radial-gradient(circle at 50% 45%, #0e2942 0%, var(--gringotts-dark) 68%);
+        background: radial-gradient(circle at 50% 45%, #0e2942 0%, var(--gringotts-dark) 68%);
         z-index: -3;
     }
     .hero-glow {
@@ -470,7 +432,7 @@
     }
     .vault-num {
         font-family: 'Lato', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 4px;
-        color: var(--cyan); margin-bottom: 18px;
+        color: #4d5464; margin-bottom: 18px;
     }
     .vault-card-inner h3 {
         font-size: 1.9rem; margin-bottom: 18px; line-height: 1.2;
@@ -553,23 +515,60 @@
         border-radius: 50%;
         background: radial-gradient(circle, rgba(34, 211, 238, 0.15), transparent 68%);
         opacity: .5; transition: opacity .5s ease, transform .5s ease;
+        pointer-events: none;
     }
     .sigil-container:hover::before { opacity: 1; transform: scale(1.08); }
-    .sigil-svg { width: 100%; height: 100%; overflow: visible; }
+    .sigil-svg { width: 100%; height: 100%; overflow: visible; pointer-events: none; }
     .sigil-svg .ring { fill: none; stroke: var(--cyan); }
     .sigil-svg .ring-1 { stroke-width: 1; stroke-dasharray: 3 9; opacity: .7; }
     .sigil-svg .ring-2 { stroke-width: 1.2; stroke-dasharray: 60 18; opacity: .55; }
     .sigil-svg .ring-3 { stroke-width: 1; opacity: .3; }
-    .sigil-svg .star { fill: none; stroke: var(--cyan-bright); stroke-width: 1.2; opacity: .8; }
-    .sigil-svg .core { fill: var(--cyan); opacity: .9; }
     .sigil-svg text {
         font-family: 'Cinzel', serif; font-size: 15px; letter-spacing: 6px;
         fill: var(--cyan); opacity: .8;
     }
+
+    /* The rotating snake — centerpiece */
+    .sigil-snake-wrap {
+        position: absolute;
+        top: 50%; left: 50%;
+        width: 58%; height: 58%;
+        margin: -29% 0 0 -29%;
+        display: flex; align-items: center; justify-content: center;
+        z-index: 3;
+        pointer-events: none;
+        will-change: transform;
+    }
+    .sigil-snake {
+        width: 100%; height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 0 22px rgba(34, 211, 238, 0.75))
+                drop-shadow(0 0 40px rgba(14, 165, 233, 0.35));
+        transform-origin: 50% 50%;
+    }
+    /* Decorative inner halo */
+    .sigil-halo {
+        position: absolute;
+        top: 50%; left: 50%;
+        width: 66%; height: 66%;
+        margin: -33% 0 0 -33%;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(34, 211, 238, 0.18), transparent 65%);
+        filter: blur(6px);
+        z-index: 1;
+        pointer-events: none;
+        animation: haloPulse 4s ease-in-out infinite;
+    }
+    @keyframes haloPulse {
+        0%, 100% { opacity: .6; transform: scale(1); }
+        50%      { opacity: 1;  transform: scale(1.06); }
+    }
+
     .sigil-hint {
         position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
         font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: #4d5464;
         font-family: 'Lato', sans-serif; font-weight: 600; white-space: nowrap;
+        z-index: 4;
     }
 
     /* ---------- Footer ---------- */
@@ -599,8 +598,9 @@
     .footer-logo {
         display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
     }
-    .footer-logo .logo-badge {
-        width: 54px; height: 28px;
+    .footer-logo img {
+        height: 40px; width: auto;
+        filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.5));
     }
 
     /* ---------- Back to top ---------- */
@@ -729,9 +729,8 @@
         .nav-links { display: none; }
         .burger { display: flex; }
         .nav-right .btn-gold { display: none; }
-        .nav-right .nav-rm-btn { display: none; }
         .logo { font-size: 18px; gap: 10px; }
-        .logo-badge { width: 50px; height: 26px; }
+        .logo img { height: 36px; }
         .vault-card { width: 300px; height: 440px; }
         .vault-card-inner { padding: 34px 28px; }
         .vault-card-inner h3 { font-size: 1.5rem; }
@@ -755,9 +754,7 @@
     <div class="preloader-inner">
         <div class="preloader-ring"></div>
         <div class="preloader-logo">
-            <div class="preloader-logo-wrap">
-                <img src="logo.png" alt="Gringotts Logo">
-            </div>
+            <img src="logo.png" alt="Gringotts Logo">
             GRINGOTTS
         </div>
         <div class="preloader-bar"><span></span></div>
@@ -774,10 +771,8 @@
 <!-- ============ NAV ============ -->
 <nav id="nav">
     <div class="logo scramble" data-text="GRINGOTTS">
-        <div class="logo-badge">
-            <img src="logo.png" alt="Gringotts Logo">
-        </div>
-        <span class="logo-name">GRINGOTTS</span>
+        <img src="logo.png" alt="Gringotts Logo">
+        GRINGOTTS
     </div>
     <div class="nav-links">
         <a href="#vaults">Vaults</a>
@@ -786,7 +781,6 @@
         <a href="#contact">Contact</a>
     </div>
     <div class="nav-right">
-        <a href="https://phanee.up.railway.app/rm" class="nav-rm-btn magnetic">RM Portal</a>
         <button class="btn-gold magnetic open-vault"><span>Open Vault</span></button>
         <button class="burger" id="burger" aria-label="Menu">
             <span></span><span></span><span></span>
@@ -799,8 +793,7 @@
     <a href="#vaults">Vaults</a>
     <a href="#security">Security</a>
     <a href="#legacy">Legacy</a>
-    <a href="https://phanee.up.railway.app/rm">RM Portal</a>
-    <a href="https://phanee.up.railway.app/" class="open-vault">Open Vault</a>
+    <a href="#contact">Contact</a>
 </div>
 
 <!-- ============ HERO ============ -->
@@ -849,7 +842,7 @@
                 <div class="vault-num">VAULT — 001</div>
                 <h3>Standard Vaults</h3>
                 <p>Protected by top-tier goblin security and physical brass locks. Ideal for personal artifacts, family heirlooms, and standard galleon reserves.</p>
-                <a href="https://phanee.up.railway.app/" class="vault-link open-vault">Open Vault <span class="arrow">→</span></a>
+                <a href="#" class="vault-link open-vault">Learn More <span class="arrow">→</span></a>
             </div>
         </div>
         <div class="vault-card">
@@ -857,7 +850,7 @@
                 <div class="vault-num">VAULT — 002</div>
                 <h3>High-Security Vaults</h3>
                 <p>Located in the deepest subterranean levels. Protected by blood-magic identification, layered enchantments, and physical magical beasts.</p>
-                <a href="https://phanee.up.railway.app/" class="vault-link open-vault">Open Vault <span class="arrow">→</span></a>
+                <a href="#" class="vault-link open-vault">Learn More <span class="arrow">→</span></a>
             </div>
         </div>
         <div class="vault-card">
@@ -865,7 +858,7 @@
                 <div class="vault-num">VAULT — 003</div>
                 <h3>Corporate Holdings</h3>
                 <p>Dedicated infrastructure for business acquisitions, seamless magical transfers, and cross-border currency conversion algorithms.</p>
-                <a href="https://phanee.up.railway.app/" class="vault-link open-vault">Open Vault <span class="arrow">→</span></a>
+                <a href="#" class="vault-link open-vault">Learn More <span class="arrow">→</span></a>
             </div>
         </div>
         <div class="vault-card">
@@ -873,7 +866,7 @@
                 <div class="vault-num">VAULT — 004</div>
                 <h3>Curse-Breaker Advisory</h3>
                 <p>Consult with our elite in-house curse-breakers to manage cursed estates, hexed artifacts, and complex inheritance laws.</p>
-                <a href="https://phanee.up.railway.app/" class="vault-link open-vault">Open Vault <span class="arrow">→</span></a>
+                <a href="#" class="vault-link open-vault">Learn More <span class="arrow">→</span></a>
             </div>
         </div>
         <div class="vault-card">
@@ -881,7 +874,7 @@
                 <div class="vault-num">VAULT — 005</div>
                 <h3>Dragon Reserve</h3>
                 <p>For assets that breathe. Temperature-controlled, flame-rated chambers overseen by our longest-serving guardians. Insurance included.</p>
-                <a href="https://phanee.up.railway.app/" class="vault-link open-vault">Open Vault <span class="arrow">→</span></a>
+                <a href="#" class="vault-link open-vault">Learn More <span class="arrow">→</span></a>
             </div>
         </div>
     </div>
@@ -920,6 +913,7 @@
 
         <div class="sigil-reveal">
             <div class="sigil-container" id="sigil">
+                <!-- Rotating rings + text (behind the snake) -->
                 <svg class="sigil-svg" viewBox="0 0 400 400">
                     <defs>
                         <path id="circlePath" d="M200,200 m-155,0 a155,155 0 1,1 310,0 a155,155 0 1,1 -310,0"/>
@@ -931,16 +925,21 @@
                     <g id="ringMid">
                         <circle class="ring ring-2" cx="200" cy="200" r="130"/>
                     </g>
-                    <g id="starGroup">
-                        <polygon class="star" points="200,80 226,168 318,168 244,222 272,310 200,258 128,310 156,222 82,168 174,168"/>
-                        <circle class="core" cx="200" cy="200" r="6"/>
-                    </g>
                     <text>
                         <textPath href="#circlePath" startOffset="0">
                             FORTIUS QUO FIDELIUS • GRINGOTTS • FORTIUS QUO FIDELIUS •
                         </textPath>
                     </text>
                 </svg>
+
+                <!-- Glowing halo -->
+                <div class="sigil-halo"></div>
+
+                <!-- The rotating snake (your logo) -->
+                <div class="sigil-snake-wrap" id="snakeWrap">
+                    <img src="logo.png" alt="Snake Emblem" class="sigil-snake" id="snakeImg">
+                </div>
+
                 <div class="sigil-hint">Touch the sigil</div>
             </div>
         </div>
@@ -952,10 +951,8 @@
     <div class="footer-grid">
         <div>
             <div class="footer-logo">
-                <div class="logo-badge">
-                    <img src="logo.png" alt="Gringotts Logo">
-                </div>
-                <div class="logo-name" style="font-size:18px;">GRINGOTTS</div>
+                <img src="logo.png" alt="Gringotts Logo">
+                <div class="logo" style="font-size:20px;">GRINGOTTS</div>
             </div>
             <p>Diagon Alley, London. The oldest wizarding bank in the known world — safeguarding fortunes, secrets, and the occasional cursed heirloom since 1474.</p>
         </div>
@@ -969,17 +966,17 @@
             </ul>
         </div>
         <div>
-            <h4>Portals</h4>
+            <h4>Bank</h4>
             <ul>
-                <li><a href="https://phanee.up.railway.app/">Customer Onboarding Portal</a></li>
-                <li><a href="https://phanee.up.railway.app/rm">Relationship Manager Portal</a></li>
+                <li><a href="#security">Security</a></li>
+                <li><a href="#legacy">Legacy Planning</a></li>
                 <li><a href="#" class="open-vault">Open a Vault</a></li>
                 <li><a href="#contact">Contact a Goblin</a></li>
             </ul>
         </div>
     </div>
     <div class="footer-bottom">
-        <span>© 2026 Gringotts Wizarding Bank. All vaults reserved.</span>
+        <span>© 2025 Gringotts Wizarding Bank. All vaults reserved.</span>
         <span>Fortius Quo Fidelius</span>
     </div>
 </footer>
@@ -1026,7 +1023,7 @@
                 <path d="M30 51 L44 65 L71 37"/>
             </svg>
             <h4>Contract Sealed</h4>
-            <p>Your magical signature has been recorded. Redirecting to your secure portal...</p>
+            <p>Your magical signature has been recorded. Redirecting to your secure vault portal...</p>
         </div>
     </div>
 </div>
@@ -1047,7 +1044,6 @@ const isTouch = window.matchMedia('(hover: none), (pointer: coarse)').matches;
 const $  = (s, c = document) => c.querySelector(s);
 const $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
 
-/* Split a heading into individual <span class="char"> elements */
 function splitChars(el) {
     const text = el.textContent.trim();
     el.textContent = '';
@@ -1063,7 +1059,6 @@ function splitChars(el) {
     return el.querySelectorAll('.char');
 }
 
-/* Text scramble (runs on hover) */
 function scramble(el) {
     const original = el.dataset.text || el.textContent.trim();
     el.dataset.text = original;
@@ -1118,8 +1113,32 @@ function runPreloader() {
       .add(() => heroIntro.play(), '-=0.45');
 }
 
-window.addEventListener('load', () => setTimeout(runPreloader, 300));
-setTimeout(runPreloader, 3200);
+if (window.location.search.includes('view=')) {
+    const vMatch = window.location.search.match(/view=([a-z]+)/);
+    if (vMatch && vMatch[1]) {
+        document.body.setAttribute('data-view', vMatch[1]);
+    }
+}
+
+if (window.location.search.includes('skip_preloader')) {
+    preloaderDone = true;
+    const p = $('#preloader');
+    if (p) p.style.display = 'none';
+    heroIntro.progress(1);
+    if (window.location.search.includes('scroll_to=')) {
+        setTimeout(() => {
+            const targetId = window.location.search.split('scroll_to=')[1].split('&')[0];
+            const el = document.getElementById(targetId);
+            if (el) {
+                window.scrollTo(0, el.offsetTop);
+                ScrollTrigger.refresh();
+            }
+        }, 100);
+    }
+} else {
+    window.addEventListener('load', () => setTimeout(runPreloader, 300));
+    setTimeout(runPreloader, 3200);
+}
 
 /* =====================================================
    2. CUSTOM CURSOR
@@ -1288,7 +1307,7 @@ if (!isTouch) {
 }
 
 /* =====================================================
-   5. SCROLL PROGRESS + NAV BEHAVIOUR + BACK TO TOP
+   5. SCROLL PROGRESS + NAV + BACK TO TOP
    ===================================================== */
 const progressBar = $('#progressBar');
 const nav = $('#nav');
@@ -1358,7 +1377,7 @@ gsap.to('.hero-badge, .hero-title, .hero-subtitle, .hero-actions, .scroll-cue', 
 });
 
 /* =====================================================
-   8. TICKER — duplicate content for seamless loop
+   8. TICKER
    ===================================================== */
 (function buildTicker() {
     const track = $('#tickerTrack');
@@ -1484,45 +1503,118 @@ gsap.to('.sigil-container', {
 });
 
 /* =====================================================
-   11. SIGIL — perpetual rotation + interactivity
+   11. SIGIL — rotating rings + ROTATING SNAKE
    ===================================================== */
 (function sigilMagic() {
     const container = $('#sigil');
-    if (!container) return;
+    const snake     = $('#snakeImg');
+    if (!container || !snake) return;
 
-    const outer = gsap.to('#ringOuter', { rotate: 360, duration: 42, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
+    /* ----- Rotating rings (perpetual) ----- */
+    const outer = gsap.to('#ringOuter', { rotate: 360,  duration: 42, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
     const mid   = gsap.to('#ringMid',   { rotate: -360, duration: 28, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
-    const star  = gsap.to('#starGroup', { rotate: 360, duration: 60, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
+    const ringTweens = [outer, mid];
 
-    const tweens = [outer, mid, star];
+    /* ----- The snake: continuous slow spin as the resting state -----
+       Because each full turn returns to 0°, the animation always looks
+       like it "comes back to the same state" on every revolution. */
+    const snakeSpin = gsap.to(snake, {
+        rotate: 360,
+        duration: 18,          // slow, elegant idle rotation
+        repeat: -1,
+        ease: 'none',
+        transformOrigin: '50% 50%',
+        paused: true
+    });
 
+    /* Subtle breathing scale on the snake */
+    const snakeBreath = gsap.to(snake, {
+        scale: 1.06,
+        duration: 2.4,
+        yoyo: true,
+        repeat: -1,
+        ease: 'sine.inOut',
+        transformOrigin: '50% 50%'
+    });
+
+    /* Only start the snake motion once the sigil has been revealed */
+    if (document.body.getAttribute('data-view') === 'sigil') {
+        snakeSpin.play();
+        gsap.set(snake, { rotate: 0, scale: 1, opacity: 1 });
+    } else {
+        ScrollTrigger.create({
+            trigger: '.onboarding',
+            start: 'top 55%',
+            once: true,
+            onEnter: () => {
+                snakeSpin.play();
+                // A grand entrance: snake spins up, then settles into idle
+                gsap.fromTo(snake,
+                    { rotate: -180, scale: 0.4, opacity: 0 },
+                    {
+                        rotate: 0, scale: 1, opacity: 1,
+                        duration: 1.6, ease: 'back.out(1.4)',
+                        onComplete: () => snakeSpin.play()
+                    }
+                );
+            }
+        });
+    }
+
+    /* ----- Hover: rings & snake speed up ----- */
     container.addEventListener('mouseenter', () => {
-        tweens.forEach(t => gsap.to(t, { timeScale: 3.2, duration: .6, ease: 'power2.out' }));
-        gsap.to('.sigil-svg .star', { opacity: 1, duration: .4 });
-        gsap.to('.sigil-svg text', { opacity: 1, duration: .4 });
+        ringTweens.forEach(t => gsap.to(t, { timeScale: 3.2, duration: .6, ease: 'power2.out' }));
+        gsap.to(snakeSpin, { timeScale: 3.5, duration: .6, ease: 'power2.out' });
         gsap.to(container, { scale: 1.04, duration: .6, ease: 'power2.out' });
+        gsap.to('.sigil-svg text', { opacity: 1, duration: .4 });
     });
     container.addEventListener('mouseleave', () => {
-        tweens.forEach(t => gsap.to(t, { timeScale: 1, duration: .8, ease: 'power2.out' }));
-        gsap.to('.sigil-svg .star', { opacity: .8, duration: .4 });
-        gsap.to('.sigil-svg text', { opacity: .8, duration: .4 });
+        ringTweens.forEach(t => gsap.to(t, { timeScale: 1, duration: .8, ease: 'power2.out' }));
+        gsap.to(snakeSpin, { timeScale: 1, duration: .8, ease: 'power2.out' });
         gsap.to(container, { scale: 1, duration: .6, ease: 'power2.out' });
+        gsap.to('.sigil-svg text', { opacity: .8, duration: .4 });
     });
 
+    /* ----- Click: dramatic double spin that returns to rest ----- */
+    let spinning = false;
     container.addEventListener('click', () => {
+        if (spinning) return;
+        spinning = true;
+
+        // Visual flash on the sigil
         gsap.fromTo(container,
             { filter: 'drop-shadow(0 0 0px rgba(34,211,238,0))' },
             {
-                filter: 'drop-shadow(0 0 34px rgba(34,211,238,0.85))',
+                filter: 'drop-shadow(0 0 34px rgba(34,211,238,0.9))',
                 duration: .35, yoyo: true, repeat: 1, ease: 'power2.out'
             }
         );
-        gsap.fromTo('#starGroup',
-            { scale: 1 },
-            { scale: 1.18, duration: .28, yoyo: true, repeat: 1, ease: 'power2.inOut', transformOrigin: '50% 50%' }
-        );
+
+        // Boost the idle spin temporarily so it feels reactive
+        gsap.to(snakeSpin, { timeScale: 6, duration: .3, ease: 'power2.out' });
+
+        // A full 720° flourish that ends on the same resting angle
+        gsap.timeline({
+            onComplete: () => {
+                gsap.to(snakeSpin, { timeScale: 1, duration: .6, ease: 'power2.out' });
+                spinning = false;
+            }
+        })
+        .to(snake, {
+            rotate: '+=720',
+            scale: 1.18,
+            duration: 1.4,
+            ease: 'power3.inOut',
+            transformOrigin: '50% 50%'
+        })
+        .to(snake, {
+            scale: 1,
+            duration: .5,
+            ease: 'power2.out'
+        }, '-=0.4');
     });
 
+    /* ----- Mouse tilt parallax ----- */
     if (!isTouch) {
         container.addEventListener('mousemove', e => {
             const r = container.getBoundingClientRect();
@@ -1535,9 +1627,19 @@ gsap.to('.sigil-container', {
                 ease: 'power2.out',
                 transformPerspective: 900
             });
+            gsap.to('.sigil-snake-wrap', {
+                rotateY: px * 24,
+                rotateX: -py * 24,
+                x: px * 14,
+                y: py * 14,
+                duration: .6,
+                ease: 'power2.out',
+                transformPerspective: 900
+            });
         });
         container.addEventListener('mouseleave', () => {
             gsap.to('.sigil-svg', { rotateX: 0, rotateY: 0, duration: 1, ease: 'elastic.out(1,0.5)' });
+            gsap.to('.sigil-snake-wrap', { rotateX: 0, rotateY: 0, x: 0, y: 0, duration: 1, ease: 'elastic.out(1,0.5)' });
         });
     }
 })();
@@ -1633,7 +1735,7 @@ $('#exploreBtn').addEventListener('click', () => {
 });
 
 /* =====================================================
-   15. REFRESH TRIGGERS ON RESIZE (debounced)
+   15. RESIZE REFRESH
    ===================================================== */
 let resizeTimer;
 window.addEventListener('resize', () => {
