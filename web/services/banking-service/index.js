@@ -12,6 +12,7 @@ const memStore = require("../../shared/memStore");
 const db = require("../../shared/db");
 const { requireAuth } = require("../auth-service");
 const { logAuditEvent } = require("../../shared/audit");
+const { escapeHtml } = require("../../shared/security");
 
 const router = express.Router();
 
@@ -197,13 +198,22 @@ router.post("/transfer", requireAuth, async (req, res) => {
     channel
   } = req.body;
 
-  const numAmount = parseFloat(amount);
-  if (!numAmount || numAmount <= 0) {
-    return res.status(400).json({ error: "Invalid transfer amount." });
+  const numAmount = Number(amount);
+  if (!Number.isFinite(numAmount) || isNaN(numAmount) || numAmount <= 0 || numAmount > 1000000000) {
+    return res.status(400).json({ error: "Invalid transfer amount. Must be a finite positive number within limits." });
   }
 
   if (!counterpartyName || !counterpartyIban) {
     return res.status(400).json({ error: "Beneficiary Name and IBAN are required." });
+  }
+
+  const safeCounterpartyName = escapeHtml(String(counterpartyName)).trim().substring(0, 150);
+  const safeCounterpartyIban = escapeHtml(String(counterpartyIban)).trim().substring(0, 50);
+  const safeDescription = escapeHtml(String(description || "Corporate Wire Transfer")).trim().substring(0, 255);
+  const safeChannel = escapeHtml(String(channel || "portal")).trim().substring(0, 30);
+
+  if (!safeCounterpartyName || !safeCounterpartyIban) {
+    return res.status(400).json({ error: "Beneficiary Name and IBAN cannot be empty." });
   }
 
   let accountNum = fromAccount;
@@ -297,12 +307,12 @@ router.post("/transfer", requireAuth, async (req, res) => {
     type: "debit",
     amount: numAmount,
     currency: currency || acc.currency,
-    counterparty_name: counterpartyName,
-    counterparty_iban: counterpartyIban,
-    description: description || "Corporate Wire Transfer",
+    counterparty_name: safeCounterpartyName,
+    counterparty_iban: safeCounterpartyIban,
+    description: safeDescription,
     category: "Commercial Payment",
     status: "settled",
-    channel: channel || "portal",
+    channel: safeChannel,
     clearing_channel: "Fedwire Funds Service (FRB)",
     created_at: new Date().toISOString(),
     timestamp: new Date().toISOString()
@@ -336,12 +346,12 @@ router.post("/transfer", requireAuth, async (req, res) => {
           "debit",
           numAmount,
           currency || acc.currency,
-          counterpartyName,
-          counterpartyIban,
-          description || "Corporate Wire Transfer",
+          safeCounterpartyName,
+          safeCounterpartyIban,
+          safeDescription,
           "Commercial Payment",
           "settled",
-          channel || "portal"
+          safeChannel
         ]
       );
     } catch (dbErr) {

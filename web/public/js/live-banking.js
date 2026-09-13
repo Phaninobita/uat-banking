@@ -5,6 +5,16 @@
  */
 
 (function () {
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#x27;');
+    }
+
     const LiveBanking = {
         accounts: [],
         transactions: [],
@@ -178,18 +188,18 @@
                 return `
                     <tr class="tx-row">
                         <td>
-                            <div style="font-weight:600;color:var(--text-primary);">${tx.counterparty_name}</div>
-                            <div style="font-size:11px;color:var(--text-muted);font-family:monospace;">${tx.counterparty_iban || 'Direct Clearing'}</div>
+                            <div style="font-weight:600;color:var(--text-primary);">${escapeHtml(tx.counterparty_name)}</div>
+                            <div style="font-size:11px;color:var(--text-muted);font-family:monospace;">${escapeHtml(tx.counterparty_iban || 'Direct Clearing')}</div>
                         </td>
                         <td>
-                            <span class="tx-category-badge">${tx.category || 'Commercial'}</span>
+                            <span class="tx-category-badge">${escapeHtml(tx.category || 'Commercial')}</span>
                         </td>
                         <td>
-                            <span class="tx-channel-badge ${tx.channel === 'mobile' ? 'mobile-badge' : ''}">${tx.channel || 'portal'}</span>
+                            <span class="tx-channel-badge ${tx.channel === 'mobile' ? 'mobile-badge' : ''}">${escapeHtml(tx.channel || 'portal')}</span>
                         </td>
                         <td style="text-align:right;">
                             <span class="${amountClass}">
-                                ${sign} ${tx.currency} ${Number(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                ${sign} ${escapeHtml(tx.currency)} ${Number(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
                         </td>
                         <td>

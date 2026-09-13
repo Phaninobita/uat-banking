@@ -32,21 +32,85 @@ app.set("trust proxy", 1);
 // Security & Middlewares
 app.use(
   helmet({
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "'unsafe-eval'",
+          "https://cdn.jsdelivr.net",
+          "https://cdnjs.cloudflare.com"
+        ],
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "https://fonts.googleapis.com",
+          "https://cdn.jsdelivr.net"
+        ],
+        fontSrc: [
+          "'self'",
+          "https://fonts.gstatic.com",
+          "data:"
+        ],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "blob:",
+          "https:"
+        ],
+        connectSrc: [
+          "'self'",
+          "https://uvfdokzjdwwjpsxuuyey.supabase.co",
+          "https://cdn.jsdelivr.net",
+          "https://vision.googleapis.com"
+        ],
+        frameAncestors: ["'self'"],
+        objectSrc: ["'none'"]
+      }
+    },
     crossOriginEmbedderPolicy: false
   })
 );
+
 app.use(cors({
-  origin: "*",
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (/^https?:\/\/(localhost|127\.0\.0\.1)(:[0-9]+)?$/.test(origin) || origin.endsWith("gringotts.com") || origin.endsWith("fnb-us.com")) {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Mobile-Client"]
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Mobile-Client"],
+  credentials: true
 }));
 
-// Generous payload limits for Base64 PDF and image uploads (up to 30MB)
-app.use(express.json({ limit: "30mb" }));
-app.use(express.urlencoded({ extended: true, limit: "30mb" }));
+// Scoped payload limits: 30MB ONLY for document uploads; 1MB globally for general endpoints to prevent DoS
+app.use(["/api/v1/documents", "/api/documents"], express.json({ limit: "30mb" }));
+app.use(["/api/v1/documents", "/api/documents"], express.urlencoded({ extended: true, limit: "30mb" }));
 
-// Rate Limiters
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
+
+// Dedicated Authentication Rate Limiter (30 attempts / 5 mins)
+const authLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { xForwardedForHeader: false, default: false },
+  message: { error: "Too many authentication attempts. Please try again later." }
+});
+app.use([
+  "/api/v1/auth/request-otp",
+  "/api/v1/auth/verify-otp",
+  "/api/auth/request-otp",
+  "/api/auth/verify-otp",
+  "/api/v1/rm/login"
+], authLimiter);
+
+// General Gateway Rate Limiter
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 1000,
