@@ -4,6 +4,27 @@
    Deep Oceanic Void (#020712 / #030d1e), Executive Amber (#f59e0b), Crisp White
    ============================================================================== */
 
+@keyframes rmLogoPulse {
+    0%, 100% {
+        box-shadow:
+            0 0 0 1px rgba(56, 130, 220, 0.2),
+            0 0 14px rgba(56, 130, 220, 0.55),
+            0 0 30px rgba(30, 80, 180, 0.3),
+            0 0 55px rgba(20, 60, 150, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow:
+            0 0 0 2px rgba(56, 130, 220, 0.35),
+            0 0 22px rgba(56, 130, 220, 0.8),
+            0 0 48px rgba(30, 80, 180, 0.55),
+            0 0 80px rgba(20, 60, 150, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        transform: scale(1.03);
+    }
+}
+
 :root {
     --rm-bg-root: #020712;
     --rm-bg-surface: #030d1e;
@@ -298,27 +319,31 @@ body {
 }
 
 .rm-logo-mark {
-    width: 90px;
-    height: 90px;
-    background: transparent;
-    border: none;
-    border-radius: 50%;
+    width: 140px;
+    height: 72px;
+    background: #ffffff;
+    border: 1.5px solid rgba(56, 100, 160, 0.65);
+    border-radius: 20px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
+    padding: 6px 10px;
     margin-bottom: 16px;
-    animation: logoPulse 4s ease-in-out infinite;
-    box-shadow: none;
-    overflow: visible;
+    animation: rmLogoPulse 4s ease-in-out infinite;
+    box-shadow:
+        0 0 0 1px rgba(56, 130, 220, 0.2),
+        0 0 16px rgba(56, 130, 220, 0.65),
+        0 0 36px rgba(30, 80, 180, 0.4),
+        0 0 64px rgba(20, 60, 150, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    overflow: hidden;
 }
 
 .rm-logo-mark .rm-logo-img {
-    width: 90px;
-    height: 90px;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
     display: block;
-    border-radius: 50%;
 }
 
 .rm-login-title {
@@ -673,26 +698,25 @@ body {
 }
 
 .rm-logo-mark-sm {
-    width: 44px;
-    height: 44px;
-    background: transparent;
-    border: none;
-    border-radius: 50%;
+    width: 72px;
+    height: 40px;
+    background: #ffffff;
+    border: 1.5px solid rgba(56, 100, 160, 0.55);
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
-    box-shadow: none;
+    padding: 3px 6px;
+    box-shadow: 0 0 10px rgba(56, 130, 220, 0.5), 0 0 22px rgba(30, 80, 180, 0.25);
     flex-shrink: 0;
-    overflow: visible;
+    overflow: hidden;
 }
 
 .rm-logo-mark-sm .rm-logo-img-sm {
-    width: 44px;
-    height: 44px;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
     display: block;
-    border-radius: 50%;
 }
 
 .rm-nav-brand {
