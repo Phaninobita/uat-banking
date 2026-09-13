@@ -156,17 +156,17 @@ app.use("/api/documents", docService.router);
 app.use("/api/emails", notifService.router);
 
 // Route /site, /landing, /home specifically to Gringotts Marketing & Wealth Website
-app.get(["/site", "/site/*", "/landing", "/home"], (req, res) => {
+app.get(["/site", "/site/", "/landing", "/landing/", "/home", "/home/"], (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "site", "index.html"));
 });
 
-// Route /rm and /rm/* specifically to Relationship Manager (RM) Executive Portal
-app.get(["/rm", "/rm/*"], (req, res) => {
+// Route /rm specifically to Relationship Manager (RM) Executive Portal
+app.get(["/rm", "/rm/"], (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "rm", "index.html"));
 });
 
-// Route /customer and /customer/* specifically to Customer Banking Portal
-app.get(["/customer", "/customer/*"], (req, res) => {
+// Route /customer specifically to Customer Banking Portal
+app.get(["/customer", "/customer/"], (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "customer", "index.html"));
 });
 
@@ -177,6 +177,9 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 app.get("*", (req, res, next) => {
   if (req.path.startsWith("/api/")) {
     return res.status(404).json({ error: "API endpoint not found on Gateway." });
+  }
+  if (/\.(png|jpg|jpeg|gif|svg|ico|webp|css|js|map|woff|woff2|ttf|eot)$/i.test(req.path)) {
+    return res.status(404).send("File not found");
   }
   res.sendFile(path.join(__dirname, "..", "public", "index.html"));
 });

@@ -1192,10 +1192,14 @@ const isTouch = window.matchMedia('(hover: none), (pointer: coarse)').matches;
 const $  = (s, c = document) => c.querySelector(s);
 const $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
 
-/* ---------- Broken image handling ---------- */
-/* Hide images that fail to load */
+/* ---------- Broken image handling with robust fallback ---------- */
 document.querySelectorAll('img[data-fallback]').forEach(img => {
     img.addEventListener('error', () => {
+        if (!img.dataset.triedFallback) {
+            img.dataset.triedFallback = '1';
+            img.src = img.src.includes('/images/') ? 'logo.png' : '/images/bank-logo-dragon.png';
+            return;
+        }
         if (img.dataset.fallback === 'hide') {
             img.classList.add('broken');
         }
