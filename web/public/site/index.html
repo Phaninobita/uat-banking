@@ -1199,6 +1199,48 @@
         .owl-floating-trigger { bottom: 20px; left: 16px; padding: 8px 14px; }
         .owl-label-title { font-size: 11px; }
     }
+
+    /* ---------- Enchanted Owl Feedback Modal & Input Interaction ---------- */
+    .owl-modal-wrapper {
+        z-index: 2400 !important;
+    }
+    .owl-modal-panel {
+        max-width: 580px !important;
+        background: linear-gradient(165deg, #0e1e33 0%, #08111f 60%, #040810 100%) !important;
+        border: 1.5px solid rgba(251, 191, 36, 0.55) !important;
+        box-shadow: 0 40px 120px rgba(0,0,0,0.85), 0 0 70px rgba(251, 191, 36, 0.25) !important;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    .owl-modal-panel::before {
+        background: linear-gradient(90deg, transparent, #fbbf24, #fde047, transparent) !important;
+    }
+    .owl-modal-close {
+        color: #fbbf24 !important;
+        border-color: rgba(251, 191, 36, 0.4) !important;
+    }
+    .owl-modal-close:hover {
+        background: #fbbf24 !important;
+        color: #1a0e00 !important;
+    }
+    .owl-floating-trigger {
+        cursor: pointer !important;
+        pointer-events: auto !important;
+        z-index: 1500 !important;
+    }
+    .owl-floating-trigger * {
+        pointer-events: none;
+    }
+    /* Force visible typing cursor and interaction for inputs and textareas */
+    input, textarea, select {
+        cursor: text !important;
+        pointer-events: auto !important;
+        user-select: text !important;
+    }
+    button, [role="button"], .owl-category-pill, .owl-star-btn {
+        cursor: pointer !important;
+        pointer-events: auto !important;
+    }
 </style>
 </head>
 <body>
@@ -1574,6 +1616,100 @@
             </svg>
             <h4>Contract Sealed</h4>
             <p>Your magical signature has been recorded. Welcome to Gringotts.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ============ ENCHANTED OWL FEEDBACK & INQUIRIES MODAL ============ -->
+<div class="modal owl-modal-wrapper" id="owlModal" aria-hidden="true" role="dialog" aria-labelledby="owlModalTitle">
+    <div class="modal-backdrop" data-close-owl></div>
+    <div class="modal-panel owl-modal-panel">
+        <button class="modal-close owl-modal-close" data-close-owl aria-label="Close Scroll">✕</button>
+
+        <form id="owlModalForm" novalidate>
+            <div class="owl-card-badge" style="margin-bottom: 12px;">
+                <span>🪶</span> HOGWARTS &amp; GRINGOTTS OWL ROOST
+            </div>
+            <h3 id="owlModalTitle" style="font-family:'Cinzel',serif; color:#ffffff; font-size:1.8rem; margin-bottom:8px; text-shadow: 0 0 20px rgba(251,191,36,0.35);">
+                Inscribe Your Counsel via Swift Owl
+            </h3>
+            <p class="modal-sub" style="margin-bottom: 22px; color: #94a3b8; font-size: 0.88rem; line-height: 1.6;">
+                Whether words of praise, vault enhancement ideas, or goblin inquiries — inscribe your thoughts with honesty. Your scroll will be sealed in crimson wax and stored in the Goblin High Vault Ledger.
+            </p>
+
+            <!-- Nature of Inscription Pills -->
+            <div style="margin-bottom: 16px;">
+                <label style="display:block; font-size:10px; letter-spacing:3px; text-transform:uppercase; color:#fbbf24; font-family:'Cinzel',serif; margin-bottom:8px; font-weight:700;">
+                    Nature of Inscription
+                </label>
+                <div class="owl-category-group" id="owlModalCategoryGroup" style="margin-bottom: 0;">
+                    <button type="button" class="owl-category-pill active" data-category="Praise & Commendation">🪶 Praise</button>
+                    <button type="button" class="owl-category-pill" data-category="Vault Enhancement Idea">⚡ Enhancement</button>
+                    <button type="button" class="owl-category-pill" data-category="Goblin Scribe Inquiry">📜 Inquiry</button>
+                    <button type="button" class="owl-category-pill" data-category="Curse-Breaker Notice">🔮 Suggestion</button>
+                </div>
+                <input type="hidden" id="owlModalCategory" value="Praise & Commendation">
+            </div>
+
+            <!-- Snitch / Galleon Rating -->
+            <div class="owl-rating-wrap" style="margin-bottom: 18px;">
+                <span class="owl-rating-label">Vault Rating:</span>
+                <div class="owl-stars" id="owlModalStars">
+                    <button type="button" class="owl-star-btn active" data-rating="1" title="1 Galleon">⚚</button>
+                    <button type="button" class="owl-star-btn active" data-rating="2" title="2 Galleons">⚚</button>
+                    <button type="button" class="owl-star-btn active" data-rating="3" title="3 Galleons">⚚</button>
+                    <button type="button" class="owl-star-btn active" data-rating="4" title="4 Galleons">⚚</button>
+                    <button type="button" class="owl-star-btn active" data-rating="5" title="5 Galleons">⚚</button>
+                </div>
+                <span class="owl-rating-desc" id="owlModalRatingDesc">Worthy of the High Chamber (5/5 ⚚)</span>
+                <input type="hidden" id="owlModalRating" value="5">
+            </div>
+
+            <div class="field" style="margin-bottom: 14px;">
+                <label for="owlModalName">Witch, Wizard, or Noble House Name *</label>
+                <input type="text" id="owlModalName" placeholder="e.g. Albus Dumbledore or Order of the Phoenix" required autocomplete="name">
+            </div>
+
+            <div class="field" style="margin-bottom: 14px;">
+                <label for="owlModalAddress">Owl Post / Fireplace Address (or Email)</label>
+                <input type="text" id="owlModalAddress" placeholder="e.g. Headmaster's Tower, Hogwarts Castle" autocomplete="email">
+            </div>
+
+            <div class="field" style="margin-bottom: 16px;">
+                <label for="owlModalMessage">The Sacred Inscription (Your Feedback or Message) *</label>
+                <textarea class="owl-textarea" id="owlModalMessage" placeholder="Inscribe your thoughts, advice, or counsel here with blood-quill clarity..." rows="4" required></textarea>
+            </div>
+
+            <div style="font-size: 11px; color: #a1a1aa; margin-bottom: 18px; display: flex; align-items: center; gap: 8px;">
+                <span>🛡️</span>
+                <span>Your wand connection &amp; IP address will be verified and permanently sealed in the Gringotts DB ledger.</span>
+            </div>
+
+            <div class="modal-actions" style="margin-top: 0;">
+                <button type="submit" class="btn-gold ripple-btn owl-btn-submit" id="owlModalSubmitBtn" style="width: 100%; justify-content: center;">
+                    <span>Seal with Crimson Wax &amp; Dispatch Owl 🦉</span>
+                </button>
+            </div>
+        </form>
+
+        <!-- Modal Success State -->
+        <div class="modal-success owl-modal-success" id="owlModalSuccess">
+            <div class="owl-wax-seal">
+                <span>🪶</span>
+            </div>
+            <h4 style="font-family:'Cinzel',serif; color:#fde047; font-size:1.6rem; margin-bottom:8px;">
+                Parchment Inscribed in Database!
+            </h4>
+            <p style="color:#e2e8f0; font-size:0.95rem; line-height:1.6; max-width:380px; margin-bottom: 14px;">
+                Thank you, <strong id="owlSuccessAuthorName" style="color:#fde047;"></strong>! Your counsel has been sealed in the Goblin High Vault Ledger and dispatched to Diagon Alley.
+            </p>
+            <div style="display:flex; flex-direction:column; gap:6px; background:rgba(251,191,36,0.1); border:1px dashed #fbbf24; border-radius:8px; padding:10px 16px; margin-bottom:20px; font-family:'Cinzel',serif; font-size:12px; color:#fbbf24;">
+                <span id="owlSuccessTracking">Tracking: OWL-7842</span>
+                <span id="owlSuccessIp" style="color:#94a3b8; font-family:'Lato',sans-serif; font-size:11px;">Wand IP: 127.0.0.1</span>
+            </div>
+            <button type="button" class="btn-gold ripple-btn" data-close-owl style="padding:10px 24px; font-size:12px;">
+                <span>Close Parchment</span>
+            </button>
         </div>
     </div>
 </div>
@@ -2427,17 +2563,15 @@ if (exploreBtn) {
    ===================================================== */
 (function initOwlFeedback() {
     const trigger = $('#owlFloatingTrigger');
-    const container = $('#owlFeedbackContainer');
-    const form = $('#owlFeedbackForm');
-    const successView = $('#owlSuccessView');
-    const submitBtn = $('#owlSubmitBtn');
-    const resetBtn = $('#owlResetBtn');
-    const stars = $$('.owl-star-btn');
-    const ratingDesc = $('#owlRatingDesc');
-    const selectedRatingInput = $('#owlSelectedRating');
-    const categoryPills = $$('.owl-category-pill');
-    const selectedCategoryInput = $('#owlSelectedCategory');
-    const trackingTag = $('#owlTrackingTag');
+    const modal = $('#owlModal');
+    const modalForm = $('#owlModalForm');
+    const modalSuccess = $('#owlModalSuccess');
+    const modalSubmitBtn = $('#owlModalSubmitBtn');
+    const modalStars = $$('#owlModalStars .owl-star-btn');
+    const modalRatingDesc = $('#owlModalRatingDesc');
+    const modalRatingInput = $('#owlModalRating');
+    const modalCategoryPills = $$('#owlModalCategoryGroup .owl-category-pill');
+    const modalCategoryInput = $('#owlModalCategory');
 
     const RATING_LABELS = {
         1: 'Dark Arts Ward Required (1/5 ⚚)',
@@ -2447,81 +2581,138 @@ if (exploreBtn) {
         5: 'Worthy of the High Chamber (5/5 ⚚)'
     };
 
-    // Scroll to feedback section and flare with gold light
-    function scrollToFeedback() {
-        const target = document.querySelector('#owl-feedback');
-        if (!target) return;
-        window.scrollTo({ top: target.offsetTop - 60, behavior: 'smooth' });
-        if (container) {
-            container.classList.remove('highlight-flare');
-            void container.offsetWidth; // trigger reflow
-            container.classList.add('highlight-flare');
+    function openOwlModal() {
+        if (!modal) return;
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('no-scroll');
+        if (modalSuccess) modalSuccess.classList.remove('show');
+        if (modalForm) {
+            modalForm.style.display = 'block';
+            modalForm.style.opacity = '1';
         }
-        const firstInput = $('#owlSenderName');
-        if (firstInput) setTimeout(() => firstInput.focus(), 650);
+        const nameInput = $('#owlModalName');
+        if (nameInput) setTimeout(() => nameInput.focus(), 250);
     }
 
+    function closeOwlModal() {
+        if (!modal) return;
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('no-scroll');
+    }
+
+    // Open on floating trigger click
     if (trigger) {
-        trigger.addEventListener('click', scrollToFeedback);
-        trigger.addEventListener('keydown', e => {
+        trigger.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openOwlModal();
+        });
+        trigger.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                scrollToFeedback();
+                openOwlModal();
             }
         });
     }
 
-    // Category Pill selection
-    categoryPills.forEach(pill => {
-        pill.addEventListener('click', () => {
-            categoryPills.forEach(p => p.classList.remove('active'));
-            pill.classList.add('active');
-            if (selectedCategoryInput) selectedCategoryInput.value = pill.dataset.category;
+    // Open on nav links or any other target
+    $$('a[href="#owl-feedback"], .open-owl-feedback').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            openOwlModal();
         });
     });
 
-    // Interactive Star / Galleon Rating
-    function updateStars(val) {
-        stars.forEach(s => {
+    // Close on backdrop or close button
+    $$('[data-close-owl]').forEach(el => {
+        el.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeOwlModal();
+        });
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal && modal.classList.contains('open')) {
+            closeOwlModal();
+        }
+    });
+
+    // Setup Category Pills in Modal
+    modalCategoryPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            modalCategoryPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            if (modalCategoryInput) modalCategoryInput.value = pill.dataset.category;
+        });
+    });
+
+    // Setup Stars in Modal
+    function updateModalStars(val) {
+        modalStars.forEach(s => {
             const r = parseInt(s.dataset.rating, 10);
             s.classList.toggle('active', r <= val);
         });
-        if (ratingDesc) ratingDesc.textContent = RATING_LABELS[val] || `${val}/5 ⚚`;
-        if (selectedRatingInput) selectedRatingInput.value = val;
+        if (modalRatingDesc) modalRatingDesc.textContent = RATING_LABELS[val] || `${val}/5 ⚚`;
+        if (modalRatingInput) modalRatingInput.value = val;
     }
 
-    stars.forEach(btn => {
+    modalStars.forEach(btn => {
         btn.addEventListener('mouseenter', () => {
             const hoverVal = parseInt(btn.dataset.rating, 10);
-            stars.forEach(s => {
+            modalStars.forEach(s => {
                 const r = parseInt(s.dataset.rating, 10);
                 s.classList.toggle('hover', r <= hoverVal);
             });
         });
         btn.addEventListener('mouseleave', () => {
-            stars.forEach(s => s.classList.remove('hover'));
+            modalStars.forEach(s => s.classList.remove('hover'));
         });
         btn.addEventListener('click', () => {
             const val = parseInt(btn.dataset.rating, 10);
-            updateStars(val);
+            updateModalStars(val);
         });
     });
 
-    // Form submission
-    if (form) {
-        form.addEventListener('submit', async e => {
+    // Spark Burst Generator helper
+    function emitGoldenSparks(element) {
+        if (typeof gsap === 'undefined' || !element) return;
+        const rect = element.getBoundingClientRect();
+        for (let i = 0; i < 24; i++) {
+            const s = document.createElement('div');
+            s.className = 'spark';
+            s.style.background = '#fde047';
+            s.style.boxShadow = '0 0 12px #fbbf24';
+            document.body.appendChild(s);
+            const angle = (Math.PI * 2 * i) / 24 + Math.random();
+            const dist = 60 + Math.random() * 90;
+            gsap.set(s, { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, scale: 1.6 });
+            gsap.to(s, {
+                x: rect.left + rect.width / 2 + Math.cos(angle) * dist,
+                y: rect.top + rect.height / 2 + Math.sin(angle) * dist,
+                scale: 0, opacity: 0, duration: 1.1 + Math.random() * .4,
+                ease: 'power2.out',
+                onComplete: () => s.remove()
+            });
+        }
+    }
+
+    // Modal Form Submission
+    if (modalForm) {
+        modalForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const nameInput = $('#owlSenderName');
-            const addressInput = $('#owlSenderAddress');
-            const messageInput = $('#owlMessageText');
+            const nameInput = $('#owlModalName');
+            const addressInput = $('#owlModalAddress');
+            const messageInput = $('#owlModalMessage');
 
             let valid = true;
-            [nameInput, addressInput, messageInput].forEach(inp => {
+            [nameInput, messageInput].forEach(inp => {
                 if (!inp || !inp.value.trim()) {
                     inp?.closest('.field')?.classList.add('invalid');
                     valid = false;
                 } else {
-                    inp.closest('.field')?.classList.remove('invalid');
+                    inp?.closest('.field')?.classList.remove('invalid');
                 }
             });
 
@@ -2529,68 +2720,142 @@ if (exploreBtn) {
 
             const payload = {
                 name: nameInput.value.trim(),
-                address: addressInput.value.trim(),
-                category: selectedCategoryInput ? selectedCategoryInput.value : 'Praise & Commendation',
-                rating: selectedRatingInput ? selectedRatingInput.value : 5,
+                address: addressInput ? addressInput.value.trim() : '',
+                category: modalCategoryInput ? modalCategoryInput.value : 'Praise & Commendation',
+                rating: modalRatingInput ? modalRatingInput.value : 5,
                 message: messageInput.value.trim()
             };
 
-            submitBtn.classList.add('loading');
-            submitBtn.innerHTML = '<span>Sealing with Crimson Wax... 🪶</span>';
+            modalSubmitBtn.classList.add('loading');
+            modalSubmitBtn.innerHTML = '<span>Sealing in Database... 🪶</span>';
+            emitGoldenSparks(modalSubmitBtn);
 
-            // Generate magical golden spark burst
-            if (typeof gsap !== 'undefined') {
-                const rect = submitBtn.getBoundingClientRect();
-                for (let i = 0; i < 20; i++) {
-                    const s = document.createElement('div');
-                    s.className = 'spark';
-                    document.body.appendChild(s);
-                    const angle = (Math.PI * 2 * i) / 20 + Math.random();
-                    const dist = 50 + Math.random() * 80;
-                    gsap.set(s, { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, scale: 1.5, background: '#fde047' });
-                    gsap.to(s, {
-                        x: rect.left + rect.width / 2 + Math.cos(angle) * dist,
-                        y: rect.top + rect.height / 2 + Math.sin(angle) * dist,
-                        scale: 0, opacity: 0, duration: 1 + Math.random() * .5,
-                        ease: 'power2.out',
-                        onComplete: () => s.remove()
-                    });
-                }
-            }
-
+            let resultData = null;
             try {
                 const res = await fetch('/api/v1/notifications/feedback', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                const data = await res.json().catch(() => ({}));
-                const trackingId = data.trackingId || ('OWL-' + Math.floor(1000 + Math.random() * 9000));
-                if (trackingTag) trackingTag.textContent = `Tracking Inscription: ${trackingId} • Barn Owl Dispatched`;
+                resultData = await res.json().catch(() => ({}));
             } catch (err) {
-                console.warn('Feedback stored locally:', err);
-                if (trackingTag) trackingTag.textContent = `Tracking Inscription: OWL-${Math.floor(1000 + Math.random() * 9000)} • Barn Owl Dispatched`;
+                console.warn('Feedback fallback:', err);
             }
 
+            const author = payload.name;
+            const trackingId = (resultData && resultData.trackingId) || ('OWL-' + Math.floor(1000 + Math.random() * 9000));
+            const ipAddress = (resultData && resultData.ip_address) || '127.0.0.1';
+
+            const authorEl = $('#owlSuccessAuthorName');
+            if (authorEl) authorEl.textContent = author;
+            const trackingEl = $('#owlSuccessTracking');
+            if (trackingEl) trackingEl.textContent = `Tracking Inscription: ${trackingId} • Goblin Vault Sealed`;
+            const ipEl = $('#owlSuccessIp');
+            if (ipEl) ipEl.textContent = `Client Wand IP: ${ipAddress} (Permanently Inscribed in DB)`;
+
             setTimeout(() => {
-                form.style.display = 'none';
-                if (successView) successView.classList.add('show');
-                submitBtn.classList.remove('loading');
-                submitBtn.innerHTML = '<span>Seal Scroll with Crimson Wax &amp; Dispatch Owl 🦉</span>';
-            }, 600);
+                modalForm.style.display = 'none';
+                if (modalSuccess) modalSuccess.classList.add('show');
+                modalSubmitBtn.classList.remove('loading');
+                modalSubmitBtn.innerHTML = '<span>Seal with Crimson Wax &amp; Dispatch Owl 🦉</span>';
+                modalForm.reset();
+            }, 550);
         });
     }
 
-    if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-            if (form) {
-                form.reset();
-                form.style.display = 'block';
+    // Also support On-Page Form (#owlFeedbackForm)
+    const onPageForm = $('#owlFeedbackForm');
+    const onPageSuccess = $('#owlSuccessView');
+    const onPageSubmit = $('#owlSubmitBtn');
+    const onPageReset = $('#owlResetBtn');
+    const onPageStars = $$('#owlStars .owl-star-btn');
+    const onPageRatingDesc = $('#owlRatingDesc');
+    const onPageRatingInput = $('#owlSelectedRating');
+    const onPageCategoryPills = $$('#owlCategoryGroup .owl-category-pill');
+    const onPageCategoryInput = $('#owlSelectedCategory');
+
+    onPageCategoryPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            onPageCategoryPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            if (onPageCategoryInput) onPageCategoryInput.value = pill.dataset.category;
+        });
+    });
+
+    onPageStars.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const val = parseInt(btn.dataset.rating, 10);
+            onPageStars.forEach(s => {
+                const r = parseInt(s.dataset.rating, 10);
+                s.classList.toggle('active', r <= val);
+            });
+            if (onPageRatingDesc) onPageRatingDesc.textContent = RATING_LABELS[val] || `${val}/5 ⚚`;
+            if (onPageRatingInput) onPageRatingInput.value = val;
+        });
+    });
+
+    if (onPageForm) {
+        onPageForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nameInput = $('#owlSenderName');
+            const addressInput = $('#owlSenderAddress');
+            const messageInput = $('#owlMessageText');
+
+            let valid = true;
+            [nameInput, messageInput].forEach(inp => {
+                if (!inp || !inp.value.trim()) {
+                    inp?.closest('.field')?.classList.add('invalid');
+                    valid = false;
+                } else {
+                    inp?.closest('.field')?.classList.remove('invalid');
+                }
+            });
+
+            if (!valid) return;
+
+            const payload = {
+                name: nameInput.value.trim(),
+                address: addressInput ? addressInput.value.trim() : '',
+                category: onPageCategoryInput ? onPageCategoryInput.value : 'Praise & Commendation',
+                rating: onPageRatingInput ? onPageRatingInput.value : 5,
+                message: messageInput.value.trim()
+            };
+
+            onPageSubmit.classList.add('loading');
+            onPageSubmit.innerHTML = '<span>Sealing in Database... 🪶</span>';
+            emitGoldenSparks(onPageSubmit);
+
+            let resData = null;
+            try {
+                const res = await fetch('/api/v1/notifications/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                resData = await res.json().catch(() => ({}));
+            } catch (err) {}
+
+            const trackingId = (resData && resData.trackingId) || ('OWL-' + Math.floor(1000 + Math.random() * 9000));
+            const ipAddress = (resData && resData.ip_address) || '127.0.0.1';
+            const tag = $('#owlTrackingTag');
+            if (tag) tag.textContent = `Tracking: ${trackingId} • IP: ${ipAddress} (Inscribed in DB)`;
+
+            setTimeout(() => {
+                onPageForm.style.display = 'none';
+                if (onPageSuccess) onPageSuccess.classList.add('show');
+                onPageSubmit.classList.remove('loading');
+                onPageSubmit.innerHTML = '<span>Seal Scroll with Crimson Wax &amp; Dispatch Owl 🦉</span>';
+            }, 550);
+        });
+    }
+
+    if (onPageReset) {
+        onPageReset.addEventListener('click', () => {
+            if (onPageForm) {
+                onPageForm.reset();
+                onPageForm.style.display = 'block';
             }
-            updateStars(5);
-            if (selectedCategoryInput) selectedCategoryInput.value = 'Praise & Commendation';
-            categoryPills.forEach((p, idx) => p.classList.toggle('active', idx === 0));
-            if (successView) successView.classList.remove('show');
+            if (onPageSuccess) onPageSuccess.classList.remove('show');
         });
     }
 })();

@@ -8,6 +8,7 @@ const express = require("express");
 const nodemailer = require("nodemailer");
 const config = require("../../shared/config");
 const memStore = require("../../shared/memStore");
+const db = require("../../shared/db");
 
 const router = express.Router();
 
@@ -180,7 +181,7 @@ router.post("/push", (req, res) => {
 });
 
 // 5. Owl Post Feedback & Whispering Scroll Inscriptions (Hogwarts & Gringotts)
-router.post("/feedback", (req, res) => {
+router.post("/feedback", async (req, res) => {
   memStore.metrics.serviceRequests.notifications++;
   const { name, address, category, rating, message } = req.body;
 
@@ -188,56 +189,80 @@ router.post("/feedback", (req, res) => {
     return res.status(400).json({ success: false, error: "Wizard/Witch name and message inscription required." });
   }
 
-  const feedbackEntry = {
-    id: "OWL-" + Math.floor(1000 + Math.random() * 9000),
+  // Extract client IP address reliably
+  const rawIp = req.headers["x-forwarded-for"] || req.socket?.remoteAddress || req.ip || "127.0.0.1";
+  const clientIp = typeof rawIp === "string" ? rawIp.split(",")[0].trim() : "127.0.0.1";
+  const userAgent = req.headers["user-agent"] || "Magical Quill / Browser";
+
+  const trackingId = "OWL-" + Math.floor(1000 + Math.random() * 9000);
+  const feedbackRecord = {
+    tracking_id: trackingId,
+    id: trackingId,
     name: name.trim(),
     address: (address || "Hogwarts Castle").trim(),
-    category: category || "Counsel & Feedback",
+    category: category || "Praise & Commendation",
     rating: parseInt(rating, 10) || 5,
     message: message.trim(),
+    ip_address: clientIp,
+    user_agent: userAgent,
     timestamp: new Date().toISOString(),
     status: "Delivered to Goblin High Council via Barn Owl"
   };
 
-  if (!memStore.feedbackEntries) {
-    memStore.feedbackEntries = [];
+  // Save to persistent database & local disk repository
+  let savedRecord = feedbackRecord;
+  try {
+    savedRecord = await db.saveFeedback(feedbackRecord);
+  } catch (dbErr) {
+    console.warn("[NOTIFICATION SERVICE] db.saveFeedback fallback note:", dbErr.message);
   }
-  memStore.feedbackEntries.unshift(feedbackEntry);
 
   // Record a simulated notification so the owl roost and mailboxes reflect it
   memStore.recordSimulatedEmail({
     to: "overseers@gringotts.diagon-alley.magic",
-    from: `"${feedbackEntry.name}" <owlpost@hogwarts.ac.uk>`,
-    subject: `🦉 [OWL DISPATCH: ${feedbackEntry.category}] From ${feedbackEntry.name} (${feedbackEntry.rating}⚚)`,
+    from: `"${savedRecord.name}" <owlpost@hogwarts.ac.uk>`,
+    subject: `🦉 [OWL DISPATCH: ${savedRecord.category}] From ${savedRecord.name} (${savedRecord.rating}⚚) [IP: ${clientIp}]`,
     html: `<div style="font-family:serif;padding:16px;border:2px solid #d97706;background:#1e1b18;color:#fef3c7;">
-      <h3 style="color:#fbbf24;">📜 Inscribed Parchment from ${feedbackEntry.name}</h3>
-      <p><strong>Dispatch Origin:</strong> ${feedbackEntry.address}</p>
-      <p><strong>Classification:</strong> ${feedbackEntry.category}</p>
-      <p><strong>Vault Sanctum Rating:</strong> ${"⚚".repeat(feedbackEntry.rating)}</p>
+      <h3 style="color:#fbbf24;">📜 Inscribed Parchment from ${savedRecord.name}</h3>
+      <p><strong>Wizard/Witch Name:</strong> ${savedRecord.name}</p>
+      <p><strong>Dispatch Origin:</strong> ${savedRecord.address}</p>
+      <p><strong>Client Wand IP:</strong> <code>${clientIp}</code></p>
+      <p><strong>Classification:</strong> ${savedRecord.category}</p>
+      <p><strong>Vault Sanctum Rating:</strong> ${"⚚".repeat(savedRecord.rating)}</p>
       <hr style="border-color:#78350f;"/>
-      <p style="white-space:pre-wrap;font-style:italic;">"${feedbackEntry.message}"</p>
-      <small style="color:#a1a1aa;">Tracking Reference: ${feedbackEntry.id} • Carried by Gringotts Barn Owl</small>
+      <p style="white-space:pre-wrap;font-style:italic;">"${savedRecord.message}"</p>
+      <small style="color:#a1a1aa;">Tracking Reference: ${savedRecord.tracking_id || savedRecord.id} • Carried by Gringotts Barn Owl</small>
     </div>`,
-    text: `Owl Dispatch from ${feedbackEntry.name}: ${feedbackEntry.message}`,
+    text: `Owl Dispatch from ${savedRecord.name} (IP: ${clientIp}): ${savedRecord.message}`,
     type: "owl_feedback",
-    metadata: { ...feedbackEntry }
+    metadata: { ...savedRecord }
   });
 
-  console.log(`🦉 [OWL DISPATCH RECEIVED] Ref: ${feedbackEntry.id} from ${feedbackEntry.name} | Rating: ${feedbackEntry.rating}⚚`);
+  console.log(`🦉 [OWL DISPATCH INSCRIBED IN DB] Ref: ${savedRecord.tracking_id || savedRecord.id} | Author: "${savedRecord.name}" | IP: ${clientIp} | Rating: ${savedRecord.rating}⚚`);
 
   return res.json({
     success: true,
-    message: "Your scroll has been sealed with goblin wax and dispatched via Swift Screech Owl to the Gringotts High Chamber!",
-    trackingId: feedbackEntry.id,
-    feedback: feedbackEntry
+    message: "Your scroll has been sealed with goblin wax, inscribed in the High Ledger, and dispatched via Swift Screech Owl!",
+    trackingId: savedRecord.tracking_id || savedRecord.id,
+    ip_address: clientIp,
+    feedback: savedRecord
   });
 });
 
-router.get("/feedback", (req, res) => {
-  return res.json({
-    success: true,
-    feedbacks: memStore.feedbackEntries || []
-  });
+router.get("/feedback", async (req, res) => {
+  try {
+    const list = await db.getFeedbacks();
+    return res.json({
+      success: true,
+      count: list.length,
+      feedbacks: list
+    });
+  } catch (err) {
+    return res.json({
+      success: true,
+      feedbacks: memStore.feedbackEntries || []
+    });
+  }
 });
 
 // Health check

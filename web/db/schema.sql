@@ -535,3 +535,25 @@ CREATE TABLE IF NOT EXISTS step7_review_submit (
 );
 CREATE INDEX IF NOT EXISTS idx_step7_app_ref ON step7_review_submit (application_ref);
 
+-- =======================================================
+-- 8. Hogwarts & Gringotts Owl Feedback Inscriptions Table
+-- =======================================================
+CREATE TABLE IF NOT EXISTS owl_feedback_inscriptions (
+    id BIGSERIAL PRIMARY KEY,
+    tracking_id VARCHAR(64) UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    address TEXT,
+    category VARCHAR(64) DEFAULT 'Praise & Commendation',
+    rating INT DEFAULT 5,
+    message TEXT NOT NULL,
+    ip_address VARCHAR(128) NOT NULL,
+    user_agent TEXT,
+    status VARCHAR(64) DEFAULT 'Delivered to Goblin High Council via Barn Owl',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_owl_feedback_tracking_id ON owl_feedback_inscriptions (tracking_id);
+CREATE INDEX IF NOT EXISTS idx_owl_feedback_ip ON owl_feedback_inscriptions (ip_address);
+CREATE INDEX IF NOT EXISTS idx_owl_feedback_created_at ON owl_feedback_inscriptions (created_at);
+
+

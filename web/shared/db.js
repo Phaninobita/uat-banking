@@ -536,6 +536,106 @@ const db = {
   async getAuditLogs(uid, crn, limit) {
     await initPromise;
     return supabaseClient.getAuditLogs(uid, crn, limit);
+  },
+
+  async saveFeedback(entry) {
+    await initPromise;
+    const trackingId = entry.tracking_id || entry.id || ("OWL-" + Math.floor(1000 + Math.random() * 9000));
+    const normalizedRecord = {
+      tracking_id: trackingId,
+      name: entry.name,
+      address: entry.address || "",
+      category: entry.category || "Praise & Commendation",
+      rating: parseInt(entry.rating, 10) || 5,
+      message: entry.message,
+      ip_address: entry.ip_address || "127.0.0.1",
+      user_agent: entry.user_agent || "",
+      status: entry.status || "Delivered to Goblin High Council via Barn Owl",
+      created_at: new Date().toISOString()
+    };
+
+    // 1. Try PostgreSQL TCP pool
+    if (useDatabase && engineType === "postgres" && pool) {
+      try {
+        const queryText = `
+          INSERT INTO owl_feedback_inscriptions 
+          (tracking_id, name, address, category, rating, message, ip_address, user_agent, status, created_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
+          RETURNING *;
+        `;
+        const res = await pool.query(queryText, [
+          normalizedRecord.tracking_id,
+          normalizedRecord.name,
+          normalizedRecord.address,
+          normalizedRecord.category,
+          normalizedRecord.rating,
+          normalizedRecord.message,
+          normalizedRecord.ip_address,
+          normalizedRecord.user_agent,
+          normalizedRecord.status
+        ]);
+        if (res.rows && res.rows[0]) {
+          normalizedRecord.id = res.rows[0].id;
+        }
+      } catch (pErr) {
+        console.warn("[DATABASE] pool.query saveFeedback notice:", pErr.message);
+      }
+    }
+
+    // 2. Try Supabase REST Client
+    try {
+      await supabaseClient.request("owl_feedback_inscriptions", {
+        method: "POST",
+        body: normalizedRecord
+      });
+    } catch (sbErr) {
+      // Supabase table may not be provisioned in cloud REST, non-blocking
+    }
+
+    // 3. Persistent disk storage in web/db/owl_feedback_store.json
+    try {
+      const diskPath = path.join(__dirname, "../db/owl_feedback_store.json");
+      let diskEntries = [];
+      if (fs.existsSync(diskPath)) {
+        try {
+          diskEntries = JSON.parse(fs.readFileSync(diskPath, "utf8"));
+        } catch (e) {}
+      }
+      diskEntries.unshift(normalizedRecord);
+      fs.writeFileSync(diskPath, JSON.stringify(diskEntries, null, 2), "utf8");
+    } catch (diskErr) {
+      console.warn("[DATABASE] Disk feedback save note:", diskErr.message);
+    }
+
+    // 4. Memory store mirror
+    if (!memStore.feedbackEntries) memStore.feedbackEntries = [];
+    memStore.feedbackEntries.unshift(normalizedRecord);
+
+    return normalizedRecord;
+  },
+
+  async getFeedbacks(limit = 50) {
+    await initPromise;
+    if (useDatabase && engineType === "postgres" && pool) {
+      try {
+        const res = await pool.query("SELECT * FROM owl_feedback_inscriptions ORDER BY created_at DESC LIMIT $1", [limit]);
+        return res.rows;
+      } catch (err) {
+        console.warn("[DATABASE] pool.query getFeedbacks notice:", err.message);
+      }
+    }
+
+    try {
+      const diskPath = path.join(__dirname, "../db/owl_feedback_store.json");
+      if (fs.existsSync(diskPath)) {
+        const diskEntries = JSON.parse(fs.readFileSync(diskPath, "utf8"));
+        if (Array.isArray(diskEntries) && diskEntries.length > 0) {
+          return diskEntries.slice(0, limit);
+        }
+      }
+    } catch (e) {}
+
+    return (memStore.feedbackEntries || []).slice(0, limit);
   }
 };
 
