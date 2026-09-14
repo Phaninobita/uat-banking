@@ -109,13 +109,13 @@ function initParticles() {
 // ── THEME INITIALIZATION ──
 const stepTitles = [
     "",
-    "Document Vault",
-    "Company Profile",
-    "Beneficial Owners (UBO)",
-    "Ownership Structure",
-    "Access & Governance Roles",
-    "Tax & Compliance (FATCA / CRS)",
-    "Review & Final Submission"
+    "Sacred Parchments & Tomes",
+    "Order & Guild Charter",
+    "Masters of the Vault (UBO)",
+    "Bloodline Hierarchy & Vault Allocation",
+    "Key Bearers & Spellbound Ranks",
+    "Ministry Decrees & Wizengamot Levies",
+    "High Covenant Attestation & Vault Sealing"
 ];
 
 function initTheme() {
@@ -150,10 +150,10 @@ function toggleTheme() {
 
 // &#8212;&#8212; REWORK MODE STATE &#8212;&#8212;
 const reworkDocLabels = [
-    "Updated Trade Licence (valid until 2027)",
-    "Proof of Funds / Bank Statement",
-    "Updated Certificate of Incorporation",
-    "Passport Copy of New UBO"
+    "Updated Guild Charter (valid through 2027)",
+    "Vault Treasury Statement / Chest of Galleons Verification",
+    "Consecrated Charter of High Inception",
+    "Wizard Identity Scroll of New Vault Master"
 ];
 
 function toggleReworkMode() {
@@ -214,7 +214,7 @@ function renderOwnershipErrors() {
             const parent = inputs[0].parentElement;
             const error = document.createElement('div');
             error.className = 'error-note';
-            error.innerHTML = '&#x274C; RM Note: Ownership percentage must not exceed 60% for Corporate entities.';
+            error.innerHTML = '&#x274C; Goblin Overseer Note: Vault allocation must not exceed 60% for Allied Guild entities.';
             parent.appendChild(error);
         }
     }
@@ -1388,9 +1388,9 @@ function addUploadBox(type) {
     box.style.padding = '32px 20px';
     box.onclick = () => triggerUpload('f-upbox-' + uploadBoxCount);
     if (type === 'individual') {
-        box.innerHTML = `<input type="file" id="f-upbox-${uploadBoxCount}" accept=".pdf,.jpg,.png" onchange="handleDocUpload(${uploadBoxCount}, this)" aria-label="Upload individual passport"><div style="font-size:28px;margin-bottom:8px;" aria-hidden="true">👤</div><strong>Upload Passport</strong><small>For individual UBOs</small>`;
+        box.innerHTML = `<input type="file" id="f-upbox-${uploadBoxCount}" accept=".pdf,.jpg,.png" onchange="handleDocUpload(${uploadBoxCount}, this)" aria-label="Present individual wizard identity scroll"><div style="font-size:28px;margin-bottom:8px;" aria-hidden="true">🧙</div><strong>Present Identity Scroll</strong><small>For individual Vault Masters</small>`;
     } else {
-        box.innerHTML = `<input type="file" id="f-upbox-${uploadBoxCount}" accept=".pdf,.jpg,.png" onchange="handleDocUpload(${uploadBoxCount}, this)" aria-label="Upload corporate trade licence"><div style="font-size:28px;margin-bottom:8px;" aria-hidden="true">🏢</div><strong>Upload Trade Licence</strong><small>For corporate owners</small>`;
+        box.innerHTML = `<input type="file" id="f-upbox-${uploadBoxCount}" accept=".pdf,.jpg,.png" onchange="handleDocUpload(${uploadBoxCount}, this)" aria-label="Present corporate guild charter"><div style="font-size:28px;margin-bottom:8px;" aria-hidden="true">🏰</div><strong>Present Guild Charter</strong><small>For allied covens &amp; guilds</small>`;
     }
     container.appendChild(box);
 }
@@ -2273,101 +2273,101 @@ function showDragDemo() {
 }
 
 // ==========================================================================
-// ROLE DEFINITIONS & HOVER TOOLTIPS (RBAC Banking Permissions)
+// ROLE DEFINITIONS & HOVER TOOLTIPS (Gringotts Vault Access & Spell Wards)
 // ==========================================================================
 const ROLE_DEFINITIONS = {
     'admin': {
-        title: 'Portal Administrator',
-        category: 'Identity & Access Control',
+        title: 'Archon Warden (Portal Administrator)',
+        category: 'Vault Security & Enchanted Wards',
         icon: '🛡️',
-        summary: 'Provisions system roles in the future, controls user account visibility, resets credentials, and manages organizational access.',
+        summary: 'Enchants portal access wards, regulates wizard vault visibility, re-attunes talismans, and governs coven permissions.',
         capabilities: [
-            '<strong>Role Governance:</strong> Creates and provisions portal roles and access tiers for current and future users',
-            '<strong>Account Visibility:</strong> Controls who can see, view statements, and perform actions on each bank account',
-            '<strong>Credential Management:</strong> Resets passwords, unlocks suspended accounts, and re-issues MFA security tokens',
-            '<strong>User Details:</strong> Updates team member profiles, phone numbers, email addresses, and departmental mandates',
-            '<strong>Access Permissions:</strong> Grants or revokes account-level permissions and sets authorization limits'
+            '<strong>Ward Governance:</strong> Enchants and bestows portal roles and ward tiers for current and future wizards',
+            '<strong>Chamber Visibility:</strong> Governs which wizards can gaze into vault chambers, inspect gold ledgers, and evoke actions',
+            '<strong>Credential Attunement:</strong> Re-attunes runic passphrases, unfreezes spellbound accounts, and issues new 4-rune talismans',
+            '<strong>Wizard Lineages:</strong> Updates coven member lineages, owl roosts, Floo channels, and guild duties',
+            '<strong>Warding Charms:</strong> Grants or revokes chamber-level access charms and establishes Galleon release thresholds'
         ],
-        auditNote: 'Administrative security role. Does not directly release corporate funds without dual authorization.'
+        auditNote: 'Warden authority role. Does not unseal vault releases without dual-wand binding.'
     },
     'superuser': {
-        title: 'Superuser (Master Access)',
-        category: 'Master Administrative & Financial Authority',
+        title: 'Grand Sorcerer (Master Keyholder)',
+        category: 'Sovereign Treasury & Master Vault Authority',
         icon: '🔑',
-        summary: 'Holds full Portal Administrator control PLUS complete operational capability to initiate payments, add beneficiaries, and retrieve statements.',
+        summary: 'Possesses sovereign Archon Warden control PLUS complete spellcraft capability to evoke transmutations, register recipient vaults, and summon certified ledgers.',
         capabilities: [
-            '<strong>All Administrator Powers:</strong> Creates roles, resets user passwords, manages MFA tokens, and controls account visibility',
-            '<strong>Make & Initiate Payments:</strong> Drafts and executes high-value wire transfers, ACH payroll, and FX conversions',
-            '<strong>Add & Manage Beneficiaries:</strong> Creates, validates, and approves domestic and international payment payees (benes)',
-            '<strong>Take & Download Statements:</strong> Downloads certified bank e-statements, transaction ledgers, and audit reports',
-            '<strong>Emergency Treasury Control:</strong> Expedites urgent payments and exercises high-tier transaction authorization'
+            '<strong>All Archon Powers:</strong> Weaves wards, resets passphrases, re-attunes 4-rune talismans, and commands chamber visibility',
+            '<strong>Evoke & Initiate Gold Transfers:</strong> Drafts and unseals high-tier Floo gold transmutations, guild stipends, and foreign currency exchanges',
+            '<strong>Inscribe Vault Recipient Charms:</strong> Forges, validates, and seals domestic and international recipient vaults',
+            '<strong>Summon Certified Ledgers:</strong> Summons goblin-certified parchment statements, transaction scrolls, and Wizengamot audit records',
+            '<strong>Emergency Vault Command:</strong> Expedites urgent gold transfers and exercises sovereign high-chamber authorization'
         ],
-        auditNote: 'Highest-level portal privilege. Enforces complete executive administrative and financial authority.'
+        auditNote: 'Highest-level vault privilege. Enforces sovereign executive and magical treasury authority.'
     },
     'admin-maker': {
-        title: 'Admin Maker (Initiator)',
-        category: 'Dual-Control Treasury Operations',
+        title: 'Spellcaster (Maker)',
+        category: 'Dual-Wand Vault Evocation',
         icon: '📤',
-        summary: 'Drafts, prepares, and initiates outward financial transactions and operational transfers for secondary verification.',
+        summary: 'Evokes, prepares, and initiates outward gold transmutations and guild operations for secondary Inquisitor scrutiny.',
         capabilities: [
-            '<strong>Initiate Payments:</strong> Drafts wire transfers, foreign currency exchanges, and scheduled bill payments',
-            '<strong>Batch Payroll:</strong> Prepares and uploads bulk payroll disbursement batches and ACH creditor files',
-            '<strong>Add Beneficiaries:</strong> Inputs new payee bank details into the compliance verification queue',
-            '<strong>Dual Control Constraint:</strong> Cannot self-approve or release funds without Admin Checker sign-off (Four-Eyes Principle)'
+            '<strong>Initiate Transmutations:</strong> Drafts Floo gold transmutations, foreign currency exchanges, and scheduled guild stipends',
+            '<strong>Batch Stipends:</strong> Prepares and uploads bulk guild stipend disbursement batches and vault ledger files',
+            '<strong>Add Recipient Vaults:</strong> Enrolls new recipient vault details into the Goblin scrutiny queue',
+            '<strong>Dual Control Constraint:</strong> Cannot self-approve or release gold without Inquisitor sign-off (Dual-Wand Binding Rite)'
         ],
-        auditNote: 'Initiation-only role. Guarantees fraud prevention via strict segregation of duties.'
+        auditNote: 'Initiation-only role. Guarantees vault protection via sacred dual-wand segregation of duties.'
     },
     'admin-checker': {
-        title: 'Admin Checker (Approver)',
-        category: 'Dual-Control Verification & Release',
+        title: 'Inquisitor (Checker)',
+        category: 'Dual-Wand Scrutiny & Vault Release',
         icon: '🔍',
-        summary: 'Independently inspects, authenticates, and releases payments and beneficiaries initiated by the Admin Maker.',
+        summary: 'Independently scrutinizes, authenticates, and unseals gold releases and recipient vaults initiated by the Spellcaster.',
         capabilities: [
-            '<strong>Payment Authorization:</strong> Reviews payment details, currency amounts, and recipient IBAN/SWIFT credentials',
-            '<strong>Release Funds:</strong> Authenticates and releases transactions for direct execution by the bank',
-            '<strong>Beneficiary Verification:</strong> Independently reviews and approves newly added payment beneficiaries',
-            '<strong>Dual Control Constraint:</strong> Cannot initiate payments; dedicated strictly to secondary audit and release'
+            '<strong>Vault Authorization:</strong> Scrutinizes transmutation details, Galleon sums, and recipient Vault Inscription credentials',
+            '<strong>Unseal Vault Releases:</strong> Authenticates and releases gold transfers for direct execution by Gringotts goblins',
+            '<strong>Recipient Vault Verification:</strong> Independently scrutinizes and approves newly enrolled recipient vaults',
+            '<strong>Dual Control Constraint:</strong> Cannot initiate transmutations; dedicated strictly to secondary goblin audit and vault release'
         ],
-        auditNote: 'Approval-only role. Enforces mandatory Four-Eyes dual control before funds exit the bank.'
+        auditNote: 'Approval-only role. Enforces mandatory Dual-Wand binding control before gold departs Gringotts.'
     },
     'board-member': {
-        title: 'Board Member',
-        category: 'Corporate Fiduciary Governance',
+        title: 'High Council Elder',
+        category: 'High Coven Fiduciary Governance',
         icon: '👔',
-        summary: 'Statutory director exercising corporate fiduciary oversight and board-level statutory governance.',
+        summary: 'Statutory elder exercising sacred coven oversight and Wizengamot-level statutory governance.',
         capabilities: [
-            '<strong>Board Resolutions:</strong> Votes on and passes board resolutions establishing and modifying corporate banking mandates',
-            '<strong>Credit Facilities:</strong> Approves corporate borrowing, debt lines, major mortgages, and banking covenants',
-            '<strong>Audit & Compliance:</strong> Inspects company audit trails, regulatory compliance filings, and annual disclosures',
-            '<strong>Non-Operational:</strong> Does not handle day-to-day transaction processing or portal user administration'
+            '<strong>Council Decrees:</strong> Votes on and seals council decrees establishing and modifying Gringotts vault mandates',
+            '<strong>Vault Credit Lines:</strong> Approves guild borrowing, dragon-guarded vault lines, and major banking covenants',
+            '<strong>Audit & Wizengamot Accord:</strong> Inspects guild audit trails, Wizengamot treaty filings, and annual disclosures',
+            '<strong>Non-Operational:</strong> Does not handle day-to-day transmutation processing or portal user administration'
         ],
-        auditNote: 'Statutory corporate governance role.'
+        auditNote: 'Statutory guild governance role.'
     },
     'senior-management': {
-        title: 'Senior Management (Executive)',
-        category: 'Executive Commercial Leadership',
+        title: 'Grand Archon (Executive)',
+        category: 'High Guild Command & Strategy',
         icon: '🏢',
-        summary: 'Executive leadership (CEO, CFO, Managing Director) driving commercial strategy and operational thresholds.',
+        summary: 'Executive guild leadership (Grand Master, Archon of Gold, High Alchemist) driving guild strategy and operational thresholds.',
         capabilities: [
-            '<strong>Authorization Limits:</strong> Sets company-wide transaction limits, payment tiers, and departmental budgets',
-            '<strong>Treasury Strategy:</strong> Oversees corporate liquidity, working capital requirements, and banking relationships',
-            '<strong>Credit Drawdowns:</strong> Authorizes credit facility utilization within approved board covenants',
-            '<strong>Executive Reporting:</strong> Receives executive cash flow summaries, liquidity forecasts, and risk metrics'
+            '<strong>Authorization Limits:</strong> Decrees guild-wide transmutation limits, payment tiers, and departmental gold allocations',
+            '<strong>Treasury Strategy:</strong> Oversees guild liquidity, working Galleon requirements, and Gringotts relationships',
+            '<strong>Credit Drawdowns:</strong> Authorizes credit facility utilization within approved council covenants',
+            '<strong>Executive Divination:</strong> Receives executive gold flow summaries, liquidity forecasts, and risk assessments'
         ],
-        auditNote: 'Executive C-Suite business leadership role.'
+        auditNote: 'Executive guild leadership role.'
     },
     'authorised-signatory': {
-        title: 'Authorised Signatory',
-        category: 'Statutory Binding Authority',
+        title: 'Chief Wand Signatory',
+        category: 'Sacred Blood-Quill Binding Authority',
         icon: '✍️',
-        summary: 'Legally designated by Board Resolution to sign official banking agreements and legally bind the company.',
+        summary: 'Designated by High Council Decree to seal official banking agreements with blood-quill and legally bind the coven.',
         capabilities: [
-            '<strong>Legal Mandates:</strong> Signs official bank account opening mandates and electronic signature agreements',
-            '<strong>Facility Contracts:</strong> Executes credit lines, term loans, letters of credit, and treasury trade agreements',
-            '<strong>Mandate Changes:</strong> Authorizes additions or cancellations of official bank accounts and signing lists',
-            '<strong>Statutory Binding:</strong> Legally binds the corporate entity under corporate power of attorney / seal'
+            '<strong>Sacred Mandates:</strong> Seals official vault opening covenants and blood-quill electronic signature agreements',
+            '<strong>Guild Agreements:</strong> Executes vault facilities, credit lines, letters of credit, and inter-realm trade pacts',
+            '<strong>Mandate Changes:</strong> Authorizes additions or cancellations of official vault chambers and wand signatory rosters',
+            '<strong>Sacred Binding:</strong> Legally binds the coven under power of attorney and ancestral wax seal'
         ],
-        auditNote: 'Mandatory statutory role required for banking onboarding.'
+        auditNote: 'Mandatory sacred role required for vault induction.'
     }
 };
 
@@ -2687,11 +2687,11 @@ function renderPersonDetails(roleType, personName) {
             dob: '1985-06-15',
             expiry: '2032-06-14',
             isPep: false,
-            roleTitle: roleType === 'maker' ? 'Primary Finance Maker' : 'Primary Finance Checker'
+            roleTitle: roleType === 'maker' ? 'Designated Spellcaster (Drafts & Evokes)' : 'Designated Inquisitor (Scrutinizes & Releases)'
         };
     }
 
-    const roleTag = roleType === 'maker' ? 'Primary Finance Maker (Drafts & Initiates)' : 'Primary Finance Checker (Reviews & Approves)';
+    const roleTag = person.roleTitle || (roleType === 'maker' ? 'Designated Spellcaster (Drafts & Evokes)' : 'Designated Inquisitor (Scrutinizes & Releases)');
     const initial = person.name ? person.name.charAt(0).toUpperCase() : '👤';
 
     cardEl.innerHTML = `
@@ -2705,30 +2705,30 @@ function renderPersonDetails(roleType, personName) {
             </div>
             <div class="pdc-status-pill">
                 <span class="live-pulse-dot" style="background:#10b981;box-shadow:0 0 8px #10b981;width:7px;height:7px;border-radius:50%;display:inline-block;" aria-hidden="true"></span>
-                <span>KYC Verified</span>
+                <span>Lineage Consecrated</span>
             </div>
         </div>
         <div class="pdc-grid">
             <div class="pdc-item">
-                <span class="pdc-label">Passport / ID No</span>
+                <span class="pdc-label">Scroll / Rune Seal No</span>
                 <span class="pdc-val">${person.passportNumber}</span>
             </div>
             <div class="pdc-item">
-                <span class="pdc-label">Nationality</span>
+                <span class="pdc-label">Magical Realm</span>
                 <span class="pdc-val">${person.nationality}</span>
             </div>
             <div class="pdc-item">
-                <span class="pdc-label">Date of Birth</span>
+                <span class="pdc-label">Date of Appearance</span>
                 <span class="pdc-val">${person.dob}</span>
             </div>
             <div class="pdc-item">
-                <span class="pdc-label">PEP Status</span>
-                <span class="pdc-val" style="color:${person.isPep ? '#f87171' : '#6ee7b7'};">${person.isPep ? 'PEP Declared' : 'Non-PEP (Cleared)'}</span>
+                <span class="pdc-label">Ministry / Wizengamot Status</span>
+                <span class="pdc-val" style="color:${person.isPep ? '#f87171' : '#6ee7b7'};">${person.isPep ? 'High Official Declared' : 'Standard Wizard Citizen'}</span>
             </div>
         </div>
         <div class="pdc-footer">
             <span class="pdc-ft-icon">⚡</span>
-            <span>Passport OCR verified • Authorized for dual-control payment workflow</span>
+            <span>Identity Scroll verified • Consecrated for Dual-Wand binding rite</span>
         </div>
     `;
     cardEl.style.display = 'block';
@@ -2779,7 +2779,7 @@ function onMakerChanged(select) {
 
     const checkerSelect = document.getElementById('checker-select');
     if (val && checkerSelect && checkerSelect.value === val) {
-        showToast('The same individual cannot act as both Maker and Checker (Four-Eyes Principle).', 'Four-Eyes Principle', 'warning');
+        showToast('The same wizard cannot act as both Spellcaster and Inquisitor (Dual-Wand Binding Rite).', 'Dual-Wand Binding', 'warning');
         checkerSelect.value = '';
         resetMakerCheckerUpload('checker');
     }
@@ -2818,8 +2818,8 @@ function populateMakerCheckerRoles() {
         currentChecker = (individuals.length > 1 && individuals[1].name !== currentMaker) ? individuals[1].name : '';
     }
 
-    makerSelect.innerHTML = '<option value="">— Select Individual Person —</option>';
-    checkerSelect.innerHTML = '<option value="">— Select Individual Person —</option>';
+    makerSelect.innerHTML = '<option value="">— Select Consecrated Wizard —</option>';
+    checkerSelect.innerHTML = '<option value="">— Select Consecrated Wizard —</option>';
 
     individuals.forEach(p => {
         makerSelect.innerHTML += `<option value="${p.name}" ${p.name === currentMaker ? 'selected' : ''}>${p.name}</option>`;
@@ -2836,12 +2836,12 @@ function populateMakerCheckerRoles() {
 function validateMakerChecker(checkerSelect) {
     const makerSelect = document.getElementById('maker-select');
     if (checkerSelect.value && !makerSelect.value) {
-        showToast('Please assign a Maker before assigning a Checker.', 'Role Dependency', 'warning');
+        showToast('Please designate a Spellcaster before designating an Inquisitor.', 'Dual-Wand Binding', 'warning');
         checkerSelect.value = '';
         resetMakerCheckerUpload('checker');
         return;
     } else if (checkerSelect.value && checkerSelect.value === makerSelect.value) {
-        showToast('The same individual cannot act as both Maker and Checker (Four-Eyes Principle).', 'Four-Eyes Principle', 'warning');
+        showToast('The same wizard cannot act as both Spellcaster and Inquisitor (Dual-Wand Binding Rite).', 'Dual-Wand Binding', 'warning');
         checkerSelect.value = '';
         resetMakerCheckerUpload('checker');
         return;
@@ -2861,23 +2861,19 @@ async function extractMakerChecker(input, roleType) {
     if (uploadCardEl) {
         const promptEl = uploadCardEl.querySelector('.uc-prompt-text');
         if (promptEl) promptEl.style.display = 'none';
-        const strongEl = uploadCardEl.querySelector('strong');
-        if (strongEl) strongEl.style.display = 'none';
-        const smallEl = uploadCardEl.querySelector('small');
-        if (smallEl) smallEl.style.display = 'none';
     }
 
-    // Show immediate OCR scanning feedback in the person details card above
-    const personCardEl = document.getElementById(`${roleType}-person-card`);
+    // Render loading indicator inside person detail card
+    const personCardEl = document.getElementById(roleType === 'maker' ? 'maker-person-card' : 'checker-person-card');
     if (personCardEl) {
         personCardEl.style.display = 'block';
         personCardEl.innerHTML = `
             <div style="padding: 18px 20px; text-align: center; color: #38bdf8; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span class="live-pulse-dot" style="background:#38bdf8;box-shadow:0 0 10px #38bdf8;width:9px;height:9px;border-radius:50%;display:inline-block;"></span>
-                    <strong style="font-size: 13px; letter-spacing: 0.02em;">Scanning Passport via Optical Character Recognition (OCR)...</strong>
+                    <strong style="font-size: 13px; letter-spacing: 0.02em;">Purifying Identity Scroll via Goblin OCR Incantations...</strong>
                 </div>
-                <span style="font-size: 11.5px; color: #94a3b8;">Extracting holder identity, passport number, nationality & birth date</span>
+                <span style="font-size: 11.5px; color: #94a3b8;">Deciphering wizard lineage, scroll seal, realm & date of birth</span>
             </div>
         `;
     }
@@ -2935,7 +2931,7 @@ async function extractMakerChecker(input, roleType) {
             expiry,
             gender,
             isPep: false,
-            roleTitle: roleType === 'maker' ? 'Primary Finance Maker (Drafts & Initiates)' : 'Primary Finance Checker (Reviews & Approves)'
+            roleTitle: roleType === 'maker' ? 'Designated Spellcaster (Drafts & Evokes)' : 'Designated Inquisitor (Scrutinizes & Releases)'
         };
         registeredIndividualsMap[personName] = personObj;
 
@@ -3000,11 +2996,11 @@ async function extractMakerChecker(input, roleType) {
             if (thumb) thumb.remove();
         }
 
-        showToast(`Verified ${personName} (${nationality} Passport ${passportNumber}) as ${roleType}.`, 'Passport Verified', 'success');
+        showToast(`Consecrated ${personName} (${nationality} Scroll ${passportNumber}) as ${roleType === 'maker' ? 'Spellcaster' : 'Inquisitor'}.`, 'Lineage Consecrated', 'success');
         triggerAutoSave();
     } catch (err) {
         console.error('Maker/Checker OCR error:', err);
-        showToast('Could not extract passport details automatically. Please select an individual manually.', 'OCR Notice', 'warning');
+        showToast('Could not decipher scroll runes automatically. Please select a wizard manually.', 'Runic Notice', 'warning');
     }
 }
 
@@ -3090,19 +3086,19 @@ function updateReviewSection() {
             const labelInput = card ? card.querySelector('.doc-label-input') : null;
             const fileStatus = card ? card.querySelector('.file-status') : null;
             if (card && card.classList.contains('uploaded')) {
-                const label = labelInput ? labelInput.value : `Document ${i}`;
-                const filename = fileStatus ? fileStatus.textContent.replace('&#x2705; ', '') : 'Uploaded';
+                const label = labelInput ? labelInput.value : `Sacred Parchment ${i}`;
+                const filename = fileStatus ? fileStatus.textContent.replace('&#x2705; ', '') : 'Consecrated';
                 uploaded.push(`${label} (${filename})`);
             }
         }
         if (uploaded.length === 0) {
-            ra1Docs.innerHTML = '<em>No documents uploaded yet.</em>';
-            if (ra1Count) ra1Count.textContent = '0 uploaded';
+            ra1Docs.innerHTML = '<em>No sacred parchments summoned yet.</em>';
+            if (ra1Count) ra1Count.textContent = '0 summoned';
         } else {
             ra1Docs.innerHTML = uploaded.map(d =>
-                `<div class="rv-row"><span class="rvl">${d}</span><span class="rvv ok">&#x2705; Staged</span></div>`
+                `<div class="rv-row"><span class="rvl">${d}</span><span class="rvv ok">&#x2705; Enrolled</span></div>`
             ).join('');
-            if (ra1Count) ra1Count.textContent = `${uploaded.length} uploaded`;
+            if (ra1Count) ra1Count.textContent = `${uploaded.length} summoned`;
         }
     }
 
@@ -3114,13 +3110,13 @@ function updateReviewSection() {
     const legalType = document.getElementById('step2_legal_type')?.value || '';
     const licenceExp = document.getElementById('step2_expiry_date')?.value || '';
     const isLicExpired = isDateExpired(licenceExp);
-    if (ra2Summary) ra2Summary.textContent = (name || 'Company') + ' · ' + (crn || 'No CRN');
+    if (ra2Summary) ra2Summary.textContent = (name || 'Order / Guild') + ' · ' + (crn || 'No Inscription');
     if (ra2Details) {
         ra2Details.innerHTML = `
-            <div class="rv-row"><span class="rvl">Company Name</span><span class="rvv">${name || '—'}</span></div>
-            <div class="rv-row"><span class="rvl">Commercial Reg. No. (CRN)</span><span class="rvv">${crn || '—'}</span></div>
-            <div class="rv-row"><span class="rvl">Legal Type</span><span class="rvv">${legalType || '—'}</span></div>
-            <div class="rv-row"><span class="rvl">Licence Expiry</span><span class="rvv" style="${isLicExpired ? 'color:#f87171;font-weight:700;' : ''}">${isLicExpired ? `&#x26A0; Expired (${licenceExp})` : (licenceExp || '—')}</span></div>
+            <div class="rv-row"><span class="rvl">Order / Guild Title</span><span class="rvv">${name || '—'}</span></div>
+            <div class="rv-row"><span class="rvl">Ministry Runic Inscription (RIN / CRN)</span><span class="rvv">${crn || '—'}</span></div>
+            <div class="rv-row"><span class="rvl">Magical Constitution</span><span class="rvv">${legalType || '—'}</span></div>
+            <div class="rv-row"><span class="rvl">Charter Seal Expiry</span><span class="rvv" style="${isLicExpired ? 'color:#f87171;font-weight:700;' : ''}">${isLicExpired ? `&#x26A0; Seal Waning (${licenceExp})` : (licenceExp || '—')}</span></div>
         `;
     }
 
@@ -3132,18 +3128,18 @@ function updateReviewSection() {
         let uboRowsHtml = '';
         if (uboCards.length > 0) {
             uboCards.forEach(c => {
-                const uboName = c.querySelector('.ubo-n')?.textContent || 'UBO';
+                const uboName = c.querySelector('.ubo-n')?.textContent || 'Vault Master';
                 const expInput = c.querySelector('input[type="date"].date-expired, input.date-expired');
                 const hasExpired = !!expInput;
-                uboRowsHtml += `<div class="rv-row"><span class="rvl">${uboName}</span><span class="rvv" style="${hasExpired ? 'color:#f87171;font-weight:700;' : ''}">${hasExpired ? `&#x26A0; Expired Doc (${expInput.value})` : '&#x2705; Valid'}</span></div>`;
+                uboRowsHtml += `<div class="rv-row"><span class="rvl">${uboName}</span><span class="rvv" style="${hasExpired ? 'color:#f87171;font-weight:700;' : ''}">${hasExpired ? `&#x26A0; Expired Scroll (${expInput.value})` : '&#x2705; Valid'}</span></div>`;
             });
             ra3Body.innerHTML = uboRowsHtml;
         } else {
             ra3Body.innerHTML = extractedEntities.map(e =>
-                `<div class="rv-row"><span class="rvl">Beneficial Owner</span><span class="rvv">${e}</span></div>`
+                `<div class="rv-row"><span class="rvl">Master of the Vault</span><span class="rvv">${e}</span></div>`
             ).join('');
         }
-        if (ra3Count) ra3Count.textContent = `${extractedEntities.length} entities`;
+        if (ra3Count) ra3Count.textContent = `${extractedEntities.length} Keepers`;
     }
 
     // 4. Ownership
@@ -3156,7 +3152,7 @@ function updateReviewSection() {
             rows.forEach(r => {
                 const ent = r.querySelector('select[id^="entity-select-"]')?.value || 'Entity';
                 const pct = r.querySelector('input[type="number"]')?.value || '0';
-                html += `<div class="rv-row"><span class="rvl">${ent}</span><span class="rvv">${pct}% Equity</span></div>`;
+                html += `<div class="rv-row"><span class="rvl">${ent}</span><span class="rvv">${pct}% Vault Share</span></div>`;
             });
             ra4Body.innerHTML = html;
             if (ra4Count) ra4Count.textContent = `${rows.length} mapped`;
@@ -3167,7 +3163,7 @@ function updateReviewSection() {
     const ra5Details = document.getElementById('ra5-details');
     if (ra5Details) {
         const fatcaVal = document.getElementById('fatca-entity-class')?.value || 'Compliant';
-        ra5Details.innerHTML = `<div class="rv-row"><span class="rvl">FATCA Status</span><span class="rvv">${fatcaVal}</span></div>`;
+        ra5Details.innerHTML = `<div class="rv-row"><span class="rvl">Wizengamot Tithe Accord</span><span class="rvv">${fatcaVal}</span></div>`;
     }
 }
 
@@ -4032,7 +4028,7 @@ function displayClientNameOnTop(companyName, crn, companyUid) {
 // &#x1F6C7;&#x1F6C7; FINAL APPLICATION SUBMISSION &#x1F6C7;&#x1F6C7;
 async function finalizeApp() {
     if (isReworkMode) {
-        showToast('Application resubmitted for relationship manager review!', 'Resubmitted', 'success');
+        showToast('Vault covenant resubmitted for Goblin Overseer scrutiny!', 'Resubmitted', 'success');
         toggleReworkMode();
     }
 
@@ -4046,28 +4042,28 @@ async function finalizeApp() {
         }
     }
 
-    // Deliver simulated application confirmation email in real time
+    // Deliver simulated application confirmation owl post in real time
     receiveSimulatedEmail({
         id: 'app_' + Date.now(),
-        from: '"Gringotts Bank Corporate Onboarding" <onboarding@gringotts.com>',
-        to: currentLoginEmail || 'admin@company.com',
-        subject: `Gringotts Bank — Corporate Application Received (${appRef})`,
+        from: '"Gringotts Bank Diagon Alley Sanctum" <owlpost@gringotts.wizard>',
+        to: currentLoginEmail || 'archon@coven.wiz',
+        subject: `Gringotts Bank — Sacred Covenant Received (${appRef})`,
         type: 'application_submitted',
         timestamp: new Date().toISOString(),
         html: `
             <div style="font-family: -apple-system, sans-serif; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
                 <div style="text-align: center; margin-bottom: 20px;">
                     <img src="/images/bank-logo-dragon.png?v=2" alt="Gringotts Bank Logo" style="height: 46px; width: 90px; object-fit: cover; border-radius: 12px; border: 1.5px solid rgba(56, 130, 220, 0.5); display: inline-block; margin-bottom: 6px; box-shadow: 0 0 10px rgba(56, 130, 220, 0.35);">
-                    <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Gringotts Bank Corporate Portal</h2>
-                    <p style="color: #64748b; font-size: 13px; margin: 0;">Diagon Alley &bull; Application Confirmation</p>
+                    <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Gringotts Bank Diagon Alley Sanctum</h2>
+                    <p style="color: #64748b; font-size: 13px; margin: 0;">Diagon Alley &bull; Sacred Covenant Confirmation</p>
                 </div>
-                <p style="color: #334155; font-size: 14px;">Dear Corporate Customer,</p>
-                <p style="color: #334155; font-size: 14px;">Your corporate account and vault allocation application has been received and logged into our compliance verification queue.</p>
+                <p style="color: #334155; font-size: 14px;">Greetings, Master of the High Coven,</p>
+                <p style="color: #334155; font-size: 14px;">Your sacred guild covenant and vault allocation petition has been received into the Gringotts Diagon Alley subterranean sanctum for Goblin scrutiny and Thief's Downfall purification.</p>
                 <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; padding: 16px; margin: 16px 0; text-align: center;">
-                    <span style="font-size: 11px; color: #166534; font-weight: 700; text-transform: uppercase;">Application Reference</span><br>
+                    <span style="font-size: 11px; color: #166534; font-weight: 700; text-transform: uppercase;">Vault Covenant Reference</span><br>
                     <span style="font-size: 24px; font-weight: 800; color: #15803d; font-family: monospace;">${appRef}</span>
                 </div>
-                <p style="color: #475569; font-size: 13px;">Our onboarding desk will complete the verification within 1–2 business days. Your assigned Relationship Manager is <strong>Bogrod & Griphook</strong> (vaults@gringotts.co.uk &bull; +44 20 7946 0190 &bull; Diagon Alley).</p>
+                <p style="color: #475569; font-size: 13px;">Our goblin overseers will complete the purification within 1–2 moon cycles. Your assigned Goblin Vault Overseers are <strong>Bogrod &amp; Griphook</strong> (vaults@gringotts.co.uk &bull; +44 20 7946 0190 &bull; Diagon Alley Branch).</p>
             </div>
         `
     });
@@ -4083,7 +4079,7 @@ async function finalizeApp() {
     });
 
     fireConfetti();
-    showToast('Corporate account application submitted successfully!', 'Congratulations', 'success', 6000);
+    showToast('Sacred Vault Covenant Consecrated Successfully!', 'Congratulations', 'success', 6000);
 }
 
 // &#x1F6C7;&#x1F6C7; UTILITY MODALS & HELPERS &#x1F6C7;&#x1F6C7;
@@ -4091,19 +4087,19 @@ function showSaveModal() {
     triggerAutoSave();
     const modal = document.getElementById('saveModal');
     const appRef = currentAppRef || 'AB-2026-001245';
-    const email = currentLoginEmail || 'admin@company.com';
+    const email = currentLoginEmail || 'archon@coven.wiz';
     const crn = currentLoginCrn || '509077205';
 
     if (modal) {
         const bodyEl = modal.querySelector('.modal-body');
         if (bodyEl) {
             bodyEl.innerHTML = `
-                Your application progress has been saved securely.<br><br>
-                You can return anytime with the link below or by signing in with CRN <strong>${crn}</strong> and email <strong>${email}</strong>.<br><br>
+                Your sacred covenant progress has been warded and preserved.<br><br>
+                You can return anytime with the runic token below or by invoking your Ministry Inscription No. (RIN / CRN) <strong>${crn}</strong> and owl roost <strong>${email}</strong>.<br><br>
                 <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:12px;margin:8px 0;word-break:break-all;">
-                    <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;">Application Reference</span><br>
+                    <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;">Vault Covenant Reference</span><br>
                     <strong style="color:var(--primary);font-size:16px;font-family:monospace;">${appRef}</strong><br><br>
-                    <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;">Resume Link</span><br>
+                    <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;">Runic Return Token</span><br>
                     <code style="color:var(--primary);font-size:12px;">https://onboarding.gringotts.com/resume/${appRef}</code>
                 </div>
             `;
@@ -4114,24 +4110,24 @@ function showSaveModal() {
     // Deliver simulated progress saved email with resume link
     receiveSimulatedEmail({
         id: 'save_' + Date.now(),
-        from: '"Gringotts Bank Onboarding" <onboarding@gringotts.com>',
+        from: '"Gringotts Bank Owl Post" <owlpost@gringotts.wizard>',
         to: email,
-        subject: `Gringotts Bank — Resume Your Application (${appRef})`,
+        subject: `Gringotts Bank — Resume Your Sacred Covenant (${appRef})`,
         type: 'resume',
         timestamp: new Date().toISOString(),
         html: `
             <div style="font-family: -apple-system, sans-serif; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
                 <div style="text-align: center; margin-bottom: 20px;">
                     <img src="/images/bank-logo-dragon.png?v=2" alt="Gringotts Bank Logo" style="height: 46px; width: 90px; object-fit: cover; border-radius: 12px; border: 1.5px solid rgba(56, 130, 220, 0.5); display: inline-block; margin-bottom: 6px; box-shadow: 0 0 10px rgba(56, 130, 220, 0.35);">
-                    <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Gringotts Bank Corporate Portal</h2>
-                    <p style="color: #64748b; font-size: 13px; margin: 0;">Diagon Alley &bull; Application Progress Saved</p>
+                    <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Gringotts Bank Diagon Alley Sanctum</h2>
+                    <p style="color: #64748b; font-size: 13px; margin: 0;">Diagon Alley &bull; Covenant Progress Preserved</p>
                 </div>
-                <p style="color: #334155; font-size: 14px;">Your onboarding progress has been saved securely.</p>
+                <p style="color: #334155; font-size: 14px;">Your vault induction covenant has been preserved securely in our subterranean archives.</p>
                 <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; margin: 16px 0; word-break: break-all;">
-                    <span style="font-size: 11px; color: #64748b; font-weight: 600;">Secure Resume Link:</span><br>
+                    <span style="font-size: 11px; color: #64748b; font-weight: 600;">Runic Return Token:</span><br>
                     <code style="color: #0284c7; font-size: 13px; font-weight: bold;">https://onboarding.gringotts.com/resume/${appRef}</code>
                 </div>
-                <p style="color: #64748b; font-size: 12px;">You can return at any time with this link or by signing in with CRN <strong>${crn}</strong>.</p>
+                <p style="color: #64748b; font-size: 12px;">You can return at any time with this token or by invoking Ministry Inscription No. (RIN / CRN) <strong>${crn}</strong>.</p>
             </div>
         `
     });
@@ -4147,8 +4143,8 @@ function handleSignOut() {
     const companyCap = document.getElementById('hdrCompanyTag') || document.getElementById('hdrCompanyCapsule');
     if (companyCap) companyCap.style.display = 'none';
     const brandSub = document.getElementById('hdrBrandSub');
-    if (brandSub) brandSub.textContent = 'Corporate Banking Portal';
-    showToast('Signed out. Enter your CRN and Email to resume your application.', 'Signed Out', 'info', 4000);
+    if (brandSub) brandSub.textContent = 'Sacred Vault & Covenant Sanctum';
+    showToast('Signed out. Inscribe your RIN and Owl Roost to resume your covenant.', 'Signed Out', 'info', 4000);
     const overlay = document.getElementById('loginOverlay');
     if (overlay) {
         overlay.classList.remove('hidden');
@@ -4182,32 +4178,32 @@ function closeModal(id) {
 function sendInvite() {
     const email = document.getElementById('inviteEmail')?.value?.trim();
     if (!email || !email.includes('@')) {
-        showToast('Please enter a valid email address.', 'Invalid Email', 'warning');
+        showToast('Please enter a valid owl roost address.', 'Invalid Roost', 'warning');
         return;
     }
     closeModal('inviteModal');
     const sentModal = document.getElementById('inviteSentModal');
     if (sentModal) sentModal.classList.add('open');
-    showToast(`Invite dispatched to ${email}`, 'Invite Sent', 'success');
+    showToast(`Enchanted owl dispatched to ${email}`, 'Owl Dispatched', 'success');
 
     // Deliver simulated invite email
     receiveSimulatedEmail({
         id: 'inv_' + Date.now(),
-        from: '"Gringotts Bank Compliance" <compliance@gringotts.com>',
+        from: '"Gringotts Bank Goblin Inquisitors" <inquisition@gringotts.wizard>',
         to: email,
-        subject: `Gringotts Bank: Invitation to Complete UBO Verification`,
+        subject: `Gringotts Bank: Invitation to Record Vault Master Lineage`,
         type: 'invite',
         timestamp: new Date().toISOString(),
         html: `
             <div style="font-family: -apple-system, sans-serif; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
                 <div style="text-align: center; margin-bottom: 20px;">
                     <img src="/images/bank-logo-dragon.png?v=2" alt="Gringotts Bank Logo" style="height: 46px; width: 90px; object-fit: cover; border-radius: 12px; border: 1.5px solid rgba(56, 130, 220, 0.5); display: inline-block; margin-bottom: 6px; box-shadow: 0 0 10px rgba(56, 130, 220, 0.35);">
-                    <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Gringotts Bank Corporate Portal</h2>
-                    <p style="color: #64748b; font-size: 13px; margin: 0;">Diagon Alley &bull; Beneficial Ownership Verification</p>
+                    <h2 style="color: #0f172a; margin: 10px 0 2px; font-size: 20px;">Gringotts Bank Diagon Alley Sanctum</h2>
+                    <p style="color: #64748b; font-size: 13px; margin: 0;">Diagon Alley &bull; Vault Master Lineage Verification</p>
                 </div>
-                <p style="color: #334155; font-size: 14px;">You have been nominated as an Ultimate Beneficial Owner (UBO) for a Gringotts Bank corporate vault account application.</p>
+                <p style="color: #334155; font-size: 14px;">You have been nominated as a Master of the Vault for a Gringotts Bank high covenant and vault allocation petition.</p>
                 <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; margin: 16px 0; text-align: center;">
-                    <button type="button" style="background: #0284c7; color: #ffffff; border: none; font-weight: 700; font-size: 13px; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Upload Identity Documents →</button>
+                    <button type="button" style="background: #0284c7; color: #ffffff; border: none; font-weight: 700; font-size: 13px; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Present Identity Scrolls &rarr;</button>
                 </div>
             </div>
         `
@@ -4220,45 +4216,45 @@ function triggerDocuSign() {
     const statusItems = document.getElementById('docusign-status-items');
     const alertBox = document.getElementById('docusign-alert');
 
-    if (btn) { btn.innerHTML = '⏳ Dispatching Invites&hellip;'; btn.style.opacity = '0.8'; btn.style.pointerEvents = 'none'; }
+    if (btn) { btn.innerHTML = '⏳ Dispatching Owls&hellip;'; btn.style.opacity = '0.8'; btn.style.pointerEvents = 'none'; }
     setTimeout(() => {
         if (actionArea) {
-            actionArea.innerHTML = `<div style="display:flex; align-items:center; gap:8px; color: #6ee7b7; font-weight: 700; font-size: 14px; width: 100%;"><span style="font-size:18px;" aria-hidden="true">&#x2705;</span> Invites successfully dispatched to all signatories!</div>`;
+            actionArea.innerHTML = `<div style="display:flex; align-items:center; gap:8px; color: #6ee7b7; font-weight: 700; font-size: 14px; width: 100%;"><span style="font-size:18px;" aria-hidden="true">&#x2705;</span> Owls successfully dispatched to all wand signatories!</div>`;
             actionArea.style.borderColor = '#10b981';
             actionArea.style.background = 'rgba(16, 185, 129, 0.18)';
         }
         if (statusItems) {
             statusItems.innerHTML = `
-                <div class="timeline-item"><span style="font-weight:600;color:#34d399;">&#x2705;</span><span style="color:#f1f5f9;">DocuSign invitations sent to signatories</span></div>
-                <div class="timeline-item"><span style="font-weight:600;color:#fbbf24;">⏳</span><span style="color:#f1f5f9;">Awaiting document review and signatures</span></div>
-                <div class="timeline-item"><span style="font-weight:600;color:#fbbf24;">⏳</span><span style="color:#f1f5f9;">Estimated completion: 24–72 hours</span></div>
+                <div class="timeline-item"><span style="font-weight:600;color:#34d399;">&#x2705;</span><span style="color:#f1f5f9;">Enchanted owl invitations sent to signatories</span></div>
+                <div class="timeline-item"><span style="font-weight:600;color:#fbbf24;">⏳</span><span style="color:#f1f5f9;">Awaiting blood-quill review and parchment seals</span></div>
+                <div class="timeline-item"><span style="font-weight:600;color:#fbbf24;">⏳</span><span style="color:#f1f5f9;">Estimated completion: 1–3 moon cycles</span></div>
             `;
         }
         if (alertBox) alertBox.style.display = 'block';
         triggerAutoSave();
-        showToast('DocuSign invites sent to all signatories.', 'Invites Sent', 'success');
+        showToast('Enchanted owl covenants sent to all signatories.', 'Owls Dispatched', 'success');
 
         // Deliver simulated DocuSign email in real time
         receiveSimulatedEmail({
             id: 'docu_' + Date.now(),
-            from: '"DocuSign via Gringotts Bank" <documents@docusign.net>',
-            to: currentLoginEmail || 'admin@company.com',
-            subject: 'DocuSign: Please Sign Your Gringotts Bank Corporate Account Client Agreement',
+            from: '"Enchanted Quill via Gringotts Bank" <scrolls@docusign.net>',
+            to: currentLoginEmail || 'archon@coven.wiz',
+            subject: 'Sacred Parchment: Inscribe with Blood-Quill Your Gringotts Bank Client Covenant',
             type: 'docusign',
             timestamp: new Date().toISOString(),
             html: `
                 <div style="font-family: -apple-system, sans-serif; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
                     <div style="text-align: center; margin-bottom: 20px;">
                         <div style="display: inline-block; background: #ffbe00; color: #0f172a; font-weight: 800; font-size: 16px; width: 44px; height: 44px; line-height: 44px; border-radius: 8px;">DS</div>
-                        <h2 style="margin: 10px 0 2px; color: #0f172a; font-size: 20px;">DocuSign Electronic Signature</h2>
-                        <p style="color: #64748b; font-size: 12px; margin: 0;">Gringotts Bank Corporate Account Opening Package &bull; Diagon Alley</p>
+                        <h2 style="margin: 10px 0 2px; color: #0f172a; font-size: 20px;">Blood-Quill Inscription Covenant</h2>
+                        <p style="color: #64748b; font-size: 12px; margin: 0;">Gringotts Bank Vault Induction Package &bull; Diagon Alley</p>
                     </div>
-                    <p style="color: #1e293b; font-size: 14px;">Hello Authorized Signatory,</p>
-                    <p style="color: #334155; font-size: 14px; line-height: 1.5;">Gringotts Bank has prepared your Corporate Banking Master Agreement and Authorized Signatory Mandate for digital signature.</p>
+                    <p style="color: #1e293b; font-size: 14px;">Greetings Chief Wand Signatory,</p>
+                    <p style="color: #334155; font-size: 14px; line-height: 1.5;">Gringotts Bank has prepared your High Coven Banking Master Covenant and Chief Signatory Mandate for blood-quill e-signature.</p>
                     <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 18px; margin: 18px 0; text-align: center;">
-                        <button type="button" onclick="simulateDocuSignSign()" style="background: #ffbe00; color: #111827; border: none; font-weight: 800; font-size: 14px; padding: 12px 26px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(255,190,0,0.3);">✍️ Review &amp; Sign Document</button>
+                        <button type="button" onclick="simulateDocuSignSign()" style="background: #ffbe00; color: #111827; border: none; font-weight: 800; font-size: 14px; padding: 12px 26px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(255,190,0,0.3);">✍️ Review &amp; Inscribe Covenant</button>
                     </div>
-                    <p style="color: #64748b; font-size: 12px;">This envelope is secured with 256-bit AES encryption compliant with the US Electronic Signatures in Global and National Commerce Act (E-SIGN Act).</p>
+                    <p style="color: #64748b; font-size: 12px;">This parchment is warded with Goblin Secrecy Charms compliant with the Wizengamot Inter-Realm Accord.</p>
                 </div>
             `
         });
@@ -4267,40 +4263,40 @@ function triggerDocuSign() {
 
 function downloadReceipt() {
     const appRef = currentAppRef || 'GB-2026-DEMO';
-    const company = document.getElementById('step2_name')?.value || 'Gringotts Commercial Client';
+    const company = document.getElementById('step2_name')?.value || 'High Wizarding Coven';
     const crn = document.getElementById('step2_crn')?.value || currentLoginCrn || '509077205';
 
-    const txt = `GRINGOTTS BANK CORPORATE ONBOARDING RECEIPT
-==================================================
-Bank: Gringotts Bank (Diagon Alley)
-Affiliation: Hogwarts Financial Council Treasury
-Location: Diagon Alley, WC2 (Underground Vault Complex)
-==================================================
-Application Ref: ${appRef}
-Submitted: ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}
-Company: ${company}
-CRN: ${crn}
-Vault Category: High-Security Multi-Currency & Galleon Reserves
+    const txt = `GRINGOTTS WIZARDING BANK — SACRED COVENANT & VAULT INDUCTION SCROLL
+===================================================================
+High Vault: Gringotts Wizarding Bank (Diagon Alley Sanctum)
+Patronage: Hogwarts Financial Council & Wizengamot Treasury
+Subterranean Tier: Vault 713 & Diagon Alley High Depository
+===================================================================
+Vault Parchment Reference: ${appRef}
+Consecrated: ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}
+Order / Guild: ${company}
+Ministry Inscription No. (RIN / CRN): ${crn}
+Vault Allocation: High-Security Subterranean Chamber & Pure Galleon Reserves
 
-NEXT STEPS:
-1. Download Gringotts Bank Mobile App
-2. Sign in with your registered email
-3. Complete biometric identity verification & Goblingate Vault authentication
-4. Sign digital documents via DocuSign
-5. Final onboarding review: 1-2 business days
+SACRED RITES & NEXT STEPS:
+1. Attune Enchanted Mirror / Gringotts Talisman
+2. Invoke access via your registered owl roost
+3. Complete Gringotts Legilimens Gaze & Thief's Downfall Purification
+4. Inscribe covenants with Blood-Quill via Owl Post
+5. Goblin High Overseer Consecration: 1-2 moon cycles
 
-RELATIONSHIP MANAGER & VAULT MASTERS:
-Bogrod & Griphook | Diagon Alley Vault Operations
-Email: vaults@gringotts.co.uk | Support: support@gringotts.com
-Address: Diagon Alley, London, UK
+GOBLIN OVERSEERS & HIGH VAULT MASTERS:
+Bogrod & Griphook | Diagon Alley High Vault Operations
+Owl Post: vaults@gringotts.co.uk | Sanctuary: support@gringotts.com
+Sanctum: Diagon Alley, London, Wizarding Realm
 `;
 
     const a = Object.assign(document.createElement('a'), {
         href: URL.createObjectURL(new Blob([txt], { type: 'text/plain' })),
-        download: `Gringotts_Application_${appRef}.txt`
+        download: `Gringotts_Sacred_Covenant_${appRef}.txt`
     });
     a.click();
-    showToast('Gringotts onboarding receipt downloaded.', 'Download Complete', 'success');
+    showToast('Gringotts sacred covenant scroll summoned.', 'Summon Complete', 'success');
 }
 
 function copyAppRef(btn) {
@@ -4310,13 +4306,13 @@ function copyAppRef(btn) {
         navigator.clipboard.writeText(text).then(() => {
             const textEl = btn ? btn.querySelector('.copy-text') : null;
             if (textEl) textEl.textContent = 'Copied!';
-            showToast(`Application Reference copied: ${text}`, 'Copied', 'info');
+            showToast(`Vault Parchment Reference copied: ${text}`, 'Copied', 'info');
             setTimeout(() => { if (textEl) textEl.textContent = 'Copy'; }, 2000);
         }).catch(() => {
-            showToast(`Application Reference: ${text}`, 'Reference', 'info');
+            showToast(`Vault Parchment Reference: ${text}`, 'Reference', 'info');
         });
     } else {
-        showToast(`Application Reference: ${text}`, 'Reference', 'info');
+        showToast(`Vault Parchment Reference: ${text}`, 'Reference', 'info');
     }
 }
 

@@ -125,8 +125,8 @@ async function rmFetch(url, options = {}) {
     const res = await fetch(url, options);
     if (res.status === 401) {
         handleRmSignOut();
-        showRmToast("RM Executive session expired. Please sign in again.", "error");
-        throw new Error("Unauthorized: RM session expired.");
+        showRmToast("Goblin Overseer session expired. Please inscribe credentials again.", "error");
+        throw new Error("Unauthorized: Overseer session expired.");
     }
     return res;
 }
@@ -162,8 +162,8 @@ function showDashboardView() {
     if (currentRmProfile) {
         const nameEl = document.getElementById("rmTopName");
         const roleEl = document.getElementById("rmTopRole");
-        if (nameEl) nameEl.textContent = currentRmProfile.name || "Phanee";
-        if (roleEl) roleEl.textContent = currentRmProfile.role || "Senior Relationship Manager \u00B7 Corporate Banking";
+        if (nameEl) nameEl.textContent = currentRmProfile.name || "Bogrod";
+        if (roleEl) roleEl.textContent = currentRmProfile.role || "Chief Goblin Vault Warden \u00B7 Ancient Bloodline Covenants";
     }
 
     fetchInvitations();
@@ -203,7 +203,7 @@ async function handleRmLoginSubmit(ev) {
         localStorage.setItem("fnb_rm_token", currentRmToken);
         localStorage.setItem("fnb_rm_profile", JSON.stringify(currentRmProfile));
 
-        showRmToast(`Executive session authenticated. Welcome back, ${currentRmProfile.name || 'Phanee'}.`, "success");
+        showRmToast(`Overseer session authenticated. Welcome back, ${currentRmProfile.name || 'Bogrod'}.`, "success");
         showDashboardView();
     } catch (err) {
         if (alertBox) {
@@ -244,7 +244,7 @@ function handleRmSignOut() {
     currentRmToken = null;
     currentRmProfile = null;
     showLoginView();
-    showRmToast("RM Executive Session terminated.", "info");
+    showRmToast("Goblin Overseer Session resealed.", "info");
 }
 
 function escapeHtml(str) {
@@ -280,7 +280,7 @@ async function checkCrnInputAvailability() {
         crnInput.classList.remove("is-valid");
         feedback.style.display = "block";
         feedback.className = "crn-feedback error";
-        feedback.innerHTML = `⚠️ <strong>Duplicate CRN:</strong> Already registered for <strong>${escapeHtml(localMatch.company_name || 'Existing Client')}</strong> (${escapeHtml(localMatch.email || '')}). Use 'Update Details' or 'Resend' in the pipeline table below.`;
+        feedback.innerHTML = `⚠️ <strong>Duplicate Ministry Runic Seal:</strong> Already consecrated for <strong>${escapeHtml(localMatch.company_name || 'Existing Order')}</strong> (${escapeHtml(localMatch.email || '')}). Use 'Amend Record' or 'Resend Owl' in the ledger below.`;
         if (hint) hint.style.display = "none";
         return;
     }
@@ -294,14 +294,14 @@ async function checkCrnInputAvailability() {
             crnInput.classList.remove("is-valid");
             feedback.style.display = "block";
             feedback.className = "crn-feedback error";
-            feedback.innerHTML = `⚠️ <strong>Duplicate CRN:</strong> Already registered for <strong>${escapeHtml(data.existing.company_name || 'Corporate Entity')}</strong> (${escapeHtml(data.existing.email || '')}).`;
+            feedback.innerHTML = `⚠️ <strong>Duplicate Ministry Runic Seal:</strong> Already registered for <strong>${escapeHtml(data.existing.company_name || 'Magical Order')}</strong> (${escapeHtml(data.existing.email || '')}).`;
             if (hint) hint.style.display = "none";
         } else {
             crnInput.classList.remove("is-invalid");
             crnInput.classList.add("is-valid");
             feedback.style.display = "block";
             feedback.className = "crn-feedback success";
-            feedback.innerHTML = `✓ CRN <strong>${escapeHtml(val)}</strong> is available for new invitation`;
+            feedback.innerHTML = `✓ Ministry Runic Seal <strong>${escapeHtml(val)}</strong> is unblemished and ready for induction`;
             if (hint) hint.style.display = "none";
         }
     } catch (e) {
@@ -328,7 +328,7 @@ async function handleDispatchInvite(ev) {
     // Client-side pre-check against loaded pipeline data
     const localExisting = pipelineData.find(inv => (inv.crn || "").trim().toUpperCase() === cleanCrn);
     if (localExisting) {
-        showRmToast(`Duplicate CRN: "${cleanCrn}" already exists for ${localExisting.company_name || 'Client'}. Please use 'Update Details' or 'Resend' in the pipeline table below.`, "error");
+        showRmToast(`Duplicate Ministry Runic Seal: "${cleanCrn}" already exists for ${localExisting.company_name || 'Order'}. Please use 'Amend Record' or 'Resend Owl' in the ledger below.`, "error");
         if (crnInput) {
             crnInput.classList.add("is-invalid");
             crnInput.classList.remove("is-valid");
@@ -337,7 +337,7 @@ async function handleDispatchInvite(ev) {
         if (feedback) {
             feedback.style.display = "block";
             feedback.className = "crn-feedback error";
-            feedback.innerHTML = `⚠️ <strong>Duplicate CRN:</strong> Already registered for <strong>${escapeHtml(localExisting.company_name || 'Client')}</strong> (${escapeHtml(localExisting.email || '')}). Use 'Update Details' or 'Resend' instead.`;
+            feedback.innerHTML = `⚠️ <strong>Duplicate Ministry Runic Seal (CRN):</strong> Already registered for <strong>${escapeHtml(localExisting.company_name || 'Order')}</strong> (${escapeHtml(localExisting.email || '')}). Use 'Amend Record' or 'Resend Owl' instead.`;
         }
         return;
     }
@@ -345,7 +345,7 @@ async function handleDispatchInvite(ev) {
     const submitBtn = document.getElementById("btnDispatchInvite");
     if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = "<span class=\"btn-label\">&#x23F3; Issuing Corporate Invitation &amp; Generating Link&hellip;</span>";
+        submitBtn.innerHTML = "<span class=\"btn-label\">&#x23F3; Inscribing Vault Mandate &amp; Dispatching Owl&hellip;</span>";
     }
 
     try {
@@ -374,15 +374,15 @@ async function handleDispatchInvite(ev) {
                 if (feedback) {
                     feedback.style.display = "block";
                     feedback.className = "crn-feedback error";
-                    feedback.innerHTML = `⚠️ <strong>Duplicate CRN:</strong> ${escapeHtml(data.error || 'An onboarding record already exists for this CRN.')}`;
+                    feedback.innerHTML = `⚠️ <strong>Duplicate Ministry Rune (CRN):</strong> ${escapeHtml(data.error || 'An induction record already exists for this Runic Seal.')}`;
                 }
             }
-            throw new Error(data.error || "Failed to issue corporate onboarding invitation.");
+            throw new Error(data.error || "Failed to dispatch vault induction mandate.");
         }
 
         // Show Success Box with generated link
         displayGeneratedInvite(data.invitation, data.inviteLink);
-        showRmToast(`Corporate onboarding invitation issued to ${email} for CRN ${crn}.`, "success");
+        showRmToast(`Vault induction mandate dispatched via Owl Post to ${email} for Runic Seal ${crn}.`, "success");
 
         if (crnInput) {
             crnInput.classList.remove("is-invalid", "is-valid");
@@ -399,7 +399,7 @@ async function handleDispatchInvite(ev) {
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = "<span class=\"btn-label\">Issue Corporate Onboarding Invitation &amp; Access Link &rarr;</span>";
+            submitBtn.innerHTML = "<span class=\"btn-label\">Dispatch Vault Induction Mandate via Owl Post &rarr;</span>";
         }
     }
 }
@@ -430,10 +430,10 @@ function copyGeneratedLink() {
 
     input.select();
     navigator.clipboard.writeText(input.value).then(() => {
-        showRmToast("Customer Onboarding Access Link copied to clipboard!", "success");
+        showRmToast("Customer Vault Induction Link copied to enchanted parchment!", "success");
     }).catch(() => {
         document.execCommand("copy");
-        showRmToast("Customer Link copied!", "success");
+        showRmToast("Vault Induction Link copied!", "success");
     });
 }
 
@@ -490,7 +490,7 @@ function renderPipelineTable(invitations) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="8" style="text-align:center; padding:36px; color:var(--rm-text-muted);">
-                    No customer invitations found. Use the dispatcher above to issue an onboarding link.
+                    No customer vault induction scrolls found. Use the dispatcher above to issue a sealed parchment.
                 </td>
             </tr>
         `;
@@ -508,11 +508,11 @@ function renderPipelineTable(invitations) {
                            (inv.status === "in_progress" ? "in_progress" : 
                            (inv.status === "review" ? "review" : "invited"));
 
-        const statusLabel = inv.status === "completed" ? "&#x2705; Activated" : 
-                           (inv.status === "in_progress" ? "&#x23F3; In Progress" : 
-                           (inv.status === "review" ? "&#x1F4CB; In Review" : "&#x2709; Dispatched"));
+        const statusLabel = inv.status === "completed" ? "&#x2705; Consecrated" : 
+                           (inv.status === "in_progress" ? "&#x23F3; Rites in Progress" : 
+                           (inv.status === "review" ? "&#x1F4DC; Goblin Scrutiny" : "&#x2709; Owl Dispatched"));
 
-        const stepText = inv.current_step ? `Step ${inv.current_step} of 7` : "Step 1 of 7";
+        const stepText = inv.current_step ? `Rite ${inv.current_step} of 7` : "Rite 1 of 7";
         const cuid = inv.company_uid || ('CUID-' + (inv.crn || '').toUpperCase().replace(/[^A-Z0-9]/g, ''));
 
         return `
@@ -525,11 +525,11 @@ function renderPipelineTable(invitations) {
                 </td>
                 <td>
                     <div style="font-weight:700; color:#ffffff;">${inv.company_name}</div>
-                    <div style="font-size:12px; color:var(--rm-text-muted);">&#x1F464; ${inv.contact_person || 'Signatory'}</div>
+                    <div style="font-size:12px; color:var(--rm-text-muted);">&#x1F9D9; ${inv.contact_person || 'Chief Signatory'}</div>
                 </td>
                 <td>
                     <span style="color:#93c5fd;">${inv.email}</span>
-                    ${inv.phone ? `<div style="font-size:11.5px; color:var(--rm-text-muted);">&#x1F4DE; ${inv.phone}</div>` : ''}
+                    ${inv.phone ? `<div style="font-size:11.5px; color:var(--rm-text-muted);">&#x1F4DF; ${inv.phone}</div>` : ''}
                 </td>
                 <td>
                     <span style="font-size:12px; font-weight:600; color:#e2e8f0;">${stepText}</span>
@@ -543,13 +543,13 @@ function renderPipelineTable(invitations) {
                 </td>
                 <td style="text-align:right;">
                     <div class="rm-action-btns">
-                        <button class="rm-btn-action" onclick="openUpdateDetailsByIndex(${idx})" style="color:#38bdf8;" title="Update Customer Email &amp; Details">
-                            &#x270F;&#xFE0F; Update Details
+                        <button class="rm-btn-action" onclick="openUpdateDetailsByIndex(${idx})" style="color:#38bdf8;" title="Amend Order Owl Roost &amp; Parameters">
+                            &#x270F;&#xFE0F; Amend Record
                         </button>
-                        <button class="rm-btn-action" onclick="resendInvite('${encodeURIComponent(inv.crn)}', '${encodeURIComponent(inv.email)}')" style="color:#10b981;" title="Resend Notification Email">
-                            &#x2709; Resend
+                        <button class="rm-btn-action" onclick="resendInvite('${encodeURIComponent(inv.crn)}', '${encodeURIComponent(inv.email)}')" style="color:#10b981;" title="Re-dispatch Owl Post Scroll">
+                            &#x2709; Resend Owl
                         </button>
-                        <button class="rm-btn-action delete" onclick="deleteInvite('${encodeURIComponent(inv.crn)}', '${encodeURIComponent(inv.email)}')" title="Revoke Invitation">
+                        <button class="rm-btn-action delete" onclick="deleteInvite('${encodeURIComponent(inv.crn)}', '${encodeURIComponent(inv.email)}')" title="Revoke Mandate">
                             &#x2715;
                         </button>
                     </div>
@@ -643,7 +643,7 @@ async function handleUpdateDetailsSubmit(ev) {
     const btn = document.getElementById("btnSaveUpdatedDetails");
     if (btn) {
         btn.disabled = true;
-        btn.innerHTML = "&#x23F3; Updating Customer Details&hellip;";
+        btn.innerHTML = "&#x23F3; Resealing Order Vault Record&hellip;";
     }
 
     try {
@@ -663,10 +663,10 @@ async function handleUpdateDetailsSubmit(ev) {
 
         const data = await res.json();
         if (!res.ok || !data.success) {
-            throw new Error(data.error || "Failed to update customer details.");
+            throw new Error(data.error || "Failed to amend vault record.");
         }
 
-        showRmToast(data.message || "Customer details updated successfully.", "success");
+        showRmToast(data.message || "Order vault record amended and resealed.", "success");
         closeUpdateDetailsModal();
         fetchInvitations();
     } catch (err) {
@@ -674,7 +674,7 @@ async function handleUpdateDetailsSubmit(ev) {
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = "&#x1F4BE; Save &amp; Update Customer";
+            btn.innerHTML = "💾 Reseal &amp; Amend Vault Record";
         }
     }
 }
@@ -682,17 +682,17 @@ async function handleUpdateDetailsSubmit(ev) {
 async function resendInvite(rawCrn, rawEmail) {
     const crn = decodeURIComponent(rawCrn);
     const email = decodeURIComponent(rawEmail);
-    showRmToast(`Dispatching invitation email to ${email}...`, "info");
+    showRmToast(`Dispatching sealed scroll via Owl Post to ${email}...`, "info");
     try {
         const res = await rmFetch(`/api/v1/rm/resend/${encodeURIComponent(crn)}/${encodeURIComponent(email)}`, {
             method: "POST"
         });
         const data = await res.json();
         if (data.success) {
-            showRmToast(data.message || `Invitation email successfully re-dispatched to ${email}.`, "success");
+            showRmToast(data.message || `Induction scroll dispatched via Owl Post to ${email}.`, "success");
             fetchInvitations();
         } else {
-            throw new Error(data.error || "Failed to resend invitation.");
+            throw new Error(data.error || "Failed to resend owl.");
         }
     } catch (err) {
         showRmToast(err.message, "error");
@@ -700,7 +700,7 @@ async function resendInvite(rawCrn, rawEmail) {
 }
 
 async function deleteInvite(crn, email) {
-    if (!confirm(`Are you sure you want to revoke the onboarding invitation for CRN ${crn} (${email})?`)) {
+    if (!confirm(`Are you sure you wish to banish/revoke the vault induction mandate for Runic Seal ${crn} (${email})?`)) {
         return;
     }
 
@@ -710,7 +710,7 @@ async function deleteInvite(crn, email) {
         });
         const data = await res.json();
         if (data.success) {
-            showRmToast("Invitation revoked successfully.", "info");
+            showRmToast("Vault mandate revoked and unsealed.", "info");
             fetchInvitations();
         } else {
             throw new Error(data.error || "Failed to revoke.");
@@ -745,8 +745,8 @@ async function openRmAuditModal(companyUid, crn, companyName) {
 
     const titleEl = document.getElementById("rmAuditTitle");
     const subEl = document.getElementById("rmAuditSub");
-    if (titleEl) titleEl.innerHTML = `Audit Trail: <strong>${escapeHtml(companyName || crn)}</strong> <span style="font-size:12px; color:#f59e0b; font-family:monospace; margin-left:8px;">${companyUid}</span>`;
-    if (subEl) subEl.textContent = `Activity and verification history for CRN ${crn}`;
+    if (titleEl) titleEl.innerHTML = `Audit Chronicle: <strong>${escapeHtml(companyName || crn)}</strong> <span style="font-size:12px; color:#f59e0b; font-family:monospace; margin-left:8px;">${companyUid}</span>`;
+    if (subEl) subEl.textContent = `Chronicle of runes, wards, and goblin scrutiny for Runic Seal ${crn}`;
 
     await refreshRmAudit();
 }
@@ -761,7 +761,7 @@ async function refreshRmAudit() {
     const countEl = document.getElementById("rmAuditCount");
     if (!content) return;
 
-    content.innerHTML = `<div style="text-align:center; padding:32px; color:var(--rm-text-muted);">Loading activity and audit history...</div>`;
+    content.innerHTML = `<div style="text-align:center; padding:32px; color:var(--rm-text-muted);">Scrying enchanted audit chronicle...</div>`;
 
     try {
         const { companyUid, crn } = activeRmAuditTarget;
@@ -773,7 +773,7 @@ async function refreshRmAudit() {
         if (countEl) countEl.textContent = logs.length;
         renderRmAuditTrail(logs);
     } catch (err) {
-        content.innerHTML = `<div style="text-align:center; padding:24px; color:#f87171;">Failed to load audit trail: ${escapeHtml(err.message || String(err))}</div>`;
+        content.innerHTML = `<div style="text-align:center; padding:24px; color:#f87171;">Failed to scry audit chronicle: ${escapeHtml(err.message || String(err))}</div>`;
     }
 }
 
@@ -782,7 +782,7 @@ function renderRmAuditTrail(logs) {
     if (!content) return;
 
     if (!logs || logs.length === 0) {
-        content.innerHTML = `<div style="text-align:center; padding:36px; color:var(--rm-text-muted);">No audit events recorded for this entity yet.</div>`;
+        content.innerHTML = `<div style="text-align:center; padding:36px; color:var(--rm-text-muted);">No chronicle runes inscribed for this Order yet.</div>`;
         return;
     }
 
@@ -800,16 +800,16 @@ function renderRmAuditTrail(logs) {
     };
 
     const actionLabels = {
-        CUSTOMER_LOGIN: 'Client Login',
-        CUSTOMER_OTP_REQUESTED: 'Security Code Sent',
-        APPLICATION_SAVE: 'Application Saved',
-        APPLICATION_SUBMITTED: 'Application Submitted',
-        STEP_PROGRESSION: 'Step Completed',
-        DOCUMENT_UPLOADED: 'Document Uploaded',
-        INVITATION_DISPATCHED: 'Invitation Sent',
-        INVITATION_RESENT: 'Invitation Re-sent',
-        DB_SYNC: 'Records Synchronized',
-        PIPELINE_SYNC: 'Pipeline Synchronized'
+        CUSTOMER_LOGIN: 'Warden Portal Entry',
+        CUSTOMER_OTP_REQUESTED: 'Owl Cipher Dispatched',
+        APPLICATION_SAVE: 'Parchment Inscribed',
+        APPLICATION_SUBMITTED: 'Covenant Consecrated',
+        STEP_PROGRESSION: 'Rite Completed',
+        DOCUMENT_UPLOADED: 'Sacred Tome Inscribed',
+        INVITATION_DISPATCHED: 'Owl Mandate Dispatched',
+        INVITATION_RESENT: 'Owl Mandate Re-dispatched',
+        DB_SYNC: 'Gringotts Ledger Synchronized',
+        PIPELINE_SYNC: 'Vault Pipeline Synchronized'
     };
 
     const tableHtml = `

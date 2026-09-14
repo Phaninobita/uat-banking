@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gringotts Bank &mdash; Customer Banking Portal</title>
+<title>Gringotts Wizarding Bank &mdash; Vault Sanctum Portal | Diagon Alley</title>
 <link rel="icon" type="image/png" href="/images/bank-logo-dragon.png?v=2">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -7510,7 +7510,7 @@ body[data-theme="rose"],
 
 
 <!-- ===== LOGIN OVERLAY ===== -->
-<div id="loginOverlay" role="dialog" aria-label="Login to Gringotts Bank Customer Portal">
+<div id="loginOverlay" role="dialog" aria-label="Access Gringotts Vault Sanctum">
   <div class="login-aurora-bg" aria-hidden="true">
     <div class="aurora-glow glow-1"></div>
     <div class="aurora-glow glow-2"></div>
@@ -7552,44 +7552,44 @@ body[data-theme="rose"],
   <div class="login-box" id="customerLoginCard">
     <div class="login-card-glare" aria-hidden="true"></div>
     <div class="login-header">
-      <div class="logo-mark" aria-label="Gringotts Bank Logo">
-        <img src="/images/bank-logo-dragon.png?v=2" alt="Gringotts Bank Logo" class="brand-logo-img">
+      <div class="logo-mark" aria-label="Gringotts Wizarding Bank Logo">
+        <img src="/images/bank-logo-dragon.png?v=2" alt="Gringotts Wizarding Bank Logo" class="brand-logo-img">
       </div>
-      <h1>Gringotts Bank</h1>
-      <p>Diagon Alley &bull; Customer Vault Portal</p>
+      <h1>Gringotts Wizarding Bank</h1>
+      <p>Diagon Alley &bull; Customer Vault Sanctum</p>
     </div>
 
     <div id="loginError" class="error-msg" role="alert"></div>
 
     <div id="lStep1" class="form-step">
       <div class="field-group">
-        <label for="custIdInput">Customer ID or Vault Number</label>
+        <label for="custIdInput">Vault Key Number / Bloodline Registry</label>
         <input type="text" id="custIdInput" placeholder="e.g. GB-0687-HP" autofocus>
       </div>
       <div class="field-group">
-        <label for="custPasswordInput">Password</label>
-        <input type="password" id="custPasswordInput" placeholder="Enter your password">
+        <label for="custPasswordInput">Secret Vault Passphrase / Incantation</label>
+        <input type="password" id="custPasswordInput" placeholder="Inscribe your secret passphrase">
       </div>
       <button type="button" class="btn-login btn-pill-sweep" onclick="handleLoginStep1()">
-        <span class="btn-label">Request OTP &rarr;</span>
+        <span class="btn-label">Summon Owl Post Cipher &rarr;</span>
       </button>
-      <div class="resend-text" style="margin-top:14px;">Forgot your password? <a role="button" tabindex="0" onclick="showToast('Password reset instructions sent to your registered email.','Reset Requested','info')">Reset it</a></div>
+      <div class="resend-text" style="margin-top:14px;">Forgotten your passphrase? <a role="button" tabindex="0" onclick="showToast('Passphrase recovery missive dispatched via Owl Post.','Recovery Dispatched','info')">Consult Goblin Overseer</a></div>
     </div>
 
     <div id="lStep2" class="form-step hidden">
       <div class="info-badge">
-        We sent a 4-digit code to your registered mobile ending in &bull;123.
+        A 4-rune enchanted cipher has been dispatched via Owl Post to your wand roost ending in &bull;123.
         <div style="margin-top: 8px; font-size: 13px; color: var(--brand-primary, #00d2ff); font-weight: 600; display: flex; align-items: center; justify-content: space-between;">
-          <span>&#x1F511; Access Code: <strong id="displayOtpBadge">1111</strong></span>
-          <button type="button" onclick="autoFillOtp()" style="font-size: 11px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--brand-primary, #00d2ff); background: rgba(0,210,255,0.12); color: var(--brand-primary, #00d2ff); cursor: pointer; font-weight: 600;">&#x26A1; Auto-fill</button>
+          <span>&#x1F511; Cipher Rune: <strong id="displayOtpBadge">1111</strong></span>
+          <button type="button" onclick="autoFillOtp()" style="font-size: 11px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--brand-primary, #00d2ff); background: rgba(0,210,255,0.12); color: var(--brand-primary, #00d2ff); cursor: pointer; font-weight: 600;">&#x26A1; Auto-inscribe</button>
         </div>
       </div>
       <div class="otp-stage-wrap" id="otpStageWrap">
-        <div class="otp-row" id="otpInputs" role="group" aria-label="One-time password input">
-          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" oninput="handleOtpDigitInput(this, 1)" onkeydown="handleOtpKeyDown(event, this, 1)" onpaste="handleOtpPaste(event)" aria-label="OTP digit 1">
-          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" oninput="handleOtpDigitInput(this, 2)" onkeydown="handleOtpKeyDown(event, this, 2)" onpaste="handleOtpPaste(event)" aria-label="OTP digit 2">
-          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" oninput="handleOtpDigitInput(this, 3)" onkeydown="handleOtpKeyDown(event, this, 3)" onpaste="handleOtpPaste(event)" aria-label="OTP digit 3">
-          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" oninput="handleOtpDigitInput(this, 4)" onkeydown="handleOtpKeyDown(event, this, 4)" onpaste="handleOtpPaste(event)" aria-label="OTP digit 4">
+        <div class="otp-row" id="otpInputs" role="group" aria-label="One-time cipher rune input">
+          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" oninput="handleOtpDigitInput(this, 1)" onkeydown="handleOtpKeyDown(event, this, 1)" onpaste="handleOtpPaste(event)" aria-label="Cipher digit 1">
+          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" oninput="handleOtpDigitInput(this, 2)" onkeydown="handleOtpKeyDown(event, this, 2)" onpaste="handleOtpPaste(event)" aria-label="Cipher digit 2">
+          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" oninput="handleOtpDigitInput(this, 3)" onkeydown="handleOtpKeyDown(event, this, 3)" onpaste="handleOtpPaste(event)" aria-label="Cipher digit 3">
+          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" oninput="handleOtpDigitInput(this, 4)" onkeydown="handleOtpKeyDown(event, this, 4)" onpaste="handleOtpPaste(event)" aria-label="Cipher digit 4">
           <!-- Morphing Loading Spinner & Status Symbol -->
           <div class="otp-morph-indicator" id="otpMorphIndicator" aria-hidden="true">
               <div class="otp-morph-ring"></div>
@@ -7600,17 +7600,17 @@ body[data-theme="rose"],
         </div>
       </div>
       <button type="button" class="btn-login btn-pill-sweep" onclick="handleOtpSubmit()">
-        <span class="btn-label">Verify &amp; Enter Portal &rarr;</span>
+        <span class="btn-label">Unseal Vault &amp; Enter Sanctum &rarr;</span>
       </button>
-      <div class="resend-text">Didn't get the code? <a onclick="resendOtp()" role="button" tabindex="0">Resend OTP</a></div>
-      <div class="resend-text"><a role="button" tabindex="0" onclick="backToStep1()">&larr; Back</a></div>
+      <div class="resend-text">Owl delayed? <a onclick="resendOtp()" role="button" tabindex="0">Dispatch Swift Owl</a></div>
+      <div class="resend-text"><a role="button" tabindex="0" onclick="backToStep1()">&larr; Return to Gates</a></div>
     </div>
 
-    <div class="footer-text">By continuing, you agree to Gringotts Bank's <a href="#">Terms of Vault Custody</a> and <a href="#">Privacy Policy</a>.<br>&copy; 2026 Gringotts Bank. Located at Diagon Alley &bull; In reference with Hogwarts Financial Council.
+    <div class="footer-text">By continuing, you agree to Gringotts Bank's <a href="#">Ancient Vault Custody Charter</a> and <a href="#">Goblin Secrecy Decrees</a>.<br>&copy; 2026 Gringotts Wizarding Bank. Located at Diagon Alley &bull; Consecrated under the Wizengamot Banking Charter.
         <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.1); display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;">
-          <a href="/" style="color: #38bdf8; font-size: 11.5px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">&#x1F3E2; Corporate Onboarding &rarr;</a>
-          <a href="/rm" style="color: #fbbf24; font-size: 11.5px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">&#x1F511; Relationship Manager (RM) &rarr;</a>
-          <a href="/site" style="color: #a855f7; font-size: 11.5px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">&#x2728; Main Website &rarr;</a>
+          <a href="/" style="color: #38bdf8; font-size: 11.5px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">&#x1F3F0; Customer Vault Induction &rarr;</a>
+          <a href="/rm" style="color: #fbbf24; font-size: 11.5px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">&#x1F511; Goblin Overseer Sanctum &rarr;</a>
+          <a href="/site" style="color: #a855f7; font-size: 11.5px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">&#x2728; Diagon Alley Grand Hall &rarr;</a>
         </div></div>
   </div>
 </div>
@@ -7624,47 +7624,47 @@ body[data-theme="rose"],
   <div class="portal-app-shell">
     <aside class="portal-sidebar" id="portalSidebar">
       <div class="sidebar-brand-header">
-        <div class="sidebar-logo-mark" aria-label="Gringotts Bank Logo">
-          <img src="/images/bank-logo-dragon.png?v=2" alt="Gringotts Bank Logo" class="sidebar-logo-img">
+        <div class="sidebar-logo-mark" aria-label="Gringotts Wizarding Bank Logo">
+          <img src="/images/bank-logo-dragon.png?v=2" alt="Gringotts Wizarding Bank Logo" class="sidebar-logo-img">
         </div>
         <div class="sidebar-brand-text">
-          <span class="brand-name">Gringotts Bank</span>
-          <small class="brand-sub">Diagon Alley &bull; Customer Vault</small>
+          <span class="brand-name">Gringotts Wizarding Bank</span>
+          <small class="brand-sub">Diagon Alley &bull; Customer Vault Sanctum</small>
         </div>
       </div>
 
       <div class="sidebar-company-card">
         <div class="scc-identity">
-          <span class="scc-icon" aria-hidden="true">&#x1F464;</span>
+          <span class="scc-icon" aria-hidden="true">&#x1F9D9;</span>
           <div class="scc-details">
             <span class="scc-company-name">Harry Potter</span>
             <div class="scc-meta-row">
               <span class="scc-crn">Vault #687</span>
-              <span class="scc-cuid">Gold Member</span>
+              <span class="scc-cuid">High Coven Elder</span>
             </div>
           </div>
         </div>
         <div class="scc-prog-container">
           <div class="scc-prog-header">
-            <span class="scc-prog-label">Total Relationship Balance</span>
+            <span class="scc-prog-label">Total Vault Reserve Balance</span>
           </div>
           <div style="font-size:16px; font-weight:800; color:#fff;">168,750.75 Galleons</div>
         </div>
       </div>
 
-      <div class="cp-nav-group-label">Overview</div>
-      <div class="cp-nav-item active" data-view="dashboard" onclick="cpShowView('dashboard')"><span class="cp-ic">&#x1F3E6;</span> Dashboard</div>
+      <div class="cp-nav-group-label">Sanctum Overview</div>
+      <div class="cp-nav-item active" data-view="dashboard" onclick="cpShowView('dashboard')"><span class="cp-ic">&#x1F3F0;</span> Vault Chamber</div>
 
-      <div class="cp-nav-group-label">Payments</div>
-      <div class="cp-nav-item" data-view="transfer" onclick="cpShowView('transfer')"><span class="cp-ic">&#x1F4B8;</span> Fund Transfer</div>
-      <div class="cp-nav-item" data-view="beneficiaries" onclick="cpShowView('beneficiaries')"><span class="cp-ic">&#x1F465;</span> Beneficiaries</div>
+      <div class="cp-nav-group-label">Galleon Transmutation &amp; Floo Dispatch</div>
+      <div class="cp-nav-item" data-view="transfer" onclick="cpShowView('transfer')"><span class="cp-ic">&#x1F4B8;</span> Floo Galleon Transfer</div>
+      <div class="cp-nav-item" data-view="beneficiaries" onclick="cpShowView('beneficiaries')"><span class="cp-ic">&#x1F9D9;</span> Allied Covens &amp; Vaults</div>
 
-      <div class="cp-nav-group-label">Account</div>
-      <div class="cp-nav-item" data-view="settings" onclick="cpShowView('settings')"><span class="cp-ic">&#x2699;&#xFE0F;</span> Settings</div>
+      <div class="cp-nav-group-label">Wards &amp; Charms</div>
+      <div class="cp-nav-item" data-view="settings" onclick="cpShowView('settings')"><span class="cp-ic">&#x2728;</span> Enchanted Decrees &amp; Wards</div>
 
       <div style="margin-top:auto; padding:14px 22px 20px;">
         <button type="button" class="btn-hdr-action btn-hdr-signout" style="width:100%; justify-content:center;" onclick="cpSignOut()">
-          <span class="hdr-btn-icon">&#x1F6AA;</span><span>Log Out</span>
+          <span class="hdr-btn-icon">&#x1F512;</span><span>Reseal Chamber</span>
         </button>
       </div>
     </aside>
@@ -7674,9 +7674,9 @@ body[data-theme="rose"],
         <div class="topbar-left">
           <div class="topbar-breadcrumb">
             <span class="topbar-dot" aria-hidden="true"></span>
-            <span class="topbar-step-pill" id="cpTopbarPill">Dashboard</span>
+            <span class="topbar-step-pill" id="cpTopbarPill">Vault Chamber</span>
             <span class="topbar-sep">&bull;</span>
-            <span class="topbar-title" id="cpTopbarTitle">Account Overview</span>
+            <span class="topbar-title" id="cpTopbarTitle">Sanctum Overview</span>
           </div>
         </div>
         <div class="topbar-right">
@@ -7698,8 +7698,8 @@ body[data-theme="rose"],
                   <span class="swatch-dot" style="background: linear-gradient(135deg, #fb7185, #f43f5e); width:8px; height:8px;"></span>
               </button>
           </div>
-          <button type="button" class="btn-hdr-action" title="Notifications" onclick="showToast('No new notifications.','Notifications','info')">
-            <span class="hdr-btn-icon">&#x1F514;</span>
+          <button type="button" class="btn-hdr-action" title="Owl Notifications" onclick="showToast('No new owl missives in your roost.','Roost Sanctum','info')">
+            <span class="hdr-btn-icon">&#x1F989;</span>
           </button>
         </div>
       </header>
@@ -7709,32 +7709,32 @@ body[data-theme="rose"],
         <!-- ================= DASHBOARD ================= -->
         <section class="cp-view active" id="cp-dashboard">
           <div class="cp-grid-3">
-            <div class="cp-bal-card"><span class="tag" style="position:absolute;top:16px;right:16px;font-size:10px;padding:3px 9px;border-radius:20px;background:rgba(16,185,129,.15);color:#10b981;font-weight:700;">Active</span>
-              <div class="lbl">Vault Current Account</div>
+            <div class="cp-bal-card"><span class="tag" style="position:absolute;top:16px;right:16px;font-size:10px;padding:3px 9px;border-radius:20px;background:rgba(16,185,129,.15);color:#10b981;font-weight:700;">Enchanted</span>
+              <div class="lbl">Primary Dragon-Guarded Vault</div>
               <div class="amt">120,540.75 <span style="font-size:12px;color:rgba(255,255,255,.4);">Galleons</span></div>
               <div class="acc">&bull;&bull;&bull;&bull; 6871</div>
             </div>
-            <div class="cp-bal-card"><span class="tag" style="position:absolute;top:16px;right:16px;font-size:10px;padding:3px 9px;border-radius:20px;background:rgba(16,185,129,.15);color:#10b981;font-weight:700;">Active</span>
-              <div class="lbl">High-Yield Savings</div>
+            <div class="cp-bal-card"><span class="tag" style="position:absolute;top:16px;right:16px;font-size:10px;padding:3px 9px;border-radius:20px;background:rgba(16,185,129,.15);color:#10b981;font-weight:700;">Enchanted</span>
+              <div class="lbl">High-Yield Goblin Interest Reserve</div>
               <div class="amt">48,210.00 <span style="font-size:12px;color:rgba(255,255,255,.4);">Galleons</span></div>
               <div class="acc">&bull;&bull;&bull;&bull; 2214</div>
             </div>
-            <div class="cp-bal-card"><span class="tag" style="position:absolute;top:16px;right:16px;font-size:10px;padding:3px 9px;border-radius:20px;background:rgba(16,185,129,.15);color:#10b981;font-weight:700;">Active</span>
-              <div class="lbl">Foreign Currency (GBP)</div>
+            <div class="cp-bal-card"><span class="tag" style="position:absolute;top:16px;right:16px;font-size:10px;padding:3px 9px;border-radius:20px;background:rgba(16,185,129,.15);color:#10b981;font-weight:700;">Enchanted</span>
+              <div class="lbl">Muggle Currency Exchange (GBP)</div>
               <div class="amt">&pound; 3,120.40</div>
               <div class="acc">&bull;&bull;&bull;&bull; 9903</div>
             </div>
           </div>
 
-          <div class="cp-section-head"><h2>Quick actions</h2></div>
+          <div class="cp-section-head"><h2>Chamber Incantations</h2></div>
           <div class="cp-qa-grid">
-            <div class="cp-qa" onclick="cpShowView('transfer')"><div class="ic">&#x1F4B8;</div><div class="lb">Transfer Funds</div></div>
-            <div class="cp-qa" onclick="cpOpenBenModal()"><div class="ic">&#x2795;</div><div class="lb">Add Beneficiary</div></div>
-            <div class="cp-qa" onclick="cpShowView('beneficiaries')"><div class="ic">&#x1F465;</div><div class="lb">Manage Beneficiaries</div></div>
-            <div class="cp-qa" onclick="cpShowView('settings')"><div class="ic">&#x1F512;</div><div class="lb">Security Settings</div></div>
+            <div class="cp-qa" onclick="cpShowView('transfer')"><div class="ic">&#x1F4B8;</div><div class="lb">Dispatch Galleons</div></div>
+            <div class="cp-qa" onclick="cpOpenBenModal()"><div class="ic">&#x2795;</div><div class="lb">Inscribe Allied Vault</div></div>
+            <div class="cp-qa" onclick="cpShowView('beneficiaries')"><div class="ic">&#x1F9D9;</div><div class="lb">Allied Covens</div></div>
+            <div class="cp-qa" onclick="cpShowView('settings')"><div class="ic">&#x1F6E1;&#xFE0F;</div><div class="lb">Dark-Arts Wards</div></div>
           </div>
 
-          <div class="cp-section-head"><h2>Recent transactions</h2><span class="cp-link">View all</span></div>
+          <div class="cp-section-head"><h2>Recent Vault Ledger Scrolls</h2><span class="cp-link">Scry all</span></div>
           <div class="cp-card" id="cpRecentTx"></div>
         </section>
 
@@ -7743,80 +7743,80 @@ body[data-theme="rose"],
           <div class="cp-grid-2">
             <div class="cp-card">
               <div class="field-group">
-                <label>Transfer type</label>
+                <label>Conduit of Transmutation</label>
                 <div class="cp-segmented" id="cpTransferSeg">
-                  <div class="cp-seg-opt active" data-type="own">Own Accounts</div>
-                  <div class="cp-seg-opt" data-type="gringotts">To Gringotts A/C</div>
-                  <div class="cp-seg-opt" data-type="other">Other Bank</div>
-                  <div class="cp-seg-opt" data-type="intl">International</div>
+                  <div class="cp-seg-opt active" data-type="own">Internal Chambers</div>
+                  <div class="cp-seg-opt" data-type="gringotts">To Diagon Alley Vault</div>
+                  <div class="cp-seg-opt" data-type="other">To Foreign Magical Vault</div>
+                  <div class="cp-seg-opt" data-type="intl">Trans-Atlantic Floo / MACUSA</div>
                 </div>
               </div>
 
               <div class="field-group">
-                <label for="cpFromAcc">From account</label>
+                <label for="cpFromAcc">Source Vault Chamber</label>
                 <select id="cpFromAcc">
-                  <option>Vault Current Account &bull;&bull;&bull;&bull;6871 &mdash; 120,540.75 Galleons</option>
-                  <option>High-Yield Savings &bull;&bull;&bull;&bull;2214 &mdash; 48,210.00 Galleons</option>
+                  <option>Primary Dragon-Guarded Vault &bull;&bull;&bull;&bull;6871 &mdash; 120,540.75 Galleons</option>
+                  <option>High-Yield Goblin Reserve &bull;&bull;&bull;&bull;2214 &mdash; 48,210.00 Galleons</option>
                 </select>
               </div>
 
               <div class="field-group" id="cpOwnAccField">
-                <label for="cpToOwnAcc">To account</label>
+                <label for="cpToOwnAcc">Destination Chamber</label>
                 <select id="cpToOwnAcc">
-                  <option>High-Yield Savings &bull;&bull;&bull;&bull;2214</option>
-                  <option>Foreign Currency (GBP) &bull;&bull;&bull;&bull;9903</option>
+                  <option>High-Yield Goblin Reserve &bull;&bull;&bull;&bull;2214</option>
+                  <option>Muggle Currency Exchange (GBP) &bull;&bull;&bull;&bull;9903</option>
                 </select>
               </div>
 
               <div class="field-group" id="cpBeneField" style="display:none;">
-                <label for="cpToBene">Beneficiary</label>
+                <label for="cpToBene">Allied Vault Signatory</label>
                 <select id="cpToBene">
-                  <option>Ron Weasley &mdash; Gringotts &bull;&bull;&bull;&bull;4410</option>
-                  <option>Hermione Granger &mdash; Gringotts &bull;&bull;&bull;&bull;7723</option>
-                  <option>Diagon Alley Apothecary Ltd &mdash; Barclays UK &bull;&bull;&bull;&bull;1188</option>
+                  <option>Ron Weasley &mdash; Gringotts Vault &bull;&bull;&bull;&bull;4410</option>
+                  <option>Hermione Granger &mdash; Gringotts Vault &bull;&bull;&bull;&bull;7723</option>
+                  <option>Diagon Alley Apothecary Ltd &mdash; Gringotts Diagon &bull;&bull;&bull;&bull;1188</option>
                   <option>Fleur Delacour &mdash; Banque de Magie, Paris</option>
                 </select>
-                <div class="field-hint">Don't see who you're looking for? <span class="cp-link" onclick="cpOpenBenModal()">Add a new beneficiary</span></div>
+                <div class="field-hint">Coven signatory not in ledger? <span class="cp-link" onclick="cpOpenBenModal()">Inscribe new allied vault</span></div>
               </div>
 
               <div class="field-group">
-                <label for="cpAmount">Amount</label>
+                <label for="cpAmount">Offering / Galleon Amount</label>
                 <div class="cp-amt-wrap">
                   <span class="curr">G</span>
                   <input type="number" id="cpAmount" placeholder="0.00" style="width:100%;">
                 </div>
-                <div class="field-hint">Available balance: 120,540.75 Galleons</div>
+                <div class="field-hint">Available in vault: 120,540.75 Galleons</div>
               </div>
 
               <div class="field-row2">
-                <div class="field-group"><label for="cpDate">Transfer date</label><input type="date" id="cpDate"></div>
+                <div class="field-group"><label for="cpDate">Dispatch Date</label><input type="date" id="cpDate"></div>
                 <div class="field-group">
-                  <label for="cpPurpose">Purpose</label>
+                  <label for="cpPurpose">Magical Covenant</label>
                   <select id="cpPurpose">
-                    <option>Family support</option>
-                    <option>Goods &amp; services</option>
-                    <option>Tuition</option>
-                    <option>Vault maintenance</option>
-                    <option>Other</option>
+                    <option>Bloodline Endowment</option>
+                    <option>Diagon Alley Artifacts &amp; Potions</option>
+                    <option>Hogwarts School of Witchcraft &amp; Wizardry Tithe</option>
+                    <option>Dragon Guard &amp; Thief's Downfall Maintenance</option>
+                    <option>Unspeakable Department Rite</option>
                   </select>
                 </div>
               </div>
 
               <div class="field-group">
-                <label for="cpRemarks">Remarks (optional)</label>
-                <textarea id="cpRemarks" placeholder="Add a note for this transfer"></textarea>
+                <label for="cpRemarks">Incantation Note (optional)</label>
+                <textarea id="cpRemarks" placeholder="Inscribe a runic note for this dispatch"></textarea>
               </div>
 
-              <button type="button" class="btn btn-primary" style="width:100%;" onclick="cpOpenReview()">Review Transfer</button>
+              <button type="button" class="btn btn-primary" style="width:100%;" onclick="cpOpenReview()">Review Galleon Dispatch &rarr;</button>
             </div>
 
             <div class="cp-card" style="height:fit-content;">
-              <h3 style="margin-top:0; font-size:14.5px; color:#fff;">Transfer limits</h3>
-              <div class="cp-summary-row"><span class="k">Daily limit remaining</span><span class="v">45,000.00 G</span></div>
-              <div class="cp-summary-row"><span class="k">Per-transaction limit</span><span class="v">25,000.00 G</span></div>
-              <div class="cp-summary-row"><span class="k">International cut-off</span><span class="v">3:00 PM GMT</span></div>
+              <h3 style="margin-top:0; font-size:14.5px; color:#fff;">Goblin Overseer Dispatch Limits</h3>
+              <div class="cp-summary-row"><span class="k">Daily Galleon Allowance</span><span class="v">45,000.00 G</span></div>
+              <div class="cp-summary-row"><span class="k">Per-Incantation Limit</span><span class="v">25,000.00 G</span></div>
+              <div class="cp-summary-row"><span class="k">Floo Network Astrological Cut-off</span><span class="v">3:00 PM GMT</span></div>
               <div style="margin-top:14px; padding:12px; border-radius:12px; background:var(--brand-glow-subtle); font-size:12px; color:var(--brand-primary);">
-                International transfers above 5,000 Galleons require additional verification.
+                Transfers exceeding 5,000 Galleons require dual-wand Wizengamot authorization.
               </div>
             </div>
           </div>
@@ -7825,16 +7825,16 @@ body[data-theme="rose"],
         <!-- ================= BENEFICIARIES ================= -->
         <section class="cp-view" id="cp-beneficiaries">
           <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
-            <button type="button" class="btn btn-primary" onclick="cpOpenBenModal()">+ Add Beneficiary</button>
+            <button type="button" class="btn btn-primary" onclick="cpOpenBenModal()">+ Inscribe Allied Vault</button>
           </div>
 
           <div class="cp-search-bar">
-            <div class="field-group"><input id="cpBenSearch" placeholder="Search by name, account or bank" oninput="cpRenderBeneficiaries()"></div>
+            <div class="field-group"><input id="cpBenSearch" placeholder="Scry by coven name, vault number, or order" oninput="cpRenderBeneficiaries()"></div>
             <div class="field-group" style="max-width:190px;">
               <select id="cpBenFilter" onchange="cpRenderBeneficiaries()">
-                <option value="all">All statuses</option>
-                <option value="verified">Verified</option>
-                <option value="pending">Pending</option>
+                <option value="all">All Ward States</option>
+                <option value="verified">Consecrated</option>
+                <option value="pending">Scrutiny Pending</option>
               </select>
             </div>
           </div>
@@ -7845,58 +7845,58 @@ body[data-theme="rose"],
         <!-- ================= SETTINGS ================= -->
         <section class="cp-view" id="cp-settings">
           <div class="cp-settings-nav">
-            <div class="cp-settings-tab active" data-tab="profile" onclick="cpShowSettingsTab('profile')">Profile</div>
-            <div class="cp-settings-tab" data-tab="security" onclick="cpShowSettingsTab('security')">Security</div>
-            <div class="cp-settings-tab" data-tab="notifications" onclick="cpShowSettingsTab('notifications')">Notifications</div>
-            <div class="cp-settings-tab" data-tab="devices" onclick="cpShowSettingsTab('devices')">Devices &amp; Sessions</div>
+            <div class="cp-settings-tab active" data-tab="profile" onclick="cpShowSettingsTab('profile')">Bloodline Pedigree</div>
+            <div class="cp-settings-tab" data-tab="security" onclick="cpShowSettingsTab('security')">Vault Wards &amp; Charms</div>
+            <div class="cp-settings-tab" data-tab="notifications" onclick="cpShowSettingsTab('notifications')">Owl Post Missives</div>
+            <div class="cp-settings-tab" data-tab="devices" onclick="cpShowSettingsTab('devices')">Apparition &amp; Mirror Portals</div>
           </div>
 
           <div class="cp-settings-panel" id="cp-settings-profile">
             <div class="cp-card">
               <div class="field-row2">
-                <div class="field-group"><label>Full name</label><input value="Harry James Potter"></div>
-                <div class="field-group"><label>Customer ID</label><input value="GB-0687-HP" disabled></div>
+                <div class="field-group"><label>Pure-Blood Lineage / Full Name</label><input value="Harry James Potter"></div>
+                <div class="field-group"><label>Vault Key Registry No.</label><input value="GB-0687-HP" disabled></div>
               </div>
               <div class="field-row2">
-                <div class="field-group"><label>Email address</label><input value="h.potter@owlmail.com"></div>
-                <div class="field-group"><label>Mobile number</label><input value="+44 7700 900123"></div>
+                <div class="field-group"><label>Owl Post Roost (Email)</label><input value="h.potter@owlmail.com"></div>
+                <div class="field-group"><label>Floo / Mirror Frequency</label><input value="+44 7700 900123"></div>
               </div>
-              <div class="field-group"><label>Mailing address</label><textarea>4 Privet Drive, Little Whinging, Surrey</textarea></div>
-              <button type="button" class="btn btn-primary" onclick="showToast('Your profile changes have been saved.','Profile Updated','success')">Save Changes</button>
+              <div class="field-group"><label>Sanctuary &amp; Hearth Address</label><textarea>4 Privet Drive, Little Whinging, Surrey</textarea></div>
+              <button type="button" class="btn btn-primary" onclick="showToast('Your pedigree parchment has been resealed in the vault archive.','Pedigree Resealed','success')">Reseal Pedigree Parchment</button>
             </div>
           </div>
 
           <div class="cp-settings-panel" id="cp-settings-security" style="display:none;">
             <div class="cp-card" style="margin-bottom:16px;">
-              <h3 style="margin-top:0; font-size:14.5px; color:#fff;">Password &amp; PIN</h3>
+              <h3 style="margin-top:0; font-size:14.5px; color:#fff;">Vault Passphrase &amp; Wand Gesture</h3>
               <div class="field-row2">
-                <div class="field-group"><label>Current password</label><input type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></div>
-                <div class="field-group"><label>New password</label><input type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></div>
+                <div class="field-group"><label>Current Secret Passphrase</label><input type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></div>
+                <div class="field-group"><label>New Secret Passphrase</label><input type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></div>
               </div>
-              <button type="button" class="btn btn-ghost" onclick="showToast('Your password has been updated.','Password Updated','success')">Update Password</button>
+              <button type="button" class="btn btn-ghost" onclick="showToast('Your vault secret passphrase has been attuned.','Passphrase Attuned','success')">Inscribe New Passphrase</button>
             </div>
             <div class="cp-card">
-              <h3 style="margin-top:0; font-size:14.5px; color:#fff;">Two-factor authentication</h3>
-              <div class="cp-pref-row"><div><div class="cp-pref-name">SMS one-time passcode</div><div class="cp-pref-desc">Required for transfers and beneficiary changes</div></div><div class="cp-switch on" onclick="this.classList.toggle('on')"></div></div>
-              <div class="cp-pref-row"><div><div class="cp-pref-name">Authenticator app</div><div class="cp-pref-desc">Use an app instead of SMS for login</div></div><div class="cp-switch" onclick="this.classList.toggle('on')"></div></div>
-              <div class="cp-pref-row"><div><div class="cp-pref-name">Biometric login</div><div class="cp-pref-desc">Face ID / fingerprint on this device</div></div><div class="cp-switch on" onclick="this.classList.toggle('on')"></div></div>
+              <h3 style="margin-top:0; font-size:14.5px; color:#fff;">Dual-Wand Binding &amp; Wards</h3>
+              <div class="cp-pref-row"><div><div class="cp-pref-name">Owl Post Cipher Rune</div><div class="cp-pref-desc">Required for Galleon dispatches and coven inscriptions</div></div><div class="cp-switch on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="cp-pref-row"><div><div class="cp-pref-name">Enchanted Scrying Mirror Authenticator</div><div class="cp-pref-desc">Use an enchanted mirror instead of Owl Post for sanctum access</div></div><div class="cp-switch" onclick="this.classList.toggle('on')"></div></div>
+              <div class="cp-pref-row"><div><div class="cp-pref-name">Blood-Quill &amp; Dragon-Skin Biometrics</div><div class="cp-pref-desc">Wand signature attestation on this scrying mirror</div></div><div class="cp-switch on" onclick="this.classList.toggle('on')"></div></div>
             </div>
           </div>
 
           <div class="cp-settings-panel" id="cp-settings-notifications" style="display:none;">
             <div class="cp-card">
-              <div class="cp-pref-row"><div><div class="cp-pref-name">Transaction alerts</div><div class="cp-pref-desc">Get notified for every debit and credit</div></div><div class="cp-switch on" onclick="this.classList.toggle('on')"></div></div>
-              <div class="cp-pref-row"><div><div class="cp-pref-name">Low balance alerts</div><div class="cp-pref-desc">Notify when balance drops below 1,000 Galleons</div></div><div class="cp-switch on" onclick="this.classList.toggle('on')"></div></div>
-              <div class="cp-pref-row"><div><div class="cp-pref-name">Beneficiary activity</div><div class="cp-pref-desc">Notify when a new beneficiary is added or edited</div></div><div class="cp-switch on" onclick="this.classList.toggle('on')"></div></div>
-              <div class="cp-pref-row"><div><div class="cp-pref-name">Marketing &amp; offers</div><div class="cp-pref-desc">Product updates from Gringotts Bank</div></div><div class="cp-switch" onclick="this.classList.toggle('on')"></div></div>
+              <div class="cp-pref-row"><div><div class="cp-pref-name">Galleon Debit &amp; Credit Owl Missives</div><div class="cp-pref-desc">Receive swift owl for every vault movement</div></div><div class="cp-switch on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="cp-pref-row"><div><div class="cp-pref-name">Depleted Vault Dragon Screech Alert</div><div class="cp-pref-desc">Notify when vault reserves drop below 1,000 Galleons</div></div><div class="cp-switch on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="cp-pref-row"><div><div class="cp-pref-name">Allied Vault Covenant Alerts</div><div class="cp-pref-desc">Notify when a new vault covenant is inscribed or altered</div></div><div class="cp-switch on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="cp-pref-row"><div><div class="cp-pref-name">Diagon Alley &amp; Ministry Proclamations</div><div class="cp-pref-desc">Decrees and new vault tiers from Gringotts Overseers</div></div><div class="cp-switch" onclick="this.classList.toggle('on')"></div></div>
             </div>
           </div>
 
           <div class="cp-settings-panel" id="cp-settings-devices" style="display:none;">
             <div class="cp-card">
-              <div class="cp-device-row"><div class="cp-tx-ic">&#x1F4BB;</div><div class="cp-tx-main"><div class="cp-tx-name">Chrome on Windows &mdash; London, UK</div><div class="cp-tx-meta">Current session &bull; Active now</div></div><span class="cp-badge cp-badge-verified">This device</span></div>
-              <div class="cp-device-row"><div class="cp-tx-ic">&#x1F4F1;</div><div class="cp-tx-main"><div class="cp-tx-name">Gringotts App on iPhone 15</div><div class="cp-tx-meta">Last active 2 hours ago</div></div><button type="button" class="btn btn-ghost" onclick="showToast('That session has been signed out.','Session Ended','success')">Sign out</button></div>
-              <div class="cp-device-row"><div class="cp-tx-ic">&#x1F4BB;</div><div class="cp-tx-main"><div class="cp-tx-name">Safari on MacBook Pro &mdash; Hogsmeade</div><div class="cp-tx-meta">Last active 3 days ago</div></div><button type="button" class="btn btn-ghost" onclick="showToast('That session has been signed out.','Session Ended','success')">Sign out</button></div>
+              <div class="cp-device-row"><div class="cp-tx-ic">&#x1FA84;</div><div class="cp-tx-main"><div class="cp-tx-name">Scrying Mirror &mdash; Diagon Alley Sanctum</div><div class="cp-tx-meta">Current session &bull; Active now</div></div><span class="cp-badge cp-badge-verified">This mirror</span></div>
+              <div class="cp-device-row"><div class="cp-tx-ic">&#x1F52E;</div><div class="cp-tx-main"><div class="cp-tx-name">Pocket Remembrall &mdash; Godric's Hollow</div><div class="cp-tx-meta">Last active 2 hours ago</div></div><button type="button" class="btn btn-ghost" onclick="showToast('That mirror session has been dispelled.','Session Dispelled','success')">Dispel link</button></div>
+              <div class="cp-device-row"><div class="cp-tx-ic">&#x1FA84;</div><div class="cp-tx-main"><div class="cp-tx-name">Three Broomsticks Public Floo Mirror &mdash; Hogsmeade</div><div class="cp-tx-meta">Last active 3 days ago</div></div><button type="button" class="btn btn-ghost" onclick="showToast('That mirror session has been dispelled.','Session Dispelled','success')">Dispel link</button></div>
             </div>
           </div>
         </section>
@@ -7909,23 +7909,23 @@ body[data-theme="rose"],
 <!-- ===== ADD BENEFICIARY MODAL ===== -->
 <div class="modal-overlay" id="cpBenModal">
   <div class="modal-box">
-    <h3 class="modal-title">Add Beneficiary</h3>
+    <h3 class="modal-title">Inscribe Allied Vault</h3>
     <div class="modal-body">
       <div class="field-group">
-        <label>Transfer network</label>
+        <label>Floo / Magical Conduit</label>
         <select id="cpNewBenNetwork">
-          <option>Within Gringotts Bank</option>
-          <option>Other UK Bank</option>
-          <option>International (SWIFT)</option>
+          <option>Within Gringotts Diagon Vaults</option>
+          <option>Foreign Magical Vault</option>
+          <option>International (ICW / MACUSA Floo)</option>
         </select>
       </div>
-      <div class="field-group"><label>Beneficiary name</label><input id="cpNewBenName" placeholder="e.g. Ron Weasley"></div>
-      <div class="field-group"><label>Account number / IBAN</label><input id="cpNewBenAcc" placeholder="e.g. GB29 GRIN 6016 1331 9268 19"></div>
-      <div class="field-group"><label>Bank name</label><input id="cpNewBenBank" placeholder="e.g. Gringotts Bank"></div>
-      <div class="field-hint" style="margin-bottom:16px;">A one-time passcode will be sent to your registered mobile to confirm this beneficiary.</div>
+      <div class="field-group"><label>Allied Coven / Witch Name</label><input id="cpNewBenName" placeholder="e.g. Ron Weasley"></div>
+      <div class="field-group"><label>Vault Number / Ministry Rune</label><input id="cpNewBenAcc" placeholder="e.g. GB29 GRIN 6016 1331 9268 19"></div>
+      <div class="field-group"><label>Magical Sanctuary / Bank Name</label><input id="cpNewBenBank" placeholder="e.g. Gringotts Wizarding Bank"></div>
+      <div class="field-hint" style="margin-bottom:16px;">A 4-rune enchanted cipher will be dispatched via Owl Post to your wand roost to confirm this allied vault.</div>
       <div style="display:flex; gap:10px; justify-content:flex-end;">
-        <button type="button" class="btn btn-ghost" onclick="cpCloseModal('cpBenModal')">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="cpAddBeneficiary()">Send OTP &amp; Add</button>
+        <button type="button" class="btn btn-ghost" onclick="cpCloseModal('cpBenModal')">Dispel</button>
+        <button type="button" class="btn btn-primary" onclick="cpAddBeneficiary()">Dispatch Cipher &amp; Inscribe</button>
       </div>
     </div>
   </div>
@@ -7934,11 +7934,11 @@ body[data-theme="rose"],
 <!-- ===== REVIEW TRANSFER MODAL ===== -->
 <div class="modal-overlay" id="cpReviewModal">
   <div class="modal-box">
-    <h3 class="modal-title">Review Transfer</h3>
+    <h3 class="modal-title">Review Galleon Dispatch</h3>
     <div class="modal-body" id="cpReviewBody"></div>
     <div style="display:flex; gap:10px; justify-content:flex-end;">
-      <button type="button" class="btn btn-ghost" onclick="cpCloseModal('cpReviewModal')">Edit</button>
-      <button type="button" class="btn btn-primary" onclick="cpOpenOtp()">Confirm &amp; Authorize</button>
+      <button type="button" class="btn btn-ghost" onclick="cpCloseModal('cpReviewModal')">Amend</button>
+      <button type="button" class="btn btn-primary" onclick="cpOpenOtp()">Consecrate &amp; Dispatch Galleons</button>
     </div>
   </div>
 </div>
@@ -7946,18 +7946,18 @@ body[data-theme="rose"],
 <!-- ===== OTP MODAL ===== -->
 <div class="modal-overlay" id="cpOtpModal">
   <div class="modal-box">
-    <h3 class="modal-title">Authorize Transfer</h3>
+    <h3 class="modal-title">Consecrate Galleon Dispatch</h3>
     <div class="modal-body">
-      <p style="margin-top:0;">Enter the 6-digit code sent to your registered mobile number ending in &bull;123.</p>
+      <p style="margin-top:0;">Enter the 6-rune enchanted cipher dispatched via Owl Post to your wand roost ending in &bull;123.</p>
       <div class="cp-otp-boxes">
         <input maxlength="1"><input maxlength="1"><input maxlength="1">
         <input maxlength="1"><input maxlength="1"><input maxlength="1">
       </div>
-      <span class="cp-link">Resend code</span>
+      <span class="cp-link">Summon Swift Owl</span>
     </div>
     <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px;">
-      <button type="button" class="btn btn-ghost" onclick="cpCloseModal('cpOtpModal')">Cancel</button>
-      <button type="button" class="btn btn-primary" onclick="cpCompleteTransfer()">Authorize Transfer</button>
+      <button type="button" class="btn btn-ghost" onclick="cpCloseModal('cpOtpModal')">Dispel</button>
+      <button type="button" class="btn btn-primary" onclick="cpCompleteTransfer()">Consecrate Dispatch</button>
     </div>
   </div>
 </div>
@@ -7993,17 +7993,22 @@ function cpShowView(name){
   document.querySelectorAll('.cp-nav-item[data-view]').forEach(i=>i.classList.toggle('active', i.dataset.view===name));
   document.querySelectorAll('.cp-view').forEach(v=>v.classList.remove('active'));
   document.getElementById('cp-'+name).classList.add('active');
-  const titles={dashboard:['Dashboard','Account Overview'],transfer:['Fund Transfer','Send Galleons Securely'],beneficiaries:['Beneficiaries','Manage Payees'],settings:['Settings','Profile &amp; Security']};
+  const titles={
+    dashboard:['Vault Chamber','Sanctum Overview'],
+    transfer:['Floo Galleon Dispatch','Send Galleons &amp; Inscribe Transfers'],
+    beneficiaries:['Allied Covens &amp; Vaults','Manage Registered Vaults'],
+    settings:['Enchanted Decrees &amp; Wards','Pedigree &amp; Vault Charms']
+  };
   document.getElementById('cpTopbarPill').textContent = titles[name][0];
   document.getElementById('cpTopbarTitle').innerHTML = titles[name][1];
 }
 
 /* ---- Recent transactions ---- */
 const cpRecentTx=[
-  {name:'Transfer to Ron Weasley', meta:'Fund Transfer &bull; Today, 9:14 AM', amt:'-450.00 G', cls:'neg', ic:'&#x1F4B8;'},
-  {name:'Salary Credit &mdash; Ministry of Magic', meta:'Credit &bull; Yesterday', amt:'+3,200.00 G', cls:'pos', ic:'&#x1F3DB;&#xFE0F;'},
-  {name:'Ollivanders Wand Shop', meta:'Card Purchase &bull; Sep 11', amt:'-77.50 G', cls:'neg', ic:'&#x1F6CD;&#xFE0F;'},
-  {name:'Transfer to Hermione Granger', meta:'Fund Transfer &bull; Sep 9', amt:'-1,200.00 G', cls:'neg', ic:'&#x1F4B8;'},
+  {name:'Owl Post Dispatch to Ron Weasley', meta:'Floo Network &bull; Today, 9:14 AM', amt:'-450.00 G', cls:'neg', ic:'&#x1F4B8;'},
+  {name:'Ministry of Magic Wizengamot Stipend', meta:'Vault Inscription &bull; Yesterday', amt:'+3,200.00 G', cls:'pos', ic:'&#x1F3DB;&#xFE0F;'},
+  {name:'Ollivanders Wand Shop &mdash; Dragon Heartstring', meta:'Diagon Alley Rite &bull; Sep 11', amt:'-77.50 G', cls:'neg', ic:'&#x1FA84;'},
+  {name:'Vault Transmutation to Hermione Granger', meta:'Gringotts High Transfer &bull; Sep 9', amt:'-1,200.00 G', cls:'neg', ic:'&#x1F4B8;'},
 ];
 const cpRc=document.getElementById('cpRecentTx');
 cpRecentTx.forEach(tx=>{
@@ -8042,28 +8047,28 @@ function cpOpenReview(){
   const to = isOwn ? document.getElementById('cpToOwnAcc').value : document.getElementById('cpToBene').value;
   const purpose = document.getElementById('cpPurpose').value;
   document.getElementById('cpReviewBody').innerHTML = `
-    <div class="cp-summary-row"><span class="k">Transfer type</span><span class="v">${type}</span></div>
-    <div class="cp-summary-row"><span class="k">From</span><span class="v">${from}</span></div>
-    <div class="cp-summary-row"><span class="k">To</span><span class="v">${to}</span></div>
-    <div class="cp-summary-row"><span class="k">Amount</span><span class="v">${amount} Galleons</span></div>
-    <div class="cp-summary-row"><span class="k">Purpose</span><span class="v">${purpose}</span></div>
-    <div class="cp-summary-row"><span class="k">Fees</span><span class="v">0.00 G</span></div>
+    <div class="cp-summary-row"><span class="k">Conduit</span><span class="v">${type}</span></div>
+    <div class="cp-summary-row"><span class="k">From Vault</span><span class="v">${from}</span></div>
+    <div class="cp-summary-row"><span class="k">To Vault</span><span class="v">${to}</span></div>
+    <div class="cp-summary-row"><span class="k">Offering Amount</span><span class="v">${amount} Galleons</span></div>
+    <div class="cp-summary-row"><span class="k">Magical Covenant</span><span class="v">${purpose}</span></div>
+    <div class="cp-summary-row"><span class="k">Goblin Seigniorage</span><span class="v">0.00 G</span></div>
   `;
   cpOpenModal('cpReviewModal');
 }
 function cpOpenOtp(){ cpCloseModal('cpReviewModal'); cpOpenModal('cpOtpModal'); }
 function cpCompleteTransfer(){
   cpCloseModal('cpOtpModal');
-  showToast('Your transfer has been authorized and processed.','Transfer Successful','success');
+  showToast('Your Galleon dispatch has been consecrated and sealed by goblin wards.','Galleons Dispatched','success');
   document.getElementById('cpAmount').value='';
   document.getElementById('cpRemarks').value='';
 }
 
 /* ---- Beneficiaries ---- */
 let cpBeneficiaries=[
-  {name:'Ron Weasley', acc:'Gringotts &bull;&bull;&bull;&bull;4410', bank:'Gringotts Bank', status:'verified', initials:'RW'},
-  {name:'Hermione Granger', acc:'Gringotts &bull;&bull;&bull;&bull;7723', bank:'Gringotts Bank', status:'verified', initials:'HG'},
-  {name:'Diagon Alley Apothecary Ltd', acc:'&bull;&bull;&bull;&bull;1188', bank:'Barclays UK', status:'verified', initials:'DA'},
+  {name:'Ron Weasley', acc:'Gringotts &bull;&bull;&bull;&bull;4410', bank:'Gringotts Wizarding Bank', status:'verified', initials:'RW'},
+  {name:'Hermione Granger', acc:'Gringotts &bull;&bull;&bull;&bull;7723', bank:'Gringotts Wizarding Bank', status:'verified', initials:'HG'},
+  {name:'Diagon Alley Apothecary Ltd', acc:'&bull;&bull;&bull;&bull;1188', bank:'Gringotts Diagon Branch', status:'verified', initials:'DA'},
   {name:'Fleur Delacour', acc:'FR76 3000 1007 &bull;&bull;&bull;&bull;', bank:'Banque de Magie, Paris', status:'pending', initials:'FD'},
 ];
 function cpRenderBeneficiaries(){
@@ -8078,31 +8083,31 @@ function cpRenderBeneficiaries(){
         <div class="cp-ben-card">
           <div class="cp-ben-avatar">${b.initials}</div>
           <div class="cp-ben-info">
-            <div class="cp-ben-name">${b.name} <span class="cp-badge ${b.status==='verified'?'cp-badge-verified':'cp-badge-pending'}">${b.status==='verified'?'Verified':'Pending'}</span></div>
+            <div class="cp-ben-name">${b.name} <span class="cp-badge ${b.status==='verified'?'cp-badge-verified':'cp-badge-pending'}">${b.status==='verified'?'Consecrated':'Scrutiny Pending'}</span></div>
             <div class="cp-ben-meta">${b.acc} &bull; ${b.bank}</div>
           </div>
           <div class="cp-ben-actions">
-            <div class="cp-icon-btn" title="Transfer now" onclick="cpShowView('transfer')">&#x1F4B8;</div>
+            <div class="cp-icon-btn" title="Dispatch now" onclick="cpShowView('transfer')">&#x1F4B8;</div>
             <div class="cp-icon-btn" title="Remove" onclick="cpRemoveBeneficiary(${i})">&#x1F5D1;&#xFE0F;</div>
           </div>
         </div>`);
     });
-  if(!list.innerHTML) list.innerHTML = '<div class="cp-card" style="text-align:center;color:rgba(255,255,255,.5);">No beneficiaries match your search.</div>';
+  if(!list.innerHTML) list.innerHTML = '<div class="cp-card" style="text-align:center;color:rgba(255,255,255,.5);">No allied vaults match your scrying inquiry.</div>';
 }
-function cpRemoveBeneficiary(i){ cpBeneficiaries.splice(i,1); cpRenderBeneficiaries(); showToast('Beneficiary removed.','Removed','success'); }
+function cpRemoveBeneficiary(i){ cpBeneficiaries.splice(i,1); cpRenderBeneficiaries(); showToast('Allied vault record banished.','Vault Removed','success'); }
 function cpOpenBenModal(){ cpOpenModal('cpBenModal'); }
 function cpAddBeneficiary(){
   const name=document.getElementById('cpNewBenName').value.trim();
   const acc=document.getElementById('cpNewBenAcc').value.trim();
-  const bank=document.getElementById('cpNewBenBank').value.trim() || 'Gringotts Bank';
-  if(!name||!acc){ showToast('Please enter a name and account number.','Missing details','warning'); return; }
+  const bank=document.getElementById('cpNewBenBank').value.trim() || 'Gringotts Wizarding Bank';
+  if(!name||!acc){ showToast('Please inscribe a coven name and vault number.','Missing Details','warning'); return; }
   const initials=name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
   cpBeneficiaries.push({name, acc, bank, status:'pending', initials});
   cpCloseModal('cpBenModal');
   ['cpNewBenName','cpNewBenAcc','cpNewBenBank'].forEach(id=>document.getElementById(id).value='');
   cpRenderBeneficiaries();
   cpShowView('beneficiaries');
-  showToast('Beneficiary added, pending OTP verification.','Beneficiary Added','success');
+  showToast('Allied vault inscribed, pending goblin scrutiny cipher.','Allied Vault Inscribed','success');
 }
 cpRenderBeneficiaries();
 
@@ -8619,9 +8624,9 @@ handleLoginStep1 = function(){
   _origHandleLoginStep1();
   if(custId && pwd){
     addSimulatedEmail({
-      subject: 'Gringotts Bank \u2014 Your Access Code',
+      subject: 'Gringotts Wizarding Bank \u2014 Your Secret Vault Cipher',
       to: (custId.toLowerCase().replace(/[^a-z0-9]/g,'')||'customer') + '@owlmail.com',
-      text: 'Your one-time login access code is 1111.',
+      text: 'Your one-time vault access cipher rune is 1111.',
       code: '1111'
     });
   }
@@ -8630,9 +8635,9 @@ const _origCpOpenOtp = cpOpenOtp;
 cpOpenOtp = function(){
   _origCpOpenOtp();
   addSimulatedEmail({
-    subject: 'Gringotts Bank \u2014 Authorize Your Transfer',
+    subject: 'Gringotts Wizarding Bank \u2014 Consecrate Galleon Dispatch',
     to: 'h.potter@owlmail.com',
-    text: 'Use this code to authorize your pending fund transfer: 123456.',
+    text: 'Inscribe this cipher rune to authorize your pending Galleon dispatch: 123456.',
     code: '123456'
   });
 };
@@ -8645,9 +8650,9 @@ cpAddBeneficiary = function(){
   _origCpAddBeneficiary();
   if(hadName && hadAcc){
     addSimulatedEmail({
-      subject: 'Gringotts Bank \u2014 New Beneficiary Verification',
+      subject: 'Gringotts Wizarding Bank \u2014 Allied Vault Consecration',
       to: 'h.potter@owlmail.com',
-      text: `Verification code to confirm beneficiary "${hadName}": 5309.`,
+      text: `Scrutiny cipher rune to confirm allied vault "${hadName}": 5309.`,
       code: '5309'
     });
   }
@@ -8655,73 +8660,73 @@ cpAddBeneficiary = function(){
 
 /* A general, non-OTP welcome email so the mailbox isn't empty on load */
 addSimulatedEmail({
-  subject: 'Welcome to Gringotts Online Banking',
+  subject: 'Welcome to Gringotts Vault Sanctum',
   to: 'h.potter@owlmail.com',
-  from: 'notifications@gringotts-bank.com',
-  text: 'Your account is set up. Explore fund transfers, beneficiaries and settings from your dashboard.',
+  from: 'bogrod@gringotts-bank.com',
+  text: 'Your vault chamber is consecrated. Inscribe Galleon transfers, scry allied covens, and adjust wards from your sanctum.',
   code: null
 });
 </script>
 
 <!-- ===== SIMULATED MAILBOX WIDGET ===== -->
 <div id="demoMailboxWidget">
-  <button id="demoMailboxBtn" type="button" onclick="toggleMailboxPanel()" aria-label="Open Gringotts Bank Virtual Mailbox Simulator" title="Gringotts Bank Simulated Live Mailbox">
+  <button id="demoMailboxBtn" type="button" onclick="toggleMailboxPanel()" aria-label="Open Gringotts Owl Post Roost Simulator" title="Gringotts Owl Post Roost Simulator">
     <span class="mailbox-icon" aria-hidden="true">&#x1FA84;</span>
-    <span class="mailbox-title">Gringotts Mailbox</span>
+    <span class="mailbox-title">Owl Post Roost</span>
     <span id="mailboxUnreadBadge" class="mailbox-badge" style="display:none;">0</span>
   </button>
 
   <div id="incomingEmailAlert" class="email-alert-toast" style="display:none;" onclick="openMailboxAndSelectLatest()">
-    <div class="alert-icon" aria-hidden="true">&#x1F4E8;</div>
+    <div class="alert-icon" aria-hidden="true">&#x1F989;</div>
     <div class="alert-body">
       <div class="alert-header">
-        <span class="alert-tag">New Email</span>
+        <span class="alert-tag">Incoming Owl</span>
         <span class="alert-time">Just now</span>
       </div>
-      <div id="alertSubject" class="alert-subject">Gringotts Bank &mdash; Your Access Code</div>
-      <div id="alertSender" class="alert-sender">From: security@gringotts-bank.com</div>
-      <div id="alertSnippet" class="alert-snippet">Click to view incoming email &amp; auto-fill OTP code</div>
+      <div id="alertSubject" class="alert-subject">Gringotts Wizarding Bank &mdash; Vault Cipher</div>
+      <div id="alertSender" class="alert-sender">From: bogrod@gringotts-bank.com</div>
+      <div id="alertSnippet" class="alert-snippet">Click to unfurl owl scroll &amp; auto-inscribe cipher</div>
     </div>
     <button type="button" class="alert-close" onclick="event.stopPropagation(); dismissEmailAlert();" aria-label="Dismiss">&times;</button>
   </div>
 
-  <div id="demoMailboxPanel" class="mailbox-panel" style="display:none;" role="dialog" aria-modal="false" aria-label="Gringotts Bank Simulated Email Inbox">
+  <div id="demoMailboxPanel" class="mailbox-panel" style="display:none;" role="dialog" aria-modal="false" aria-label="Gringotts Owl Post Roost">
     <div class="mb-panel-header">
       <div class="mb-header-left">
-        <div class="mb-avatar" aria-hidden="true">&#x1FA84;</div>
+        <div class="mb-avatar" aria-hidden="true">&#x1F989;</div>
         <div>
-          <div class="mb-header-title">Gringotts Bank Virtual Mailbox</div>
-          <div class="mb-header-sub">Diagon Alley Dispatch &bull; <span id="mailboxStatusText" class="status-live">&#x25CF; Live</span></div>
+          <div class="mb-header-title">Gringotts Owl Post Roost</div>
+          <div class="mb-header-sub">Diagon Alley Owl Dispatch &bull; <span id="mailboxStatusText" class="status-live">&#x25CF; Active Roost</span></div>
         </div>
       </div>
       <div class="mb-header-actions">
-        <button type="button" class="btn-mb-action" onclick="clearLiveMailbox()" title="Clear simulated inbox">&#x1F5D1; Clear</button>
-        <button type="button" class="btn-mb-close" onclick="toggleMailboxPanel(false)" aria-label="Close mailbox">&times;</button>
+        <button type="button" class="btn-mb-action" onclick="clearLiveMailbox()" title="Clear owl scrolls">&#x1F5D1; Clear</button>
+        <button type="button" class="btn-mb-close" onclick="toggleMailboxPanel(false)" aria-label="Close roost">&times;</button>
       </div>
     </div>
     <div class="mb-panel-body">
       <div id="mbListView" class="mb-list-view">
         <div class="mb-list-toolbar">
-          <span class="mb-count-label">Inbox (<span id="mbCount">0</span>)</span>
-          <span class="mb-sync-indicator"><span class="pulse-dot"></span> Auto-Sync</span>
+          <span class="mb-count-label">Parchments (<span id="mbCount">0</span>)</span>
+          <span class="mb-sync-indicator"><span class="pulse-dot"></span> Owl Flight</span>
         </div>
         <div id="mbEmailList" class="mb-email-items">
           <div class="mb-empty-state">
-            <div class="empty-icon" aria-hidden="true">&#x1F4ED;</div>
-            <div class="empty-title">Simulated Inbox Ready</div>
-            <div class="empty-desc">Request an OTP code or trigger a transfer to see emails arrive here instantly.</div>
+            <div class="empty-icon" aria-hidden="true">&#x1F989;</div>
+            <div class="empty-title">Owl Roost Ready</div>
+            <div class="empty-desc">Request an access cipher or dispatch Galleons to see incoming owls arrive here instantly.</div>
           </div>
         </div>
       </div>
       <div id="mbReaderView" class="mb-reader-view" style="display:none;">
         <div class="mb-reader-header">
-          <button type="button" class="btn-mb-back" onclick="backToInboxList()">&larr; Back to Inbox</button>
+          <button type="button" class="btn-mb-back" onclick="backToInboxList()">&larr; Back to Roost</button>
           <span id="mbReaderTimestamp" class="mb-reader-time">Just now</span>
         </div>
         <div class="mb-email-meta">
-          <div class="meta-row"><strong>From:</strong> <span id="mbReaderFrom">security@gringotts-bank.com</span></div>
+          <div class="meta-row"><strong>From:</strong> <span id="mbReaderFrom">bogrod@gringotts-bank.com</span></div>
           <div class="meta-row"><strong>To:</strong> <span id="mbReaderTo">h.potter@owlmail.com</span></div>
-          <div class="meta-row"><strong>Subject:</strong> <span id="mbReaderSubject">Gringotts Bank Access Code</span></div>
+          <div class="meta-row"><strong>Subject:</strong> <span id="mbReaderSubject">Gringotts Vault Cipher</span></div>
         </div>
         <div id="mbReaderActionBanner" class="mb-reader-action-banner" style="display:none;"></div>
         <div id="mbReaderContent" class="mb-reader-body"></div>
