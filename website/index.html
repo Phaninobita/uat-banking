@@ -1202,15 +1202,45 @@
 
     /* ---------- Enchanted Owl Feedback Modal & Input Interaction ---------- */
     .owl-modal-wrapper {
-        z-index: 2400 !important;
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 999999 !important;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: rgba(3, 5, 9, 0.85) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none !important;
+        transition: opacity .35s ease, visibility .35s ease;
+    }
+    .owl-modal-wrapper.open {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
     }
     .owl-modal-panel {
         max-width: 580px !important;
+        width: 100% !important;
         background: linear-gradient(165deg, #0e1e33 0%, #08111f 60%, #040810 100%) !important;
-        border: 1.5px solid rgba(251, 191, 36, 0.55) !important;
-        box-shadow: 0 40px 120px rgba(0,0,0,0.85), 0 0 70px rgba(251, 191, 36, 0.25) !important;
+        border: 1.5px solid rgba(251, 191, 36, 0.65) !important;
+        box-shadow: 0 40px 120px rgba(0,0,0,0.9), 0 0 70px rgba(251, 191, 36, 0.3) !important;
+        border-radius: 16px !important;
+        padding: 38px 34px 34px !important;
         max-height: 90vh;
         overflow-y: auto;
+        position: relative;
+        z-index: 2;
+        transform: translateY(20px) scale(0.96);
+        transition: transform .35s cubic-bezier(0.16, 1, 0.3, 1), opacity .35s ease;
+    }
+    .owl-modal-wrapper.open .owl-modal-panel {
+        transform: translateY(0) scale(1) !important;
+        opacity: 1 !important;
     }
     .owl-modal-panel::before {
         background: linear-gradient(90deg, transparent, #fbbf24, #fde047, transparent) !important;
@@ -1218,17 +1248,25 @@
     .owl-modal-close {
         color: #fbbf24 !important;
         border-color: rgba(251, 191, 36, 0.4) !important;
+        cursor: pointer !important;
+        pointer-events: auto !important;
+        z-index: 10 !important;
     }
     .owl-modal-close:hover {
         background: #fbbf24 !important;
         color: #1a0e00 !important;
     }
     .owl-floating-trigger {
+        position: fixed !important;
+        bottom: 28px !important;
+        left: 28px !important;
+        z-index: 99998 !important;
         cursor: pointer !important;
         pointer-events: auto !important;
-        z-index: 1500 !important;
+        user-select: none;
     }
     .owl-floating-trigger * {
+        cursor: pointer !important;
         pointer-events: none;
     }
     /* Force visible typing cursor and interaction for inputs and textareas */
@@ -1280,7 +1318,6 @@
         <a href="#vaults" class="nav-link magnetic">Vaults</a>
         <a href="#security" class="nav-link magnetic">Security</a>
         <a href="#legacy" class="nav-link magnetic">Legacy</a>
-        <a href="#owl-feedback" class="nav-link magnetic" style="color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);">✦ Owl Dispatch</a>
         <a href="#contact" class="nav-link magnetic">Contact</a>
     </div>
     <div class="nav-right">
@@ -1296,7 +1333,6 @@
     <a href="#vaults">Vaults</a>
     <a href="#security">Security</a>
     <a href="#legacy">Legacy</a>
-    <a href="#owl-feedback" style="color: #fbbf24;">✦ Owl Dispatch</a>
     <a href="#contact">Contact</a>
     <a href="https://phanee.up.railway.app/" class="access-vault-btn" style="color: var(--cyan-bright); border: 1px solid rgba(34, 211, 238, 0.4); padding: 8px 24px; border-radius: 8px;">Access Vault</a>
 </div>
@@ -1622,9 +1658,9 @@
 
 <!-- ============ ENCHANTED OWL FEEDBACK & INQUIRIES MODAL ============ -->
 <div class="modal owl-modal-wrapper" id="owlModal" aria-hidden="true" role="dialog" aria-labelledby="owlModalTitle">
-    <div class="modal-backdrop" data-close-owl></div>
+    <div class="modal-backdrop" data-close-owl onclick="window.closeOwlModal && window.closeOwlModal(event)"></div>
     <div class="modal-panel owl-modal-panel">
-        <button class="modal-close owl-modal-close" data-close-owl aria-label="Close Scroll">✕</button>
+        <button class="modal-close owl-modal-close" data-close-owl onclick="window.closeOwlModal && window.closeOwlModal(event)" aria-label="Close Scroll">✕</button>
 
         <form id="owlModalForm" novalidate>
             <div class="owl-card-badge" style="margin-bottom: 12px;">
@@ -1707,10 +1743,22 @@
                 <span id="owlSuccessTracking">Tracking: OWL-7842</span>
                 <span id="owlSuccessIp" style="color:#94a3b8; font-family:'Lato',sans-serif; font-size:11px;">Wand IP: 127.0.0.1</span>
             </div>
-            <button type="button" class="btn-gold ripple-btn" data-close-owl style="padding:10px 24px; font-size:12px;">
+            <button type="button" class="btn-gold ripple-btn" data-close-owl onclick="window.closeOwlModal && window.closeOwlModal(event)" style="padding:10px 24px; font-size:12px;">
                 <span>Close Parchment</span>
             </button>
         </div>
+    </div>
+</div>
+
+<!-- ============ FLOATING JUMPING & SHINING OWL POST TRIGGER ============ -->
+<div class="owl-floating-trigger magnetic" id="owlFloatingTrigger" role="button" tabindex="0" aria-label="Dispatch Owl Post and Share Feedback" onclick="window.openOwlModal && window.openOwlModal(event)">
+    <div class="owl-orb">
+        <span>🪶</span>
+        <div class="owl-orb-pulse"></div>
+    </div>
+    <div class="owl-label-wrap">
+        <span class="owl-label-eyebrow">✦ OWL POST • FEEDBACK ✦</span>
+        <span class="owl-label-title">Inscribe Counsel &amp; Inquire</span>
     </div>
 </div>
 
@@ -1720,13 +1768,50 @@
 
 <script>
 /* =====================================================
-   0. UTILITIES
+   0. UTILITIES & MODAL CONTROLLERS
    ===================================================== */
 gsap.registerPlugin(ScrollTrigger);
 
 const isTouch = window.matchMedia('(hover: none), (pointer: coarse)').matches;
 const $  = (s, c = document) => c.querySelector(s);
 const $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
+
+// Globally accessible fail-safe controllers for Enchanted Owl Feedback Modal
+window.openOwlModal = function(e) {
+    if (e) {
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
+    const modal = document.getElementById('owlModal');
+    if (!modal) {
+        console.warn('owlModal element not found');
+        return;
+    }
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('no-scroll');
+    const modalForm = document.getElementById('owlModalForm');
+    const modalSuccess = document.getElementById('owlModalSuccess');
+    if (modalSuccess) modalSuccess.classList.remove('show');
+    if (modalForm) {
+        modalForm.style.display = 'block';
+        modalForm.style.opacity = '1';
+    }
+    const nameInput = document.getElementById('owlModalName');
+    if (nameInput) setTimeout(() => nameInput.focus(), 220);
+};
+
+window.closeOwlModal = function(e) {
+    if (e) {
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
+    const modal = document.getElementById('owlModal');
+    if (!modal) return;
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('no-scroll');
+};
 
 /* ---------- Broken image handling with robust fallback ---------- */
 document.querySelectorAll('img[data-fallback]').forEach(img => {
@@ -2582,6 +2667,10 @@ if (exploreBtn) {
     };
 
     function openOwlModal() {
+        if (typeof window.openOwlModal === 'function') {
+            window.openOwlModal();
+            return;
+        }
         if (!modal) return;
         modal.classList.add('open');
         modal.setAttribute('aria-hidden', 'false');
@@ -2596,13 +2685,31 @@ if (exploreBtn) {
     }
 
     function closeOwlModal() {
+        if (typeof window.closeOwlModal === 'function') {
+            window.closeOwlModal();
+            return;
+        }
         if (!modal) return;
         modal.classList.remove('open');
         modal.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('no-scroll');
     }
 
-    // Open on floating trigger click
+    // Direct event delegation on document so clicking trigger ALWAYS opens modal
+    document.addEventListener('click', (e) => {
+        const t = e.target.closest('#owlFloatingTrigger') || e.target.closest('.open-owl-feedback');
+        if (t) {
+            e.preventDefault();
+            e.stopPropagation();
+            openOwlModal();
+        }
+        if (e.target.closest('[data-close-owl]')) {
+            e.preventDefault();
+            closeOwlModal();
+        }
+    });
+
+    // Open on floating trigger click & keydown
     if (trigger) {
         trigger.addEventListener('click', (e) => {
             e.preventDefault();
@@ -2616,22 +2723,6 @@ if (exploreBtn) {
             }
         });
     }
-
-    // Open on nav links or any other target
-    $$('a[href="#owl-feedback"], .open-owl-feedback').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            openOwlModal();
-        });
-    });
-
-    // Close on backdrop or close button
-    $$('[data-close-owl]').forEach(el => {
-        el.addEventListener('click', (e) => {
-            e.preventDefault();
-            closeOwlModal();
-        });
-    });
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && modal && modal.classList.contains('open')) {
@@ -2860,18 +2951,6 @@ if (exploreBtn) {
     }
 })();
 </script>
-
-<!-- ============ FLOATING JUMPING & SHINING OWL POST TRIGGER ============ -->
-<div class="owl-floating-trigger magnetic" id="owlFloatingTrigger" role="button" tabindex="0" aria-label="Dispatch Owl Post and Share Feedback">
-    <div class="owl-orb">
-        <span>🪶</span>
-        <div class="owl-orb-pulse"></div>
-    </div>
-    <div class="owl-label-wrap">
-        <span class="owl-label-eyebrow">✦ OWL POST • FEEDBACK ✦</span>
-        <span class="owl-label-title">Inscribe Counsel &amp; Inquire</span>
-    </div>
-</div>
 
 </body>
 </html>
