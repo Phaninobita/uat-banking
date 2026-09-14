@@ -179,6 +179,67 @@ router.post("/push", (req, res) => {
   });
 });
 
+// 5. Owl Post Feedback & Whispering Scroll Inscriptions (Hogwarts & Gringotts)
+router.post("/feedback", (req, res) => {
+  memStore.metrics.serviceRequests.notifications++;
+  const { name, address, category, rating, message } = req.body;
+
+  if (!message || !name) {
+    return res.status(400).json({ success: false, error: "Wizard/Witch name and message inscription required." });
+  }
+
+  const feedbackEntry = {
+    id: "OWL-" + Math.floor(1000 + Math.random() * 9000),
+    name: name.trim(),
+    address: (address || "Hogwarts Castle").trim(),
+    category: category || "Counsel & Feedback",
+    rating: parseInt(rating, 10) || 5,
+    message: message.trim(),
+    timestamp: new Date().toISOString(),
+    status: "Delivered to Goblin High Council via Barn Owl"
+  };
+
+  if (!memStore.feedbackEntries) {
+    memStore.feedbackEntries = [];
+  }
+  memStore.feedbackEntries.unshift(feedbackEntry);
+
+  // Record a simulated notification so the owl roost and mailboxes reflect it
+  memStore.recordSimulatedEmail({
+    to: "overseers@gringotts.diagon-alley.magic",
+    from: `"${feedbackEntry.name}" <owlpost@hogwarts.ac.uk>`,
+    subject: `🦉 [OWL DISPATCH: ${feedbackEntry.category}] From ${feedbackEntry.name} (${feedbackEntry.rating}⚚)`,
+    html: `<div style="font-family:serif;padding:16px;border:2px solid #d97706;background:#1e1b18;color:#fef3c7;">
+      <h3 style="color:#fbbf24;">📜 Inscribed Parchment from ${feedbackEntry.name}</h3>
+      <p><strong>Dispatch Origin:</strong> ${feedbackEntry.address}</p>
+      <p><strong>Classification:</strong> ${feedbackEntry.category}</p>
+      <p><strong>Vault Sanctum Rating:</strong> ${"⚚".repeat(feedbackEntry.rating)}</p>
+      <hr style="border-color:#78350f;"/>
+      <p style="white-space:pre-wrap;font-style:italic;">"${feedbackEntry.message}"</p>
+      <small style="color:#a1a1aa;">Tracking Reference: ${feedbackEntry.id} • Carried by Gringotts Barn Owl</small>
+    </div>`,
+    text: `Owl Dispatch from ${feedbackEntry.name}: ${feedbackEntry.message}`,
+    type: "owl_feedback",
+    metadata: { ...feedbackEntry }
+  });
+
+  console.log(`🦉 [OWL DISPATCH RECEIVED] Ref: ${feedbackEntry.id} from ${feedbackEntry.name} | Rating: ${feedbackEntry.rating}⚚`);
+
+  return res.json({
+    success: true,
+    message: "Your scroll has been sealed with goblin wax and dispatched via Swift Screech Owl to the Gringotts High Chamber!",
+    trackingId: feedbackEntry.id,
+    feedback: feedbackEntry
+  });
+});
+
+router.get("/feedback", (req, res) => {
+  return res.json({
+    success: true,
+    feedbacks: memStore.feedbackEntries || []
+  });
+});
+
 // Health check
 router.get("/health", (req, res) => {
   res.json({

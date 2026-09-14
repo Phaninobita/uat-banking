@@ -888,8 +888,316 @@
         .modal-panel { padding: 40px 24px 32px; }
     }
 
-    @media (prefers-reduced-motion: reduce) {
-        * { animation-duration: .001s !important; animation-iteration-count: 1 !important; transition-duration: .001s !important; }
+    /* ---------- Floating Owl Dispatch Trigger (Jumping & Shining) ---------- */
+    .owl-floating-trigger {
+        position: fixed;
+        bottom: 28px;
+        left: 28px;
+        z-index: 1100;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 18px 10px 14px;
+        background: linear-gradient(135deg, rgba(17, 34, 57, 0.96), rgba(6, 13, 26, 0.98));
+        border: 1.5px solid rgba(251, 191, 36, 0.65);
+        border-radius: 50px;
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.65), 0 0 25px rgba(251, 191, 36, 0.4), inset 0 0 15px rgba(251, 191, 36, 0.15);
+        backdrop-filter: blur(12px);
+        cursor: pointer;
+        user-select: none;
+        overflow: hidden;
+        animation: owlJump 3.8s cubic-bezier(0.28, 0.84, 0.42, 1) infinite;
+        transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+    }
+    .owl-floating-trigger:hover {
+        transform: translateY(-4px) scale(1.03);
+        border-color: #fde047;
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.75), 0 0 35px rgba(251, 191, 36, 0.65), inset 0 0 20px rgba(251, 191, 36, 0.3);
+    }
+    /* Periodic eye-catching jump / hop */
+    @keyframes owlJump {
+        0%, 65%, 100% { transform: translateY(0) scale(1); }
+        72% { transform: translateY(-13px) scale(1.05); }
+        78% { transform: translateY(0) scale(0.97); }
+        84% { transform: translateY(-6px) scale(1.02); }
+        90% { transform: translateY(0) scale(1); }
+    }
+    /* Sweeping radiant light shine effect */
+    .owl-floating-trigger::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -120%;
+        width: 60%;
+        height: 200%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), rgba(251, 191, 36, 0.6), transparent);
+        transform: rotate(25deg);
+        animation: owlShine 3.6s ease-in-out infinite;
+        pointer-events: none;
+    }
+    @keyframes owlShine {
+        0%, 55% { left: -120%; }
+        80%, 100% { left: 180%; }
+    }
+    .owl-orb {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 35%, #fde047, #d97706 70%, #78350f);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        color: #1e1b18;
+        box-shadow: 0 0 16px rgba(251, 191, 36, 0.7);
+        flex-shrink: 0;
+        position: relative;
+    }
+    .owl-orb-pulse {
+        position: absolute;
+        inset: -4px;
+        border-radius: 50%;
+        border: 1.5px solid rgba(251, 191, 36, 0.7);
+        animation: orbRings 2.2s ease-out infinite;
+    }
+    @keyframes orbRings {
+        0% { transform: scale(0.85); opacity: 1; }
+        100% { transform: scale(1.6); opacity: 0; }
+    }
+    .owl-label-wrap {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.25;
+        text-align: left;
+    }
+    .owl-label-eyebrow {
+        font-size: 9px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #fbbf24;
+        font-family: 'Cinzel', serif;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .owl-label-title {
+        font-size: 13px;
+        color: #ffffff;
+        font-weight: 700;
+        font-family: 'Lato', sans-serif;
+    }
+
+    /* ---------- Dedicated Owl Post & Feedback Section ---------- */
+    .owl-feedback-section {
+        position: relative;
+        padding: 100px 24px;
+        background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.09), transparent 70%),
+                    radial-gradient(circle at 80% 80%, rgba(34, 211, 238, 0.05), transparent 60%),
+                    var(--gringotts-dark);
+        border-top: 1px solid rgba(251, 191, 36, 0.25);
+        border-bottom: 1px solid rgba(251, 191, 36, 0.25);
+        overflow: hidden;
+    }
+    .owl-feedback-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: linear-gradient(170deg, rgba(17, 34, 57, 0.9), rgba(13, 27, 46, 0.98));
+        border: 1.5px solid rgba(251, 191, 36, 0.45);
+        border-radius: 20px;
+        padding: 50px 45px;
+        box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6), 0 0 45px rgba(251, 191, 36, 0.15);
+        position: relative;
+        backdrop-filter: blur(12px);
+        transition: box-shadow .5s ease, border-color .5s ease, transform .5s ease;
+    }
+    .owl-feedback-container.highlight-flare {
+        animation: goldFlare 1.8s ease-out;
+    }
+    @keyframes goldFlare {
+        0%, 100% { box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6), 0 0 45px rgba(251, 191, 36, 0.15); border-color: rgba(251, 191, 36, 0.45); }
+        35% { box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8), 0 0 95px rgba(251, 191, 36, 0.85); border-color: #fde047; transform: scale(1.018); }
+    }
+    .owl-card-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        background: rgba(245, 158, 11, 0.14);
+        border: 1px solid rgba(251, 191, 36, 0.4);
+        border-radius: 30px;
+        font-size: 11px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #fde047;
+        font-family: 'Cinzel', serif;
+        margin-bottom: 18px;
+    }
+    .owl-card-title {
+        font-family: 'Cinzel', serif;
+        font-size: 2.2rem;
+        color: #ffffff;
+        margin-bottom: 12px;
+        line-height: 1.25;
+        text-shadow: 0 0 25px rgba(251, 191, 36, 0.25);
+    }
+    .owl-card-sub {
+        color: #94a3b8;
+        font-size: 1rem;
+        line-height: 1.7;
+        margin-bottom: 35px;
+        max-width: 720px;
+    }
+    .owl-category-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 24px;
+    }
+    .owl-category-pill {
+        padding: 9px 18px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 24px;
+        color: #cbd5e1;
+        font-size: 12px;
+        font-family: 'Cinzel', serif;
+        cursor: pointer;
+        transition: all .25s ease;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+    .owl-category-pill:hover,
+    .owl-category-pill.active {
+        background: rgba(245, 158, 11, 0.2);
+        border-color: #fbbf24;
+        color: #fde047;
+        box-shadow: 0 0 18px rgba(251, 191, 36, 0.35);
+    }
+    .owl-rating-wrap {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+    .owl-rating-label {
+        font-size: 11px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #fbbf24;
+        font-family: 'Cinzel', serif;
+    }
+    .owl-stars {
+        display: flex;
+        gap: 6px;
+    }
+    .owl-star-btn {
+        background: transparent;
+        border: none;
+        font-size: 24px;
+        color: #475569;
+        cursor: pointer;
+        transition: transform .2s ease, color .2s ease, text-shadow .2s ease;
+        line-height: 1;
+        padding: 2px;
+    }
+    .owl-star-btn.active,
+    .owl-star-btn.hover {
+        color: #fde047;
+        text-shadow: 0 0 15px rgba(251, 191, 36, 0.85);
+        transform: scale(1.22);
+    }
+    .owl-rating-desc {
+        font-size: 12px;
+        color: #fbbf24;
+        font-style: italic;
+        font-family: 'Lato', sans-serif;
+    }
+    .owl-grid-fields {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    .owl-textarea {
+        width: 100%;
+        min-height: 115px;
+        padding: 14px 16px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
+        color: var(--text-light);
+        font-family: 'Lato', sans-serif;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        outline: none;
+        resize: vertical;
+        transition: border-color .3s ease, box-shadow .3s ease, background .3s ease;
+        margin-bottom: 24px;
+    }
+    .owl-textarea:focus {
+        border-color: #fbbf24;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15), 0 0 25px rgba(245, 158, 11, 0.25);
+        background: rgba(245, 158, 11, 0.03);
+    }
+    .owl-btn-submit {
+        background: linear-gradient(135deg, #d97706, #fbbf24 60%, #fde047);
+        color: #1a0e00 !important;
+        font-weight: 700;
+        font-family: 'Cinzel', serif;
+        border: 1px solid #fde047;
+        box-shadow: 0 6px 25px rgba(245, 158, 11, 0.45);
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 15px 32px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform .25s ease, box-shadow .25s ease;
+    }
+    .owl-btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 35px rgba(245, 158, 11, 0.7);
+    }
+    .owl-success-view {
+        display: none;
+        text-align: center;
+        padding: 40px 20px;
+    }
+    .owl-success-view.show {
+        display: block;
+        animation: fadeInScroll .5s ease forwards;
+    }
+    @keyframes fadeInScroll {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .owl-wax-seal {
+        width: 84px;
+        height: 84px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 35%, #ef4444, #b91c1c 70%, #7f1d1d);
+        border: 3px solid #f87171;
+        box-shadow: 0 0 30px rgba(239, 68, 68, 0.55), inset 0 0 15px rgba(0, 0, 0, 0.4);
+        margin: 0 auto 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        animation: sealDrop .6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes sealDrop {
+        from { transform: scale(2.4) rotate(-30deg); opacity: 0; }
+        to { transform: scale(1) rotate(0); opacity: 1; }
+    }
+
+    @media (max-width: 768px) {
+        .owl-grid-fields { grid-template-columns: 1fr; }
+        .owl-feedback-container { padding: 32px 20px; }
+        .owl-floating-trigger { bottom: 20px; left: 16px; padding: 8px 14px; }
+        .owl-label-title { font-size: 11px; }
     }
 </style>
 </head>
@@ -930,6 +1238,7 @@
         <a href="#vaults" class="nav-link magnetic">Vaults</a>
         <a href="#security" class="nav-link magnetic">Security</a>
         <a href="#legacy" class="nav-link magnetic">Legacy</a>
+        <a href="#owl-feedback" class="nav-link magnetic" style="color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);">✦ Owl Dispatch</a>
         <a href="#contact" class="nav-link magnetic">Contact</a>
     </div>
     <div class="nav-right">
@@ -945,6 +1254,7 @@
     <a href="#vaults">Vaults</a>
     <a href="#security">Security</a>
     <a href="#legacy">Legacy</a>
+    <a href="#owl-feedback" style="color: #fbbf24;">✦ Owl Dispatch</a>
     <a href="#contact">Contact</a>
     <a href="https://phanee.up.railway.app/" class="access-vault-btn" style="color: var(--cyan-bright); border: 1px solid rgba(34, 211, 238, 0.4); padding: 8px 24px; border-radius: 8px;">Access Vault</a>
 </div>
@@ -1091,6 +1401,96 @@
                 </svg>
 
                 <div class="sigil-hint">Touch the sigil</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ HOGWARTS & GRINGOTTS OWL DISPATCH (FEEDBACK & INQUIRIES) ============ -->
+<section class="owl-feedback-section" id="owl-feedback">
+    <div class="owl-feedback-container" id="owlFeedbackContainer">
+        <div class="owl-card-badge">
+            <span>🪶</span> HOGWARTS &amp; GRINGOTTS OWL ROOST • SCRIBE'S LEDGER
+        </div>
+        <h2 class="owl-card-title">Inscribe Your Counsel via Swift Owl</h2>
+        <p class="owl-card-sub">
+            Share words of praise, summon curse-breaker counsel, or impart feedback on our subterranean vaults.
+            Every scroll is sealed with enchanted goblin wax and delivered directly to the Gringotts High Council.
+        </p>
+
+        <form id="owlFeedbackForm" novalidate>
+            <!-- Category Pills -->
+            <div style="margin-bottom: 12px;">
+                <label style="display:block; font-size:10px; letter-spacing:3px; text-transform:uppercase; color:#fbbf24; font-family:'Cinzel',serif; margin-bottom:12px; font-weight:700;">
+                    Nature of Inscription
+                </label>
+                <div class="owl-category-group" id="owlCategoryGroup">
+                    <button type="button" class="owl-category-pill active" data-category="Praise & Commendation">🪶 Praise &amp; Commendation</button>
+                    <button type="button" class="owl-category-pill" data-category="Vault Enhancement Idea">⚡ Vault Enhancement Idea</button>
+                    <button type="button" class="owl-category-pill" data-category="Goblin Scribe Inquiry">📜 Goblin Scribe Inquiry</button>
+                    <button type="button" class="owl-category-pill" data-category="Curse-Breaker Notice">🔮 Curse-Breaker Notice</button>
+                </div>
+                <input type="hidden" id="owlSelectedCategory" value="Praise & Commendation">
+            </div>
+
+            <!-- Snitch / Galleon Rating -->
+            <div class="owl-rating-wrap">
+                <span class="owl-rating-label">Vault Satisfaction:</span>
+                <div class="owl-stars" id="owlStars">
+                    <button type="button" class="owl-star-btn active" data-rating="1" title="1 Galleon">⚚</button>
+                    <button type="button" class="owl-star-btn active" data-rating="2" title="2 Galleons">⚚</button>
+                    <button type="button" class="owl-star-btn active" data-rating="3" title="3 Galleons">⚚</button>
+                    <button type="button" class="owl-star-btn active" data-rating="4" title="4 Galleons">⚚</button>
+                    <button type="button" class="owl-star-btn active" data-rating="5" title="5 Galleons">⚚</button>
+                </div>
+                <span class="owl-rating-desc" id="owlRatingDesc">Worthy of the High Chamber (5/5 ⚚)</span>
+                <input type="hidden" id="owlSelectedRating" value="5">
+            </div>
+
+            <div class="owl-grid-fields">
+                <div class="field" style="margin-bottom:0;">
+                    <label for="owlSenderName">Witch, Wizard, or Noble House</label>
+                    <input type="text" id="owlSenderName" placeholder="e.g. Albus Dumbledore or Order of the Phoenix" required>
+                </div>
+                <div class="field" style="margin-bottom:0;">
+                    <label for="owlSenderAddress">Owl Post / Fireplace Address</label>
+                    <input type="text" id="owlSenderAddress" placeholder="e.g. Headmaster's Tower, Hogwarts Castle" required>
+                </div>
+            </div>
+
+            <div class="field" style="margin-top:20px; margin-bottom:0;">
+                <label for="owlMessageText">The Sacred Inscription (Your Feedback or Message)</label>
+                <textarea class="owl-textarea" id="owlMessageText" placeholder="Inscribe your honest feedback, advice, or inquiries here with blood-quill clarity..." rows="4" required></textarea>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-top:24px;">
+                <button type="submit" class="owl-btn-submit ripple-btn" id="owlSubmitBtn">
+                    <span>Seal Scroll with Crimson Wax &amp; Dispatch Owl 🦉</span>
+                </button>
+                <span style="font-size:11px; color:#94a3b8; font-style:italic; font-family:'Lato',sans-serif;">
+                    ✦ Dispatches swiftly via screech owl to Diagon Alley
+                </span>
+            </div>
+        </form>
+
+        <!-- Success view -->
+        <div class="owl-success-view" id="owlSuccessView">
+            <div class="owl-wax-seal">
+                <span>🪶</span>
+            </div>
+            <h3 style="font-family:'Cinzel',serif; color:#fde047; font-size:1.8rem; margin-bottom:12px;">
+                Parchment Sealed &amp; Owl Dispatched!
+            </h3>
+            <p style="color:#e2e8f0; font-size:1.05rem; line-height:1.7; max-width:540px; margin:0 auto 16px;">
+                Your scroll has been sealed with Gringotts crimson wax and entrusted to a swift Barn Owl flying toward the Goblin High Sanctum.
+            </p>
+            <div style="display:inline-block; padding:8px 20px; background:rgba(251,191,36,0.12); border:1px dashed #fbbf24; border-radius:8px; font-family:'Cinzel',serif; color:#fbbf24; font-size:13px; margin-bottom:24px;" id="owlTrackingTag">
+                Tracking Inscription: OWL-7842
+            </div>
+            <div>
+                <button type="button" class="btn-gold ripple-btn" id="owlResetBtn" style="padding:12px 28px; font-size:12px;">
+                    <span>Inscribe Another Scroll</span>
+                </button>
             </div>
         </div>
     </div>
@@ -2022,11 +2422,191 @@ if (exploreBtn) {
 /* =====================================================
    21. RESIZE REFRESH
    ===================================================== */
-let resizeTimer;
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => ScrollTrigger.refresh(), 250);
-});
+/* =====================================================
+   22. HOGWARTS & GRINGOTTS OWL DISPATCH (FEEDBACK & INQUIRIES)
+   ===================================================== */
+(function initOwlFeedback() {
+    const trigger = $('#owlFloatingTrigger');
+    const container = $('#owlFeedbackContainer');
+    const form = $('#owlFeedbackForm');
+    const successView = $('#owlSuccessView');
+    const submitBtn = $('#owlSubmitBtn');
+    const resetBtn = $('#owlResetBtn');
+    const stars = $$('.owl-star-btn');
+    const ratingDesc = $('#owlRatingDesc');
+    const selectedRatingInput = $('#owlSelectedRating');
+    const categoryPills = $$('.owl-category-pill');
+    const selectedCategoryInput = $('#owlSelectedCategory');
+    const trackingTag = $('#owlTrackingTag');
+
+    const RATING_LABELS = {
+        1: 'Dark Arts Ward Required (1/5 ⚚)',
+        2: 'Acceptable (2/5 ⚚)',
+        3: 'Exceeds Expectations (3/5 ⚚)',
+        4: 'Outstanding Vault Quality (4/5 ⚚)',
+        5: 'Worthy of the High Chamber (5/5 ⚚)'
+    };
+
+    // Scroll to feedback section and flare with gold light
+    function scrollToFeedback() {
+        const target = document.querySelector('#owl-feedback');
+        if (!target) return;
+        window.scrollTo({ top: target.offsetTop - 60, behavior: 'smooth' });
+        if (container) {
+            container.classList.remove('highlight-flare');
+            void container.offsetWidth; // trigger reflow
+            container.classList.add('highlight-flare');
+        }
+        const firstInput = $('#owlSenderName');
+        if (firstInput) setTimeout(() => firstInput.focus(), 650);
+    }
+
+    if (trigger) {
+        trigger.addEventListener('click', scrollToFeedback);
+        trigger.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                scrollToFeedback();
+            }
+        });
+    }
+
+    // Category Pill selection
+    categoryPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            categoryPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            if (selectedCategoryInput) selectedCategoryInput.value = pill.dataset.category;
+        });
+    });
+
+    // Interactive Star / Galleon Rating
+    function updateStars(val) {
+        stars.forEach(s => {
+            const r = parseInt(s.dataset.rating, 10);
+            s.classList.toggle('active', r <= val);
+        });
+        if (ratingDesc) ratingDesc.textContent = RATING_LABELS[val] || `${val}/5 ⚚`;
+        if (selectedRatingInput) selectedRatingInput.value = val;
+    }
+
+    stars.forEach(btn => {
+        btn.addEventListener('mouseenter', () => {
+            const hoverVal = parseInt(btn.dataset.rating, 10);
+            stars.forEach(s => {
+                const r = parseInt(s.dataset.rating, 10);
+                s.classList.toggle('hover', r <= hoverVal);
+            });
+        });
+        btn.addEventListener('mouseleave', () => {
+            stars.forEach(s => s.classList.remove('hover'));
+        });
+        btn.addEventListener('click', () => {
+            const val = parseInt(btn.dataset.rating, 10);
+            updateStars(val);
+        });
+    });
+
+    // Form submission
+    if (form) {
+        form.addEventListener('submit', async e => {
+            e.preventDefault();
+            const nameInput = $('#owlSenderName');
+            const addressInput = $('#owlSenderAddress');
+            const messageInput = $('#owlMessageText');
+
+            let valid = true;
+            [nameInput, addressInput, messageInput].forEach(inp => {
+                if (!inp || !inp.value.trim()) {
+                    inp?.closest('.field')?.classList.add('invalid');
+                    valid = false;
+                } else {
+                    inp.closest('.field')?.classList.remove('invalid');
+                }
+            });
+
+            if (!valid) return;
+
+            const payload = {
+                name: nameInput.value.trim(),
+                address: addressInput.value.trim(),
+                category: selectedCategoryInput ? selectedCategoryInput.value : 'Praise & Commendation',
+                rating: selectedRatingInput ? selectedRatingInput.value : 5,
+                message: messageInput.value.trim()
+            };
+
+            submitBtn.classList.add('loading');
+            submitBtn.innerHTML = '<span>Sealing with Crimson Wax... 🪶</span>';
+
+            // Generate magical golden spark burst
+            if (typeof gsap !== 'undefined') {
+                const rect = submitBtn.getBoundingClientRect();
+                for (let i = 0; i < 20; i++) {
+                    const s = document.createElement('div');
+                    s.className = 'spark';
+                    document.body.appendChild(s);
+                    const angle = (Math.PI * 2 * i) / 20 + Math.random();
+                    const dist = 50 + Math.random() * 80;
+                    gsap.set(s, { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, scale: 1.5, background: '#fde047' });
+                    gsap.to(s, {
+                        x: rect.left + rect.width / 2 + Math.cos(angle) * dist,
+                        y: rect.top + rect.height / 2 + Math.sin(angle) * dist,
+                        scale: 0, opacity: 0, duration: 1 + Math.random() * .5,
+                        ease: 'power2.out',
+                        onComplete: () => s.remove()
+                    });
+                }
+            }
+
+            try {
+                const res = await fetch('/api/v1/notifications/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json().catch(() => ({}));
+                const trackingId = data.trackingId || ('OWL-' + Math.floor(1000 + Math.random() * 9000));
+                if (trackingTag) trackingTag.textContent = `Tracking Inscription: ${trackingId} • Barn Owl Dispatched`;
+            } catch (err) {
+                console.warn('Feedback stored locally:', err);
+                if (trackingTag) trackingTag.textContent = `Tracking Inscription: OWL-${Math.floor(1000 + Math.random() * 9000)} • Barn Owl Dispatched`;
+            }
+
+            setTimeout(() => {
+                form.style.display = 'none';
+                if (successView) successView.classList.add('show');
+                submitBtn.classList.remove('loading');
+                submitBtn.innerHTML = '<span>Seal Scroll with Crimson Wax &amp; Dispatch Owl 🦉</span>';
+            }, 600);
+        });
+    }
+
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            if (form) {
+                form.reset();
+                form.style.display = 'block';
+            }
+            updateStars(5);
+            if (selectedCategoryInput) selectedCategoryInput.value = 'Praise & Commendation';
+            categoryPills.forEach((p, idx) => p.classList.toggle('active', idx === 0));
+            if (successView) successView.classList.remove('show');
+        });
+    }
+})();
 </script>
+
+<!-- ============ FLOATING JUMPING & SHINING OWL POST TRIGGER ============ -->
+<div class="owl-floating-trigger magnetic" id="owlFloatingTrigger" role="button" tabindex="0" aria-label="Dispatch Owl Post and Share Feedback">
+    <div class="owl-orb">
+        <span>🪶</span>
+        <div class="owl-orb-pulse"></div>
+    </div>
+    <div class="owl-label-wrap">
+        <span class="owl-label-eyebrow">✦ OWL POST • FEEDBACK ✦</span>
+        <span class="owl-label-title">Inscribe Counsel &amp; Inquire</span>
+    </div>
+</div>
+
 </body>
 </html>

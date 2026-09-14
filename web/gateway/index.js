@@ -154,6 +154,7 @@ app.use("/api/auth", authService.router);
 app.use("/api/application", appService.router);
 app.use("/api/documents", docService.router);
 app.use("/api/emails", notifService.router);
+app.use("/api/feedback", notifService.router);
 
 // Route /site, /landing, /home specifically to Gringotts Marketing & Wealth Website
 app.get(["/site", "/site/", "/landing", "/landing/", "/home", "/home/"], (req, res) => {
