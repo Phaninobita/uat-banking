@@ -988,36 +988,6 @@
         font-family: 'Lato', sans-serif;
     }
 
-    /* ---------- Dedicated Owl Post & Feedback Section ---------- */
-    .owl-feedback-section {
-        position: relative;
-        padding: 100px 24px;
-        background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.09), transparent 70%),
-                    radial-gradient(circle at 80% 80%, rgba(34, 211, 238, 0.05), transparent 60%),
-                    var(--gringotts-dark);
-        border-top: 1px solid rgba(251, 191, 36, 0.25);
-        border-bottom: 1px solid rgba(251, 191, 36, 0.25);
-        overflow: hidden;
-    }
-    .owl-feedback-container {
-        max-width: 900px;
-        margin: 0 auto;
-        background: linear-gradient(170deg, rgba(17, 34, 57, 0.9), rgba(13, 27, 46, 0.98));
-        border: 1.5px solid rgba(251, 191, 36, 0.45);
-        border-radius: 20px;
-        padding: 50px 45px;
-        box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6), 0 0 45px rgba(251, 191, 36, 0.15);
-        position: relative;
-        backdrop-filter: blur(12px);
-        transition: box-shadow .5s ease, border-color .5s ease, transform .5s ease;
-    }
-    .owl-feedback-container.highlight-flare {
-        animation: goldFlare 1.8s ease-out;
-    }
-    @keyframes goldFlare {
-        0%, 100% { box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6), 0 0 45px rgba(251, 191, 36, 0.15); border-color: rgba(251, 191, 36, 0.45); }
-        35% { box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8), 0 0 95px rgba(251, 191, 36, 0.85); border-color: #fde047; transform: scale(1.018); }
-    }
     .owl-card-badge {
         display: inline-flex;
         align-items: center;
@@ -1195,7 +1165,6 @@
 
     @media (max-width: 768px) {
         .owl-grid-fields { grid-template-columns: 1fr; }
-        .owl-feedback-container { padding: 32px 20px; }
         .owl-floating-trigger { bottom: 20px; left: 16px; padding: 8px 14px; }
         .owl-label-title { font-size: 11px; }
     }
@@ -1479,96 +1448,6 @@
                 </svg>
 
                 <div class="sigil-hint">Touch the sigil</div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ============ HOGWARTS & GRINGOTTS OWL DISPATCH (FEEDBACK & INQUIRIES) ============ -->
-<section class="owl-feedback-section" id="owl-feedback">
-    <div class="owl-feedback-container" id="owlFeedbackContainer">
-        <div class="owl-card-badge">
-            <span>🪶</span> HOGWARTS &amp; GRINGOTTS OWL ROOST • SCRIBE'S LEDGER
-        </div>
-        <h2 class="owl-card-title">Inscribe Your Counsel via Swift Owl</h2>
-        <p class="owl-card-sub">
-            Share words of praise, summon curse-breaker counsel, or impart feedback on our subterranean vaults.
-            Every scroll is sealed with enchanted goblin wax and delivered directly to the Gringotts High Council.
-        </p>
-
-        <form id="owlFeedbackForm" novalidate>
-            <!-- Category Pills -->
-            <div style="margin-bottom: 12px;">
-                <label style="display:block; font-size:10px; letter-spacing:3px; text-transform:uppercase; color:#fbbf24; font-family:'Cinzel',serif; margin-bottom:12px; font-weight:700;">
-                    Nature of Inscription
-                </label>
-                <div class="owl-category-group" id="owlCategoryGroup">
-                    <button type="button" class="owl-category-pill active" data-category="Praise & Commendation">🪶 Praise &amp; Commendation</button>
-                    <button type="button" class="owl-category-pill" data-category="Vault Enhancement Idea">⚡ Vault Enhancement Idea</button>
-                    <button type="button" class="owl-category-pill" data-category="Goblin Scribe Inquiry">📜 Goblin Scribe Inquiry</button>
-                    <button type="button" class="owl-category-pill" data-category="Curse-Breaker Notice">🔮 Curse-Breaker Notice</button>
-                </div>
-                <input type="hidden" id="owlSelectedCategory" value="Praise & Commendation">
-            </div>
-
-            <!-- Snitch / Galleon Rating -->
-            <div class="owl-rating-wrap">
-                <span class="owl-rating-label">Vault Satisfaction:</span>
-                <div class="owl-stars" id="owlStars">
-                    <button type="button" class="owl-star-btn active" data-rating="1" title="1 Galleon">⚚</button>
-                    <button type="button" class="owl-star-btn active" data-rating="2" title="2 Galleons">⚚</button>
-                    <button type="button" class="owl-star-btn active" data-rating="3" title="3 Galleons">⚚</button>
-                    <button type="button" class="owl-star-btn active" data-rating="4" title="4 Galleons">⚚</button>
-                    <button type="button" class="owl-star-btn active" data-rating="5" title="5 Galleons">⚚</button>
-                </div>
-                <span class="owl-rating-desc" id="owlRatingDesc">Worthy of the High Chamber (5/5 ⚚)</span>
-                <input type="hidden" id="owlSelectedRating" value="5">
-            </div>
-
-            <div class="owl-grid-fields">
-                <div class="field" style="margin-bottom:0;">
-                    <label for="owlSenderName">Witch, Wizard, or Noble House</label>
-                    <input type="text" id="owlSenderName" placeholder="e.g. Albus Dumbledore or Order of the Phoenix" required>
-                </div>
-                <div class="field" style="margin-bottom:0;">
-                    <label for="owlSenderAddress">Owl Post / Fireplace Address</label>
-                    <input type="text" id="owlSenderAddress" placeholder="e.g. Headmaster's Tower, Hogwarts Castle" required>
-                </div>
-            </div>
-
-            <div class="field" style="margin-top:20px; margin-bottom:0;">
-                <label for="owlMessageText">The Sacred Inscription (Your Feedback or Message)</label>
-                <textarea class="owl-textarea" id="owlMessageText" placeholder="Inscribe your honest feedback, advice, or inquiries here with blood-quill clarity..." rows="4" required></textarea>
-            </div>
-
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-top:24px;">
-                <button type="submit" class="owl-btn-submit ripple-btn" id="owlSubmitBtn">
-                    <span>Seal Scroll with Crimson Wax &amp; Dispatch Owl 🦉</span>
-                </button>
-                <span style="font-size:11px; color:#94a3b8; font-style:italic; font-family:'Lato',sans-serif;">
-                    ✦ Dispatches swiftly via screech owl to Diagon Alley
-                </span>
-            </div>
-        </form>
-
-        <!-- Success view -->
-        <div class="owl-success-view" id="owlSuccessView">
-            <div class="owl-wax-seal">
-                <span>🪶</span>
-            </div>
-            <h3 style="font-family:'Cinzel',serif; color:#fde047; font-size:1.8rem; margin-bottom:12px;">
-                Parchment Sealed &amp; Owl Dispatched!
-            </h3>
-            <p style="color:#e2e8f0; font-size:1.05rem; line-height:1.7; max-width:540px; margin:0 auto 16px;">
-                Your scroll has been sealed with Gringotts crimson wax and entrusted to a swift Barn Owl flying toward the Goblin High Sanctum.
-            </p>
-            <div style="display:inline-block; padding:8px 20px; background:rgba(251,191,36,0.12); border:1px dashed #fbbf24; border-radius:8px; font-family:'Cinzel',serif; color:#fbbf24; font-size:13px; margin-bottom:24px;" id="owlTrackingTag">
-                Tracking Inscription: OWL-7842
-            </div>
-            <div>
-                <button type="button" class="btn-gold ripple-btn" id="owlResetBtn" style="padding:12px 28px; font-size:12px;">
-                    <span>Inscribe Another Scroll</span>
-                </button>
             </div>
         </div>
     </div>
@@ -2851,102 +2730,6 @@ if (exploreBtn) {
                 modalSubmitBtn.innerHTML = '<span>Seal with Crimson Wax &amp; Dispatch Owl 🦉</span>';
                 modalForm.reset();
             }, 550);
-        });
-    }
-
-    // Also support On-Page Form (#owlFeedbackForm)
-    const onPageForm = $('#owlFeedbackForm');
-    const onPageSuccess = $('#owlSuccessView');
-    const onPageSubmit = $('#owlSubmitBtn');
-    const onPageReset = $('#owlResetBtn');
-    const onPageStars = $$('#owlStars .owl-star-btn');
-    const onPageRatingDesc = $('#owlRatingDesc');
-    const onPageRatingInput = $('#owlSelectedRating');
-    const onPageCategoryPills = $$('#owlCategoryGroup .owl-category-pill');
-    const onPageCategoryInput = $('#owlSelectedCategory');
-
-    onPageCategoryPills.forEach(pill => {
-        pill.addEventListener('click', () => {
-            onPageCategoryPills.forEach(p => p.classList.remove('active'));
-            pill.classList.add('active');
-            if (onPageCategoryInput) onPageCategoryInput.value = pill.dataset.category;
-        });
-    });
-
-    onPageStars.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const val = parseInt(btn.dataset.rating, 10);
-            onPageStars.forEach(s => {
-                const r = parseInt(s.dataset.rating, 10);
-                s.classList.toggle('active', r <= val);
-            });
-            if (onPageRatingDesc) onPageRatingDesc.textContent = RATING_LABELS[val] || `${val}/5 ⚚`;
-            if (onPageRatingInput) onPageRatingInput.value = val;
-        });
-    });
-
-    if (onPageForm) {
-        onPageForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const nameInput = $('#owlSenderName');
-            const addressInput = $('#owlSenderAddress');
-            const messageInput = $('#owlMessageText');
-
-            let valid = true;
-            [nameInput, messageInput].forEach(inp => {
-                if (!inp || !inp.value.trim()) {
-                    inp?.closest('.field')?.classList.add('invalid');
-                    valid = false;
-                } else {
-                    inp?.closest('.field')?.classList.remove('invalid');
-                }
-            });
-
-            if (!valid) return;
-
-            const payload = {
-                name: nameInput.value.trim(),
-                address: addressInput ? addressInput.value.trim() : '',
-                category: onPageCategoryInput ? onPageCategoryInput.value : 'Praise & Commendation',
-                rating: onPageRatingInput ? onPageRatingInput.value : 5,
-                message: messageInput.value.trim()
-            };
-
-            onPageSubmit.classList.add('loading');
-            onPageSubmit.innerHTML = '<span>Sealing in Database... 🪶</span>';
-            emitGoldenSparks(onPageSubmit);
-
-            let resData = null;
-            try {
-                const res = await fetch('/api/v1/notifications/feedback', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                resData = await res.json().catch(() => ({}));
-            } catch (err) {}
-
-            const trackingId = (resData && resData.trackingId) || ('OWL-' + Math.floor(1000 + Math.random() * 9000));
-            const ipAddress = (resData && resData.ip_address) || '127.0.0.1';
-            const tag = $('#owlTrackingTag');
-            if (tag) tag.textContent = `Tracking: ${trackingId} • IP: ${ipAddress} (Inscribed in DB)`;
-
-            setTimeout(() => {
-                onPageForm.style.display = 'none';
-                if (onPageSuccess) onPageSuccess.classList.add('show');
-                onPageSubmit.classList.remove('loading');
-                onPageSubmit.innerHTML = '<span>Seal Scroll with Crimson Wax &amp; Dispatch Owl 🦉</span>';
-            }, 550);
-        });
-    }
-
-    if (onPageReset) {
-        onPageReset.addEventListener('click', () => {
-            if (onPageForm) {
-                onPageForm.reset();
-                onPageForm.style.display = 'block';
-            }
-            if (onPageSuccess) onPageSuccess.classList.remove('show');
         });
     }
 })();
