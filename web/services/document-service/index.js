@@ -506,7 +506,7 @@ router.post("/ocr", requireAuth, async (req, res) => {
     if (!extractedText && !parsedData.fullName && !parsedData.passportNumber) {
       if (docType === "corporate") {
         parsedData.fullName = "First National Holdings Inc";
-        parsedData.registrationNumber = "CRN-8849201";
+        parsedData.registrationNumber = "RIN-8849201";
         parsedData.issuingAuthority = "Delaware Division of Corporations";
         parsedData.expiry = "2028-11-30";
       } else {

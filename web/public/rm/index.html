@@ -100,7 +100,7 @@
             <div class="rm-page-header">
                 <div>
                     <h1 class="rm-page-title">Sacred Vault Induction &amp; Coven Covenant Command</h1>
-                    <p class="rm-page-sub">Dispatch sealed vault induction mandates via Owl Post with automated Ministry Runic Inscription (CRN) and lineage scrutiny.</p>
+                    <p class="rm-page-sub">Dispatch sealed vault induction mandates via Owl Post with automated Ministry Runic Inscription (RIN) and lineage scrutiny.</p>
                 </div>
                 <div class="rm-header-actions">
                     <button class="rm-btn rm-btn-primary" onclick="focusInviteForm()">+ Dispatch Vault Induction Scroll</button>
@@ -130,15 +130,15 @@
                         <span class="rm-card-icon">&#x1F4E7;</span>
                         <div>
                             <h2 class="rm-card-title">Dispatch Sacred Vault Induction Mandate</h2>
-                            <p class="rm-card-sub">Inscribe the Order's Ministry Runic Inscription (CRN) and Owl Post roost to consecrate and dispatch their dedicated vault induction scroll.</p>
+                            <p class="rm-card-sub">Inscribe the Order's Ministry Runic Inscription (RIN) and Owl Post roost to consecrate and dispatch their dedicated vault induction scroll.</p>
                         </div>
                     </div>
                 </div>
                 <form id="rmInviteForm" onsubmit="handleDispatchInvite(event)" class="rm-dispatch-form">
                     <div class="rm-grid-2">
                         <div class="rm-form-group">
-                            <label for="inviteCrn">Ministry Runic Inscription No. (CRN / RIN) <span class="rm-req">*</span></label>
-                            <input type="text" id="inviteCrn" class="rm-input" placeholder="e.g. 10029481 or CRN-509077205" required autocomplete="off">
+                            <label for="inviteCrn">Ministry Runic Inscription No. (RIN) <span class="rm-req">*</span></label>
+                            <input type="text" id="inviteCrn" class="rm-input" placeholder="e.g. 10029481 or RIN-509077205" required autocomplete="off">
                             <div id="crnFeedback" class="crn-feedback" style="display:none;"></div>
                             <small class="rm-hint" id="crnHint">Sacred runic seal registered with the Ministry of Magic</small>
                         </div>
@@ -191,7 +191,7 @@
                         <a id="btnTestCustomerLink" href="#" target="_blank" class="rm-btn rm-btn-launch">&#x1F3F0; Open Customer Vault Portal &rarr;</a>
                     </div>
                     <div class="rm-success-chips">
-                        <span>Ministry Rune (CRN): <strong id="chipCrn"></strong></span>
+                        <span>Ministry Rune (RIN): <strong id="chipCrn"></strong></span>
                         <span>Vault Covenant ID: <strong id="chipCuid" style="color:#f59e0b;"></strong></span>
                         <span>Owl Roost: <strong id="chipEmail"></strong></span>
                         <span>Ward Status: <strong style="color:#10b981;">Ready for Induction</strong></span>
@@ -208,7 +208,7 @@
                         </div>
                     </div>
                     <div class="rm-table-tools">
-                        <input type="text" id="pipelineSearch" class="rm-search-input" placeholder="&#x1F50D; Scry by Runic No. (CRN), Owl Roost, or Order..." oninput="filterPipelineTable()">
+                        <input type="text" id="pipelineSearch" class="rm-search-input" placeholder="&#x1F50D; Scry by Runic No. (RIN), Owl Roost, or Order..." oninput="filterPipelineTable()">
                         <button class="rm-btn rm-btn-ghost rm-btn-sm" onclick="fetchInvitations()">&#x1F504; Refresh Ledger</button>
                     </div>
                 </div>
@@ -217,7 +217,7 @@
                         <thead>
                             <tr>
                                 <th>Vault Covenant ID</th>
-                                <th>Ministry Rune (CRN)</th>
+                                <th>Ministry Rune (RIN)</th>
                                 <th>Order / Coven &amp; Signatory</th>
                                 <th>Owl Post Roost</th>
                                 <th>Induction Rite</th>
@@ -251,7 +251,7 @@
                 <input type="hidden" id="editOriginalEmail">
                 
                 <div class="rm-form-group" style="margin-bottom:14px;">
-                    <label for="editCrn" style="font-size:12px; font-weight:600; color:#94a3b8; margin-bottom:6px; display:block;">Ministry Runic Inscription No. (CRN)</label>
+                    <label for="editCrn" style="font-size:12px; font-weight:600; color:#94a3b8; margin-bottom:6px; display:block;">Ministry Runic Inscription No. (RIN)</label>
                     <input type="text" id="editCrn" class="rm-input" style="font-family:monospace; font-weight:700; opacity:0.85;" readonly>
                 </div>
 

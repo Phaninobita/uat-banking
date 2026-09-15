@@ -273,7 +273,7 @@ function setSubmittedViewState(isSubmitted) {
             const crnEl = document.getElementById('topbarCrnDisplay');
             const compName = document.getElementById('hdrCompanyName')?.textContent || 'Corporate Client';
             if (nameEl) nameEl.textContent = compName;
-            if (crnEl && currentLoginCrn) crnEl.textContent = 'CRN: ' + currentLoginCrn;
+            if (crnEl && currentLoginCrn) crnEl.textContent = 'RIN: ' + currentLoginCrn;
         }
 
         if (reviewBody) reviewBody.style.display = 'none';
@@ -1710,7 +1710,7 @@ async function extractUboData() {
                 extractedEntities.push(name);
             } else {
                 const name = data.fullName || (file ? file.name.replace(/\.[^/.]+$/, "") : 'Corporate Shareholder LLC');
-                const reg = data.registrationNumber || 'CRN-509077205';
+                const reg = data.registrationNumber || 'RIN-509077205';
                 const auth = data.issuingAuthority || 'Delaware Division of Corporations';
                 const incorp = data.dob || '2019-09-20';
                 const exp = data.expiry || '2028-09-19';
@@ -1863,7 +1863,7 @@ function addEmptyIndividualCard() {
 
 function addEmptyCorporateCard() {
     const name = `Corporate Shareholder ${uboCount + 1} LLC`;
-    generatePrefilledCorpCard(name, 'CRN-000000', 'Ministry of Economy', '2020-01-01', '2028-01-01');
+    generatePrefilledCorpCard(name, 'RIN-000000', 'Ministry of Magic', '2020-01-01', '2028-01-01');
     extractedEntities.push(name);
     triggerAutoSave();
 }
@@ -3114,7 +3114,7 @@ function updateReviewSection() {
     if (ra2Details) {
         ra2Details.innerHTML = `
             <div class="rv-row"><span class="rvl">Order / Guild Title</span><span class="rvv">${name || '—'}</span></div>
-            <div class="rv-row"><span class="rvl">Ministry Runic Inscription (RIN / CRN)</span><span class="rvv">${crn || '—'}</span></div>
+            <div class="rv-row"><span class="rvl">Ministry Runic Inscription (RIN)</span><span class="rvv">${crn || '—'}</span></div>
             <div class="rv-row"><span class="rvl">Magical Constitution</span><span class="rvv">${legalType || '—'}</span></div>
             <div class="rv-row"><span class="rvl">Charter Seal Expiry</span><span class="rvv" style="${isLicExpired ? 'color:#f87171;font-weight:700;' : ''}">${isLicExpired ? `&#x26A0; Seal Waning (${licenceExp})` : (licenceExp || '—')}</span></div>
         `;
@@ -3515,7 +3515,7 @@ async function handleLoginStep1() {
     const crn = crnInput ? crnInput.value.trim() : '';
     const email = emailInput ? emailInput.value.trim() : '';
 
-    if (!crn) { showLoginError('Please enter your Commercial Registration Number (CRN).'); return; }
+    if (!crn) { showLoginError('Please enter your Ministry Runic Inscription No. (RIN).'); return; }
     if (!email || !email.includes('@')) { showLoginError('Please enter a valid registered email address.'); return; }
 
     hideLoginError();
@@ -3571,7 +3571,7 @@ async function handleLoginStep1() {
                             <h2 style="margin: 8px 0 2px; color: #0f172a; font-size: 18px;">Gringotts Bank Corporate Portal</h2>
                             <p style="color: #64748b; font-size: 12px; margin: 0;">Diagon Alley &bull; Vault Verification Code</p>
                         </div>
-                        <p style="color: #334155; font-size: 14px;">Use the following verification code to access your corporate onboarding application for CRN <strong>${crn}</strong>:</p>
+                        <p style="color: #334155; font-size: 14px;">Use the following verification code to access your vault onboarding scroll for RIN <strong>${crn}</strong>:</p>
                         <div style="background: #f8fafc; border: 2px dashed #0284c7; border-radius: 8px; padding: 16px; text-align: center; margin: 16px 0;">
                             <span style="font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #0284c7; font-family: monospace;">${otpCode}</span>
                         </div>
@@ -3949,9 +3949,9 @@ function showLoginError(err, customTitle = null) {
     if ((err && err.code === 'RM_INVITATION_NOT_FOUND') || errMsg.includes('Relationship Manager (RM) Database') || errMsg.includes('Access Restricted')) {
         isRmInviteError = true;
         title = '&#x26D4; Access Restricted';
-        const displayCrn = currentLoginCrn || (err && err.crn) || 'entered CRN';
+        const displayCrn = currentLoginCrn || (err && err.crn) || 'entered RIN';
         const displayEmail = currentLoginEmail || (err && err.email) || 'entered Email';
-        detail = `CRN <code>${displayCrn}</code> and Email <code>${displayEmail}</code> could not be verified. Please ensure you have received an onboarding invitation from your Relationship Manager.`;
+        detail = `RIN <code>${displayCrn}</code> and Owl Roost <code>${displayEmail}</code> could not be verified. Please ensure you have received a vault induction mandate from the Goblin Vault Overseer.`;
     } else if (errMsg.includes('OTP') || errMsg.includes('verification code') || errMsg.includes('code are required')) {
         title = '&#x1F511; Verification Notice';
         detail = errMsg;
@@ -3995,7 +3995,7 @@ function displayClientNameOnTop(companyName, crn, companyUid) {
     }
 
     if (nameEl) nameEl.textContent = resolvedName;
-    if (crnEl) crnEl.textContent = resolvedCrn ? `CRN: ${resolvedCrn}` : '';
+    if (crnEl) crnEl.textContent = resolvedCrn ? `RIN: ${resolvedCrn}` : '';
     if (cuidEl) {
         cuidEl.textContent = currentCompanyUid ? `ID: ${currentCompanyUid}` : '';
         cuidEl.style.display = currentCompanyUid ? 'inline-block' : 'none';
@@ -4095,7 +4095,7 @@ function showSaveModal() {
         if (bodyEl) {
             bodyEl.innerHTML = `
                 Your sacred covenant progress has been warded and preserved.<br><br>
-                You can return anytime with the runic token below or by invoking your Ministry Inscription No. (RIN / CRN) <strong>${crn}</strong> and owl roost <strong>${email}</strong>.<br><br>
+                You can return anytime with the runic token below or by invoking your Ministry Inscription No. (RIN) <strong>${crn}</strong> and owl roost <strong>${email}</strong>.<br><br>
                 <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:12px;margin:8px 0;word-break:break-all;">
                     <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;">Vault Covenant Reference</span><br>
                     <strong style="color:var(--primary);font-size:16px;font-family:monospace;">${appRef}</strong><br><br>
@@ -4127,7 +4127,7 @@ function showSaveModal() {
                     <span style="font-size: 11px; color: #64748b; font-weight: 600;">Runic Return Token:</span><br>
                     <code style="color: #0284c7; font-size: 13px; font-weight: bold;">https://onboarding.gringotts.com/resume/${appRef}</code>
                 </div>
-                <p style="color: #64748b; font-size: 12px;">You can return at any time with this token or by invoking Ministry Inscription No. (RIN / CRN) <strong>${crn}</strong>.</p>
+                <p style="color: #64748b; font-size: 12px;">You can return at any time with this token or by invoking Ministry Inscription No. (RIN) <strong>${crn}</strong>.</p>
             </div>
         `
     });
@@ -4275,7 +4275,7 @@ Subterranean Tier: Vault 713 & Diagon Alley High Depository
 Vault Parchment Reference: ${appRef}
 Consecrated: ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}
 Order / Guild: ${company}
-Ministry Inscription No. (RIN / CRN): ${crn}
+Ministry Inscription No. (RIN): ${crn}
 Vault Allocation: High-Security Subterranean Chamber & Pure Galleon Reserves
 
 SACRED RITES & NEXT STEPS:

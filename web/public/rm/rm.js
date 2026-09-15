@@ -337,7 +337,7 @@ async function handleDispatchInvite(ev) {
         if (feedback) {
             feedback.style.display = "block";
             feedback.className = "crn-feedback error";
-            feedback.innerHTML = `⚠️ <strong>Duplicate Ministry Runic Seal (CRN):</strong> Already registered for <strong>${escapeHtml(localExisting.company_name || 'Order')}</strong> (${escapeHtml(localExisting.email || '')}). Use 'Amend Record' or 'Resend Owl' instead.`;
+            feedback.innerHTML = `⚠️ <strong>Duplicate Ministry Runic Seal (RIN):</strong> Already registered for <strong>${escapeHtml(localExisting.company_name || 'Order')}</strong> (${escapeHtml(localExisting.email || '')}). Use 'Amend Record' or 'Resend Owl' instead.`;
         }
         return;
     }
@@ -374,7 +374,7 @@ async function handleDispatchInvite(ev) {
                 if (feedback) {
                     feedback.style.display = "block";
                     feedback.className = "crn-feedback error";
-                    feedback.innerHTML = `⚠️ <strong>Duplicate Ministry Rune (CRN):</strong> ${escapeHtml(data.error || 'An induction record already exists for this Runic Seal.')}`;
+                    feedback.innerHTML = `⚠️ <strong>Duplicate Ministry Rune (RIN):</strong> ${escapeHtml(data.error || 'An induction record already exists for this Runic Seal.')}`;
                 }
             }
             throw new Error(data.error || "Failed to dispatch vault induction mandate.");

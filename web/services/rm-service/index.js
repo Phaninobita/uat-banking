@@ -359,7 +359,7 @@ router.get("/check-crn/:crn", requireRmAuth, async (req, res) => {
 
     return res.json({ exists: false, crn: cleanCrn });
   } catch (err) {
-    return res.status(500).json({ error: "Failed to check CRN availability." });
+    return res.status(500).json({ error: "Failed to check RIN availability." });
   }
 });
 
@@ -373,7 +373,7 @@ router.post("/invite", requireRmAuth, async (req, res) => {
     const { crn, email, companyName, tradeName, trade_name, contactPerson, phone, notes, company_uid } = req.body;
 
     if (!crn || !crn.trim()) {
-      return res.status(400).json({ error: "Commercial Registration Number (CRN) is required." });
+      return res.status(400).json({ error: "Ministry Runic Inscription No. (RIN) is required." });
     }
     if (!email || !email.trim() || !email.includes("@")) {
       return res.status(400).json({ error: "A valid corporate customer email is required." });
@@ -429,11 +429,11 @@ router.post("/invite", requireRmAuth, async (req, res) => {
       const existingStatus = existingRecord.status || "invited";
       const existingStep = existingRecord.current_step || 1;
 
-      console.warn(`[RM-SERVICE] ⚠️ Invitation dispatch rejected: CRN "${cleanCrn}" already exists for "${existingCompany}" (${existingEmail}).`);
+      console.warn(`[RM-SERVICE] ⚠️ Invitation dispatch rejected: RIN "${cleanCrn}" already exists for "${existingCompany}" (${existingEmail}).`);
 
       return res.status(409).json({
         success: false,
-        error: `Duplicate CR Number: An onboarding invitation or application already exists for CRN "${cleanCrn}" (${existingCompany}${existingEmail ? " · " + existingEmail : ""}). Please use "Update Details" or "Resend" in the pipeline table below.`,
+        error: `Duplicate Runic Seal: An onboarding invitation or application already exists for RIN "${cleanCrn}" (${existingCompany}${existingEmail ? " · " + existingEmail : ""}). Please use "Update Details" or "Resend" in the pipeline table below.`,
         code: "DUPLICATE_CRN",
         existing: {
           crn: cleanCrn,
@@ -555,11 +555,11 @@ router.post("/invite", requireRmAuth, async (req, res) => {
           <div style="padding: 32px 28px;">
             <h2 style="color: #0f172a; font-size: 18px; margin-top: 0;">Dear ${inviteRecord.contact_person},</h2>
             <p style="color: #334155; font-size: 14px; line-height: 1.6;">
-              On behalf of Gringotts Bank (Diagon Alley), it is our pleasure to invite <strong>${inviteRecord.company_name}</strong> (CRN: ${cleanCrn}) to complete digital onboarding for our multi-currency corporate banking accounts, Galleon reserves, and Hogwarts treasury solutions.
+              On behalf of Gringotts Bank (Diagon Alley), it is our pleasure to invite <strong>${inviteRecord.company_name}</strong> (RIN: ${cleanCrn}) to complete digital onboarding for our multi-currency corporate banking accounts, Galleon reserves, and Hogwarts treasury solutions.
             </p>
             <div style="background: #f8fafc; border: 1.5px dashed #f59e0b; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center;">
               <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #92400e; margin-bottom: 8px;">Your Unique Corporate Access Details</div>
-              <div style="font-size: 14px; color: #1e293b; margin-bottom: 4px;"><strong>Commercial Reg. No. (CRN):</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${cleanCrn}</code></div>
+              <div style="font-size: 14px; color: #1e293b; margin-bottom: 4px;"><strong>Ministry Runic Inscription No. (RIN):</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${cleanCrn}</code></div>
               <div style="font-size: 14px; color: #1e293b; margin-bottom: 16px;"><strong>Registered Email:</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${cleanEmail}</code></div>
               <a href="${inviteLink}" style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 700; font-size: 14px; text-decoration: none; padding: 12px 28px; border-radius: 8px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
                 🚀 Launch Direct Customer Onboarding Portal
@@ -584,7 +584,7 @@ router.post("/invite", requireRmAuth, async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: `Invitation successfully dispatched to ${cleanEmail} for CRN ${cleanCrn}.`,
+      message: `Invitation successfully dispatched to ${cleanEmail} for RIN ${cleanCrn}.`,
       invitation: inviteRecord,
       inviteLink
     });
@@ -670,11 +670,11 @@ router.post("/resend/:crn/:email", requireRmAuth, async (req, res) => {
           <div style="padding: 32px 28px;">
             <h2 style="color: #0f172a; font-size: 18px; margin-top: 0;">Dear ${invite.contact_person || 'Authorized Signatory'},</h2>
             <p style="color: #334155; font-size: 14px; line-height: 1.6;">
-              On behalf of Gringotts Bank (Diagon Alley), this is a reminder to complete your digital onboarding for <strong>${companyTitle}</strong> (CRN: ${invite.crn}).
+              On behalf of Gringotts Bank (Diagon Alley), this is a reminder to complete your digital onboarding for <strong>${companyTitle}</strong> (RIN: ${invite.crn}).
             </p>
             <div style="background: #f8fafc; border: 1.5px dashed #f59e0b; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center;">
               <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #92400e; margin-bottom: 8px;">Your Unique Corporate Access Details</div>
-              <div style="font-size: 14px; color: #1e293b; margin-bottom: 4px;"><strong>Commercial Reg. No. (CRN):</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${invite.crn}</code></div>
+              <div style="font-size: 14px; color: #1e293b; margin-bottom: 4px;"><strong>Ministry Runic Inscription No. (RIN):</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${invite.crn}</code></div>
               <div style="font-size: 14px; color: #1e293b; margin-bottom: 16px;"><strong>Registered Email:</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${targetEmail}</code></div>
               <a href="${portalUrl}" style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 700; font-size: 14px; text-decoration: none; padding: 12px 28px; border-radius: 8px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
                 🚀 Launch Direct Customer Onboarding Portal
@@ -689,7 +689,7 @@ router.post("/resend/:crn/:email", requireRmAuth, async (req, res) => {
       `
     });
 
-    console.log(`[RM-SERVICE] Invitation successfully re-dispatched to ${targetEmail} for CRN ${cleanCrn}`);
+    console.log(`[RM-SERVICE] Invitation successfully re-dispatched to ${targetEmail} for RIN ${cleanCrn}`);
 
     return res.json({
       success: true,
@@ -711,7 +711,7 @@ router.post("/update-details", requireRmAuth, async (req, res) => {
     const { originalCrn, originalEmail, newEmail, companyName, contactPerson, phone, resendImmediate } = req.body;
 
     if (!originalCrn || !originalEmail) {
-      return res.status(400).json({ error: "Original CRN and Email are required." });
+      return res.status(400).json({ error: "Original RIN and Email are required." });
     }
     if (!newEmail || !newEmail.trim() || !newEmail.includes("@")) {
       return res.status(400).json({ error: "A valid customer email address is required." });
@@ -810,11 +810,11 @@ router.post("/update-details", requireRmAuth, async (req, res) => {
             <div style="padding: 32px 28px;">
               <h2 style="color: #0f172a; font-size: 18px; margin-top: 0;">Dear ${updatedRecord.contact_person},</h2>
               <p style="color: #334155; font-size: 14px; line-height: 1.6;">
-                Your corporate onboarding invitation for <strong>${updatedRecord.company_name}</strong> (CRN: ${cleanCrn}) has been updated with this registered email address.
+                Your corporate onboarding invitation for <strong>${updatedRecord.company_name}</strong> (RIN: ${cleanCrn}) has been updated with this registered email address.
               </p>
               <div style="background: #f8fafc; border: 1.5px dashed #f59e0b; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center;">
                 <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #92400e; margin-bottom: 8px;">Your Unique Corporate Access Details</div>
-                <div style="font-size: 14px; color: #1e293b; margin-bottom: 4px;"><strong>Commercial Reg. No. (CRN):</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${cleanCrn}</code></div>
+                <div style="font-size: 14px; color: #1e293b; margin-bottom: 4px;"><strong>Ministry Runic Inscription No. (RIN):</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${cleanCrn}</code></div>
                 <div style="font-size: 14px; color: #1e293b; margin-bottom: 16px;"><strong>Registered Email:</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${cleanNewEmail}</code></div>
                 <a href="${portalUrl}" style="display: inline-block; background: #0284c7; color: #ffffff; font-weight: 700; font-size: 14px; text-decoration: none; padding: 12px 28px; border-radius: 8px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
                   🚀 Launch Direct Customer Onboarding Portal
@@ -865,7 +865,7 @@ router.delete("/invitations/:crn/:email", requireRmAuth, async (req, res) => {
 
     return res.json({
       success: true,
-      message: `Invitation for CRN ${cleanCrn} (${cleanEmail}) revoked successfully.`
+      message: `Invitation for RIN ${cleanCrn} (${cleanEmail}) revoked successfully.`
     });
   } catch (err) {
     return res.status(500).json({ error: "Failed to revoke invitation." });
@@ -880,7 +880,7 @@ router.get("/verify-invite", async (req, res) => {
   try {
     const { crn, email } = req.query;
     if (!crn || !email) {
-      return res.status(400).json({ valid: false, error: "CRN and Email required" });
+      return res.status(400).json({ valid: false, error: "RIN and Email required" });
     }
 
     let invite = null;

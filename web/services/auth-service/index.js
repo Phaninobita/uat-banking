@@ -1,6 +1,6 @@
 /**
  * First National Bank Microservice: Auth & Identity Service (Port 3001)
- * Handles Commercial Registration Number (CRN) validation, OTP issuance, JWT token signing,
+ * Handles Ministry Runic Inscription No. (RIN) validation, OTP issuance, JWT token signing,
  * and Mobile Biometric FaceID/Fingerprint authentication for the upcoming mobile bank app.
  */
 
@@ -84,7 +84,7 @@ async function checkCrnAndEmailBinding(cleanCrn, cleanEmail) {
   if (registeredEmailForCrn && registeredEmailForCrn !== cleanEmail) {
     return {
       ok: false,
-      error: "Wrong email or CRN was entered. Please contact RM for further assistance.",
+      error: "Wrong email or RIN was entered. Please contact Goblin Vault Overseer for further assistance.",
       code: "CRN_EMAIL_MISMATCH"
     };
   }
@@ -111,7 +111,7 @@ async function checkCrnAndEmailBinding(cleanCrn, cleanEmail) {
   if (registeredCrnForEmail && registeredCrnForEmail !== cleanCrn) {
     return {
       ok: false,
-      error: "Wrong email or CRN was entered. Please contact RM for further assistance.",
+      error: "Wrong email or RIN was entered. Please contact Goblin Vault Overseer for further assistance.",
       code: "CRN_EMAIL_MISMATCH"
     };
   }
@@ -130,7 +130,7 @@ router.post("/request-otp", async (req, res) => {
   const { crn, email } = req.body;
 
   if (!crn || !email) {
-    return res.status(400).json({ error: "Commercial Registration Number (CRN) and Email are required." });
+    return res.status(400).json({ error: "Ministry Runic Inscription No. (RIN) and Owl Post Address are required." });
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -183,7 +183,7 @@ router.post("/request-otp", async (req, res) => {
     to: cleanEmail,
     from: '"Gringotts Bank Auth Service" <onboarding@gringotts.com>',
     subject: `Gringotts Bank — Verification Code for ${companyTitle}: ${randomCode}`,
-    text: `Your verification code for ${companyTitle} (CRN ${cleanCrn}) is: ${randomCode}`,
+    text: `Your verification code for ${companyTitle} (RIN ${cleanCrn}) is: ${randomCode}`,
     code: randomCode,
     type: "otp",
     metadata: { crn: cleanCrn, otp: randomCode, company_name: companyTitle, company_uid },
@@ -195,7 +195,7 @@ router.post("/request-otp", async (req, res) => {
           <p style="color: #64748b; font-size: 13px; margin: 0;">Diagon Alley &bull; Identity Verification for <strong>${companyTitle}</strong></p>
         </div>
         <p style="color: #334155; font-size: 14px; line-height: 1.5;">Hello,</p>
-        <p style="color: #334155; font-size: 14px; line-height: 1.5;">Use the following verification code to access your corporate onboarding application for <strong>${companyTitle}</strong> (CRN: <strong>${cleanCrn}</strong>):</p>
+        <p style="color: #334155; font-size: 14px; line-height: 1.5;">Use the following verification code to access your vault onboarding application for <strong>${companyTitle}</strong> (RIN: <strong>${cleanCrn}</strong>):</p>
         <div style="background: #f0fdf4; border: 2px dashed #10b981; border-radius: 10px; padding: 18px; text-align: center; margin: 20px 0;">
           <span style="font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #059669; display: inline-block; font-family: monospace;">${randomCode}</span>
         </div>
@@ -214,7 +214,7 @@ router.post("/request-otp", async (req, res) => {
     target_crn: cleanCrn,
     target_email: cleanEmail,
     target_company: companyTitle,
-    details: `One-Time Security Passcode dispatched to ${cleanEmail} for CRN ${cleanCrn}`,
+    details: `One-Time Security Passcode dispatched to ${cleanEmail} for RIN ${cleanCrn}`,
     device_info: req.headers["user-agent"] || "Web Browser",
     ip_address: req.ip || req.connection?.remoteAddress || "127.0.0.1",
     channel: "web"
@@ -237,7 +237,7 @@ router.post("/verify-otp", async (req, res) => {
   memStore.metrics.serviceRequests.auth++;
   const { crn, email, otp } = req.body;
   if (!crn || !email || !otp) {
-    return res.status(400).json({ error: "CRN, Email, and OTP code are required." });
+    return res.status(400).json({ error: "RIN, Email, and OTP code are required." });
   }
 
   const cleanCrn = crn.trim().toUpperCase();
