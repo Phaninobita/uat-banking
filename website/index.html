@@ -1549,50 +1549,17 @@
                 Inscribe Your Counsel via Swift Owl
             </h3>
             <p class="modal-sub" style="margin-bottom: 22px; color: #94a3b8; font-size: 0.88rem; line-height: 1.6;">
-                Whether words of praise, vault enhancement ideas, or goblin inquiries — inscribe your thoughts with honesty. Your scroll will be sealed in crimson wax and stored in the Goblin High Vault Ledger.
+                Inscribe your thoughts, counsel, and suggestions below. Your parchment will be sealed in crimson wax and recorded directly into the Goblin High Vault Ledger.
             </p>
 
-            <!-- Nature of Inscription Pills -->
-            <div style="margin-bottom: 16px;">
-                <label style="display:block; font-size:10px; letter-spacing:3px; text-transform:uppercase; color:#fbbf24; font-family:'Cinzel',serif; margin-bottom:8px; font-weight:700;">
-                    Nature of Inscription
-                </label>
-                <div class="owl-category-group" id="owlModalCategoryGroup" style="margin-bottom: 0;">
-                    <button type="button" class="owl-category-pill active" data-category="Praise & Commendation">🪶 Praise</button>
-                    <button type="button" class="owl-category-pill" data-category="Vault Enhancement Idea">⚡ Enhancement</button>
-                    <button type="button" class="owl-category-pill" data-category="Goblin Scribe Inquiry">📜 Inquiry</button>
-                    <button type="button" class="owl-category-pill" data-category="Curse-Breaker Notice">🔮 Suggestion</button>
-                </div>
-                <input type="hidden" id="owlModalCategory" value="Praise & Commendation">
-            </div>
-
-            <!-- Snitch / Galleon Rating -->
-            <div class="owl-rating-wrap" style="margin-bottom: 18px;">
-                <span class="owl-rating-label">Vault Rating:</span>
-                <div class="owl-stars" id="owlModalStars">
-                    <button type="button" class="owl-star-btn active" data-rating="1" title="1 Galleon">⚚</button>
-                    <button type="button" class="owl-star-btn active" data-rating="2" title="2 Galleons">⚚</button>
-                    <button type="button" class="owl-star-btn active" data-rating="3" title="3 Galleons">⚚</button>
-                    <button type="button" class="owl-star-btn active" data-rating="4" title="4 Galleons">⚚</button>
-                    <button type="button" class="owl-star-btn active" data-rating="5" title="5 Galleons">⚚</button>
-                </div>
-                <span class="owl-rating-desc" id="owlModalRatingDesc">Worthy of the High Chamber (5/5 ⚚)</span>
-                <input type="hidden" id="owlModalRating" value="5">
-            </div>
-
-            <div class="field" style="margin-bottom: 14px;">
-                <label for="owlModalName">Witch, Wizard, or Noble House Name *</label>
-                <input type="text" id="owlModalName" placeholder="e.g. Albus Dumbledore or Order of the Phoenix" required autocomplete="name">
-            </div>
-
-            <div class="field" style="margin-bottom: 14px;">
-                <label for="owlModalAddress">Owl Post / Fireplace Address (or Email)</label>
-                <input type="text" id="owlModalAddress" placeholder="e.g. Headmaster's Tower, Hogwarts Castle" autocomplete="email">
-            </div>
-
             <div class="field" style="margin-bottom: 16px;">
-                <label for="owlModalMessage">The Sacred Inscription (Your Feedback or Message) *</label>
-                <textarea class="owl-textarea" id="owlModalMessage" placeholder="Inscribe your thoughts, advice, or counsel here with blood-quill clarity..." rows="4" required></textarea>
+                <label for="owlModalName">Name *</label>
+                <input type="text" id="owlModalName" placeholder="e.g. Albus Dumbledore or Hermione Granger" required autocomplete="name">
+            </div>
+
+            <div class="field" style="margin-bottom: 18px;">
+                <label for="owlModalMessage">Suggestions &amp; Comments *</label>
+                <textarea class="owl-textarea" id="owlModalMessage" placeholder="Inscribe your suggestions or comments here with blood-quill clarity..." rows="5" required></textarea>
             </div>
 
             <div style="font-size: 11px; color: #a1a1aa; margin-bottom: 18px; display: flex; align-items: center; gap: 8px;">
@@ -2531,19 +2498,6 @@ if (exploreBtn) {
     const modalForm = $('#owlModalForm');
     const modalSuccess = $('#owlModalSuccess');
     const modalSubmitBtn = $('#owlModalSubmitBtn');
-    const modalStars = $$('#owlModalStars .owl-star-btn');
-    const modalRatingDesc = $('#owlModalRatingDesc');
-    const modalRatingInput = $('#owlModalRating');
-    const modalCategoryPills = $$('#owlModalCategoryGroup .owl-category-pill');
-    const modalCategoryInput = $('#owlModalCategory');
-
-    const RATING_LABELS = {
-        1: 'Dark Arts Ward Required (1/5 ⚚)',
-        2: 'Acceptable (2/5 ⚚)',
-        3: 'Exceeds Expectations (3/5 ⚚)',
-        4: 'Outstanding Vault Quality (4/5 ⚚)',
-        5: 'Worthy of the High Chamber (5/5 ⚚)'
-    };
 
     function openOwlModal() {
         if (typeof window.openOwlModal === 'function') {
@@ -2609,42 +2563,6 @@ if (exploreBtn) {
         }
     });
 
-    // Setup Category Pills in Modal
-    modalCategoryPills.forEach(pill => {
-        pill.addEventListener('click', () => {
-            modalCategoryPills.forEach(p => p.classList.remove('active'));
-            pill.classList.add('active');
-            if (modalCategoryInput) modalCategoryInput.value = pill.dataset.category;
-        });
-    });
-
-    // Setup Stars in Modal
-    function updateModalStars(val) {
-        modalStars.forEach(s => {
-            const r = parseInt(s.dataset.rating, 10);
-            s.classList.toggle('active', r <= val);
-        });
-        if (modalRatingDesc) modalRatingDesc.textContent = RATING_LABELS[val] || `${val}/5 ⚚`;
-        if (modalRatingInput) modalRatingInput.value = val;
-    }
-
-    modalStars.forEach(btn => {
-        btn.addEventListener('mouseenter', () => {
-            const hoverVal = parseInt(btn.dataset.rating, 10);
-            modalStars.forEach(s => {
-                const r = parseInt(s.dataset.rating, 10);
-                s.classList.toggle('hover', r <= hoverVal);
-            });
-        });
-        btn.addEventListener('mouseleave', () => {
-            modalStars.forEach(s => s.classList.remove('hover'));
-        });
-        btn.addEventListener('click', () => {
-            const val = parseInt(btn.dataset.rating, 10);
-            updateModalStars(val);
-        });
-    });
-
     // Spark Burst Generator helper
     function emitGoldenSparks(element) {
         if (typeof gsap === 'undefined' || !element) return;
@@ -2673,7 +2591,6 @@ if (exploreBtn) {
         modalForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const nameInput = $('#owlModalName');
-            const addressInput = $('#owlModalAddress');
             const messageInput = $('#owlModalMessage');
 
             let valid = true;
@@ -2690,9 +2607,9 @@ if (exploreBtn) {
 
             const payload = {
                 name: nameInput.value.trim(),
-                address: addressInput ? addressInput.value.trim() : '',
-                category: modalCategoryInput ? modalCategoryInput.value : 'Praise & Commendation',
-                rating: modalRatingInput ? modalRatingInput.value : 5,
+                address: 'Hogwarts Owl Roost',
+                category: 'Suggestion & Counsel',
+                rating: 5,
                 message: messageInput.value.trim()
             };
 
