@@ -8,7 +8,7 @@
 
 | Portal / Route | Express Route Mount | Primary HTML File | Supporting Styles & Scripts | Purpose & Key Features |
 | :--- | :--- | :--- | :--- | :--- |
-| **Marketing Website & Grand Hall** | `/site`, `/landing`, `/home` | [`web/public/site/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/site/index.html) *(copies: [`website/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/website/index.html), [`docs/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/docs/index.html))* | Three.js WebGL 3D rotating vault core, Orbitron & Space Grotesk typography, 3D tilt cards, magnetic buttons, cipher decode | Public futuristic landing site. Hero: *"The Safest Vault on Earth"*, 3D holographic quantum vault, live FX matrix, defense grid simulator. |
+| **Marketing Website & Grand Hall** | `/site`, `/landing`, `/home` | [`web/public/site/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/site/index.html) *(copies: [`website/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/website/index.html), [`docs/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/docs/index.html))* | Living Vault: liquid-metal cursor, breathing organism background, starling murmuration numbers, depth-of-field focus pull, global gaze tracking, Web Audio synthesizer | Concept: 'Living Vault' organism. Hero: *"The Safest Vault on Earth"*, murmuration dragon crest, living EKG telemetry, liquid specie matrix. |
 | **Customer Vault Portal** | `/customer` | [`web/public/customer/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/customer/index.html) | Self-contained styles & client logic | Customer Treasury Dashboard: multi-currency accounts (Galleons, Sickles, Knuts, USD, EUR, GBP), live FX, transaction feeds, biometric login. |
 | **Goblin RM Overseer Portal** | `/rm` | [`web/public/rm/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/rm/index.html) | [`web/public/rm/rm.css`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/rm/rm.css), [`web/public/rm/rm.js`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/rm/rm.js) | Relationship Manager suite: onboarding pipeline kanban, application review/approval, customer invitation dispatch, audit logs. |
 | **Sacred Covenant Induction** | `/` (root / fallback) | [`web/public/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/index.html) | [`web/public/css/style.css`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/css/style.css), [`web/public/js/app.js`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/js/app.js), [`web/public/js/api.js`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/js/api.js) | Multi-step corporate induction wizard, KYC document upload, blood-binding oath signature, verification steps. |
@@ -97,15 +97,14 @@ All endpoints are mounted through the unified Gateway on port `3000`:
 ## 🎨 Theme & Branding Memory
 
 - **Hero Title**: `"The Safest Vault on Earth"`
-  - Styled with Orbitron bold typography, uppercase, radiant glowing gradient animation (`sheenGradient`).
-  - Animated with sci-fi matrix glyph decode/cipher scramble effect on page boot.
-  - Accompanied by Three.js WebGL 3D rotating holographic polyhedral vault core and dynamic cursor spotlight.
-- **Badge**: `"SYSTEM ONLINE · EST. 1474 · DIAGON ALLEY NODE"` with emerald/cyan pulsing quantum dot indicator.
+  - Styled with Cinzel ancient monumental serif typography with liquid-chrome and amber specular sheen.
+  - Accompanied by the signature Living Murmuration Dragon Crest (800 nodes scattering on hover and locking into vault gear on click).
+  - Data metrics rendered as living starling murmuration particles.
+- **Tone & Concept**: "Living Vault" — an organic sentient banking organism made of liquid metal and light.
 - **Color Palettes**:
-  - **Void Black**: `--void: #02040a`
-  - **Electric Cyan & Sapphire**: `--cyan: #00f0ff`, `--cyan-dim: rgba(0, 240, 255, 0.28)`
-  - **Neon Violet**: `--violet: #8b5cf6`
-  - **Imperial Gold**: `--gold: #ffd700`
+  - **Obsidian Black**: `--obsidian: #030305`, `--obsidian-deep: #010103`
+  - **Liquid Chrome**: `--chrome-specular: #f8fafc`, `--chrome-light: #e2e8f0`, `--chrome-mid: #94a3b8`
+  - **Bio-Luminescent Amber**: `--amber: #f59e0b`, `--amber-glow: rgba(245, 158, 11, 0.45)` (Strictly avoids generic cyan/purple)
 - **Logos & Crests**:
   - Primary Dragon Crest: [`web/public/images/bank-logo-dragon.png`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/images/bank-logo-dragon.png)
   - Gold Crest: [`web/public/images/bank-logo-gold.png`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/images/bank-logo-gold.png)
