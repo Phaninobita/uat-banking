@@ -3,2030 +3,1511 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gringotts Bank | Corporate Onboarding</title>
+<title>GRINGOTTS // The Safest Vault on Earth — Est. 1474</title>
 <link rel="icon" type="image/png" href="logo.png">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- Three.js for 3D Holographic Vault in Hero -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <style>
+    /* ══════════ DESIGN SYSTEM & THEME TOKENS ══════════ */
     :root {
-        --gringotts-gold: #22d3ee;
-        --gold-bright: #67e8f9;
-        --cyan: #22d3ee;
-        --cyan-bright: #67e8f9;
-        --blue-accent: #0ea5e9;
-        --green-ok: #22c55e;
-        --gringotts-dark: #060d1a;
-        --dark-2: #0a1525;
-        --panel: #0d1b2e;
-        --panel-2: #112239;
-        --border-soft: rgba(34, 211, 238, 0.15);
-        --border-line: rgba(34, 211, 238, 0.25);
-        --text-light: #e2e8f0;
-        --muted: #94a3b8;
-        --nav-h: 88px;
+        --void: #02040a;
+        --void-deep: #010206;
+        --panel: rgba(8, 14, 30, 0.6);
+        --panel-solid: #091024;
+        --panel-highlight: rgba(14, 25, 52, 0.75);
+        --cyan: #00f0ff;
+        --cyan-dim: rgba(0, 240, 255, 0.28);
+        --cyan-glow: rgba(0, 240, 255, 0.45);
+        --violet: #8b5cf6;
+        --violet-dim: rgba(139, 92, 246, 0.3);
+        --gold: #ffd700;
+        --gold-dim: rgba(255, 215, 0, 0.35);
+        --emerald: #10b981;
+        --text: #f0f7ff;
+        --text-secondary: #9cb2cd;
+        --muted: #647d9e;
+        --line: rgba(0, 240, 255, 0.12);
+        --line-bright: rgba(0, 240, 255, 0.35);
+        --font-display: 'Orbitron', -apple-system, sans-serif;
+        --font-body: 'Space Grotesk', -apple-system, sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
+        --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+        --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     html { scroll-behavior: smooth; }
-
     body {
-        background-color: var(--gringotts-dark);
-        background-image:
-            radial-gradient(circle at 20% 0%, rgba(34, 211, 238, 0.08), transparent 45%),
-            radial-gradient(circle at 85% 90%, rgba(14, 165, 233, 0.06), transparent 55%);
-        color: var(--text-light);
-        font-family: 'Lato', sans-serif;
+        background: var(--void);
+        color: var(--text);
+        font-family: var(--font-body);
         overflow-x: hidden;
-        cursor: none;
+        cursor: default;
+        position: relative;
+        min-height: 100vh;
+    }
+    ::selection { background: rgba(0, 240, 255, 0.35); color: #fff; }
+
+    /* ══════════ AMBIENT ATMOSPHERE & CURSOR LIGHT ══════════ */
+    #cursorGlow {
+        position: fixed; width: 480px; height: 480px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(0, 240, 255, 0.12) 0%, rgba(139, 92, 246, 0.05) 45%, transparent 70%);
+        pointer-events: none; z-index: 1; transform: translate(-50%, -50%);
+        transition: opacity 0.3s ease; filter: blur(35px);
+    }
+    @media (hover: none) { #cursorGlow { display: none; } }
+
+    .bg-grid {
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background-image:
+            linear-gradient(rgba(0, 240, 255, 0.035) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 240, 255, 0.035) 1px, transparent 1px);
+        background-size: 60px 60px;
+        mask-image: radial-gradient(ellipse 85% 65% at 50% 35%, black 25%, transparent 100%);
     }
 
-    body.no-scroll { overflow: hidden; }
-
-    h1, h2, h3, .logo { font-family: 'Cinzel', serif; color: var(--text-light); }
-
-    a { color: inherit; text-decoration: none; }
-
-    /* Hide broken images gracefully */
-    img { display: inline-block; }
-    img.broken { display: none !important; }
-
-    /* ---------- Scrollbar ---------- */
-    ::-webkit-scrollbar { width: 10px; }
-    ::-webkit-scrollbar-track { background: var(--gringotts-dark); }
-    ::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 5px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
-
-    /* ---------- Ambient Orbs Canvas ---------- */
-    #orbs {
-        position: fixed; inset: 0;
-        z-index: 0;
-        pointer-events: none;
-        display: block;
-        width: 100%; height: 100%;
-        opacity: .85;
+    .circuit-overlay {
+        position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.28;
+        background-image: radial-gradient(circle at 80% 20%, rgba(0, 240, 255, 0.08) 0%, transparent 40%),
+                          radial-gradient(circle at 15% 85%, rgba(139, 92, 246, 0.07) 0%, transparent 45%);
     }
-    main, nav, header, section, footer { position: relative; z-index: 1; }
 
-    /* ---------- Preloader ---------- */
-    #preloader {
-        position: fixed; inset: 0; z-index: 10000;
-        background: var(--gringotts-dark);
-        display: flex; align-items: center; justify-content: center;
+    .bg-orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .bg-orbs::before, .bg-orbs::after {
+        content: ''; position: absolute; border-radius: 50%; filter: blur(140px); opacity: 0.55;
+        animation: orbDrift 22s ease-in-out infinite alternate;
     }
-    .preloader-inner { text-align: center; position: relative; }
-    .preloader-ring {
-        width: 130px; height: 130px; margin: 0 auto 34px;
-        border-radius: 50%;
-        border: 1px solid rgba(34, 211, 238, 0.15);
-        border-top-color: var(--cyan);
-        border-right-color: rgba(34, 211, 238, 0.5);
-        animation: spin 1.1s linear infinite;
+    .bg-orbs::before {
+        width: 680px; height: 680px; top: -180px; right: -120px;
+        background: radial-gradient(circle, rgba(0, 240, 255, 0.18), transparent 70%);
+    }
+    .bg-orbs::after {
+        width: 600px; height: 600px; bottom: -160px; left: -140px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.16), transparent 70%);
+        animation-delay: -11s;
+    }
+    @keyframes orbDrift { to { transform: translate(-80px, 70px) scale(1.15); } }
+
+    .scanlines {
+        position: fixed; inset: 0; z-index: 70; pointer-events: none; opacity: 0.035;
+        background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 240, 255, 0.45) 2px 3px);
+    }
+    canvas#netCanvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+    /* ══════════ BOOT SEQUENCE PRELOADER ══════════ */
+    #boot {
+        position: fixed; inset: 0; z-index: 999; background: var(--void-deep);
+        display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px;
+        transition: opacity 0.6s var(--ease-out-expo), visibility 0.6s;
+    }
+    #boot.done { opacity: 0; visibility: hidden; pointer-events: none; }
+    #boot .boot-logo {
+        font-family: var(--font-display); font-weight: 900; font-size: clamp(26px, 5vw, 36px); letter-spacing: 12px;
+        color: var(--cyan); text-shadow: 0 0 35px var(--cyan-glow);
+    }
+    #boot .boot-bar {
+        width: 260px; height: 2px; background: rgba(0, 240, 255, 0.15); border-radius: 2px; overflow: hidden;
         position: relative;
     }
-    .preloader-ring::after {
-        content: "";
-        position: absolute; inset: 18px;
-        border-radius: 50%;
-        border: 1px solid rgba(34, 211, 238, 0.15);
-        border-bottom-color: var(--cyan-bright);
-        animation: spin 1.8s linear infinite reverse;
+    #boot .boot-bar span {
+        display: block; height: 100%; width: 0;
+        background: linear-gradient(90deg, var(--cyan), var(--violet), var(--gold));
+        animation: bootFill 1.1s ease forwards;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .preloader-logo {
-        font-family: 'Cinzel', serif; font-weight: 700;
-        letter-spacing: 8px; font-size: 22px; color: var(--cyan);
-        text-indent: 8px;
-        display: flex; flex-direction: column; align-items: center; gap: 15px;
-    }
-    .preloader-logo img {
-        height: 100px; width: auto;
-        filter: drop-shadow(0 0 15px rgba(34, 211, 238, 0.6));
-        animation: preloaderLogoPulse 2s ease-in-out infinite;
-    }
-    @keyframes preloaderLogoPulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.06); }
-    }
-    .preloader-bar {
-        width: 220px; height: 2px; margin: 26px auto 0;
-        background: rgba(34, 211, 238, 0.15); overflow: hidden;
-    }
-    .preloader-bar span {
-        display: block; height: 100%; width: 0%;
-        background: linear-gradient(90deg, #0e7490, var(--cyan-bright));
-        box-shadow: 0 0 12px var(--cyan);
-    }
+    @keyframes bootFill { to { width: 100%; } }
+    #boot .boot-status { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 2.5px; }
 
-    /* ---------- Custom Cursor ---------- */
-    .cursor-dot, .cursor-ring, .cursor-trail {
-        position: fixed; top: 0; left: 0; z-index: 9999;
-        pointer-events: none; border-radius: 50%;
-        transform: translate(-50%, -50%);
-    }
-    .cursor-dot {
-        width: 6px; height: 6px;
-        background: var(--cyan-bright);
-        box-shadow: 0 0 10px var(--cyan);
-    }
-    .cursor-ring {
-        width: 38px; height: 38px;
-        border: 1px solid rgba(34, 211, 238, 0.55);
-        transition: width .3s ease, height .3s ease, background .3s ease, border-color .3s ease;
-    }
-    .cursor-ring.is-hover {
-        width: 70px; height: 70px;
-        background: rgba(34, 211, 238, 0.08);
-        border-color: var(--cyan-bright);
-    }
-    .cursor-ring.is-down { transform: translate(-50%, -50%) scale(.8); }
-
-    .cursor-trail {
-        width: 4px; height: 4px;
-        background: var(--cyan);
-        box-shadow: 0 0 8px var(--cyan);
-        opacity: 0;
-    }
-
-    @media (hover: none), (pointer: coarse) {
-        .cursor-dot, .cursor-ring, .cursor-trail { display: none; }
-        body { cursor: auto; }
-    }
-
-    /* ---------- Scroll Progress ---------- */
-    .scroll-progress {
-        position: fixed; top: 0; left: 0; height: 2px; width: 0%;
-        background: linear-gradient(90deg, #0e7490, var(--cyan-bright), #0e7490);
-        box-shadow: 0 0 14px rgba(34, 211, 238, 0.8);
-        z-index: 1200;
-    }
-
-    /* ---------- Navigation ---------- */
+    /* ══════════ NAVIGATION BAR ══════════ */
     nav {
-        position: fixed; top: 0; width: 100%;
-        height: var(--nav-h);
-        padding: 0 50px;
-        display: flex; justify-content: space-between; align-items: center;
-        z-index: 1000;
-        background: linear-gradient(to bottom, rgba(6, 13, 26, 0.9), transparent);
-        transition: background .45s ease, backdrop-filter .45s ease, transform .45s ease, border-color .45s ease;
-        border-bottom: 1px solid transparent;
+        position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 18px clamp(20px, 5vw, 64px);
+        background: rgba(2, 4, 10, 0.72);
+        backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+        border-bottom: 1px solid var(--line);
+        transition: padding 0.3s ease;
     }
-    nav.scrolled {
-        background: rgba(6, 13, 26, 0.82);
-        backdrop-filter: blur(14px);
-        border-bottom-color: rgba(34, 211, 238, 0.18);
+    .brand { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+    .brand-mark {
+        width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center;
+        background: linear-gradient(135deg, rgba(0, 240, 255, 0.18), rgba(139, 92, 246, 0.18));
+        border: 1px solid var(--cyan-dim); position: relative; overflow: hidden;
+        box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
     }
-    nav.nav-hidden { transform: translateY(-100%); }
+    .brand-mark img { width: 34px; height: 34px; object-fit: cover; border-radius: 8px; z-index: 2; }
+    .brand-mark::after {
+        content: ''; position: absolute; inset: -50%;
+        background: conic-gradient(from 0deg, transparent 0%, rgba(0, 240, 255, 0.4) 25%, transparent 50%);
+        animation: spinMark 4.5s linear infinite; z-index: 1;
+    }
+    @keyframes spinMark { to { transform: rotate(360deg); } }
+    .brand-title-wrap { display: flex; flex-direction: column; }
+    .brand-name { font-family: var(--font-display); font-weight: 800; font-size: 17px; letter-spacing: 4px; color: var(--text); }
+    .brand-sub { font-family: var(--font-mono); font-size: 9px; letter-spacing: 3px; color: var(--cyan); margin-top: 2px; }
 
-    .logo {
-        font-size: 22px; font-weight: 700; letter-spacing: 3px;
-        color: var(--text-light);
-        cursor: none;
-        display: flex; align-items: center; gap: 15px;
-    }
-    .logo img {
-        height: 44px; width: auto;
-        filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.7));
-        transition: transform 0.3s ease;
-        animation: logoHeartbeat 3.6s ease-in-out infinite;
-    }
-    @keyframes logoHeartbeat {
-        0%, 100% { transform: scale(1); }
-        20% { transform: scale(1.06); }
-        30% { transform: scale(.98); }
-        40% { transform: scale(1.04); }
-        50% { transform: scale(1); }
-    }
-    .logo:hover img { animation: none; transform: scale(1.12); }
-
-    .nav-links { display: flex; gap: 38px; align-items: center; }
+    .nav-links { display: flex; gap: 32px; align-items: center; }
     .nav-links a {
-        font-family: 'Lato', sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 1.5px;
-        text-transform: uppercase; color: #b9bec9;
-        position: relative; padding: 6px 0;
-        transition: color .3s ease;
-        display: inline-block;
+        font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 2.5px; text-transform: uppercase;
+        color: var(--text-secondary); text-decoration: none; position: relative; padding: 6px 0;
+        transition: color 0.25s ease;
     }
     .nav-links a::after {
-        content: ""; position: absolute; left: 0; bottom: 0;
-        width: 0%; height: 1px; background: var(--cyan);
-        transition: width .35s cubic-bezier(.6,.2,.2,1);
+        content: ''; position: absolute; left: 0; bottom: 0; height: 1px; width: 0;
+        background: var(--cyan); transition: width 0.3s var(--ease-out-expo); box-shadow: 0 0 10px var(--cyan);
     }
-    .nav-links a::before {
-        content: ""; position: absolute; left: 50%; bottom: -2px;
-        width: 0; height: 4px; border-radius: 50%;
-        background: var(--cyan); opacity: 0;
-        filter: blur(6px);
-        transform: translateX(-50%);
-        transition: opacity .3s ease, width .4s ease;
-    }
-    .nav-links a:hover { color: var(--cyan-bright); }
+    .nav-links a:hover { color: var(--text); }
     .nav-links a:hover::after { width: 100%; }
-    .nav-links a:hover::before { opacity: .8; width: 60%; }
 
-    .nav-right { display: flex; align-items: center; gap: 18px; }
+    .nav-cta {
+        font-family: var(--font-mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+        color: var(--cyan); text-decoration: none; padding: 10px 24px; border-radius: 999px;
+        border: 1px solid var(--cyan-dim); background: rgba(0, 240, 255, 0.08);
+        transition: all 0.3s var(--ease-out-expo); position: relative; overflow: hidden;
+        display: inline-flex; align-items: center; gap: 8px;
+    }
+    .nav-cta:hover {
+        background: rgba(0, 240, 255, 0.18); box-shadow: 0 0 30px rgba(0, 240, 255, 0.35);
+        transform: translateY(-1px); border-color: var(--cyan);
+    }
+    @media (max-width: 920px) { .nav-links { display: none; } }
 
-    .burger {
-        display: none; width: 42px; height: 42px;
-        background: transparent; border: 1px solid rgba(34, 211, 238, 0.35);
-        border-radius: 3px; cursor: none;
-        flex-direction: column; justify-content: center; align-items: center; gap: 5px;
-        transition: border-color .3s ease;
-    }
-    .burger:hover { border-color: var(--cyan); }
-    .burger span {
-        display: block; width: 18px; height: 1.5px; background: var(--cyan);
-        transition: transform .35s ease, opacity .3s ease;
-    }
-    .burger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
-    .burger.open span:nth-child(2) { opacity: 0; }
-    .burger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
-
-    .mobile-menu {
-        position: fixed; inset: 0; z-index: 990;
-        background: rgba(6, 13, 26, 0.97);
-        backdrop-filter: blur(10px);
-        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px;
-        clip-path: circle(0% at 100% 0%);
-        transition: clip-path .7s cubic-bezier(.76,0,.24,1);
-    }
-    .mobile-menu.open { clip-path: circle(150% at 100% 0%); }
-    .mobile-menu a {
-        font-family: 'Cinzel', serif; font-size: 26px; letter-spacing: 4px;
-        color: #cfd3db; text-transform: uppercase;
-        opacity: 0; transform: translateY(24px);
-        transition: color .3s ease;
-    }
-    .mobile-menu a:hover { color: var(--cyan); }
-    .mobile-menu.open a { animation: menuIn .6s forwards; }
-    .mobile-menu.open a:nth-child(1) { animation-delay: .18s; }
-    .mobile-menu.open a:nth-child(2) { animation-delay: .26s; }
-    .mobile-menu.open a:nth-child(3) { animation-delay: .34s; }
-    .mobile-menu.open a:nth-child(4) { animation-delay: .42s; }
-    @keyframes menuIn { to { opacity: 1; transform: translateY(0); } }
-
-    /* ---------- Buttons ---------- */
-    .btn-gold {
-        display: inline-flex; align-items: center; justify-content: center;
-        text-decoration: none;
-        position: relative; overflow: hidden;
-        background: linear-gradient(135deg, #0ea5e9, #22d3ee);
-        color: #04121f;
-        padding: 13px 32px;
-        border: 1px solid rgba(34, 211, 238, 0.6); border-radius: 8px;
-        font-family: 'Lato', sans-serif; font-weight: 700; font-size: 12px;
-        cursor: none; letter-spacing: 1.5px; text-transform: uppercase;
-        transition: color .35s ease, box-shadow .35s ease, background .35s ease, transform .3s ease;
-        will-change: transform;
-        box-shadow: 0 0 20px rgba(34, 211, 238, 0.25);
-        isolation: isolate;
-    }
-    .btn-gold::before {
-        content: ""; position: absolute; inset: 0;
-        background: linear-gradient(135deg, #22d3ee, #67e8f9);
-        opacity: 0;
-        transition: opacity .4s ease;
-        z-index: -1;
-    }
-    .btn-gold::after {
-        content: ""; position: absolute; top: 0; left: -120%;
-        width: 60%; height: 100%;
-        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.55), transparent);
-        transform: skewX(-20deg);
-        transition: left .8s cubic-bezier(.2,.9,.25,1);
-        pointer-events: none;
-    }
-    .btn-gold:hover {
-        box-shadow: 0 0 32px rgba(34, 211, 238, 0.55), 0 0 60px rgba(34, 211, 238, 0.25);
-        transform: translateY(-1px);
-    }
-    .btn-gold:hover::before { opacity: 1; }
-    .btn-gold:hover::after { left: 130%; }
-    .btn-gold span { position: relative; z-index: 1; }
-    .btn-gold:active { transform: scale(.96); }
-
-    .btn-ghost {
-        background: transparent; color: #b9bec9;
-        padding: 13px 32px; border: 1px solid rgba(255,255,255,.16); border-radius: 8px;
-        font-family: 'Lato', sans-serif; font-weight: 700; font-size: 12px;
-        cursor: none; letter-spacing: 1.5px; text-transform: uppercase;
-        transition: border-color .35s ease, color .35s ease, background .35s ease, transform .3s ease;
-        position: relative; overflow: hidden;
-    }
-    .btn-ghost:hover { border-color: var(--cyan); color: var(--cyan-bright); background: rgba(34, 211, 238, 0.06); transform: translateY(-1px); }
-
-    .ripple {
-        position: absolute;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.45);
-        transform: scale(0);
-        animation: rippleAnim .7s ease-out;
-        pointer-events: none;
-    }
-    @keyframes rippleAnim {
-        to { transform: scale(4); opacity: 0; }
-    }
-
-    .btn-loader {
-        display: inline-block;
-        width: 14px; height: 14px;
-        border: 2px solid rgba(4, 18, 31, 0.35);
-        border-top-color: #04121f;
-        border-radius: 50%;
-        animation: spin .8s linear infinite;
-        vertical-align: -2px;
-        margin-left: 10px;
-    }
-
-    /* ---------- Hero ---------- */
+    /* ══════════ FULL-SCREEN HERO WITH THREE.JS ══════════ */
     .hero {
-        height: 100vh; min-height: 620px;
-        display: flex; flex-direction: column; justify-content: center; align-items: center;
-        text-align: center; position: relative; overflow: hidden;
-        padding: 0 24px;
+        min-height: 100vh; display: grid; grid-template-columns: 1.15fr 0.85fr;
+        align-items: center; position: relative; z-index: 2;
+        padding: 120px clamp(20px, 6vw, 80px) 70px;
+        max-width: 1400px; margin: 0 auto; gap: 40px;
     }
-    .hero-bg {
-        position: absolute; top: -12%; left: -12%; width: 124%; height: 124%;
-        background: radial-gradient(circle at 50% 45%, #0e2942 0%, var(--gringotts-dark) 68%);
-        z-index: -3;
-    }
-    .hero-glow {
-        position: absolute; top: 50%; left: 50%;
-        width: 900px; height: 900px; margin: -450px 0 0 -450px;
-        background: radial-gradient(circle, rgba(34, 211, 238, 0.14) 0%, rgba(34, 211, 238, 0) 62%);
-        z-index: -2; pointer-events: none;
-        filter: blur(10px);
-        animation: heroGlowBreathe 6s ease-in-out infinite;
-    }
-    @keyframes heroGlowBreathe {
-        0%, 100% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.12); opacity: .75; }
-    }
-    #dust { position: absolute; inset: 0; z-index: -1; display: block; width: 100%; height: 100%; }
-
-    /* Hero title - solid white with cyan glow (removed the gradient that was hiding text) */
-    .hero h1 {
-        font-size: clamp(2.4rem, 7vw, 5.4rem);
-        margin-bottom: 22px;
-        line-height: 1.08;
-        letter-spacing: 1px;
-        color: #ffffff;
-        text-shadow:
-            0 0 20px rgba(34, 211, 238, 0.35),
-            0 0 60px rgba(34, 211, 238, 0.15);
-        animation: heroTitleGlow 4s ease-in-out infinite;
-    }
-    @keyframes heroTitleGlow {
-        0%, 100% { text-shadow: 0 0 20px rgba(34, 211, 238, 0.35), 0 0 60px rgba(34, 211, 238, 0.15); }
-        50% { text-shadow: 0 0 30px rgba(34, 211, 238, 0.55), 0 0 80px rgba(34, 211, 238, 0.3); }
-    }
-    .hero h1 .char { display: inline-block; will-change: transform, opacity; }
-
-    .hero p.hero-subtitle {
-        font-size: clamp(1rem, 1.6vw, 1.35rem);
-        max-width: 700px; color: #a9b0bd; letter-spacing: 1px; line-height: 1.8;
-    }
-    .hero-actions {
-        display: flex; gap: 18px; margin-top: 44px; flex-wrap: wrap; justify-content: center;
-    }
-    .hero-badge {
-        display: inline-flex; align-items: center; gap: 10px;
-        border: 1px solid rgba(34, 211, 238, 0.35);
-        padding: 8px 18px; border-radius: 100px;
-        font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
-        color: var(--cyan-bright); margin-bottom: 30px;
-        background: rgba(34, 211, 238, 0.06);
-    }
-    .hero-badge .pulse {
-        width: 7px; height: 7px; border-radius: 50%; background: var(--cyan-bright);
-        box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7);
-        animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-        0% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.6); }
-        70% { box-shadow: 0 0 0 12px rgba(34, 211, 238, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
+    @media (max-width: 1000px) {
+        .hero { grid-template-columns: 1fr; text-align: center; padding-top: 130px; gap: 20px; }
     }
 
-    .scroll-cue {
-        position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
-        display: flex; flex-direction: column; align-items: center; gap: 12px;
-    }
-    .scroll-cue .mouse {
-        width: 24px; height: 40px; border: 1px solid rgba(34, 211, 238, 0.5); border-radius: 14px;
+    .hero-content { position: relative; z-index: 3; }
+    .hero-hud {
         position: relative;
-        animation: mouseBounce 1.8s ease-in-out infinite;
+        padding: clamp(24px, 4vw, 44px);
+        background: rgba(8, 14, 30, 0.45);
+        backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
     }
-    @keyframes mouseBounce {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-4px); }
+    .hud-corner {
+        position: absolute; width: 28px; height: 28px;
+        border-color: var(--cyan); border-style: solid; border-width: 0; pointer-events: none;
     }
-    .scroll-cue .mouse::after {
-        content: ""; position: absolute; top: 7px; left: 50%; margin-left: -1.5px;
-        width: 3px; height: 7px; border-radius: 2px; background: var(--cyan);
-        animation: wheel 1.8s infinite;
-    }
-    @keyframes wheel {
-        0% { transform: translateY(0); opacity: 1; }
-        70% { transform: translateY(14px); opacity: 0; }
-        100% { transform: translateY(0); opacity: 0; }
-    }
-    .scroll-cue span {
-        font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: #6e7480;
-        font-family: 'Lato', sans-serif; font-weight: 600;
-        animation: cueText 2.4s ease-in-out infinite;
-    }
-    @keyframes cueText {
-        0%, 100% { opacity: .5; letter-spacing: 4px; }
-        50% { opacity: 1; letter-spacing: 6px; }
-    }
+    .hud-corner.tl { top: -1px; left: -1px; border-top-width: 2px; border-left-width: 2px; border-top-left-radius: 8px; }
+    .hud-corner.tr { top: -1px; right: -1px; border-top-width: 2px; border-right-width: 2px; border-top-right-radius: 8px; }
+    .hud-corner.bl { bottom: -1px; left: -1px; border-bottom-width: 2px; border-left-width: 2px; border-bottom-left-radius: 8px; }
+    .hud-corner.br { bottom: -1px; right: -1px; border-bottom-width: 2px; border-right-width: 2px; border-bottom-right-radius: 8px; }
 
-    /* ---------- Ticker ---------- */
-    .ticker {
-        overflow: hidden; background: #04090f;
-        border-top: 1px solid rgba(34, 211, 238, 0.18);
-        border-bottom: 1px solid rgba(34, 211, 238, 0.18);
-        padding: 16px 0;
-        position: relative;
+    .hero-sys {
+        font-family: var(--font-mono); font-size: 11px; letter-spacing: 3.5px; color: var(--cyan);
+        border: 1px solid var(--cyan-dim); padding: 7px 18px; border-radius: 999px; margin-bottom: 24px;
+        display: inline-flex; align-items: center; gap: 10px; background: rgba(0, 240, 255, 0.05);
+        box-shadow: 0 0 20px rgba(0, 240, 255, 0.12);
     }
-    .ticker-track {
-        display: flex; width: max-content;
-        animation: marquee 34s linear infinite;
+    .hero-sys .dot {
+        width: 8px; height: 8px; border-radius: 50%; background: var(--cyan);
+        box-shadow: 0 0 12px var(--cyan); animation: pulseDot 1.6s ease infinite;
+    }
+    @keyframes pulseDot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.85); } }
+
+    /* Decode / Scramble Headline */
+    .hero-title {
+        font-family: var(--font-display); font-weight: 900; line-height: 1.08;
+        font-size: clamp(34px, 5.2vw, 68px); letter-spacing: 1.5px; margin-bottom: 20px;
+        text-transform: uppercase;
+    }
+    .hero-title .glow {
+        background: linear-gradient(92deg, var(--cyan) 0%, #a5f3fc 35%, var(--violet) 70%, var(--gold) 105%);
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+        background-size: 200% auto; animation: sheenGradient 7s linear infinite;
+        filter: drop-shadow(0 0 35px rgba(0, 240, 255, 0.35));
+    }
+    @keyframes sheenGradient { to { background-position: 200% center; } }
+
+    .hero-subtitle {
+        color: var(--text-secondary); font-size: clamp(15px, 1.8vw, 17.5px); line-height: 1.8;
+        font-weight: 300; margin-bottom: 36px; max-width: 620px;
+    }
+    @media (max-width: 1000px) { .hero-subtitle { margin-left: auto; margin-right: auto; } }
+
+    .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+    @media (max-width: 1000px) { .hero-actions { justify-content: center; } }
+
+    /* Magnetic & Cyber Buttons */
+    .btn {
+        font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 2.5px; text-transform: uppercase;
+        padding: 16px 36px; border-radius: 14px; cursor: pointer; text-decoration: none;
+        transition: transform 0.25s var(--ease-out-expo), box-shadow 0.25s, border-color 0.25s;
+        border: none; position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
         will-change: transform;
     }
-    .ticker:hover .ticker-track { animation-play-state: paused; }
-    .ticker-track span {
-        font-family: 'Lato', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 3px;
-        text-transform: uppercase; color: #4e5462; padding: 0 34px;
-        display: flex; align-items: center; gap: 34px; white-space: nowrap;
-        transition: color .3s ease;
+    .btn-primary {
+        color: #01111a; font-weight: 700;
+        background: linear-gradient(135deg, var(--cyan), #0284c7);
+        box-shadow: 0 0 34px rgba(0, 240, 255, 0.45), inset 0 1px 0 rgba(255,255,255,0.4);
     }
-    .ticker-track span:hover { color: var(--cyan-bright); }
-    .ticker-track span::after { content: "◆"; color: var(--cyan); font-size: 8px; animation: sparkPulse 2s ease-in-out infinite; }
-    @keyframes sparkPulse {
-        0%, 100% { opacity: .5; transform: scale(1); }
-        50% { opacity: 1; transform: scale(1.4); }
+    .btn-primary:hover {
+        box-shadow: 0 0 55px rgba(0, 240, 255, 0.65), 0 12px 30px rgba(0, 240, 255, 0.3);
     }
-    @keyframes marquee { to { transform: translateX(-50%); } }
-
-    /* ---------- Section Titles (masked reveal) ---------- */
-    .mask-title {
-        position: relative;
-        overflow: hidden;
-        display: inline-block;
+    .btn-ghost {
+        color: var(--text); background: rgba(8, 14, 30, 0.5);
+        border: 1px solid var(--line-bright); backdrop-filter: blur(12px);
     }
-    .mask-title .mask-inner {
-        display: inline-block;
-        transform: translateY(110%);
-        will-change: transform;
+    .btn-ghost:hover {
+        border-color: var(--cyan); background: rgba(0, 240, 255, 0.08);
+        box-shadow: 0 0 25px rgba(0, 240, 255, 0.2);
     }
 
-    /* ---------- Vault Section ---------- */
-    .vault-section {
-        height: 100vh; min-height: 620px;
-        display: flex; align-items: center;
-        overflow: hidden; background: var(--dark-2);
-        position: relative;
+    /* 3D Holographic Vault Container */
+    .hero-3d-wrap {
+        position: relative; width: 100%; height: 500px;
+        display: flex; align-items: center; justify-content: center;
     }
-    .vault-section::before {
-        content: ""; position: absolute; inset: 0;
-        background: radial-gradient(circle at 50% 120%, rgba(34, 211, 238, 0.08), transparent 60%);
-        pointer-events: none;
+    @media (max-width: 1000px) { .hero-3d-wrap { height: 380px; } }
+    #hero3dCanvas { width: 100%; height: 100%; display: block; outline: none; }
+    .hero-3d-telemetry {
+        position: absolute; bottom: 12px; right: 12px;
+        font-family: var(--font-mono); font-size: 10px; letter-spacing: 2px;
+        color: var(--cyan); background: rgba(2, 4, 10, 0.7);
+        padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line);
+        display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px);
     }
-    .vault-header {
-        position: absolute; top: 12%; left: 50%; transform: translateX(-50%);
-        font-size: clamp(1.6rem, 3.4vw, 3rem); z-index: 10; white-space: nowrap;
-        letter-spacing: 4px; text-align: center;
-        color: #ffffff;
-    }
-    .vault-header small {
-        display: block; font-family: 'Lato', sans-serif; font-weight: 600; font-size: 11px;
-        letter-spacing: 5px; color: #5d6472; margin-top: 10px; text-transform: uppercase;
+    .hero-3d-telemetry span.pulse {
+        width: 6px; height: 6px; border-radius: 50%; background: var(--emerald);
+        box-shadow: 0 0 8px var(--emerald); animation: pulseDot 2s infinite;
     }
 
-    .vault-container {
-        display: flex; gap: 46px;
-        padding: 0 25vw;
-        width: max-content;
-        position: relative; z-index: 2;
-        perspective: 1400px;
+    /* ══════════ MOTION SECTION DIVIDERS ══════════ */
+    .section-beam {
+        position: relative; width: 100%; height: 1px;
+        background: linear-gradient(90deg, transparent 0%, rgba(0, 240, 255, 0.25) 30%, rgba(139, 92, 246, 0.3) 70%, transparent 100%);
+        margin: 20px 0; overflow: hidden;
+    }
+    .section-beam::after {
+        content: ''; position: absolute; top: 0; left: -20%; width: 25%; height: 100%;
+        background: linear-gradient(90deg, transparent, #00f0ff, transparent);
+        box-shadow: 0 0 16px #00f0ff, 0 0 8px #00f0ff;
+        animation: beamSweep 4.5s ease-in-out infinite;
+    }
+    @keyframes beamSweep { 0% { left: -25%; } 100% { left: 110%; } }
+
+    /* ══════════ METRICS HUD STRIP ══════════ */
+    .metrics {
+        position: relative; z-index: 3; max-width: 1240px; margin: 0 auto; padding: 0 clamp(20px, 5vw, 64px);
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px;
+    }
+    .metric-card {
+        background: var(--panel); border: 1px solid var(--line); border-radius: 20px;
+        padding: 24px 28px; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+        position: relative; overflow: hidden; transition: border-color 0.3s, transform 0.3s;
+    }
+    .metric-card:hover { border-color: var(--cyan-dim); transform: translateY(-4px); }
+    .metric-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, var(--cyan), transparent); opacity: 0.7;
+    }
+    .metric-card .v {
+        font-family: var(--font-display); font-size: clamp(26px, 3.2vw, 34px); font-weight: 800;
+        color: var(--text); letter-spacing: 1px;
+    }
+    .metric-card .v em { font-style: normal; color: var(--cyan); font-size: 17px; margin-left: 4px; }
+    .metric-card .k {
+        font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 2.5px; text-transform: uppercase;
+        color: var(--text-secondary); margin-top: 8px;
     }
 
-    .vault-card { width: 400px; height: 500px; flex: 0 0 auto; }
-    .vault-card-inner {
-        position: relative; width: 100%; height: 100%;
-        background: linear-gradient(145deg, var(--panel-2), var(--panel));
-        border: 1px solid rgba(34, 211, 238, 0.2);
-        border-radius: 12px;
-        padding: 44px 40px;
-        display: flex; flex-direction: column; justify-content: center;
-        box-shadow: 0 24px 60px rgba(0,0,0,.55);
-        transition: border-color .4s ease, box-shadow .4s ease;
+    /* ══════════ SECTIONS CORE ══════════ */
+    section {
+        position: relative; z-index: 2; padding: 110px clamp(20px, 6vw, 64px);
+        max-width: 1280px; margin: 0 auto;
+    }
+    .sec-tag {
+        font-family: var(--font-mono); font-size: 11px; letter-spacing: 4px; color: var(--cyan);
+        display: inline-flex; align-items: center; gap: 12px; margin-bottom: 16px;
+    }
+    .sec-tag::before {
+        content: ''; width: 32px; height: 1px; background: var(--cyan);
+        box-shadow: 0 0 10px var(--cyan);
+    }
+    .sec-title {
+        font-family: var(--font-display); font-weight: 800; font-size: clamp(28px, 4.2vw, 48px);
+        letter-spacing: 1px; margin-bottom: 16px; text-transform: uppercase;
+    }
+    .sec-sub {
+        color: var(--text-secondary); max-width: 660px; line-height: 1.85; font-weight: 300;
+        margin-bottom: 54px; font-size: 15.5px;
+    }
+
+    /* Staggered Parallax & Reveal */
+    .reveal {
+        opacity: 0; transform: translateY(40px) scale(0.98);
+        transition: opacity 0.85s var(--ease-out-expo), transform 0.85s var(--ease-out-expo);
+        will-change: opacity, transform;
+    }
+    .reveal.in { opacity: 1; transform: translateY(0) scale(1); }
+
+    /* ══════════ 3D TILT CARDS GRID ══════════ */
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 24px; }
+    .tilt-card {
+        background: var(--panel); border: 1px solid var(--line); border-radius: 22px;
+        padding: 36px 32px; position: relative; overflow: hidden;
+        backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
         transform-style: preserve-3d;
-        overflow: hidden;
-        isolation: isolate;
+        transition: border-color 0.3s, box-shadow 0.3s, transform 0.15s ease-out;
     }
-    .vault-card-inner::before {
-        content: ""; position: absolute; inset: 0;
-        background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%),
-                    rgba(34, 211, 238, 0.18), transparent 55%);
-        opacity: 0; transition: opacity .4s ease; pointer-events: none;
+    .tilt-card:hover {
+        border-color: var(--cyan-dim);
+        box-shadow: 0 30px 70px rgba(0,0,0,0.65), 0 0 45px rgba(0, 240, 255, 0.12);
     }
-    .vault-card-inner::after {
-        content: ""; position: absolute; top: -50%; left: -60%;
-        width: 50%; height: 200%;
-        background: linear-gradient(120deg, transparent 20%, rgba(103,232,249,0.18) 50%, transparent 80%);
-        transform: rotate(20deg);
-        transition: left .9s cubic-bezier(.2,.9,.25,1);
-        pointer-events: none;
-        z-index: 3;
+    /* Dynamic Specular Glare */
+    .tilt-card .card-glare {
+        position: absolute; inset: 0; pointer-events: none; border-radius: 22px;
+        background: radial-gradient(circle 240px at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255, 255, 255, 0.12), transparent 70%);
+        opacity: 0; transition: opacity 0.3s ease;
     }
-    .vault-card-inner:hover::before { opacity: 1; }
-    .vault-card-inner:hover::after { left: 130%; }
-    .vault-card-inner:hover {
-        border-color: rgba(34, 211, 238, 0.75);
-        box-shadow: 0 30px 80px rgba(0,0,0,.7), 0 0 40px rgba(34, 211, 238, 0.15);
-    }
-    .vault-num {
-        font-family: 'Lato', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 4px;
-        color: #4d5464; margin-bottom: 18px;
-    }
-    .vault-card-inner h3 {
-        font-size: 1.9rem; margin-bottom: 18px; line-height: 1.2;
-        transform: translateZ(30px);
-        color: #ffffff;
-    }
-    .vault-card-inner p {
-        line-height: 1.85; color: #8f96a3; font-size: .97rem;
-        transform: translateZ(18px);
-    }
-    .vault-link {
-        margin-top: 30px; display: inline-flex; align-items: center; gap: 10px;
-        font-family: 'Lato', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 2px;
-        text-transform: uppercase; color: var(--cyan-bright);
-        transform: translateZ(24px);
-        cursor: none;
-    }
-    .vault-link .arrow { transition: transform .35s cubic-bezier(.6,.2,.2,1); display: inline-block; }
-    .vault-card-inner:hover .vault-link .arrow { transform: translateX(8px); }
+    .tilt-card:hover .card-glare { opacity: 1; }
 
-    .vault-progress {
-        position: absolute; bottom: 46px; left: 50%; transform: translateX(-50%);
-        width: min(420px, 60vw); height: 1px; background: rgba(34, 211, 238, 0.16);
-        z-index: 10; overflow: hidden;
+    .tilt-card .cid {
+        position: absolute; top: 24px; right: 26px; font-family: var(--font-mono);
+        font-size: 10px; color: var(--muted); letter-spacing: 2px;
     }
-    .vault-progress span {
-        display: block; height: 100%; width: 0%;
-        background: linear-gradient(90deg, #0e7490, var(--cyan-bright));
-        box-shadow: 0 0 10px var(--cyan);
-        position: relative;
+    .tilt-card .ic {
+        width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; font-size: 26px;
+        background: linear-gradient(135deg, rgba(0, 240, 255, 0.14), rgba(139, 92, 246, 0.14));
+        border: 1px solid var(--cyan-dim); margin-bottom: 24px;
+        box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
     }
-    .vault-progress span::after {
-        content: ""; position: absolute; right: 0; top: 50%;
-        width: 8px; height: 8px; margin-top: -4px; border-radius: 50%;
-        background: var(--cyan-bright);
-        box-shadow: 0 0 14px var(--cyan-bright), 0 0 24px var(--cyan);
-        animation: progressDot 1.4s ease-in-out infinite;
+    .tilt-card h3 {
+        font-family: var(--font-display); font-size: 18px; font-weight: 700;
+        letter-spacing: 1px; margin-bottom: 12px; color: var(--text);
     }
-    @keyframes progressDot {
-        0%, 100% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.6); opacity: .6; }
+    .tilt-card p { color: var(--text-secondary); font-size: 14px; line-height: 1.8; font-weight: 300; }
+    .tilt-card .card-tags { display: flex; gap: 8px; margin-top: 22px; flex-wrap: wrap; }
+    .tilt-card .tag {
+        font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 1.5px;
+        padding: 4px 10px; border-radius: 6px; background: rgba(0, 240, 255, 0.06);
+        border: 1px solid rgba(0, 240, 255, 0.15); color: var(--cyan);
     }
 
-    /* ---------- Onboarding ---------- */
-    .onboarding {
-        min-height: 100vh;
-        display: flex; align-items: center; justify-content: center;
-        padding: 120px 50px;
-        background: var(--gringotts-dark);
-        position: relative; overflow: hidden;
+    /* ══════════ DEFENSE GRID & INTERACTIVE SIMULATOR ══════════ */
+    .security-layout {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center;
     }
-    .onboarding::after {
-        content: ""; position: absolute; top: -20%; right: -15%;
-        width: 700px; height: 700px; border-radius: 50%;
-        background: radial-gradient(circle, rgba(34, 211, 238, 0.08), transparent 65%);
-        pointer-events: none;
-        animation: onboardingOrb 12s ease-in-out infinite;
-    }
-    @keyframes onboardingOrb {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        50% { transform: translate(-40px, 40px) scale(1.15); }
-    }
-    .onboarding-grid {
-        display: grid; grid-template-columns: 1fr 1fr;
-        gap: 80px; max-width: 1200px; align-items: center;
-        position: relative; z-index: 2;
-    }
-    .security-text h2 { font-size: clamp(2rem, 3.6vw, 3.4rem); margin-bottom: 28px; line-height: 1.15; color: #ffffff; }
-    .security-text p {
-        font-size: 1.08rem; line-height: 2; color: #a2a8b4; margin-bottom: 38px;
-    }
-    .security-text p .hl { color: var(--cyan-bright); text-shadow: 0 0 12px rgba(34, 211, 238, 0.5); }
+    @media (max-width: 960px) { .security-layout { grid-template-columns: 1fr; } }
 
-    .stat-row {
-        display: flex; gap: 46px; margin-bottom: 42px; flex-wrap: wrap;
+    .shield-stage {
+        position: relative; aspect-ratio: 1; max-width: 460px; margin: 0 auto; width: 100%;
+        display: grid; place-items: center;
     }
-    .stat .num {
-        font-family: 'Lato', sans-serif; font-weight: 700; font-size: 2rem; color: var(--cyan-bright);
-        display: block; line-height: 1;
-        transition: transform .3s ease, text-shadow .3s ease;
-        text-shadow: 0 0 18px rgba(34, 211, 238, 0.4);
+    .shield-ring {
+        position: absolute; border-radius: 50%; border: 1px solid var(--cyan-dim);
     }
-    .stat .num.pulse { animation: statPulse .5s ease; }
-    @keyframes statPulse {
-        0% { transform: scale(1); }
-        40% { transform: scale(1.15); text-shadow: 0 0 30px rgba(34, 211, 238, 0.9); }
-        100% { transform: scale(1); }
+    .shield-ring.sr1 { inset: 0; border-color: rgba(0, 240, 255, 0.2); animation: spinClock 35s linear infinite; }
+    .shield-ring.sr2 { inset: 10%; border-style: dashed; border-color: var(--cyan); animation: spinCounter 25s linear infinite; }
+    .shield-ring.sr3 { inset: 20%; border-color: var(--violet-dim); animation: spinClock 18s linear infinite; }
+    .shield-ring.sr4 { inset: 30%; border-style: dotted; border-color: var(--gold-dim); animation: spinCounter 12s linear infinite; }
+    @keyframes spinClock { to { transform: rotate(360deg); } }
+    @keyframes spinCounter { to { transform: rotate(-360deg); } }
+
+    .shield-core {
+        width: 140px; height: 140px; border-radius: 50%; display: grid; place-items: center; font-size: 54px;
+        background: radial-gradient(circle, rgba(0, 240, 255, 0.25), rgba(2, 4, 10, 0.95) 75%);
+        border: 2px solid var(--cyan); box-shadow: 0 0 60px rgba(0, 240, 255, 0.4), inset 0 0 30px rgba(0, 240, 255, 0.3);
+        z-index: 2; position: relative; transition: all 0.4s ease;
     }
-    .stat .lbl {
-        font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #5d6472;
-        margin-top: 8px; display: block;
+    .shield-stage.alert .shield-core {
+        background: radial-gradient(circle, rgba(239, 68, 68, 0.4), rgba(2, 4, 10, 0.95) 75%);
+        border-color: #ef4444; box-shadow: 0 0 70px rgba(239, 68, 68, 0.6);
     }
 
-    /* Sigil */
-    .sigil-reveal { display: flex; justify-content: center; }
-    .sigil-container {
-        width: min(440px, 100%); aspect-ratio: 1;
-        display: flex; align-items: center; justify-content: center;
-        position: relative;
-        clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0% 100%);
-        cursor: none;
+    .sec-items-list { display: flex; flex-direction: column; gap: 16px; }
+    .sec-card {
+        display: flex; gap: 18px; align-items: flex-start; background: var(--panel);
+        border: 1px solid var(--line); border-radius: 18px; padding: 22px 24px;
+        backdrop-filter: blur(16px); transition: border-color 0.3s, transform 0.3s;
     }
-    .sigil-container::before {
-        content: ""; position: absolute; inset: 6%;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(34, 211, 238, 0.15), transparent 68%);
-        opacity: .5; transition: opacity .5s ease, transform .5s ease;
-        pointer-events: none;
+    .sec-card:hover { border-color: var(--cyan-dim); transform: translateX(8px); }
+    .sec-card .num {
+        font-family: var(--font-mono); color: var(--cyan); font-size: 13px; font-weight: 600; padding-top: 2px;
     }
-    .sigil-container:hover::before { opacity: 1; transform: scale(1.08); }
-    .sigil-svg { width: 100%; height: 100%; overflow: visible; }
-    .sigil-svg .ring { fill: none; stroke: var(--cyan); }
-    .sigil-svg .ring-1 { stroke-width: 1; stroke-dasharray: 3 9; opacity: .7; }
-    .sigil-svg .ring-2 { stroke-width: 1.2; stroke-dasharray: 60 18; opacity: .55; }
-    .sigil-svg .ring-3 { stroke-width: 1; opacity: .3; }
-    .sigil-svg .star { fill: none; stroke: var(--cyan-bright); stroke-width: 1.2; opacity: .8; }
-    .sigil-svg .core { fill: var(--cyan); opacity: .9; }
-    .sigil-svg text {
-        font-family: 'Cinzel', serif; font-size: 15px; letter-spacing: 6px;
-        fill: var(--cyan); opacity: .8;
+    .sec-card h4 { font-size: 16px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+    .sec-card p { color: var(--text-secondary); font-size: 13.5px; line-height: 1.75; font-weight: 300; }
+
+    /* Interactive Threat Simulation Console */
+    .sim-console {
+        margin-top: 28px; background: rgba(3, 7, 18, 0.85); border: 1px solid var(--cyan-dim);
+        border-radius: 16px; padding: 18px 22px; font-family: var(--font-mono);
+    }
+    .sim-header {
+        display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+        font-size: 11px; letter-spacing: 2px; color: var(--muted);
+    }
+    .sim-output {
+        font-size: 12px; color: var(--cyan); min-height: 20px; line-height: 1.5;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .sim-btn {
+        width: 100%; margin-top: 14px; padding: 12px 20px; border-radius: 10px;
+        background: rgba(0, 240, 255, 0.1); border: 1px solid var(--cyan-dim);
+        color: var(--cyan); font-family: var(--font-mono); font-size: 11px; letter-spacing: 2px;
+        text-transform: uppercase; cursor: pointer; transition: all 0.25s;
+    }
+    .sim-btn:hover { background: rgba(0, 240, 255, 0.22); box-shadow: 0 0 25px rgba(0, 240, 255, 0.3); }
+
+    /* ══════════ MULTI-CURRENCY FX TELEMETRY CONVERTER ══════════ */
+    .fx-grid {
+        display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 32px; align-items: center;
+        background: var(--panel-solid); border: 1px solid var(--line); border-radius: 24px;
+        padding: clamp(28px, 5vw, 44px); backdrop-filter: blur(20px);
+    }
+    @media (max-width: 900px) { .fx-grid { grid-template-columns: 1fr; } }
+    .fx-calc { display: flex; flex-direction: column; gap: 16px; }
+    .fx-input-wrap {
+        display: flex; align-items: center; background: rgba(0, 240, 255, 0.04);
+        border: 1px solid var(--line); border-radius: 14px; padding: 12px 18px; gap: 12px;
+    }
+    .fx-input-wrap input {
+        background: transparent; border: none; outline: none; color: var(--text);
+        font-family: var(--font-mono); font-size: 20px; width: 100%;
+    }
+    .fx-input-wrap select {
+        background: rgba(8, 14, 30, 0.8); border: 1px solid var(--line-bright);
+        color: var(--cyan); font-family: var(--font-mono); font-size: 12px;
+        border-radius: 8px; padding: 6px 10px; outline: none; cursor: pointer;
+    }
+    .fx-rate-display {
+        font-family: var(--font-mono); font-size: 12px; color: var(--muted);
+        letter-spacing: 1.5px; display: flex; justify-content: space-between;
+    }
+    .fx-rates-box {
+        display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
+    }
+    .fx-chip {
+        background: rgba(0, 240, 255, 0.04); border: 1px solid var(--line); border-radius: 12px;
+        padding: 14px 16px;
+    }
+    .fx-chip .label { font-family: var(--font-mono); font-size: 10px; color: var(--muted); letter-spacing: 1.5px; }
+    .fx-chip .val { font-family: var(--font-display); font-size: 18px; color: var(--text); margin-top: 4px; font-weight: 700; }
+
+    /* ══════════ LINEAGE TIMELINE ══════════ */
+    .timeline {
+        position: relative; margin-left: 12px; padding-left: 36px;
+        border-left: 1px solid var(--line-bright); display: flex; flex-direction: column; gap: 38px;
+    }
+    .tl-node { position: relative; }
+    .tl-node::before {
+        content: ''; position: absolute; left: -43px; top: 5px; width: 13px; height: 13px;
+        border-radius: 50%; background: var(--void); border: 2px solid var(--cyan);
+        box-shadow: 0 0 16px var(--cyan); transition: transform 0.3s;
+    }
+    .tl-node:hover::before { transform: scale(1.4); background: var(--cyan); }
+    .tl-node .yr {
+        font-family: var(--font-display); color: var(--cyan); font-size: 14px;
+        letter-spacing: 2px; margin-bottom: 8px;
+    }
+    .tl-node h4 { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+    .tl-node p { color: var(--text-secondary); font-size: 14px; line-height: 1.8; font-weight: 300; max-width: 600px; }
+
+    /* ══════════ FULL CTA COMMAND PANEL ══════════ */
+    .cta-panel {
+        position: relative; text-align: center; border-radius: 28px;
+        padding: clamp(50px, 8vw, 96px) 32px;
+        background: radial-gradient(ellipse 75% 85% at 50% -20%, rgba(0, 240, 255, 0.18), transparent 65%),
+                    radial-gradient(ellipse 65% 75% at 50% 120%, rgba(139, 92, 246, 0.12), transparent 60%),
+                    var(--panel-solid);
+        border: 1px solid var(--line-bright); overflow: hidden;
+        box-shadow: 0 30px 90px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .cta-panel h2 {
+        font-family: var(--font-display); font-size: clamp(26px, 4.5vw, 46px); font-weight: 900;
+        letter-spacing: 1.5px; margin-bottom: 18px; text-transform: uppercase;
+    }
+    .cta-panel p {
+        color: var(--text-secondary); max-width: 580px; margin: 0 auto 42px; line-height: 1.85; font-weight: 300;
     }
 
-    .sigil-hint {
-        position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
-        font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: #4d5464;
-        font-family: 'Lato', sans-serif; font-weight: 600; white-space: nowrap;
-        z-index: 4;
-        animation: hintPulse 2.8s ease-in-out infinite;
-    }
-    @keyframes hintPulse {
-        0%, 100% { opacity: .4; letter-spacing: 4px; }
-        50% { opacity: 1; letter-spacing: 5.5px; }
-    }
-
-    /* ---------- Footer ---------- */
+    /* ══════════ SCI-FI FOOTER ══════════ */
     footer {
-        padding: 70px 50px 40px;
-        border-top: 1px solid rgba(34, 211, 238, 0.15);
-        background: #04090f;
+        position: relative; z-index: 2; border-top: 1px solid var(--line);
+        padding: 60px clamp(20px, 6vw, 64px) 40px; background: rgba(1, 3, 8, 0.92);
+        backdrop-filter: blur(20px);
     }
-    .footer-grid {
-        max-width: 1200px; margin: 0 auto;
-        display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 50px;
+    .footer-divider-glow {
+        position: absolute; top: -1px; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, var(--cyan), var(--violet), transparent);
+        box-shadow: 0 0 16px var(--cyan);
     }
-    .footer-grid h4 {
-        font-family: 'Lato', sans-serif; font-weight: 700; color: var(--cyan-bright);
-        font-size: 12px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 22px;
-        position: relative; display: inline-block;
+    .foot-grid {
+        max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between;
+        gap: 40px; flex-wrap: wrap;
     }
-    .footer-grid h4::after {
-        content: ""; position: absolute; left: 0; bottom: -8px;
-        width: 24px; height: 2px; background: var(--cyan);
-        box-shadow: 0 0 10px var(--cyan);
+    .foot-brand p {
+        color: var(--text-secondary); font-size: 13.5px; max-width: 360px; line-height: 1.8;
+        margin-top: 14px; font-weight: 300;
     }
-    .footer-grid p { color: #6d7482; line-height: 1.9; font-size: .92rem; }
-    .footer-grid ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
-    .footer-grid ul a {
-        color: #6d7482; font-size: .92rem;
-        transition: color .3s ease, padding-left .3s ease, text-shadow .3s ease;
+    .foot-links { display: flex; gap: clamp(34px, 6vw, 84px); }
+    .foot-links h5 {
+        font-family: var(--font-mono); font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+        color: var(--cyan); margin-bottom: 18px;
+    }
+    .foot-links a {
+        display: block; color: var(--text-secondary); text-decoration: none; font-size: 13.5px;
+        margin-bottom: 12px; transition: color 0.25s ease;
+    }
+    .foot-links a:hover { color: var(--cyan); }
+    .foot-base {
+        max-width: 1280px; margin: 44px auto 0; padding-top: 24px;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        display: flex; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+        font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.5px; color: var(--muted);
+    }
+
+    /* ══════════ FLOATING UPLINK CONSOLE (FEEDBACK MODAL) ══════════ */
+    .fb-trigger {
+        position: fixed; bottom: 28px; right: 28px; z-index: 95; width: 56px; height: 56px;
+        border-radius: 50%; display: grid; place-items: center; font-size: 22px; cursor: pointer;
+        background: linear-gradient(135deg, rgba(0, 240, 255, 0.22), rgba(139, 92, 246, 0.22));
+        border: 1px solid var(--cyan); backdrop-filter: blur(14px);
+        box-shadow: 0 0 25px rgba(0, 240, 255, 0.35);
+        transition: transform 0.3s var(--ease-spring), box-shadow 0.3s;
+    }
+    .fb-trigger:hover { transform: scale(1.12); box-shadow: 0 0 45px rgba(0, 240, 255, 0.6); }
+
+    .fb-modal {
+        position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center;
+        background: rgba(1, 3, 8, 0.82); backdrop-filter: blur(12px); padding: 20px;
+    }
+    .fb-modal.open { display: flex; }
+    .fb-panel {
+        width: 100%; max-width: 480px; background: var(--panel-solid); border: 1px solid var(--cyan);
+        border-radius: 24px; padding: 36px;
+        box-shadow: 0 40px 120px rgba(0,0,0,0.9), 0 0 60px rgba(0, 240, 255, 0.2);
         position: relative;
     }
-    .footer-grid ul a:hover { color: var(--cyan-bright); padding-left: 8px; text-shadow: 0 0 12px rgba(34, 211, 238, 0.5); }
-    .footer-grid ul a::before {
-        content: "▸"; position: absolute; left: -12px; opacity: 0;
-        transition: opacity .3s ease, transform .3s ease;
-        transform: translateX(-4px);
+    .fb-panel h3 { font-family: var(--font-display); font-size: 17px; letter-spacing: 2.5px; margin-bottom: 8px; color: var(--text); }
+    .fb-panel .fb-sub { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 1.5px; margin-bottom: 24px; }
+    .fb-panel input, .fb-panel textarea {
+        width: 100%; background: rgba(0, 240, 255, 0.04); border: 1px solid var(--line-bright);
+        border-radius: 12px; padding: 14px 16px; color: var(--text); font-family: var(--font-body);
+        font-size: 14px; margin-bottom: 16px; outline: none; resize: vertical; transition: border-color 0.25s, box-shadow 0.25s;
     }
-    .footer-grid ul a:hover::before { opacity: 1; transform: translateX(0); }
-    .footer-bottom {
-        max-width: 1200px; margin: 60px auto 0; padding-top: 26px;
-        border-top: 1px solid rgba(255,255,255,.06);
-        display: flex; justify-content: space-between; flex-wrap: wrap; gap: 14px;
-        font-size: .78rem; color: #4b5160; letter-spacing: 1px;
+    .fb-panel input:focus, .fb-panel textarea:focus {
+        border-color: var(--cyan); box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
     }
-    .footer-logo {
-        display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
-    }
-    .footer-logo img {
-        height: 40px; width: auto;
-        filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.5));
-        animation: logoHeartbeat 4s ease-in-out infinite;
-    }
-
-    /* ---------- Back to top ---------- */
-    .to-top {
-        position: fixed; right: 30px; bottom: 30px; z-index: 900;
-        width: 48px; height: 48px; border-radius: 50%;
-        border: 1px solid rgba(34, 211, 238, 0.4);
-        background: rgba(6, 13, 26, 0.85);
-        backdrop-filter: blur(8px);
-        color: var(--cyan-bright); font-size: 16px;
-        cursor: none; display: grid; place-items: center;
-        opacity: 0; pointer-events: none; transform: translateY(18px) scale(.85);
-        transition: opacity .4s ease, transform .4s ease, background .3s ease, box-shadow .3s ease;
-    }
-    .to-top.show { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); animation: toTopPulse 3s ease-in-out infinite; }
-    .to-top:hover { background: var(--cyan); color: #04121f; box-shadow: 0 0 22px rgba(34, 211, 238, 0.55); }
-    @keyframes toTopPulse {
-        0%, 100% { box-shadow: 0 0 0 rgba(34,211,238,0); }
-        50% { box-shadow: 0 0 22px rgba(34,211,238,0.5); }
-    }
-
-    /* ---------- Modal ---------- */
-    .modal {
-        position: fixed; inset: 0; z-index: 2000;
-        display: flex; align-items: center; justify-content: center;
-        padding: 24px;
-        visibility: hidden; opacity: 0;
-        transition: opacity .4s ease, visibility .4s ease;
-    }
-    .modal.open { visibility: visible; opacity: 1; }
-    .modal-backdrop {
-        position: absolute; inset: 0;
-        background: rgba(3,5,9,.82); backdrop-filter: blur(8px);
-    }
-    .modal-panel {
-        position: relative; z-index: 2;
-        width: min(520px, 100%);
-        background: linear-gradient(160deg, var(--panel-2), var(--panel));
-        border: 1px solid rgba(34, 211, 238, 0.35);
-        border-radius: 14px;
-        padding: 48px 42px 42px;
-        box-shadow: 0 40px 100px rgba(0,0,0,.75), 0 0 60px rgba(34, 211, 238, 0.12);
-        transform: translateY(40px) scale(.96);
-        opacity: 0;
-        transition: transform .5s cubic-bezier(.2,.9,.25,1), opacity .4s ease;
-        overflow: hidden;
-    }
-    .modal.open .modal-panel { transform: translateY(0) scale(1); opacity: 1; }
-    .modal-panel::before {
-        content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-        background: linear-gradient(90deg, transparent, var(--cyan), transparent);
-        animation: modalTopShine 3s ease-in-out infinite;
-    }
-    @keyframes modalTopShine {
-        0%, 100% { opacity: .6; }
-        50% { opacity: 1; box-shadow: 0 0 20px var(--cyan); }
-    }
-    .modal-close {
-        position: absolute; top: 16px; right: 16px;
-        width: 36px; height: 36px; border-radius: 50%;
-        background: transparent; border: 1px solid rgba(34, 211, 238, 0.25);
-        color: var(--cyan-bright); font-size: 18px; line-height: 1;
-        cursor: none; display: grid; place-items: center;
-        transition: background .3s ease, color .3s ease, transform .3s ease;
-    }
-    .modal-close:hover { background: var(--cyan); color: #04121f; transform: rotate(90deg); }
-    .modal-panel h3 { font-size: 1.7rem; margin-bottom: 10px; color: #ffffff; }
-    .modal-sub { color: #7b828f; font-size: .9rem; margin-bottom: 32px; line-height: 1.7; }
-
-    .field { margin-bottom: 22px; position: relative; }
-    .field label {
-        display: block; font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
-        color: #5d6472; margin-bottom: 9px; font-family: 'Lato', sans-serif; font-weight: 600;
-        transition: color .3s ease;
-    }
-    .field input, .field select {
-        width: 100%; padding: 13px 14px;
-        background: rgba(255,255,255,.03);
-        border: 1px solid rgba(255,255,255,.1);
-        border-radius: 8px; color: var(--text-light);
-        font-family: 'Lato', sans-serif; font-size: .95rem;
-        outline: none; cursor: none;
-        transition: border-color .3s ease, box-shadow .3s ease, background .3s ease;
-    }
-    .field select option { background: #0d1b2e; }
-    .field input:focus, .field select:focus {
-        border-color: var(--cyan);
-        box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15), 0 0 20px rgba(34, 211, 238, 0.25);
-        background: rgba(34, 211, 238, 0.04);
-    }
-    .field:focus-within label { color: var(--cyan-bright); text-shadow: 0 0 10px rgba(34, 211, 238, 0.5); }
-    .field.invalid input { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15); }
-
-    .modal-actions { display: flex; gap: 14px; margin-top: 30px; }
-    .modal-actions .btn-gold { flex: 1; padding: 15px; }
-    .modal-actions .btn-gold.loading { pointer-events: none; opacity: .85; }
-
-    .modal-success {
-        position: absolute; inset: 0;
-        background: linear-gradient(160deg, var(--panel-2), var(--panel));
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-        gap: 20px; text-align: center; padding: 40px;
-        opacity: 0; pointer-events: none;
-        transition: opacity .5s ease .1s;
-    }
-    .modal-success.show { opacity: 1; pointer-events: auto; }
-    .check-circle { width: 84px; height: 84px; }
-    .check-circle circle {
-        fill: none; stroke: var(--cyan); stroke-width: 2;
-        stroke-dasharray: 260; stroke-dashoffset: 260;
-    }
-    .check-circle path {
-        fill: none; stroke: var(--cyan-bright); stroke-width: 3.4;
-        stroke-linecap: round; stroke-linejoin: round;
-        stroke-dasharray: 60; stroke-dashoffset: 60;
-    }
-    .modal-success.show .check-circle circle { animation: draw 1s cubic-bezier(.6,0,.2,1) forwards; }
-    .modal-success.show .check-circle path { animation: draw .6s cubic-bezier(.6,0,.2,1) .55s forwards; }
-    @keyframes draw { to { stroke-dashoffset: 0; } }
-    .modal-success h4 { font-family: 'Cinzel', serif; color: var(--cyan-bright); font-size: 1.35rem; }
-    .modal-success p { color: #7b828f; font-size: .9rem; line-height: 1.7; max-width: 300px; }
-
-    .spark {
-        position: fixed; width: 5px; height: 5px; border-radius: 50%;
-        background: var(--cyan-bright); pointer-events: none; z-index: 9998;
-        box-shadow: 0 0 10px var(--cyan);
-    }
-
-    /* ---------- Responsive ---------- */
-    @media (max-width: 1024px) {
-        .onboarding-grid { grid-template-columns: 1fr; gap: 60px; }
-        .sigil-reveal { order: -1; }
-        .sigil-container { width: min(340px, 80%); }
-    }
-    @media (max-width: 860px) {
-        nav { padding: 0 22px; }
-        .nav-links { display: none; }
-        .burger { display: flex; }
-        .nav-right .btn-gold { display: none; }
-        .logo { font-size: 18px; gap: 10px; }
-        .logo img { height: 36px; }
-        .vault-card { width: 300px; height: 440px; }
-        .vault-card-inner { padding: 34px 28px; }
-        .vault-card-inner h3 { font-size: 1.5rem; }
-        .vault-container { padding: 0 12vw; gap: 30px; }
-        .onboarding { padding: 100px 22px; }
-        .footer-grid { grid-template-columns: 1fr; gap: 36px; }
-        footer { padding: 60px 22px 34px; }
-        .stat-row { gap: 30px; }
-    }
-    @media (max-width: 480px) {
-        .hero-actions { flex-direction: column; width: 100%; }
-        .hero-actions .btn-gold, .hero-actions .btn-ghost { width: 100%; }
-        .modal-panel { padding: 40px 24px 32px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        * { animation-duration: .001s !important; animation-iteration-count: 1 !important; transition-duration: .001s !important; }
-    }
+    .fb-status { font-family: var(--font-mono); font-size: 11px; margin-top: 14px; min-height: 18px; color: var(--cyan); }
 </style>
 </head>
 <body>
 
-<!-- ============ AMBIENT BACKGROUND ORBS ============ -->
-<canvas id="orbs"></canvas>
+<!-- Dynamic Cursor Light Follower -->
+<div id="cursorGlow"></div>
 
-<!-- ============ PRELOADER ============ -->
-<div id="preloader">
-    <div class="preloader-inner">
-        <div class="preloader-ring"></div>
-        <div class="preloader-logo">
-            <img src="logo.png" alt="Gringotts Logo" data-fallback="hide">
-            GRINGOTTS
-        </div>
-        <div class="preloader-bar"><span></span></div>
-    </div>
+<!-- Ambient Grid & Particle Layers -->
+<div class="bg-grid"></div>
+<div class="circuit-overlay"></div>
+<div class="bg-orbs"></div>
+<canvas id="netCanvas"></canvas>
+<div class="scanlines"></div>
+
+<!-- Preloader Boot Sequence -->
+<div id="boot">
+    <div class="boot-logo">GRINGOTTS</div>
+    <div class="boot-bar"><span></span></div>
+    <div class="boot-status" id="bootStatus">INITIALIZING SECURE WEALTH GRID…</div>
 </div>
 
-<!-- ============ CURSOR ============ -->
-<div class="cursor-dot"></div>
-<div class="cursor-ring"></div>
-<div class="cursor-trail" id="cursorTrail1"></div>
-<div class="cursor-trail" id="cursorTrail2"></div>
-<div class="cursor-trail" id="cursorTrail3"></div>
-
-<!-- ============ SCROLL PROGRESS ============ -->
-<div class="scroll-progress" id="progressBar"></div>
-
-<!-- ============ NAV ============ -->
-<nav id="nav">
-    <div class="logo scramble" data-text="GRINGOTTS">
-        <img src="logo.png" alt="Gringotts Logo" data-fallback="hide">
-        GRINGOTTS
-    </div>
+<!-- Header Navigation -->
+<nav>
+    <a class="brand" href="#hero">
+        <div class="brand-mark">
+            <img src="logo.png" alt="Gringotts" onerror="this.style.display='none'">
+        </div>
+        <div class="brand-title-wrap">
+            <span class="brand-name">GRINGOTTS</span>
+            <span class="brand-sub">SECURE WEALTH GRID</span>
+        </div>
+    </a>
     <div class="nav-links">
-        <a href="#vaults" class="nav-link magnetic">Vaults</a>
-        <a href="#security" class="nav-link magnetic">Security</a>
-        <a href="#legacy" class="nav-link magnetic">Legacy</a>
-        <a href="#contact" class="nav-link magnetic">Contact</a>
+        <a href="#services">Systems</a>
+        <a href="#security">Defense Grid</a>
+        <a href="#telemetry">Treasury FX</a>
+        <a href="#legacy">Lineage</a>
+        <a href="#contact">Uplink</a>
     </div>
-    <div class="nav-right">
-        <a href="https://phanee.up.railway.app/" class="btn-gold magnetic access-vault-btn" id="accessVaultBtn"><span>Access Vault</span></a>
-        <button class="burger" id="burger" aria-label="Menu">
-            <span></span><span></span><span></span>
-        </button>
-    </div>
+    <a class="nav-cta magnetic" href="https://phanee.up.railway.app/">Access Vault ⟶</a>
 </nav>
 
-<!-- ============ MOBILE MENU ============ -->
-<div class="mobile-menu" id="mobileMenu">
-    <a href="#vaults">Vaults</a>
-    <a href="#security">Security</a>
-    <a href="#legacy">Legacy</a>
-    <a href="#contact">Contact</a>
-    <a href="https://phanee.up.railway.app/" class="access-vault-btn" style="color: var(--cyan-bright); border: 1px solid rgba(34, 211, 238, 0.4); padding: 8px 24px; border-radius: 8px;">Access Vault</a>
-</div>
-
-<!-- ============ HERO ============ -->
+<!-- Full-Screen Hero with 3D Holographic Vault (Three.js) -->
 <header class="hero" id="hero">
-    <div class="hero-bg" id="heroBg"></div>
-    <div class="hero-glow" id="heroGlow"></div>
-    <canvas id="dust"></canvas>
+    <div class="hero-content">
+        <div class="hero-hud">
+            <span class="hud-corner tl"></span><span class="hud-corner tr"></span>
+            <span class="hud-corner bl"></span><span class="hud-corner br"></span>
 
-    <div class="hero-badge hero-anim"><span class="pulse"></span> Est. 1474 · Diagon Alley</div>
-    <h1 class="hero-title" id="heroTitle">The Safest Vault on Earth</h1>
-    <p class="hero-subtitle hero-anim">Unimpeachable security. Ancient magic. Modern wealth management.</p>
+            <div class="hero-sys"><span class="dot"></span> SYSTEM ONLINE · EST. 1474 · DIAGON ALLEY NODE</div>
 
-    <div class="hero-actions hero-anim">
-        <button class="btn-gold magnetic ripple-btn open-vault"><span>Open Your Vault</span></button>
-        <button class="btn-ghost magnetic ripple-btn" id="exploreBtn">Explore Vaults</button>
+            <!-- Scramble/Decode Headline Target -->
+            <h1 class="hero-title" id="heroTitle" data-value="The Safest Vault on Earth">
+                <span class="glow">The Safest Vault on Earth</span>
+            </h1>
+
+            <p class="hero-subtitle">
+                Five and a half centuries of impenetrable vaultcraft, now running on a
+                quantum-hardened wealth grid. Ancient magic, modern cryptography — one
+                uninterrupted lineage of custody.
+            </p>
+
+            <div class="hero-actions">
+                <a class="btn btn-primary magnetic" href="https://phanee.up.railway.app/">
+                    <span>Open Your Vault</span> ⟶
+                </a>
+                <a class="btn btn-ghost magnetic" href="#services">
+                    Explore Systems
+                </a>
+            </div>
+        </div>
     </div>
 
-    <div class="scroll-cue hero-anim">
-        <div class="mouse"></div>
-        <span>Scroll</span>
+    <!-- 3D Three.js Holographic Polyhedral Core -->
+    <div class="hero-3d-wrap">
+        <canvas id="hero3dCanvas"></canvas>
+        <div class="hero-3d-telemetry">
+            <span class="pulse"></span> 3D HOLOGRAPHIC VAULT CORE · 60 FPS
+        </div>
     </div>
 </header>
 
-<!-- ============ TICKER ============ -->
-<div class="ticker">
-    <div class="ticker-track" id="tickerTrack">
-        <span>Goblin-Engineered Security</span>
-        <span>Blood-Binding Contracts</span>
-        <span>Dragon-Guarded Depths</span>
-        <span>Curse-Breaker Advisory</span>
-        <span>Cross-Border Galleon Exchange</span>
-        <span>Subterranean Vault Network</span>
+<div class="section-beam"></div>
+
+<!-- Live Telemetry Metrics Strip -->
+<div class="metrics">
+    <div class="metric-card reveal">
+        <div class="v" data-count="552">0</div>
+        <div class="k">Years of Unbroken Custody</div>
+    </div>
+    <div class="metric-card reveal">
+        <div class="v" data-count="99.99" data-decimals="2">0</div>
+        <div class="k">Grid Uptime Telemetry %</div>
+    </div>
+    <div class="metric-card reveal">
+        <div class="v" data-count="7140000">0</div>
+        <div class="k">Assets Under Ward (Galleons)</div>
+    </div>
+    <div class="metric-card reveal">
+        <div class="v" data-static="BREACH-FREE">BREACH-FREE</div>
+        <div class="k">Historical Security Record</div>
     </div>
 </div>
 
-<!-- ============ VAULTS ============ -->
-<section class="vault-section" id="vaults">
-    <h2 class="vault-header mask-title scramble" data-text="Our Vault Services">
-        <span class="mask-inner">Our Vault Services</span>
-        <small>Levels One through Seven Hundred</small>
-    </h2>
+<!-- Section: Core Systems & Services (3D Tilt Cards) -->
+<section id="services">
+    <div class="sec-tag reveal">CORE SYSTEMS ARCHITECTURE</div>
+    <h2 class="sec-title reveal">Vault Services, Upgraded</h2>
+    <p class="sec-sub reveal">
+        Every service in the grid runs on isolated, holographically-audited ledgers.
+        Hover any node to inspect live sensory protocols.
+    </p>
 
-    <div class="vault-container" id="vaultContainer">
-        <div class="vault-card">
-            <div class="vault-card-inner">
-                <div class="vault-num">VAULT — 001</div>
-                <h3>Standard Vaults</h3>
-                <p>Protected by top-tier goblin security and physical brass locks. Ideal for personal artifacts, family heirlooms, and standard galleon reserves.</p>
-                <a href="#" class="vault-link">Learn More <span class="arrow">→</span></a>
+    <div class="cards-grid">
+        <div class="tilt-card reveal">
+            <span class="cid">SYS-01</span>
+            <div class="card-glare"></div>
+            <div class="ic">🛡️</div>
+            <h3>Subterranean Custody</h3>
+            <p>Multi-layer custody chambers hundreds of kilometres below Diagon Alley, guarded by ancient dragons and 24/7 holographic grid telemetry.</p>
+            <div class="card-tags">
+                <span class="tag">DEEP VAULTS</span>
+                <span class="tag">LEVEL-7 WARD</span>
             </div>
         </div>
-        <div class="vault-card">
-            <div class="vault-card-inner">
-                <div class="vault-num">VAULT — 002</div>
-                <h3>High-Security Vaults</h3>
-                <p>Located in the deepest subterranean levels. Protected by blood-magic identification, layered enchantments, and physical magical beasts.</p>
-                <a href="#" class="vault-link">Learn More <span class="arrow">→</span></a>
+
+        <div class="tilt-card reveal">
+            <span class="cid">SYS-02</span>
+            <div class="card-glare"></div>
+            <div class="ic">🌐</div>
+            <h3>Multi-Currency Treasury</h3>
+            <p>Galleons, Sickles, Knuts, USD, EUR, and GBP — instantaneous conversion across our liquidity mesh with real-time oracle feeds.</p>
+            <div class="card-tags">
+                <span class="tag">MULTI-CURRENCY</span>
+                <span class="tag">ZERO SLIPPAGE</span>
             </div>
         </div>
-        <div class="vault-card">
-            <div class="vault-card-inner">
-                <div class="vault-num">VAULT — 003</div>
-                <h3>Corporate Holdings</h3>
-                <p>Dedicated infrastructure for business acquisitions, seamless magical transfers, and cross-border currency conversion algorithms.</p>
-                <a href="#" class="vault-link">Learn More <span class="arrow">→</span></a>
+
+        <div class="tilt-card reveal">
+            <span class="cid">SYS-03</span>
+            <div class="card-glare"></div>
+            <div class="ic">⚡</div>
+            <h3>Autonomous Dual Key</h3>
+            <p>Maker-checker authorized settlement across the grid. Every asset movement requires goblin dual-signoff with tamper-proof audit trails.</p>
+            <div class="card-tags">
+                <span class="tag">MAKER-CHECKER</span>
+                <span class="tag">256-BIT ENCRYPTION</span>
             </div>
         </div>
-        <div class="vault-card">
-            <div class="vault-card-inner">
-                <div class="vault-num">VAULT — 004</div>
-                <h3>Curse-Breaker Advisory</h3>
-                <p>Consult with our elite in-house curse-breakers to manage cursed estates, hexed artifacts, and complex inheritance laws.</p>
-                <a href="#" class="vault-link">Learn More <span class="arrow">→</span></a>
+
+        <div class="tilt-card reveal">
+            <span class="cid">SYS-04</span>
+            <div class="card-glare"></div>
+            <div class="ic">🧬</div>
+            <h3>Biometric CIF Registry</h3>
+            <p>One unified customer identity from initial onboarding to core banking ledger — straight-through processing with zero re-keying.</p>
+            <div class="card-tags">
+                <span class="tag">BIOMETRIC</span>
+                <span class="tag">INSTANT CIF</span>
             </div>
         </div>
-        <div class="vault-card">
-            <div class="vault-card-inner">
-                <div class="vault-num">VAULT — 005</div>
-                <h3>Dragon Reserve</h3>
-                <p>For assets that breathe. Temperature-controlled, flame-rated chambers overseen by our longest-serving guardians. Insurance included.</p>
-                <a href="#" class="vault-link">Learn More <span class="arrow">→</span></a>
+
+        <div class="tilt-card reveal">
+            <span class="cid">SYS-05</span>
+            <div class="card-glare"></div>
+            <div class="ic">📡</div>
+            <h3>SWIFT-Grade BIC Mesh</h3>
+            <p>Each client node receives its own dedicated BIC on the secure wealth grid, ready for instant cross-realm wire and Galleon settlement.</p>
+            <div class="card-tags">
+                <span class="tag">DEDICATED BIC</span>
+                <span class="tag">ISO 20022 READY</span>
+            </div>
+        </div>
+
+        <div class="tilt-card reveal">
+            <span class="cid">SYS-06</span>
+            <div class="card-glare"></div>
+            <div class="ic">🔮</div>
+            <h3>Predictive Risk Engine</h3>
+            <p>Continuous AML screening, Thief's Downfall enchantment simulation, and behavioral fraud scoring — compliance that never blinks.</p>
+            <div class="card-tags">
+                <span class="tag">THIEF'S DOWNFALL</span>
+                <span class="tag">REAL-TIME TELEMETRY</span>
             </div>
         </div>
     </div>
-
-    <div class="vault-progress"><span id="vaultProgress"></span></div>
 </section>
 
-<!-- ============ ONBOARDING ============ -->
-<section class="onboarding" id="security">
-    <div class="onboarding-grid">
-        <div class="security-text" id="legacy">
-            <h2 class="split-text scramble mask-title" data-text="Forge Your Legacy">
-                <span class="mask-inner">Forge Your Legacy</span>
-            </h2>
-            <p class="fade-text">
-                Opening a vault at Gringotts requires more than just capital. It requires <span class="hl">trust</span>.
-                Our onboarding process involves biometric magical signature verification and binding contracts
-                to ensure your assets remain eternally yours.
+<div class="section-beam"></div>
+
+<!-- Section: Defense Grid & Interactive Threat Simulator -->
+<section id="security">
+    <div class="security-layout">
+        <!-- Visual Shield Animation -->
+        <div class="shield-stage reveal" id="shieldStage">
+            <div class="shield-ring sr1"></div>
+            <div class="shield-ring sr2"></div>
+            <div class="shield-ring sr3"></div>
+            <div class="shield-ring sr4"></div>
+            <div class="shield-core">🐉</div>
+        </div>
+
+        <!-- Defense Description & Live Simulator -->
+        <div>
+            <div class="sec-tag reveal">DEFENSE GRID MATRIX</div>
+            <h2 class="sec-title reveal">The Safest Vault,<br>Formalized.</h2>
+            <p class="sec-sub reveal" style="margin-bottom: 28px;">
+                The Ukrainian Ironbelly at the gate is no longer just a legend —
+                it is the physical manifestation of an impenetrable multi-layered security stack.
             </p>
 
-            <div class="stat-row">
-                <div class="stat fade-text">
-                    <span class="num" data-count="700">0</span>
-                    <span class="lbl">Vault Levels</span>
+            <div class="sec-items-list">
+                <div class="sec-card reveal">
+                    <span class="num">01</span>
+                    <div>
+                        <h4>Enchanted Wards + SHA-256 Cryptography</h4>
+                        <p>Every chamber is sealed by ancient blood-binding oaths and wrapped in modern quantum-resistant cryptographic keys.</p>
+                    </div>
                 </div>
-                <div class="stat fade-text">
-                    <span class="num" data-count="1474" data-raw="true">0</span>
-                    <span class="lbl">Established</span>
+
+                <div class="sec-card reveal">
+                    <span class="num">02</span>
+                    <div>
+                        <h4>Dual-Key Maker-Checker Governance</h4>
+                        <p>No single actor can disburse wealth. Every transaction requires independent verification by senior goblin overseers.</p>
+                    </div>
                 </div>
-                <div class="stat fade-text">
-                    <span class="num" data-count="99" data-suffix=".9%">0</span>
-                    <span class="lbl">Asset Retention</span>
+
+                <div class="sec-card reveal">
+                    <span class="num">03</span>
+                    <div>
+                        <h4>Tamper-Evident Corporate Audit Ledger</h4>
+                        <p>Every login, permission change, and vault opening writes permanently to an append-only cryptographic ledger.</p>
+                    </div>
                 </div>
             </div>
 
-            <button class="btn-gold magnetic fade-text ripple-btn open-vault"><span>Initiate Binding Contract</span></button>
-        </div>
-
-        <div class="sigil-reveal">
-            <div class="sigil-container" id="sigil">
-                <svg class="sigil-svg" viewBox="0 0 400 400">
-                    <defs>
-                        <path id="circlePath" d="M200,200 m-155,0 a155,155 0 1,1 310,0 a155,155 0 1,1 -310,0"/>
-                    </defs>
-                    <circle class="ring ring-3" cx="200" cy="200" r="192"/>
-                    <g id="ringOuter">
-                        <circle class="ring ring-1" cx="200" cy="200" r="170"/>
-                    </g>
-                    <g id="ringMid">
-                        <circle class="ring ring-2" cx="200" cy="200" r="130"/>
-                    </g>
-                    <g id="starGroup">
-                        <polygon class="star" points="200,80 226,168 318,168 244,222 272,310 200,258 128,310 156,222 82,168 174,168"/>
-                        <circle class="core" cx="200" cy="200" r="6"/>
-                    </g>
-                    <text>
-                        <textPath href="#circlePath" startOffset="0">
-                            FORTIUS QUO FIDELIUS • GRINGOTTS • FORTIUS QUO FIDELIUS •
-                        </textPath>
-                    </text>
-                </svg>
-
-                <div class="sigil-hint">Touch the sigil</div>
+            <!-- Interactive Threat Simulation Console -->
+            <div class="sim-console reveal">
+                <div class="sim-header">
+                    <span>SECURITY GRID TELEMETRY</span>
+                    <span id="simStatusBadge" style="color:var(--emerald)">● NORMAL (READY)</span>
+                </div>
+                <div class="sim-output" id="simLog">Click below to simulate defense countermeasures against unauthorized breach…</div>
+                <button class="sim-btn" id="simBtn">⚡ SIMULATE INTRUSION ATTEMPT</button>
             </div>
         </div>
     </div>
 </section>
 
-<!-- ============ FOOTER ============ -->
-<footer id="contact">
-    <div class="footer-grid">
-        <div class="footer-col">
-            <div class="footer-logo">
-                <img src="logo.png" alt="Gringotts Logo" data-fallback="hide">
-                <div class="logo" style="font-size:20px;">GRINGOTTS</div>
+<div class="section-beam"></div>
+
+<!-- Section: Interactive Multi-Currency Treasury Converter -->
+<section id="telemetry">
+    <div class="sec-tag reveal">TREASURY ORACLE FEED</div>
+    <h2 class="sec-title reveal">Live Multi-Currency Matrix</h2>
+    <p class="sec-sub reveal">
+        Convert between wizarding specie and muggle fiat instantly at live goblin exchange rates.
+    </p>
+
+    <div class="fx-grid reveal">
+        <div class="fx-calc">
+            <div class="fx-input-wrap">
+                <input type="number" id="fxAmount" value="1000" min="1">
+                <select id="fxFrom">
+                    <option value="GAL">Galleons (GAL)</option>
+                    <option value="USD">US Dollars (USD)</option>
+                    <option value="EUR">Euros (EUR)</option>
+                    <option value="GBP">British Pounds (GBP)</option>
+                </select>
             </div>
-            <p>Diagon Alley, London. The oldest wizarding bank in the known world — safeguarding fortunes, secrets, and the occasional cursed heirloom since 1474.</p>
+            <div class="fx-rate-display">
+                <span>CONVERSION PROTOCOL: REAL-TIME</span>
+                <span id="fxEquation">1 GAL = $6.64 USD</span>
+            </div>
         </div>
-        <div class="footer-col">
-            <h4>Services</h4>
-            <ul>
-                <li><a href="#vaults">Personal Vaults</a></li>
-                <li><a href="#vaults">Corporate Holdings</a></li>
-                <li><a href="#vaults">Curse Breaking</a></li>
-                <li><a href="#vaults">Currency Exchange</a></li>
-            </ul>
-        </div>
-        <div class="footer-col">
-            <h4>Bank</h4>
-            <ul>
-                <li><a href="#security">Security</a></li>
-                <li><a href="#legacy">Legacy Planning</a></li>
-                <li><a href="https://phanee.up.railway.app/" class="access-vault-btn">Access Vault</a></li>
-                <li><a href="#contact">Contact a Goblin</a></li>
-            </ul>
+
+        <div class="fx-rates-box">
+            <div class="fx-chip">
+                <div class="label">US DOLLARS (USD)</div>
+                <div class="val" id="resUSD">$6,640.00</div>
+            </div>
+            <div class="fx-chip">
+                <div class="label">EUROS (EUR)</div>
+                <div class="val" id="resEUR">€6,120.00</div>
+            </div>
+            <div class="fx-chip">
+                <div class="label">BRITISH POUNDS (GBP)</div>
+                <div class="val" id="resGBP">£5,250.00</div>
+            </div>
+            <div class="fx-chip">
+                <div class="label">SICKLES / KNUTS</div>
+                <div class="val" id="resSub">17,000s / 493,000k</div>
+            </div>
         </div>
     </div>
-    <div class="footer-bottom">
-        <span>© 2025 Gringotts Wizarding Bank. All vaults reserved.</span>
-        <span>Fortius Quo Fidelius</span>
+</section>
+
+<div class="section-beam"></div>
+
+<!-- Section: Lineage Timeline -->
+<section id="legacy">
+    <div class="sec-tag reveal">TEMPORAL CONTINUITY</div>
+    <h2 class="sec-title reveal">Five Centuries, One Grid</h2>
+    <p class="sec-sub reveal">
+        The oldest financial institution in the world — and the most advanced. Same vaults, same dragon, quantum physics.
+    </p>
+
+    <div class="timeline">
+        <div class="tl-node reveal">
+            <div class="yr">1474 · GENESIS</div>
+            <h4>Foundation Beneath Diagon Alley</h4>
+            <p>Gringotts is established by the ancient goblin clans. The subterranean caverns are enchanted and the dragon takes its eternal post.</p>
+        </div>
+
+        <div class="tl-node reveal">
+            <div class="yr">1865 · CHARTER</div>
+            <h4>Exclusive Goblin Ministry Charter</h4>
+            <p>The Ministry of Magic cedes total governance of currency and vault custody to the Gringotts Goblin Council — an unbroken sovereign mandate.</p>
+        </div>
+
+        <div class="tl-node reveal">
+            <div class="yr">1998 · TRIAL</div>
+            <h4>The Great Infiltration</h4>
+            <p>A catastrophic break-in attempt ends with an escaped dragon across London skies — yet the subterranean vault bedrock remains impenetrable.</p>
+        </div>
+
+        <div class="tl-node reveal">
+            <div class="yr">2026 · MODERN ERA</div>
+            <h4>The Secure Wealth Grid Deployment</h4>
+            <p>Gringotts launches the Secure Wealth Grid: live cloud microservices, multi-currency corporate treasury accounts, and individual BICs for global entities.</p>
+        </div>
+    </div>
+</section>
+
+<div class="section-beam"></div>
+
+<!-- Section: CTA Command Console -->
+<section id="contact">
+    <div class="cta-panel reveal">
+        <h2>Open Your Node on<br>the Secure Wealth Grid</h2>
+        <p>
+            Begin your corporate induction covenant. Upon approval, your CIF identity is minted,
+            your vault account is warded, and your dedicated BIC goes live immediately.
+        </p>
+        <a class="btn btn-primary magnetic" href="https://phanee.up.railway.app/">
+            <span>Begin Onboarding</span> ⟶
+        </a>
+    </div>
+</section>
+
+<!-- Sci-Fi Footer -->
+<footer>
+    <div class="footer-divider-glow"></div>
+    <div class="foot-grid">
+        <div class="foot-brand">
+            <a class="brand" href="#hero">
+                <div class="brand-mark">
+                    <img src="logo.png" alt="Gringotts" onerror="this.style.display='none'">
+                </div>
+                <div>
+                    <span class="brand-name">GRINGOTTS</span>
+                    <span class="brand-sub">SECURE WEALTH GRID</span>
+                </div>
+            </a>
+            <p>
+                Diagon Alley, London · Overseen by the Goblin High Council in covenant with the International Confederation of Wizards.
+                Breach-free for 552 years and counting.
+            </p>
+        </div>
+
+        <div class="foot-links">
+            <div>
+                <h5>Grid Architecture</h5>
+                <a href="#services">Core Systems</a>
+                <a href="#security">Defense Matrix</a>
+                <a href="#telemetry">Treasury FX</a>
+                <a href="#legacy">Lineage History</a>
+            </div>
+            <div>
+                <h5>Vault Access</h5>
+                <a href="https://phanee.up.railway.app/">Client Vault Sanctum</a>
+                <a href="https://phanee.up.railway.app/">Corporate Onboarding</a>
+                <a href="/rm">RM Overseer Portal</a>
+                <a href="/api/v1/gateway/health">Mesh Health API</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="foot-base">
+        <span>© 2026 GRINGOTTS WIZARDING BANK — SECURE WEALTH GRID v3.2</span>
+        <span>NODE: DIAGON-ALLEY-01 · STATUS: <span style="color:var(--cyan)">● ONLINE</span> · LATENCY: 12ms</span>
     </div>
 </footer>
 
-<!-- ============ BACK TO TOP ============ -->
-<button class="to-top magnetic" id="toTop" aria-label="Back to top">↑</button>
+<!-- Floating Uplink Button & Transmission Modal -->
+<div class="fb-trigger" id="fbTrigger" title="Send a transmission to Gringotts Operators">💬</div>
 
-<!-- ============ MODAL ============ -->
-<div class="modal" id="modal">
-    <div class="modal-backdrop" data-close></div>
-    <div class="modal-panel">
-        <button class="modal-close" data-close aria-label="Close">✕</button>
-
-        <form id="vaultForm" novalidate>
-            <h3>Open Your Vault</h3>
-            <p class="modal-sub">Complete the preliminary binding form. A goblin representative will contact you within three business days.</p>
-
-            <div class="field">
-                <label for="fullName">Full Legal Name</label>
-                <input type="text" id="fullName" placeholder="e.g. Hermione J. Granger" required>
-            </div>
-            <div class="field">
-                <label for="owlAddress">Owl / Fireplace Address</label>
-                <input type="text" id="owlAddress" placeholder="e.g. 12 Grimmauld Place" required>
-            </div>
-            <div class="field">
-                <label for="vaultType">Vault Classification</label>
-                <select id="vaultType">
-                    <option>Standard Vault</option>
-                    <option>High-Security Vault</option>
-                    <option>Corporate Holdings</option>
-                    <option>Dragon Reserve</option>
-                </select>
-            </div>
-
-            <div class="modal-actions">
-                <button type="submit" class="btn-gold ripple-btn" id="submitBtn"><span>Seal the Contract</span></button>
-            </div>
-        </form>
-
-        <div class="modal-success" id="modalSuccess">
-            <svg class="check-circle" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="42"/>
-                <path d="M30 51 L44 65 L71 37"/>
-            </svg>
-            <h4>Contract Sealed</h4>
-            <p>Your magical signature has been recorded. Welcome to Gringotts.</p>
-        </div>
+<div class="fb-modal" id="fbModal">
+    <div class="fb-panel">
+        <h3>📡 SEND TRANSMISSION</h3>
+        <div class="fb-sub">ENCRYPTED UPLINK DIRECTLY TO GOBLIN VAULT OPERATORS</div>
+        <input id="fbName" placeholder="Your name / callsign (e.g. Albus D.)">
+        <textarea id="fbText" rows="4" placeholder="Transmit feedback, inquiries, or security reports…"></textarea>
+        <button class="btn btn-primary fb-send" id="fbSend" style="width:100%">Transmit ⟶</button>
+        <div class="fb-status" id="fbStatus"></div>
     </div>
 </div>
 
-<!-- ============ GSAP ============ -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-
+<!-- Interactive Scripts: Three.js 3D Vault, Cipher Decode, Magnetic Buttons, 3D Tilt, Particle Mesh -->
 <script>
-/* =====================================================
-   0. UTILITIES
-   ===================================================== */
-gsap.registerPlugin(ScrollTrigger);
-
-const isTouch = window.matchMedia('(hover: none), (pointer: coarse)').matches;
-const $  = (s, c = document) => c.querySelector(s);
-const $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
-
-/* ---------- Broken image handling with robust fallback ---------- */
-document.querySelectorAll('img[data-fallback]').forEach(img => {
-    img.addEventListener('error', () => {
-        if (!img.dataset.triedFallback) {
-            img.dataset.triedFallback = '1';
-            img.src = img.src.includes('/images/') ? 'logo.png' : '/images/bank-logo-dragon.png';
-            return;
+/* ═══════════════════════════════════════════════
+   1. BOOT SEQUENCE & PRELOADER
+   ═══════════════════════════════════════════════ */
+window.addEventListener('load', () => {
+    const status = document.getElementById('bootStatus');
+    const lines = [
+        'INITIALIZING SECURE WEALTH GRID…',
+        'SYNCHRONIZING THREE.JS HOLOGRAPHIC VAULT…',
+        'ESTABLISHING DIAGON ALLEY NODE UPLINK…',
+        'DEFENSE MATRIX ONLINE · GRID READY.'
+    ];
+    let step = 0;
+    const interval = setInterval(() => {
+        step++;
+        if (step < lines.length) {
+            status.textContent = lines[step];
+        } else {
+            clearInterval(interval);
+            setTimeout(() => {
+                const boot = document.getElementById('boot');
+                boot.classList.add('done');
+                triggerTitleDecode();
+            }, 300);
         }
-        if (img.dataset.fallback === 'hide') {
-            img.classList.add('broken');
+    }, 380);
+});
+
+/* ═══════════════════════════════════════════════
+   2. CURSOR SPOTLIGHT FOLLOW (LERP INTERPOLATION)
+   ═══════════════════════════════════════════════ */
+const cursorGlow = document.getElementById('cursorGlow');
+let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+let cursorX = mouseX, cursorY = mouseY;
+
+window.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+});
+
+function animateCursor() {
+    cursorX += (mouseX - cursorX) * 0.12;
+    cursorY += (mouseY - cursorY) * 0.12;
+    if (cursorGlow) {
+        cursorGlow.style.left = `${cursorX}px`;
+        cursorGlow.style.top = `${cursorY}px`;
+    }
+    requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+/* ═══════════════════════════════════════════════
+   3. TEXT CIPHER / DECODE EFFECT (HEADLINE)
+   ═══════════════════════════════════════════════ */
+function triggerTitleDecode() {
+    const el = document.querySelector('#heroTitle .glow');
+    if (!el) return;
+    const targetText = "THE SAFEST VAULT ON EARTH";
+    const glyphs = "01XZ◇◈⬡0x7F░▒▓∆∇⌘ΨΩ";
+    let iteration = 0;
+
+    const interval = setInterval(() => {
+        el.textContent = targetText.split("").map((letter, index) => {
+            if (index < iteration) {
+                return targetText[index];
+            }
+            if (letter === " ") return " ";
+            return glyphs[Math.floor(Math.random() * glyphs.length)];
+        }).join("");
+
+        if (iteration >= targetText.length) {
+            clearInterval(interval);
+            el.textContent = targetText;
         }
+        iteration += 1 / 2;
+    }, 30);
+}
+
+/* ═══════════════════════════════════════════════
+   4. THREE.JS 3D HOLOGRAPHIC VAULT CORE (HERO)
+   ═══════════════════════════════════════════════ */
+(() => {
+    const canvas = document.getElementById('hero3dCanvas');
+    if (!canvas || typeof THREE === 'undefined') return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+    camera.position.z = 4.2;
+
+    let renderer;
+    try {
+        renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    } catch (e) {
+        console.warn("WebGL not available for 3D vault", e);
+        return;
+    }
+
+    // Outer Holographic Wireframe Icosahedron
+    const outerGeo = new THREE.IcosahedronGeometry(1.4, 1);
+    const outerMat = new THREE.MeshBasicMaterial({
+        color: 0x00f0ff,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.45
+    });
+    const outerMesh = new THREE.Mesh(outerGeo, outerMat);
+    scene.add(outerMesh);
+
+    // Inner Glowing Polyhedral Dodecahedron
+    const innerGeo = new THREE.DodecahedronGeometry(0.9, 0);
+    const innerMat = new THREE.MeshBasicMaterial({
+        color: 0x8b5cf6,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.6
+    });
+    const innerMesh = new THREE.Mesh(innerGeo, innerMat);
+    scene.add(innerMesh);
+
+    // Core Sphere (Energy Core)
+    const coreGeo = new THREE.SphereGeometry(0.35, 16, 16);
+    const coreMat = new THREE.MeshBasicMaterial({
+        color: 0x00f0ff,
+        wireframe: false,
+        transparent: true,
+        opacity: 0.85
+    });
+    const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+    scene.add(coreMesh);
+
+    // Orbital Particle Rings (Cyan & Gold)
+    const particlesCount = 220;
+    const ringGeo = new THREE.BufferGeometry();
+    const ringPositions = new Float32Array(particlesCount * 3);
+
+    for (let i = 0; i < particlesCount; i++) {
+        const angle = (i / particlesCount) * Math.PI * 2;
+        const radius = 1.9 + (Math.random() - 0.5) * 0.2;
+        ringPositions[i * 3] = Math.cos(angle) * radius;
+        ringPositions[i * 3 + 1] = (Math.random() - 0.5) * 0.35;
+        ringPositions[i * 3 + 2] = Math.sin(angle) * radius;
+    }
+    ringGeo.setAttribute('position', new THREE.BufferAttribute(ringPositions, 3));
+    const ringMat = new THREE.PointsMaterial({
+        color: 0x00f0ff,
+        size: 0.045,
+        transparent: true,
+        opacity: 0.75
+    });
+    const particleRing = new THREE.Points(ringGeo, ringMat);
+    particleRing.rotation.x = Math.PI / 4;
+    scene.add(particleRing);
+
+    // Second Tilted Gold Ring
+    const goldRing = particleRing.clone();
+    goldRing.material = new THREE.PointsMaterial({ color: 0xffd700, size: 0.04, transparent: true, opacity: 0.7 });
+    goldRing.rotation.x = -Math.PI / 3;
+    goldRing.rotation.z = Math.PI / 6;
+    scene.add(goldRing);
+
+    // Interactive mouse damping
+    let targetRotX = 0, targetRotY = 0;
+    window.addEventListener('mousemove', e => {
+        const nx = (e.clientX / window.innerWidth) - 0.5;
+        const ny = (e.clientY / window.innerHeight) - 0.5;
+        targetRotX = ny * 0.7;
+        targetRotY = nx * 0.7;
+    });
+
+    function resize3D() {
+        if (!canvas) return;
+        const w = canvas.clientWidth;
+        const h = canvas.clientHeight;
+        if (canvas.width !== w || canvas.height !== h) {
+            renderer.setSize(w, h, false);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+    }
+
+    function render3D() {
+        resize3D();
+
+        outerMesh.rotation.x += 0.003;
+        outerMesh.rotation.y += 0.005;
+        innerMesh.rotation.x -= 0.004;
+        innerMesh.rotation.y -= 0.006;
+        particleRing.rotation.y += 0.004;
+        goldRing.rotation.y -= 0.003;
+
+        // Smooth mouse orientation
+        scene.rotation.x += (targetRotX - scene.rotation.x) * 0.05;
+        scene.rotation.y += (targetRotY - scene.rotation.y) * 0.05;
+
+        // Core Pulse
+        const scale = 1 + Math.sin(Date.now() * 0.003) * 0.12;
+        coreMesh.scale.set(scale, scale, scale);
+
+        renderer.render(scene, camera);
+        requestAnimationFrame(render3D);
+    }
+    render3D();
+    window.addEventListener('resize', resize3D);
+})();
+
+/* ═══════════════════════════════════════════════
+   5. MAGNETIC BUTTONS INTERACTION
+   ═══════════════════════════════════════════════ */
+document.querySelectorAll('.magnetic').forEach(btn => {
+    btn.addEventListener('mousemove', e => {
+        const rect = btn.getBoundingClientRect();
+        const x = e.clientX - (rect.left + rect.width / 2);
+        const y = e.clientY - (rect.top + rect.height / 2);
+        btn.style.transform = `translate3d(${x * 0.28}px, ${y * 0.28}px, 0)`;
+    });
+    btn.addEventListener('mouseleave', () => {
+        btn.style.transform = 'translate3d(0, 0, 0)';
     });
 });
 
-/* Split a heading into individual <span class="char"> elements */
-function splitChars(el) {
-    if (!el) return [];
-    const text = el.textContent.trim();
-    el.textContent = '';
-    const frag = document.createDocumentFragment();
-    for (const ch of text) {
-        if (ch === ' ') { frag.appendChild(document.createTextNode(' ')); continue; }
-        const s = document.createElement('span');
-        s.className = 'char';
-        s.textContent = ch;
-        frag.appendChild(s);
-    }
-    el.appendChild(frag);
-    return el.querySelectorAll('.char');
-}
+/* ═══════════════════════════════════════════════
+   6. 3D CARD TILT & SPECULAR GLARE
+   ═══════════════════════════════════════════════ */
+document.querySelectorAll('.tilt-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
 
-function scramble(el) {
-    if (!el) return;
-    const original = el.dataset.text || el.textContent.trim();
-    el.dataset.text = original;
-    const pool = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789•◆/\\';
-    let frame = 0;
-    clearInterval(el._scrambleTimer);
-    el._scrambleTimer = setInterval(() => {
-        el.textContent = original.split('').map((c, i) => {
-            if (c === ' ') return ' ';
-            if (frame / 3 > i) return c;
-            return pool[Math.floor(Math.random() * pool.length)];
-        }).join('');
-        frame++;
-        if (frame > original.length * 3) {
-            clearInterval(el._scrambleTimer);
-            el.textContent = original;
-        }
-    }, 28);
-}
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
 
-/* =====================================================
-   1. HERO INTRO (ROBUST) — text always visible eventually
-   ===================================================== */
-const heroChars = splitChars($('#heroTitle'));
+        const rotateX = ((y - centerY) / centerY) * -9;
+        const rotateY = ((x - centerX) / centerX) * 9;
 
-/* Set initial state via GSAP so the timeline animates TO visible.
-   If GSAP ever fails to play the timeline, we force-play it after a fallback. */
-const heroAnimEls = $$('.hero-anim');
-const heroIntro = gsap.timeline({ paused: true });
-
-heroIntro
-    .fromTo(heroChars,
-        { yPercent: 120, opacity: 0, rotateX: -80 },
-        { yPercent: 0, opacity: 1, rotateX: 0, duration: 1.1, ease: 'power4.out', stagger: 0.028 }
-    )
-    .fromTo('.hero-badge',
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: .8, ease: 'power3.out' },
-        '-=0.75'
-    )
-    .fromTo('.hero-subtitle',
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: .9, ease: 'power2.out' },
-        '-=0.55'
-    )
-    .fromTo('.hero-actions',
-        { opacity: 0, y: 26 },
-        { opacity: 1, y: 0, duration: .8, ease: 'power3.out' },
-        '-=0.6'
-    )
-    .fromTo('.scroll-cue',
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: .7 },
-        '-=0.4'
-    );
-
-/* Immediately apply the "from" state so hero text is hidden at first paint */
-gsap.set(heroChars, { yPercent: 120, opacity: 0, rotateX: -80 });
-gsap.set('.hero-badge', { opacity: 0, y: 20 });
-gsap.set('.hero-subtitle', { opacity: 0, y: 20 });
-gsap.set('.hero-actions', { opacity: 0, y: 26 });
-gsap.set('.scroll-cue', { opacity: 0, y: 20 });
-
-let heroPlayed = false;
-function playHero() {
-    if (heroPlayed) return;
-    heroPlayed = true;
-    heroIntro.play();
-}
-
-/* Hard fallback: if preloader never finishes within 4s, reveal hero */
-gsap.delayedCall(4, playHero);
-setTimeout(playHero, 4200); // belt-and-suspenders
-
-/* =====================================================
-   2. PRELOADER
-   ===================================================== */
-let preloaderDone = false;
-function runPreloader() {
-    if (preloaderDone) return;
-    preloaderDone = true;
-
-    const tl = gsap.timeline();
-    tl.to('.preloader-bar span', { width: '100%', duration: 1.1, ease: 'power2.inOut' })
-      .to('.preloader-inner', { opacity: 0, y: -24, duration: .5, ease: 'power2.in' }, '+=0.1')
-      .to('#preloader', {
-          opacity: 0, duration: .7, ease: 'power2.inOut',
-          onComplete: () => { $('#preloader').style.display = 'none'; }
-      }, '-=0.25')
-      .add(playHero, '-=0.45');
-}
-
-window.addEventListener('load', () => setTimeout(runPreloader, 300));
-setTimeout(runPreloader, 2600); // fallback if 'load' is slow
-
-/* =====================================================
-   3. CUSTOM CURSOR
-   ===================================================== */
-if (!isTouch) {
-    const dot  = $('.cursor-dot');
-    const ring = $('.cursor-ring');
-    const trails = [$('#cursorTrail1'), $('#cursorTrail2'), $('#cursorTrail3')];
-
-    const dotX  = gsap.quickTo(dot,  'x', { duration: 0.12, ease: 'power3' });
-    const dotY  = gsap.quickTo(dot,  'y', { duration: 0.12, ease: 'power3' });
-    const ringX = gsap.quickTo(ring, 'x', { duration: 0.5,  ease: 'power3' });
-    const ringY = gsap.quickTo(ring, 'y', { duration: 0.5,  ease: 'power3' });
-    const trailX = trails.map(t => t ? gsap.quickTo(t, 'x', { duration: 0.45, ease: 'power3' }) : null);
-    const trailY = trails.map(t => t ? gsap.quickTo(t, 'y', { duration: 0.45, ease: 'power3' }) : null);
-
-    window.addEventListener('mousemove', e => {
-        dotX(e.clientX); dotY(e.clientY);
-        ringX(e.clientX); ringY(e.clientY);
-        trailX.forEach(fn => fn && fn(e.clientX));
-        trailY.forEach(fn => fn && fn(e.clientY));
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+        card.style.setProperty('--glare-x', `${x}px`);
+        card.style.setProperty('--glare-y', `${y}px`);
     });
 
-    let trailVisible = false;
-    window.addEventListener('mousemove', () => {
-        if (trailVisible) return;
-        trailVisible = true;
-        trails.forEach((t, i) => {
-            if (t) gsap.to(t, { opacity: .55 - i * 0.15, duration: .6, delay: i * 0.05 });
-        });
+    card.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
     });
+});
 
-    document.addEventListener('mousedown', () => ring.classList.add('is-down'));
-    document.addEventListener('mouseup',   () => ring.classList.remove('is-down'));
+/* ═══════════════════════════════════════════════
+   7. PARTICLE NETWORK CANVAS (BACKGROUND)
+   ═══════════════════════════════════════════════ */
+(() => {
+    const c = document.getElementById('netCanvas');
+    if (!c) return;
+    const ctx = c.getContext('2d');
+    let W, H, pts = [];
 
-    const hoverSelector = 'a, button, .vault-card-inner, .sigil-container, input, select, .logo';
-    document.addEventListener('mouseover', e => {
-        if (e.target.closest(hoverSelector)) ring.classList.add('is-hover');
-    });
-    document.addEventListener('mouseout', e => {
-        if (e.target.closest(hoverSelector)) ring.classList.remove('is-hover');
-    });
-
-    document.addEventListener('click', e => {
-        for (let i = 0; i < 12; i++) {
-            const s = document.createElement('div');
-            s.className = 'spark';
-            document.body.appendChild(s);
-            const angle = (Math.PI * 2 * i) / 12 + Math.random();
-            const dist = 40 + Math.random() * 70;
-            gsap.set(s, { x: e.clientX, y: e.clientY, scale: 1 });
-            gsap.to(s, {
-                x: e.clientX + Math.cos(angle) * dist,
-                y: e.clientY + Math.sin(angle) * dist,
-                scale: 0, opacity: 0, duration: .7 + Math.random() * .4,
-                ease: 'power2.out',
-                onComplete: () => s.remove()
-            });
-        }
-    });
-}
-
-/* =====================================================
-   4. AMBIENT BACKGROUND ORBS
-   ===================================================== */
-(function ambientOrbs() {
-    const canvas = $('#orbs');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let W = 0, H = 0, orbs = [];
-
-    const sprite = document.createElement('canvas');
-    sprite.width = sprite.height = 256;
-    const sctx = sprite.getContext('2d');
-    const grad = sctx.createRadialGradient(128, 128, 0, 128, 128, 128);
-    grad.addColorStop(0, 'rgba(34, 211, 238, 0.55)');
-    grad.addColorStop(0.35, 'rgba(34, 211, 238, 0.15)');
-    grad.addColorStop(1, 'rgba(34, 211, 238, 0.0)');
-    sctx.fillStyle = grad;
-    sctx.fillRect(0, 0, 256, 256);
-
-    function resize() {
-        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-        W = window.innerWidth;
-        H = window.innerHeight;
-        canvas.width = W * dpr;
-        canvas.height = H * dpr;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        buildOrbs();
+    function resizeNet() {
+        W = c.width = window.innerWidth;
+        H = c.height = window.innerHeight;
     }
 
-    function buildOrbs() {
-        const count = Math.max(4, Math.floor(W / 400));
-        orbs = Array.from({ length: count }, () => ({
+    const count = () => Math.min(80, Math.floor(window.innerWidth / 18));
+
+    function initNet() {
+        resizeNet();
+        pts = Array.from({ length: count() }, () => ({
             x: Math.random() * W,
             y: Math.random() * H,
-            r: 180 + Math.random() * 220,
-            vx: (Math.random() - 0.5) * 0.14,
-            vy: (Math.random() - 0.5) * 0.14,
-            a: 0.2 + Math.random() * 0.3,
-            phase: Math.random() * Math.PI * 2
+            vx: (Math.random() - 0.5) * 0.45,
+            vy: (Math.random() - 0.5) * 0.45
         }));
     }
 
-    let t = 0;
-    function frame() {
+    function tickNet() {
         ctx.clearRect(0, 0, W, H);
-        t += 0.006;
 
-        for (const o of orbs) {
-            o.x += o.vx;
-            o.y += o.vy;
-            if (o.x < -o.r) o.x = W + o.r;
-            if (o.x > W + o.r) o.x = -o.r;
-            if (o.y < -o.r) o.y = H + o.r;
-            if (o.y > H + o.r) o.y = -o.r;
-
-            const pulse = 0.75 + 0.25 * Math.sin(t * 2 + o.phase);
-            ctx.globalAlpha = o.a * pulse;
-            ctx.drawImage(sprite, o.x - o.r, o.y - o.r, o.r * 2, o.r * 2);
-        }
-        ctx.globalAlpha = 1;
-        requestAnimationFrame(frame);
-    }
-
-    resize();
-    window.addEventListener('resize', resize);
-    frame();
-})();
-
-/* =====================================================
-   5. CYAN DUST CANVAS (hero)
-   ===================================================== */
-(function cyanDust() {
-    const canvas = $('#dust');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let W = 0, H = 0, particles = [];
-    const mouse = { x: -9999, y: -9999 };
-
-    const sprite = document.createElement('canvas');
-    sprite.width = sprite.height = 64;
-    const sctx = sprite.getContext('2d');
-    const grad = sctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-    grad.addColorStop(0,   'rgba(180, 240, 255, 1)');
-    grad.addColorStop(0.25,'rgba(34, 211, 238, 0.65)');
-    grad.addColorStop(1,   'rgba(34, 211, 238, 0)');
-    sctx.fillStyle = grad;
-    sctx.fillRect(0, 0, 64, 64);
-
-    function resize() {
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        W = canvas.clientWidth;
-        H = canvas.clientHeight;
-        canvas.width  = W * dpr;
-        canvas.height = H * dpr;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        buildParticles();
-    }
-
-    function buildParticles() {
-        const count = Math.min(Math.floor(W / 12), 130);
-        particles = Array.from({ length: count }, () => spawn(true));
-    }
-
-    function spawn(initial) {
-        return {
-            x: Math.random() * W,
-            y: initial ? Math.random() * H : H + 20,
-            r: 0.6 + Math.random() * 1.9,
-            vx: (Math.random() - 0.5) * 0.22,
-            vy: -(0.15 + Math.random() * 0.55),
-            a: 0.15 + Math.random() * 0.5,
-            tw: Math.random() * Math.PI * 2
-        };
-    }
-
-    canvas.addEventListener('mousemove', e => {
-        const rect = canvas.getBoundingClientRect();
-        mouse.x = e.clientX - rect.left;
-        mouse.y = e.clientY - rect.top;
-    });
-    canvas.addEventListener('mouseleave', () => { mouse.x = mouse.y = -9999; });
-
-    let t = 0;
-    function frame() {
-        ctx.clearRect(0, 0, W, H);
-        t += 0.02;
-
-        for (const p of particles) {
-            const dx = p.x - mouse.x;
-            const dy = p.y - mouse.y;
-            const d2 = dx * dx + dy * dy;
-            if (d2 < 13000) {
-                const d = Math.sqrt(d2) || 1;
-                const force = (1 - d / 115) * 0.9;
-                p.x += (dx / d) * force;
-                p.y += (dy / d) * force;
-            }
-
+        for (const p of pts) {
             p.x += p.vx;
             p.y += p.vy;
-            p.x += Math.sin(t + p.tw) * 0.12;
+            if (p.x < 0 || p.x > W) p.vx *= -1;
+            if (p.y < 0 || p.y > H) p.vy *= -1;
 
-            if (p.y < -30 || p.x < -40 || p.x > W + 40) {
-                Object.assign(p, spawn(false));
-            }
-
-            const alpha = p.a * (0.65 + 0.35 * Math.sin(t * 2 + p.tw));
-            ctx.globalAlpha = alpha;
-            const size = p.r * 9;
-            ctx.drawImage(sprite, p.x - size / 2, p.y - size / 2, size, size);
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 240, 255, 0.45)';
+            ctx.fill();
         }
-        ctx.globalAlpha = 1;
-        requestAnimationFrame(frame);
-    }
 
-    resize();
-    window.addEventListener('resize', resize);
-    frame();
-})();
-
-/* =====================================================
-   6. HERO MOUSE PARALLAX
-   ===================================================== */
-if (!isTouch) {
-    const glow = $('#heroGlow');
-    const heroContent = [$('.hero-badge'), $('#heroTitle'), $('.hero-subtitle'), $('.hero-actions')].filter(Boolean);
-
-    const gx = gsap.quickTo(glow, 'x', { duration: 1.1, ease: 'power3' });
-    const gy = gsap.quickTo(glow, 'y', { duration: 1.1, ease: 'power3' });
-
-    window.addEventListener('mousemove', e => {
-        const nx = (e.clientX / window.innerWidth  - 0.5);
-        const ny = (e.clientY / window.innerHeight - 0.5);
-        gx(nx * 130);
-        gy(ny * 130);
-
-        heroContent.forEach((el, i) => {
-            gsap.to(el, {
-                x: nx * (14 - i * 2),
-                y: ny * (10 - i * 1.6),
-                duration: 1.2,
-                ease: 'power3.out',
-                overwrite: 'auto'
-            });
-        });
-    });
-}
-
-/* =====================================================
-   7. SCROLL PROGRESS + NAV + BACK TO TOP
-   ===================================================== */
-const progressBar = $('#progressBar');
-const nav = $('#nav');
-const toTop = $('#toTop');
-let lastY = window.scrollY;
-
-function onScroll() {
-    const y = window.scrollY;
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    const pct = max > 0 ? y / max : 0;
-    progressBar.style.width = (pct * 100) + '%';
-
-    nav.classList.toggle('scrolled', y > 60);
-
-    if (y < 120) nav.classList.remove('nav-hidden');
-    else if (y > lastY + 6) nav.classList.add('nav-hidden');
-    else if (y < lastY - 6) nav.classList.remove('nav-hidden');
-    lastY = y;
-
-    toTop.classList.toggle('show', y > 600);
-
-    const hueShift = Math.round(pct * 25);
-    document.body.style.backgroundColor = `hsl(${210 + hueShift}, 55%, ${4 + pct * 3}%)`;
-}
-window.addEventListener('scroll', onScroll, { passive: true });
-onScroll();
-
-toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-
-/* =====================================================
-   8. MAGNETIC (buttons + nav links)
-   ===================================================== */
-if (!isTouch) {
-    $$('.magnetic').forEach(el => {
-        el.addEventListener('mousemove', e => {
-            const r = el.getBoundingClientRect();
-            const x = e.clientX - r.left - r.width / 2;
-            const y = e.clientY - r.top - r.height / 2;
-            gsap.to(el, { x: x * 0.28, y: y * 0.42, duration: .4, ease: 'power2.out' });
-        });
-        el.addEventListener('mouseleave', () => {
-            gsap.to(el, { x: 0, y: 0, duration: .7, ease: 'elastic.out(1, 0.42)' });
-        });
-    });
-}
-
-/* =====================================================
-   9. RIPPLES
-   ===================================================== */
-$$('.ripple-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-        const r = btn.getBoundingClientRect();
-        const ripple = document.createElement('span');
-        ripple.className = 'ripple';
-        const size = Math.max(r.width, r.height);
-        ripple.style.width = ripple.style.height = size + 'px';
-        ripple.style.left = (e.clientX - r.left - size / 2) + 'px';
-        ripple.style.top  = (e.clientY - r.top  - size / 2) + 'px';
-        btn.appendChild(ripple);
-        setTimeout(() => ripple.remove(), 800);
-    });
-});
-
-/* =====================================================
-   10. MOBILE MENU
-   ===================================================== */
-const burger = $('#burger');
-const mobileMenu = $('#mobileMenu');
-
-burger.addEventListener('click', () => {
-    const open = mobileMenu.classList.toggle('open');
-    burger.classList.toggle('open', open);
-    document.body.classList.toggle('no-scroll', open);
-});
-$$('#mobileMenu a').forEach(a => a.addEventListener('click', () => {
-    mobileMenu.classList.remove('open');
-    burger.classList.remove('open');
-    document.body.classList.remove('no-scroll');
-}));
-
-/* =====================================================
-   11. HERO SCROLL PARALLAX + FADE
-   ===================================================== */
-gsap.to('#heroBg', {
-    yPercent: 26, ease: 'none',
-    scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true }
-});
-gsap.to('.hero-badge, .hero-title, .hero-subtitle, .hero-actions, .scroll-cue', {
-    yPercent: -60, opacity: 0, ease: 'none',
-    scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom 20%', scrub: true }
-});
-
-/* =====================================================
-   12. TICKER
-   ===================================================== */
-(function buildTicker() {
-    const track = $('#tickerTrack');
-    if (!track) return;
-    track.innerHTML += track.innerHTML;
-})();
-
-gsap.to('.ticker-track', {
-    yPercent: -8,
-    ease: 'none',
-    scrollTrigger: {
-        trigger: '.ticker',
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: true
-    }
-});
-
-/* =====================================================
-   13. MASK TITLE REVEALS
-   ===================================================== */
-$$('.mask-title').forEach(el => {
-    const inner = el.querySelector('.mask-inner');
-    if (!inner) return;
-    gsap.to(inner, {
-        y: 0,
-        duration: 1.1,
-        ease: 'power4.out',
-        scrollTrigger: {
-            trigger: el,
-            start: 'top 85%'
-        }
-    });
-});
-
-/* =====================================================
-   14. HORIZONTAL VAULT SCROLL + IDLE FLOAT
-   ===================================================== */
-const vaultContainer = $('#vaultContainer');
-const vaultProgress = $('#vaultProgress');
-const vaultCards = $$('.vault-card');
-
-if (vaultContainer) {
-    const getScrollDistance = () => vaultContainer.scrollWidth - window.innerWidth;
-
-    const horizontalTween = gsap.to(vaultContainer, {
-        x: () => -getScrollDistance(),
-        ease: 'none',
-        scrollTrigger: {
-            trigger: '.vault-section',
-            pin: true,
-            anticipatePin: 1,
-            scrub: 1,
-            start: 'top top',
-            end: () => '+=' + getScrollDistance(),
-            invalidateOnRefresh: true,
-            onUpdate: self => {
-                if (vaultProgress) vaultProgress.style.width = (self.progress * 100) + '%';
-            }
-        }
-    });
-
-    vaultCards.forEach((card, i) => {
-        gsap.fromTo(card,
-            { y: 90, opacity: 0.15, scale: 0.88 },
-            {
-                y: 0, opacity: 1, scale: 1, ease: 'none',
-                scrollTrigger: {
-                    trigger: card,
-                    containerAnimation: horizontalTween,
-                    start: 'left 98%',
-                    end: 'left 55%',
-                    scrub: true
+        // Connection Lines
+        for (let i = 0; i < pts.length; i++) {
+            for (let j = i + 1; j < pts.length; j++) {
+                const dx = pts[i].x - pts[j].x;
+                const dy = pts[i].y - pts[j].y;
+                const dist = Math.hypot(dx, dy);
+                if (dist < 120) {
+                    ctx.beginPath();
+                    ctx.moveTo(pts[i].x, pts[i].y);
+                    ctx.lineTo(pts[j].x, pts[j].y);
+                    ctx.strokeStyle = `rgba(0, 240, 255, ${0.1 * (1 - dist / 120)})`;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
                 }
             }
-        );
-
-        gsap.to(card, {
-            y: -10,
-            duration: 2.6 + Math.random() * 1.2,
-            yoyo: true,
-            repeat: -1,
-            ease: 'sine.inOut',
-            delay: i * 0.25
-        });
-    });
-
-    if (!isTouch) {
-        vaultCards.forEach(card => {
-            const inner = card.querySelector('.vault-card-inner');
-            if (!inner) return;
-
-            card.addEventListener('mousemove', e => {
-                const r = card.getBoundingClientRect();
-                const px = (e.clientX - r.left) / r.width;
-                const py = (e.clientY - r.top) / r.height;
-
-                gsap.to(inner, {
-                    rotateY: (px - 0.5) * 16,
-                    rotateX: -(py - 0.5) * 16,
-                    duration: 0.5,
-                    ease: 'power2.out',
-                    transformPerspective: 1200,
-                    transformOrigin: 'center'
-                });
-
-                inner.style.setProperty('--mx', (px * 100) + '%');
-                inner.style.setProperty('--my', (py * 100) + '%');
-            });
-
-            card.addEventListener('mouseleave', () => {
-                gsap.to(inner, {
-                    rotateX: 0, rotateY: 0,
-                    duration: 0.9,
-                    ease: 'elastic.out(1, 0.5)'
-                });
-            });
-        });
-    }
-}
-
-/* =====================================================
-   15. ONBOARDING REVEALS + COUNTERS
-   ===================================================== */
-gsap.from('.split-text', {
-    y: 90, opacity: 0, duration: 1, ease: 'power3.out',
-    scrollTrigger: { trigger: '.onboarding', start: 'top 72%' }
-});
-
-gsap.from('.fade-text', {
-    y: 34, opacity: 0, duration: .9, stagger: 0.16, ease: 'power3.out',
-    scrollTrigger: { trigger: '.onboarding', start: 'top 62%' }
-});
-
-$$('.num').forEach(el => {
-    const target = parseFloat(el.dataset.count);
-    const raw = el.dataset.raw === 'true';
-    const suffix = el.dataset.suffix || '';
-    const obj = { val: 0 };
-
-    ScrollTrigger.create({
-        trigger: el,
-        start: 'top 88%',
-        once: true,
-        onEnter: () => {
-            gsap.to(obj, {
-                val: target,
-                duration: 1.8,
-                ease: 'power2.out',
-                onUpdate: () => {
-                    el.textContent = raw
-                        ? Math.floor(obj.val).toString()
-                        : Math.floor(obj.val).toLocaleString() + suffix;
-                },
-                onComplete: () => {
-                    el.classList.add('pulse');
-                    setTimeout(() => el.classList.remove('pulse'), 600);
-                }
-            });
         }
-    });
-});
-
-gsap.to('.sigil-container', {
-    clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
-    duration: 1.5, ease: 'power3.inOut',
-    scrollTrigger: { trigger: '.onboarding', start: 'top 55%' }
-});
-
-/* =====================================================
-   16. SIGIL — perpetual rotation + interactivity
-   ===================================================== */
-(function sigilMagic() {
-    const container = $('#sigil');
-    if (!container) return;
-
-    const outer = gsap.to('#ringOuter', { rotate: 360, duration: 42, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
-    const mid   = gsap.to('#ringMid',   { rotate: -360, duration: 28, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
-    const star  = gsap.to('#starGroup', { rotate: 360, duration: 60, repeat: -1, ease: 'none', transformOrigin: '50% 50%' });
-
-    const tweens = [outer, mid, star];
-
-    container.addEventListener('mouseenter', () => {
-        tweens.forEach(t => gsap.to(t, { timeScale: 3.2, duration: .6, ease: 'power2.out' }));
-        gsap.to('.sigil-svg .star', { opacity: 1, duration: .4 });
-        gsap.to('.sigil-svg text', { opacity: 1, duration: .4 });
-        gsap.to(container, { scale: 1.04, duration: .6, ease: 'power2.out' });
-    });
-    container.addEventListener('mouseleave', () => {
-        tweens.forEach(t => gsap.to(t, { timeScale: 1, duration: .8, ease: 'power2.out' }));
-        gsap.to('.sigil-svg .star', { opacity: .8, duration: .4 });
-        gsap.to('.sigil-svg text', { opacity: .8, duration: .4 });
-        gsap.to(container, { scale: 1, duration: .6, ease: 'power2.out' });
-    });
-
-    container.addEventListener('click', () => {
-        gsap.fromTo(container,
-            { filter: 'drop-shadow(0 0 0px rgba(34, 211, 238, 0))' },
-            {
-                filter: 'drop-shadow(0 0 34px rgba(34, 211, 238, 0.85))',
-                duration: .35, yoyo: true, repeat: 1, ease: 'power2.out'
-            }
-        );
-        gsap.fromTo('#starGroup',
-            { scale: 1 },
-            { scale: 1.18, duration: .28, yoyo: true, repeat: 1, ease: 'power2.inOut', transformOrigin: '50% 50%' }
-        );
-    });
-
-    if (!isTouch) {
-        container.addEventListener('mousemove', e => {
-            const r = container.getBoundingClientRect();
-            const px = (e.clientX - r.left) / r.width - 0.5;
-            const py = (e.clientY - r.top) / r.height - 0.5;
-            gsap.to('.sigil-svg', {
-                rotateY: px * 16,
-                rotateX: -py * 16,
-                duration: .6,
-                ease: 'power2.out',
-                transformPerspective: 900
-            });
-        });
-        container.addEventListener('mouseleave', () => {
-            gsap.to('.sigil-svg', { rotateX: 0, rotateY: 0, duration: 1, ease: 'elastic.out(1, 0.5)' });
-        });
+        requestAnimationFrame(tickNet);
     }
+    initNet();
+    window.addEventListener('resize', initNet);
+    tickNet();
 })();
 
-/* =====================================================
-   17. FOOTER REVEALS
-   ===================================================== */
-gsap.from('.footer-col', {
-    y: 40, opacity: 0, duration: .8, stagger: 0.15, ease: 'power3.out',
-    scrollTrigger: { trigger: 'footer', start: 'top 85%' }
-});
-gsap.from('.footer-grid h4', {
-    x: -20, opacity: 0, duration: .7, stagger: 0.12, ease: 'power3.out',
-    scrollTrigger: { trigger: 'footer', start: 'top 80%' }
-});
-gsap.from('.footer-grid ul li', {
-    x: -16, opacity: 0, duration: .6, stagger: 0.05, ease: 'power2.out',
-    scrollTrigger: { trigger: 'footer', start: 'top 78%' }
-});
-
-/* =====================================================
-   18. MODAL
-   ===================================================== */
-const modal = $('#modal');
-const vaultForm = $('#vaultForm');
-const modalSuccess = $('#modalSuccess');
-const submitBtn = $('#submitBtn');
-
-function openModal() {
-    modal.classList.add('open');
-    document.body.classList.add('no-scroll');
-    modalSuccess.classList.remove('show');
-    vaultForm.style.opacity = 1;
-    vaultForm.reset();
-    $$('.field').forEach(f => f.classList.remove('invalid'));
-    submitBtn.classList.remove('loading');
-    submitBtn.innerHTML = '<span>Seal the Contract</span>';
-}
-function closeModal() {
-    modal.classList.remove('open');
-    document.body.classList.remove('no-scroll');
-    setTimeout(() => modalSuccess.classList.remove('show'), 400);
-}
-
-const PORTAL_URL = 'https://phanee.up.railway.app/';
-
-$('.access-vault-btn').forEach(btn => btn.addEventListener('click', e => {
-    e.preventDefault();
-    if (typeof mobileMenu !== 'undefined' && mobileMenu) mobileMenu.classList.remove('open');
-    if (typeof burger !== 'undefined' && burger) burger.classList.remove('open');
-    window.location.href = PORTAL_URL;
-}));
-
-$('.open-vault').forEach(btn => btn.addEventListener('click', e => {
-    e.preventDefault();
-    if (typeof mobileMenu !== 'undefined' && mobileMenu) mobileMenu.classList.remove('open');
-    if (typeof burger !== 'undefined' && burger) burger.classList.remove('open');
-    openModal();
-}));
-$$('[data-close]').forEach(el => el.addEventListener('click', closeModal));
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
-});
-
-vaultForm.addEventListener('submit', e => {
-    e.preventDefault();
-    let valid = true;
-
-    $$('.field', vaultForm).forEach(field => {
-        const input = field.querySelector('input');
-        if (!input) return;
-        if (!input.value.trim()) {
-            field.classList.add('invalid');
-            gsap.fromTo(field, { x: -8 }, { x: 0, duration: .45, ease: 'elastic.out(1, 0.3)' });
-            valid = false;
-        } else {
-            field.classList.remove('invalid');
+/* ═══════════════════════════════════════════════
+   8. SCROLL REVEAL OBSERVER
+   ═══════════════════════════════════════════════ */
+const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('in');
+            revealObserver.unobserve(entry.target);
         }
     });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-    if (!valid) return;
+/* ═══════════════════════════════════════════════
+   9. ANIMATED COUNT-UP METRICS
+   ═══════════════════════════════════════════════ */
+const countObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+        countObserver.unobserve(el);
 
-    submitBtn.classList.add('loading');
-    submitBtn.innerHTML = '<span>Sealing</span><span class="btn-loader"></span>';
+        const staticText = el.dataset.static;
+        if (staticText) {
+            el.textContent = staticText;
+            return;
+        }
 
-    setTimeout(() => {
-        gsap.to(vaultForm, { opacity: 0, duration: .35, ease: 'power2.in' });
-        setTimeout(() => modalSuccess.classList.add('show'), 260);
-        setTimeout(() => {
-            closeModal();
-            window.location.href = PORTAL_URL;
-        }, 2200);
-    }, 900);
-});
+        const target = parseFloat(el.dataset.count);
+        const decimals = parseInt(el.dataset.decimals || '0');
+        const startTime = performance.now();
+        const duration = 1800;
 
-$$('.field input').forEach(inp => {
-    inp.addEventListener('input', () => inp.closest('.field').classList.remove('invalid'));
-});
-
-/* =====================================================
-   19. SCRAMBLE TEXT ON HOVER
-   ===================================================== */
-$$('.scramble').forEach(el => {
-    el.addEventListener('mouseenter', () => {
-        const target = el.querySelector('.mask-inner') || el;
-        scramble(target);
+        function updateCount(now) {
+            const progress = Math.min(1, (now - startTime) / duration);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = target * eased;
+            el.textContent = decimals ? current.toFixed(decimals) : Math.floor(current).toLocaleString();
+            if (progress < 1) requestAnimationFrame(updateCount);
+        }
+        requestAnimationFrame(updateCount);
     });
-});
+}, { threshold: 0.4 });
+document.querySelectorAll('.metric-card .v').forEach(el => countObserver.observe(el));
 
-/* =====================================================
-   20. SMOOTH ANCHOR SCROLLING
-   ===================================================== */
-$$('a[href^="#"]').forEach(link => {
-    link.addEventListener('click', e => {
-        const id = link.getAttribute('href');
-        if (id === '#' || id.length < 2) return;
-        const target = document.querySelector(id);
-        if (!target) return;
-        e.preventDefault();
-        window.scrollTo({ top: target.offsetTop - 60, behavior: 'smooth' });
-    });
-});
+/* ═══════════════════════════════════════════════
+   10. INTERACTIVE DEFENSE SIMULATOR
+   ═══════════════════════════════════════════════ */
+const simBtn = document.getElementById('simBtn');
+const simStage = document.getElementById('shieldStage');
+const simLog = document.getElementById('simLog');
+const simStatusBadge = document.getElementById('simStatusBadge');
 
-const exploreBtn = $('#exploreBtn');
-if (exploreBtn) {
-    exploreBtn.addEventListener('click', () => {
-        const t = document.querySelector('#vaults');
-        if (t) window.scrollTo({ top: t.offsetTop, behavior: 'smooth' });
+if (simBtn) {
+    simBtn.addEventListener('click', () => {
+        simBtn.disabled = true;
+        simStage.classList.add('alert');
+        simStatusBadge.textContent = '▲ INTRUSION DETECTED (DEFLECTING)';
+        simStatusBadge.style.color = '#ef4444';
+
+        const logs = [
+            '⚠ SENSORY TRIP: Unauthorized dimensional phase shift at Vault 713…',
+            '⚡ ENGAGING WARD 7: Blood-binding enchantment seals energized…',
+            '🐉 DRAGON CORE ACTIVE: Thermal perimeter incinerates rogue spectral probe…',
+            '🔒 SHA-256 ROTATION: 4096-bit ephemeral keys cycled across all vaults…',
+            '✓ THREAT NEUTRALIZED · ZERO BREACH · 100% ASSETS SECURED.'
+        ];
+
+        let index = 0;
+        simLog.textContent = logs[0];
+        const t = setInterval(() => {
+            index++;
+            if (index < logs.length) {
+                simLog.textContent = logs[index];
+            } else {
+                clearInterval(t);
+                simStage.classList.remove('alert');
+                simStatusBadge.textContent = '● NORMAL (100% DEFENDED)';
+                simStatusBadge.style.color = 'var(--emerald)';
+                simBtn.disabled = false;
+            }
+        }, 850);
     });
 }
 
-/* =====================================================
-   21. RESIZE REFRESH
-   ===================================================== */
-let resizeTimer;
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => ScrollTrigger.refresh(), 250);
-});
+/* ═══════════════════════════════════════════════
+   11. MULTI-CURRENCY FX CALCULATOR
+   ═══════════════════════════════════════════════ */
+const fxAmount = document.getElementById('fxAmount');
+const fxFrom = document.getElementById('fxFrom');
+const fxEquation = document.getElementById('fxEquation');
+const resUSD = document.getElementById('resUSD');
+const resEUR = document.getElementById('resEUR');
+const resGBP = document.getElementById('resGBP');
+const resSub = document.getElementById('resSub');
+
+// Base conversion rates (1 GAL = $6.64 USD)
+const RATES_IN_USD = {
+    GAL: 6.64,
+    USD: 1.0,
+    EUR: 1.08,
+    GBP: 1.26
+};
+
+function calculateFX() {
+    if (!fxAmount || !fxFrom) return;
+    const amount = parseFloat(fxAmount.value) || 0;
+    const fromCurr = fxFrom.value;
+    const usdValue = amount * (RATES_IN_USD[fromCurr] || 1);
+
+    const galleons = usdValue / RATES_IN_USD.GAL;
+    const usd = usdValue;
+    const eur = usdValue / RATES_IN_USD.EUR;
+    const gbp = usdValue / RATES_IN_USD.GBP;
+
+    resUSD.textContent = `$${usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    resEUR.textContent = `€${eur.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    resGBP.textContent = `£${gbp.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    const sickles = Math.floor(galleons * 17);
+    const knuts = Math.floor(galleons * 17 * 29);
+    resSub.textContent = `${sickles.toLocaleString()}s / ${knuts.toLocaleString()}k`;
+
+    if (fromCurr === 'GAL') {
+        fxEquation.textContent = `1 GAL = $${RATES_IN_USD.GAL} USD · €${(RATES_IN_USD.GAL / RATES_IN_USD.EUR).toFixed(2)} EUR`;
+    } else {
+        fxEquation.textContent = `1 ${fromCurr} = ${(RATES_IN_USD[fromCurr] / RATES_IN_USD.GAL).toFixed(4)} GAL`;
+    }
+}
+
+if (fxAmount && fxFrom) {
+    fxAmount.addEventListener('input', calculateFX);
+    fxFrom.addEventListener('change', calculateFX);
+    calculateFX();
+}
+
+/* ═══════════════════════════════════════════════
+   12. TRANSMISSION UPLINK CONSOLE (FEEDBACK MODAL)
+   ═══════════════════════════════════════════════ */
+const fbModal = document.getElementById('fbModal');
+const fbTrigger = document.getElementById('fbTrigger');
+const fbSend = document.getElementById('fbSend');
+
+if (fbTrigger && fbModal) {
+    fbTrigger.addEventListener('click', () => fbModal.classList.add('open'));
+    fbModal.addEventListener('click', e => {
+        if (e.target === fbModal) fbModal.classList.remove('open');
+    });
+}
+
+if (fbSend) {
+    fbSend.addEventListener('click', async () => {
+        const name = document.getElementById('fbName').value.trim();
+        const message = document.getElementById('fbText').value.trim();
+        const status = document.getElementById('fbStatus');
+
+        if (!name || !message) {
+            status.textContent = '⚠ TRANSMISSION INCOMPLETE — Please enter your callsign and message.';
+            return;
+        }
+
+        status.textContent = '⟳ ENCRYPTING & TRANSMITTING UPLINK…';
+        try {
+            const res = await fetch('/api/v1/notifications/feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, message, feedbackType: 'website', rating: 5 })
+            });
+
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            status.textContent = '✓ TRANSMISSION DELIVERED. The Vault Council acknowledges your dispatch.';
+            document.getElementById('fbText').value = '';
+            setTimeout(() => {
+                fbModal.classList.remove('open');
+                status.textContent = '';
+            }, 2400);
+        } catch (err) {
+            status.textContent = '⚠ UPLINK FAILED — Local transmission logged.';
+            setTimeout(() => {
+                fbModal.classList.remove('open');
+                status.textContent = '';
+            }, 2000);
+        }
+    });
+}
 </script>
 </body>
 </html>

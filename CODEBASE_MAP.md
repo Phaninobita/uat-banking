@@ -8,7 +8,7 @@
 
 | Portal / Route | Express Route Mount | Primary HTML File | Supporting Styles & Scripts | Purpose & Key Features |
 | :--- | :--- | :--- | :--- | :--- |
-| **Marketing Website & Grand Hall** | `/site`, `/landing`, `/home` | [`web/public/site/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/site/index.html) *(copies: [`website/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/website/index.html), [`docs/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/docs/index.html))* | Inline CSS & JS (dust canvas, Cinzel font) | Public landing site. Hero: *"The Safest Vault on Earth"*, vault tiers, exchange calculator, animated particles. |
+| **Marketing Website & Grand Hall** | `/site`, `/landing`, `/home` | [`web/public/site/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/site/index.html) *(copies: [`website/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/website/index.html), [`docs/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/docs/index.html))* | Three.js WebGL 3D rotating vault core, Orbitron & Space Grotesk typography, 3D tilt cards, magnetic buttons, cipher decode | Public futuristic landing site. Hero: *"The Safest Vault on Earth"*, 3D holographic quantum vault, live FX matrix, defense grid simulator. |
 | **Customer Vault Portal** | `/customer` | [`web/public/customer/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/customer/index.html) | Self-contained styles & client logic | Customer Treasury Dashboard: multi-currency accounts (Galleons, Sickles, Knuts, USD, EUR, GBP), live FX, transaction feeds, biometric login. |
 | **Goblin RM Overseer Portal** | `/rm` | [`web/public/rm/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/rm/index.html) | [`web/public/rm/rm.css`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/rm/rm.css), [`web/public/rm/rm.js`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/rm/rm.js) | Relationship Manager suite: onboarding pipeline kanban, application review/approval, customer invitation dispatch, audit logs. |
 | **Sacred Covenant Induction** | `/` (root / fallback) | [`web/public/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/index.html) | [`web/public/css/style.css`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/css/style.css), [`web/public/js/app.js`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/js/app.js), [`web/public/js/api.js`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/js/api.js) | Multi-step corporate induction wizard, KYC document upload, blood-binding oath signature, verification steps. |
@@ -97,12 +97,15 @@ All endpoints are mounted through the unified Gateway on port `3000`:
 ## 🎨 Theme & Branding Memory
 
 - **Hero Title**: `"The Safest Vault on Earth"`
-  - Styled with Cinzel serif font, uppercase, golden glowing animation (`heroTitleGlow`).
-  - Animated with interactive character splitting (`splitChars($('#heroTitle'))`).
-- **Badge**: `"Est. 1474 · Diagon Alley"` with cyan pulsing dot indicator.
+  - Styled with Orbitron bold typography, uppercase, radiant glowing gradient animation (`sheenGradient`).
+  - Animated with sci-fi matrix glyph decode/cipher scramble effect on page boot.
+  - Accompanied by Three.js WebGL 3D rotating holographic polyhedral vault core and dynamic cursor spotlight.
+- **Badge**: `"SYSTEM ONLINE · EST. 1474 · DIAGON ALLEY NODE"` with emerald/cyan pulsing quantum dot indicator.
 - **Color Palettes**:
-  - **Electric Cyan & Azure** (Default): `--brand-primary: #00d2ff`, `--brand-secondary: #0ea5e9`, `--brand-tertiary: #38bdf8`.
-  - **Imperial Gold**: `--brand-primary: #fbbf24`, `--brand-secondary: #f59e0b`, `--brand-tertiary: #fde047`.
+  - **Void Black**: `--void: #02040a`
+  - **Electric Cyan & Sapphire**: `--cyan: #00f0ff`, `--cyan-dim: rgba(0, 240, 255, 0.28)`
+  - **Neon Violet**: `--violet: #8b5cf6`
+  - **Imperial Gold**: `--gold: #ffd700`
 - **Logos & Crests**:
   - Primary Dragon Crest: [`web/public/images/bank-logo-dragon.png`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/images/bank-logo-dragon.png)
   - Gold Crest: [`web/public/images/bank-logo-gold.png`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/images/bank-logo-gold.png)
