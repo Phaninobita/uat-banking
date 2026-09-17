@@ -1,32 +1,21 @@
 /* ==========================================================================
-   Gringotts Wizarding Bank — Creative Vault Login Styling & Character Animation
-   Theme: Deep Obsidian Stone & Vault Gold
+   Creative Login Page — Yellow Edition with Animated Walking Boy Character
+   Matches the viral video / reel concept
    ========================================================================== */
 
 :root {
-  --bg-obsidian: #06070a;
-  --bg-deep: #0b0d13;
-  --bg-vault-gold: #1c1505;
-  --card-bg: rgba(11, 15, 25, 0.92);
-  --card-border: rgba(251, 191, 36, 0.32);
-  --card-border-glow: rgba(251, 191, 36, 0.6);
-  --gold-primary: #fbbf24;
-  --gold-glow: rgba(251, 191, 36, 0.4);
-  --gold-muted: #d97706;
-  --gold-deep: #92400e;
-  --cyan-accent: #22d3ee;
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --input-bg: rgba(255, 255, 255, 0.04);
-  --input-border: rgba(255, 255, 255, 0.14);
-  --input-border-focus: #fbbf24;
-  --font-serif: 'Cinzel', Georgia, serif;
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-  --radius-card: 22px;
-  --radius-input: 10px;
-  --transition-smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --yellow-bg: #ffc82c; /* Warm, vibrant sunny yellow */
+  --yellow-deep: #f59e0b;
+  --card-bg: #ffffff;
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --input-bg: #f9fafb;
+  --input-border: #e5e7eb;
+  --input-focus: #111827;
+  --btn-bg: #111827;
+  --btn-hover: #1f2937;
+  --font-main: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-code: 'Fira Code', monospace;
 }
 
 *, *::before, *::after {
@@ -35,855 +24,543 @@
   padding: 0;
 }
 
-body {
-  font-family: var(--font-sans);
-  background-color: var(--bg-obsidian);
-  color: var(--text-primary);
+body.yellow-theme {
+  font-family: var(--font-main);
+  background-color: var(--yellow-bg);
+  color: var(--text-main);
   min-height: 100dvh;
+  margin: 0;
+  padding: 0;
   overflow-x: hidden;
+}
+
+/* ── Main Layout Wrapper ── */
+.login-wrapper {
   position: relative;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* ── Ambient Background Canvas & Glow Orbs ── */
-.vault-dust-canvas {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.vault-backdrop {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-
-.vault-glow-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
-  opacity: 0.35;
-}
-
-.glow-top {
-  top: -10%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 600px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(251, 191, 36, 0.28) 0%, rgba(217, 119, 6, 0.1) 60%, transparent 80%);
-}
-
-.glow-bottom {
-  bottom: -15%;
-  right: 15%;
-  width: 500px;
-  height: 350px;
-  background: radial-gradient(circle, rgba(34, 211, 238, 0.12) 0%, transparent 70%);
-}
-
-.vault-arch-ring {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 820px;
-  height: 820px;
-  border-radius: 50%;
-  border: 1px dashed rgba(251, 191, 36, 0.08);
-  box-shadow: inset 0 0 100px rgba(251, 191, 36, 0.03);
-  pointer-events: none;
-}
-
-/* ── Top Navigation ── */
-.vault-nav {
-  position: relative;
-  z-index: 10;
+  min-height: 100dvh;
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding: 1.25rem 2rem;
-  max-width: 1280px;
-  margin: 0 auto;
+  padding: 1.25rem 1.5rem 2rem;
+  background: radial-gradient(circle at center, #ffd33d 0%, #ffc82c 100%);
 }
 
-.vault-brand {
+/* ── Top Floating Header ── */
+.top-badge {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  text-decoration: none;
-  color: var(--text-primary);
+  justify-content: space-between;
+  width: 100%;
+  max-width: 800px;
+  padding: 0.5rem 0;
 }
 
-.vault-brand-logo {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
-  filter: drop-shadow(0 2px 8px rgba(251, 191, 36, 0.4));
+.badge-pill {
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.1);
+  color: #1f2937;
+  padding: 4px 12px;
+  border-radius: 100px;
+  letter-spacing: 0.02em;
 }
 
-.vault-brand-title {
-  display: block;
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: 1.2rem;
-  letter-spacing: 0.08em;
-  color: #fff;
-  line-height: 1.1;
-}
-
-.vault-brand-sub {
-  display: block;
-  font-size: 0.72rem;
-  color: var(--gold-primary);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.vault-nav-links {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.nav-pill {
-  padding: 0.45rem 0.95rem;
+.badge-link {
   font-size: 0.82rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: #111827;
   text-decoration: none;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 100px;
-  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 4px 12px;
+  border-radius: 8px;
+  transition: all 0.2s;
 }
 
-.nav-pill:hover {
-  color: var(--gold-primary);
-  background: rgba(251, 191, 36, 0.1);
-  border-color: rgba(251, 191, 36, 0.4);
-}
-
-/* ── Main Viewport (Modern CSS Grid Centering with 100dvh) ── */
-.login-stage {
-  position: relative;
-  z-index: 5;
-  display: grid;
-  place-items: center;
-  min-height: calc(100dvh - 140px);
-  padding: 1.5rem;
-}
-
-/* Stage Container (Shared Stacking Context for Character + Card) */
-.stage-container {
-  position: relative;
-  width: 100%;
-  max-width: 440px;
-  margin: auto;
+.badge-link:hover {
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* ==========================================================================
-   THE GOBLIN CHARACTER LAYER & STATE STYLES (Z-INDEX 1)
+   CARD SCENE (Stacking context for Character + White Card)
    ========================================================================== */
-.goblin-scene {
+.card-scene {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  margin: auto 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ==========================================================================
+   THE ANIMATED BOY CHARACTER (Z-INDEX 1)
+   ========================================================================== */
+.boy-track {
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 1; /* Sits strictly behind the card (z-index 2) */
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
-.goblin-walker {
+.boy-character {
   position: absolute;
-  top: -150px; /* Positions goblin's head & shoulders peeking over card */
+  top: -155px; /* Head & torso visible over card top */
+  width: 150px;
+  height: 250px;
+  transform-origin: bottom center;
+  transition: transform 0.4s ease;
+  animation: boyPaceBehindCard 8s infinite ease-in-out;
+}
+
+/* Speech / Whistle Bubble */
+.boy-bubble {
+  position: absolute;
+  top: -24px;
   left: 50%;
   transform: translateX(-50%);
-  width: 220px;
-  height: 260px;
-  transition: transform 0.5s var(--transition-smooth);
-}
-
-/* Speech Bubble */
-.goblin-bubble {
-  position: absolute;
-  top: -45px;
-  left: 50%;
-  transform: translateX(-50%) scale(0.9);
-  background: #1e1b15;
-  color: #fef08a;
-  border: 1px solid rgba(251, 191, 36, 0.4);
-  border-radius: 12px;
-  padding: 6px 14px;
-  font-size: 0.76rem;
+  background: #111827;
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.72rem;
   font-weight: 600;
   white-space: nowrap;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.3s ease;
-  z-index: 10;
-}
-
-.goblin-bubble::after {
-  content: '';
-  position: absolute;
-  bottom: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 6px 6px 0;
-  border-style: solid;
-  border-color: #1e1b15 transparent;
-}
-
-.goblin-bubble.show {
-  opacity: 1;
-  transform: translateX(-50%) scale(1);
-}
-
-/* SVG Goblin Articulation Elements */
-.goblin-svg {
-  overflow: visible;
-}
-
-.goblin-head-group {
-  transform-origin: 120px 140px;
-  transition: transform 0.35s ease;
-}
-
-.pupil {
-  transition: transform 0.2s ease;
-}
-
-.eyelid {
-  transition: opacity 0.15s ease;
-}
-
-.eyebrow-left, .eyebrow-right {
-  transition: transform 0.25s ease;
-  transform-origin: center;
-}
-
-.goblin-arm {
-  transform-origin: 75px 168px;
-  transition: transform 0.35s ease;
-}
-
-.goblin-arm-right {
-  transform-origin: 165px 168px;
-}
-
-/* Hands Covering Eyes (Initially Hidden) */
-.hands-cover-eyes {
-  opacity: 0;
-  transform: translateY(20px);
-  transform-origin: 120px 120px;
-  transition: all 0.35s var(--transition-smooth);
-}
-
-.finger {
-  transition: transform 0.3s var(--transition-smooth);
-  transform-origin: 98px 98px;
-}
-
-/* ── Character State: IDLE WALKING ── */
-.state-walking .goblin-walker {
-  animation: goblinPace 9s infinite ease-in-out;
-}
-
-.state-walking .goblin-head-group {
-  animation: goblinHeadBob 1.5s infinite ease-in-out;
-}
-
-.state-walking .goblin-arm-left {
-  animation: armSwingLeft 1.5s infinite ease-in-out;
-}
-
-.state-walking .goblin-arm-right {
-  animation: armSwingRight 1.5s infinite ease-in-out;
-}
-
-@keyframes goblinPace {
-  0%, 100% {
-    transform: translateX(-120px);
-  }
-  20% {
-    transform: translateX(-120px);
-  }
-  45% {
-    transform: translateX(120px);
-  }
-  70% {
-    transform: translateX(120px);
-  }
-  85% {
-    transform: translateX(-30px);
-  }
-}
-
-@keyframes goblinHeadBob {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-4px) rotate(2deg); }
-}
-
-@keyframes armSwingLeft {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(-8deg); }
-}
-
-@keyframes armSwingRight {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(8deg); }
-}
-
-/* ── Character State: PEEKING ON USERNAME ── */
-.state-peeking .goblin-walker {
-  animation: none;
-  transform: translate(-145px, 20px); /* Steps out from left edge */
-}
-
-.state-peeking .goblin-head-group {
-  transform: rotate(-12deg) translateY(-8px);
-}
-
-.state-peeking .pupil {
-  transform: translate(3px, 3px); /* Looks down at input */
-}
-
-.state-peeking .eyebrow-left {
-  transform: translateY(-4px);
-}
-
-/* ── Character State: COVERING EYES ON PASSWORD ── */
-.state-covering-eyes .goblin-walker {
-  animation: none;
-  transform: translate(0, -38px); /* Centers behind top edge */
-}
-
-.state-covering-eyes .goblin-head-group {
-  transform: translateY(-5px);
-}
-
-.state-covering-eyes .hands-cover-eyes {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.state-covering-eyes .goblin-arm-left,
-.state-covering-eyes .goblin-arm-right {
-  opacity: 0.15;
-}
-
-/* ── Character State: PEEKING THROUGH FINGERS (SHOW PASSWORD) ── */
-.state-peeking-fingers .goblin-walker {
-  animation: none;
-  transform: translate(0, -38px);
-}
-
-.state-peeking-fingers .hands-cover-eyes {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Spreads fingers on left hand so eye can peek through! */
-.state-peeking-fingers .hand-covering-left .finger-2 {
-  transform: rotate(-35deg) translateY(-8px);
-}
-
-.state-peeking-fingers .hand-covering-left .finger-3 {
-  transform: rotate(25deg) translateY(6px);
-}
-
-.state-peeking-fingers #pupilLeft {
-  transform: translate(2px, 3px);
-}
-
-.state-peeking-fingers #eyebrowLeft {
-  transform: translateY(-6px);
-}
-
-/* ── Character State: UNLOCKING / SUCCESS ── */
-.state-unlocking .goblin-walker {
-  animation: none;
-  transform: translate(0, -55px) scale(1.05);
-}
-
-.state-unlocking .goblin-head-group {
-  transform: translateY(-8px) scale(1.05);
-}
-
-.state-unlocking #mouthLine {
-  d: path("M100 138 Q120 158 140 138");
-}
-
-.state-unlocking .hands-cover-eyes {
-  opacity: 0;
-}
-
-.state-unlocking .goblin-arm-right {
-  transform: rotate(-35deg) translateY(-15px); /* Pulls lever */
-}
-
-/* ==========================================================================
-   THE VAULT LOGIN CARD (Z-INDEX 2)
-   ========================================================================== */
-.vault-card {
-  position: relative;
-  z-index: 2; /* Sits firmly in front of the goblin */
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-card);
-  padding: 2.25rem 2rem;
-  box-shadow: 
-    0 10px 30px -5px rgba(0, 0, 0, 0.8),
-    0 25px 50px -12px rgba(0, 0, 0, 0.9),
-    0 0 0 1px rgba(255, 255, 255, 0.05),
-    inset 0 1px 0 rgba(251, 191, 36, 0.35);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  transition: all 0.4s var(--transition-smooth);
-}
-
-.vault-card:hover {
-  border-color: rgba(251, 191, 36, 0.45);
-  box-shadow: 
-    0 15px 35px -5px rgba(0, 0, 0, 0.85),
-    0 30px 60px -10px rgba(0, 0, 0, 0.95),
-    0 0 25px rgba(251, 191, 36, 0.15),
-    inset 0 1px 0 rgba(251, 191, 36, 0.5);
-}
-
-/* Metallic Glare Effect */
-.card-metallic-sheen {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 120px;
-  background: linear-gradient(180deg, rgba(251, 191, 36, 0.08) 0%, transparent 100%);
-  border-radius: var(--radius-card) var(--radius-card) 0 0;
-  pointer-events: none;
-}
-
-/* Card Header */
-.card-header {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.card-crest-wrapper {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  width: 58px;
-  height: 58px;
-  background: radial-gradient(circle, rgba(251, 191, 36, 0.15) 0%, rgba(11, 15, 25, 0.8) 80%);
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  border-radius: 50%;
-  margin-bottom: 0.75rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-}
-
-.card-crest-img {
-  width: 36px;
-  height: 36px;
-  object-fit: contain;
-  filter: drop-shadow(0 2px 6px rgba(251, 191, 36, 0.5));
-}
-
-.card-title {
-  font-family: var(--font-serif);
-  font-size: 1.55rem;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.25rem;
-}
-
-.card-subtitle {
-  font-size: 0.82rem;
-  color: var(--gold-primary);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-/* Role Switcher Tabs */
-.role-tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 4px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  margin-bottom: 1.5rem;
-}
-
-.role-tab {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 12px;
-  background: transparent;
-  color: var(--text-muted);
-  border: none;
-  border-radius: 9px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.role-tab:hover {
-  color: var(--text-primary);
-}
-
-.role-tab.active {
-  background: rgba(251, 191, 36, 0.15);
-  color: var(--gold-primary);
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-/* Alert Box */
-.vault-alert {
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-size: 0.82rem;
-  font-weight: 500;
-  margin-bottom: 1.25rem;
-  line-height: 1.4;
-}
-
-.vault-alert.error {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  color: #fca5a5;
-}
-
-.vault-alert.success {
-  background: rgba(34, 197, 94, 0.15);
-  border: 1px solid rgba(34, 197, 94, 0.4);
-  color: #86efac;
-}
-
-/* Form Controls */
-.vault-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.form-group label {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.field-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.forgot-link {
-  font-size: 0.78rem;
-  color: var(--gold-primary);
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.forgot-link:hover {
-  color: #fff;
-  text-decoration: underline;
-}
-
-/* Input Wrapper & Prefix Icons */
-.input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.input-prefix-icon {
-  position: absolute;
-  left: 14px;
-  font-size: 1rem;
-  color: var(--text-muted);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.vault-input {
-  width: 100%;
-  height: 48px;
-  padding: 0 45px 0 42px;
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  border-radius: var(--radius-input);
-  font-family: var(--font-sans);
-  font-size: 0.95rem;
-  color: #fff;
-  outline: none;
-  transition: all 0.2s ease;
-}
-
-.vault-input::placeholder {
-  color: rgba(255, 255, 255, 0.3);
-  font-size: 0.88rem;
-}
-
-.vault-input:hover {
-  border-color: rgba(251, 191, 36, 0.35);
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.vault-input:focus-visible {
-  border-color: var(--input-border-focus);
-  background: rgba(255, 255, 255, 0.07);
-  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
-}
-
-.field-hint {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-}
-
-/* Password Eye Toggle Button */
-.toggle-cipher-btn {
-  position: absolute;
-  right: 12px;
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-}
-
-.toggle-cipher-btn:hover {
-  color: var(--gold-primary);
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.toggle-cipher-btn:focus-visible {
-  outline: 2px solid var(--gold-primary);
-}
-
-/* Checkbox */
-.checkbox-group {
-  display: flex;
-  align-items: center;
-}
-
-.custom-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.custom-checkbox input {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  height: 0;
-  width: 0;
-}
-
-.checkbox-box {
-  width: 18px;
-  height: 18px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--input-border);
-  border-radius: 5px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.custom-checkbox input:checked ~ .checkbox-box {
-  background: var(--gold-primary);
-  border-color: var(--gold-primary);
-}
-
-.custom-checkbox input:checked ~ .checkbox-box::after {
-  content: '✔';
-  font-size: 11px;
-  color: #000;
-  font-weight: 800;
-}
-
-.checkbox-label {
-  font-size: 0.78rem;
-  color: var(--text-secondary);
-}
-
-/* Primary Unlock Button */
-.btn-unlock {
-  position: relative;
-  width: 100%;
-  height: 50px;
-  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
-  border: none;
-  border-radius: var(--radius-input);
-  color: #0b0f19;
-  font-family: var(--font-sans);
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  cursor: pointer;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(251, 191, 36, 0.35);
-  transition: all 0.25s var(--transition-smooth);
-}
-
-.btn-unlock:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 25px rgba(251, 191, 36, 0.5);
-  background: linear-gradient(135deg, #fef08a 0%, #f59e0b 100%);
-}
-
-.btn-unlock:active {
-  transform: translateY(1px);
-}
-
-.btn-unlock:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-glow {
-  position: absolute;
-  inset: -10px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
-.btn-unlock:hover .btn-glow {
+.boy-bubble.show {
   opacity: 1;
 }
 
-/* Demo Pills Bar */
-.demo-pills-bar {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 10px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 10px;
-  border: 1px dashed rgba(251, 191, 36, 0.2);
+/* ── Boy Walk Cycle Animations ── */
+.leg-left {
+  transform-origin: 65px 150px;
+  animation: walkLegL 0.75s infinite ease-in-out alternate;
 }
 
-.demo-pills-label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--gold-primary);
-  text-transform: uppercase;
-  margin-right: 2px;
+.leg-right {
+  transform-origin: 92px 150px;
+  animation: walkLegR 0.75s infinite ease-in-out alternate;
 }
 
-.demo-pill {
-  padding: 4px 8px;
-  font-size: 0.74rem;
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text-secondary);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s ease;
+.arm-left {
+  transform-origin: 65px 95px;
+  animation: swingArmL 0.75s infinite ease-in-out alternate;
 }
 
-.demo-pill:hover {
-  background: rgba(251, 191, 36, 0.15);
-  border-color: rgba(251, 191, 36, 0.4);
-  color: #fff;
+.arm-right {
+  transform-origin: 95px 95px;
+  animation: swingArmR 0.75s infinite ease-in-out alternate;
 }
 
-/* Footer Links */
-.card-footer-routes {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  margin-top: 0.5rem;
-  font-size: 0.76rem;
+.head {
+  transform-origin: 80px 75px;
+  animation: bobHead 0.75s infinite ease-in-out alternate;
 }
 
-.sub-link {
-  color: var(--text-muted);
-  text-decoration: none;
-  transition: color 0.2s ease;
+/* Hands Covering Eyes (Initially Hidden) */
+.boy-cover-eyes {
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.3s ease;
 }
 
-.sub-link:hover {
-  color: var(--gold-primary);
+/* ── Walk Keyframes ── */
+@keyframes walkLegL {
+  0% { transform: rotate(-25deg); }
+  100% { transform: rotate(25deg); }
 }
 
-.dot-sep {
-  color: rgba(255, 255, 255, 0.2);
+@keyframes walkLegR {
+  0% { transform: rotate(25deg); }
+  100% { transform: rotate(-25deg); }
 }
 
-/* Page Footer */
-.vault-page-footer {
-  position: relative;
-  z-index: 5;
-  text-align: center;
-  padding: 1.5rem 1rem;
-  font-size: 0.74rem;
-  color: rgba(255, 255, 255, 0.4);
+@keyframes swingArmL {
+  0% { transform: rotate(25deg); }
+  100% { transform: rotate(-25deg); }
+}
+
+@keyframes swingArmR {
+  0% { transform: rotate(-25deg); }
+  100% { transform: rotate(25deg); }
+}
+
+@keyframes bobHead {
+  0% { transform: translateY(0) rotate(-1deg); }
+  100% { transform: translateY(-3px) rotate(1deg); }
+}
+
+/* Boy Pacing from Left to Right behind the card */
+@keyframes boyPaceBehindCard {
+  /* Walking towards Right */
+  0% {
+    transform: translateX(-150px) scaleX(1);
+  }
+  45% {
+    transform: translateX(150px) scaleX(1);
+  }
+  /* Turn around to Left */
+  50% {
+    transform: translateX(150px) scaleX(-1);
+  }
+  95% {
+    transform: translateX(-150px) scaleX(-1);
+  }
+  100% {
+    transform: translateX(-150px) scaleX(1);
+  }
+}
+
+/* ── Interactive State Classes ── */
+/* When Username is focused: Boy peeks curiously from the left edge */
+.state-peeking-user .boy-character {
+  animation: none;
+  transform: translateX(-155px) scaleX(1);
+}
+
+.state-peeking-user .head {
+  transform: rotate(-10deg) translateY(-2px);
+}
+
+/* When Password is focused: Boy moves center and covers eyes! */
+.state-covering-eyes .boy-character {
+  animation: none;
+  transform: translateX(0) scaleX(1);
+}
+
+.state-covering-eyes .boy-cover-eyes {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.state-covering-eyes .arm-left,
+.state-covering-eyes .arm-right {
+  opacity: 0.2;
+}
+
+/* When Password eye is toggled to SHOW: Boy peeks through fingers! */
+.state-peeking-fingers .boy-character {
+  animation: none;
+  transform: translateX(0) scaleX(1);
+}
+
+.state-peeking-fingers .boy-cover-eyes {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.state-peeking-fingers .finger-left {
+  transform: rotate(-30deg) translateY(-5px);
+  transform-origin: 66px 48px;
 }
 
 /* ==========================================================================
-   ACCESSIBILITY & REDUCED MOTION PREFERENCE
+   THE WHITE LOGIN CARD (Z-INDEX 2)
+   ========================================================================== */
+.login-card {
+  position: relative;
+  z-index: 2; /* Sits firmly in front of the boy */
+  background: var(--card-bg);
+  width: 100%;
+  max-width: 370px;
+  border-radius: 18px;
+  padding: 2.25rem 2rem;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1.5rem;
+  text-align: left;
+  letter-spacing: -0.02em;
+}
+
+/* Alert Box */
+.alert-box {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.alert-box.error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.alert-box.success {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+/* Form Groups */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.input-label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  font-family: var(--font-main);
+  font-size: 0.95rem;
+  color: #111827;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.form-input::placeholder {
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+.form-input:focus {
+  background: #ffffff;
+  border-color: #111827;
+  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
+}
+
+.password-field .form-input {
+  padding-right: 44px;
+}
+
+/* Eye Toggle Button */
+.eye-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: color 0.2s;
+}
+
+.eye-btn:hover {
+  color: #111827;
+}
+
+/* Forgot Password */
+.form-links {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.forgot-password {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #4b5563;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.forgot-password:hover {
+  color: #111827;
+  text-decoration: underline;
+}
+
+/* Primary Log In Button */
+.btn-login {
+  width: 100%;
+  height: 48px;
+  background-color: var(--btn-bg);
+  color: #ffffff;
+  font-family: var(--font-main);
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.2);
+  transition: all 0.2s ease;
+}
+
+.btn-login:hover {
+  background-color: var(--btn-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(17, 24, 39, 0.25);
+}
+
+.btn-login:active {
+  transform: translateY(1px);
+}
+
+/* Quick Fill Demo Chips */
+.quick-credentials {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 0.25rem;
+  font-size: 0.72rem;
+  color: #6b7280;
+}
+
+.chip-btn {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.chip-btn:hover {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+/* ==========================================================================
+   CODE SNIPPET OVERLAY DOCK (As seen at the bottom of the video)
+   ========================================================================== */
+.code-dock {
+  width: 100%;
+  max-width: 580px;
+  background: #1e1e1e;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.dock-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: #2d2d2d;
+  border-bottom: 1px solid #333333;
+}
+
+.window-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.dot-red { background: #ff5f56; }
+.dot-yellow { background: #ffbd2e; }
+.dot-green { background: #27c93f; }
+
+.dock-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: #888888;
+  font-family: var(--font-code);
+  font-size: 0.74rem;
+  padding: 3px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  background: #1e1e1e;
+  color: #ffffff;
+}
+
+.dock-title {
+  font-size: 0.68rem;
+  color: #888888;
+  font-family: var(--font-code);
+}
+
+.dock-body {
+  padding: 12px 16px;
+  font-family: var(--font-code);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #d4d4d4;
+  overflow-x: auto;
+}
+
+.code-content code {
+  font-family: inherit;
+}
+
+/* Syntax Highlighting */
+.tok-tag { color: #569cd6; }
+.tok-attr { color: #9cdcfe; }
+.tok-str { color: #ce9178; }
+.tok-selector { color: #d7ba7d; }
+.tok-prop { color: #9cdcfe; }
+.tok-val { color: #b5cea8; }
+
+/* ==========================================================================
+   REDUCED MOTION COMPLIANCE
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
-  .state-walking .goblin-walker,
-  .state-walking .goblin-head-group,
-  .state-walking .goblin-arm-left,
-  .state-walking .goblin-arm-right {
+  .boy-character,
+  .leg-left,
+  .leg-right,
+  .arm-left,
+  .arm-right,
+  .head {
     animation: none !important;
-  }
-  .goblin-walker,
-  .goblin-head-group,
-  .hands-cover-eyes,
-  .vault-card,
-  .btn-unlock {
-    transition: none !important;
   }
 }
 
-/* Responsive adjustments */
+/* Mobile Responsiveness */
 @media (max-width: 480px) {
-  .vault-card {
+  .login-card {
     padding: 1.75rem 1.25rem;
   }
-  .vault-nav {
-    padding: 1rem;
-  }
-  .vault-nav-links {
-    display: none;
+  .code-dock {
+    display: none; /* Hide code dock on narrow screens to focus on the form */
   }
 }

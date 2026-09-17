@@ -3,215 +3,171 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gringotts Wizarding Bank &mdash; Creative Vault Sanctum Login | Diagon Alley</title>
+  <title>Creative Login Page &mdash; Boy Walking Animation</title>
   <link rel="icon" type="image/png" href="/images/bank-logo-dragon.png?v=2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/login/login.css?v=20260917_01">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/login/login.css?v=20260917_02">
 </head>
-<body>
-  <!-- Ambient Vault Canvas (Golden Dust & Ember Motes) -->
-  <canvas id="vaultDust" class="vault-dust-canvas" aria-hidden="true"></canvas>
+<body class="yellow-theme">
 
-  <!-- Deep Gold Vault Archway Atmosphere -->
-  <div class="vault-backdrop" aria-hidden="true">
-    <div class="vault-glow-orb glow-top"></div>
-    <div class="vault-glow-orb glow-bottom"></div>
-    <div class="vault-arch-ring"></div>
-  </div>
+  <!-- Main Viewport Container with vibrant yellow background -->
+  <div class="login-wrapper">
 
-  <!-- Top Navigation Header -->
-  <header class="vault-nav">
-    <a href="/site" class="vault-brand" title="Return to Grand Hall">
-      <img src="/images/bank-logo-dragon.png?v=2" alt="Gringotts Dragon Crest" class="vault-brand-logo">
-      <div class="vault-brand-text">
-        <span class="vault-brand-title">Gringotts</span>
-        <span class="vault-brand-sub">Est. 1474 &bull; Diagon Alley</span>
-      </div>
-    </a>
-    <div class="vault-nav-links">
-      <a href="/site" class="nav-pill">Grand Hall</a>
-      <a href="/customer" class="nav-pill">Customer Sanctum</a>
-      <a href="/rm" class="nav-pill">RM Overseer</a>
-    </div>
-  </header>
+    <!-- Top Floating Badge -->
+    <header class="top-badge">
+      <span class="badge-pill">✨ Creative Login Concept &bull; Yellow Edition</span>
+      <a href="/site" class="badge-link">Back to Bank &rarr;</a>
+    </header>
 
-  <!-- Main Viewport (CSS Grid / Flexbox centering with 100dvh) -->
-  <main class="login-stage" id="loginStage">
-    
-    <!-- WRAPPER: Character + Card in shared stacking context -->
-    <div class="stage-container" id="stageContainer">
+    <!-- Stage: Character + Centered Card -->
+    <div class="card-scene">
 
       <!-- ============================================================== -->
-      <!-- THE GOBLIN CHARACTER LAYER (Z-INDEX 1 - Positioned Behind Card) -->
+      <!-- THE ANIMATED BOY CHARACTER (Z-INDEX 1 - WALKING BEHIND CARD)    -->
       <!-- ============================================================== -->
-      <div class="goblin-scene" id="goblinScene" aria-hidden="true">
-        <div class="goblin-walker" id="goblinWalker">
+      <div class="boy-track" aria-hidden="true">
+        <div class="boy-character" id="boyCharacter">
           
-          <!-- Speech Bubble / Reaction Notice -->
-          <div class="goblin-bubble" id="goblinBubble">
-            <span id="goblinBubbleText">State your business, wizard...</span>
+          <!-- Speech Bubble / Whistle Note -->
+          <div class="boy-bubble" id="boyBubble">
+            <span>🎵 Walking by...</span>
           </div>
 
-          <!-- SVG Goblin Character Articulated Puppet -->
-          <svg class="goblin-svg" viewBox="0 0 240 280" width="220" height="260" id="goblinSvg">
+          <!-- Stylized 2D Cartoon Boy SVG -->
+          <svg class="boy-svg" viewBox="0 0 160 260" width="150" height="250" id="boySvg">
             <defs>
-              <!-- Skin Gradient -->
-              <linearGradient id="goblinSkin" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#b6c29a" />
-                <stop offset="50%" stop-color="#8e9e72" />
-                <stop offset="100%" stop-color="#69774f" />
+              <linearGradient id="hairGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#3d2314" />
+                <stop offset="100%" stop-color="#1f1108" />
               </linearGradient>
-              <!-- Ears Gradient -->
-              <linearGradient id="earInner" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#c9b398" />
-                <stop offset="100%" stop-color="#a48c6f" />
+              <linearGradient id="skinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ffdfba" />
+                <stop offset="100%" stop-color="#f5c696" />
               </linearGradient>
-              <!-- Vest / Robes Gradient -->
-              <linearGradient id="goblinVest" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#4a0e17" />
-                <stop offset="60%" stop-color="#2d080e" />
-                <stop offset="100%" stop-color="#190407" />
+              <linearGradient id="shirtGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#3b82f6" />
+                <stop offset="100%" stop-color="#1d4ed8" />
               </linearGradient>
-              <!-- Gold Trim / Spectacles -->
-              <linearGradient id="goldMetal" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#fef08a" />
-                <stop offset="50%" stop-color="#fbbf24" />
-                <stop offset="100%" stop-color="#b45309" />
+              <linearGradient id="pantsGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1e293b" />
+                <stop offset="100%" stop-color="#0f172a" />
               </linearGradient>
-              <!-- Shadow Filter -->
-              <filter id="goblinShadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000" flood-opacity="0.5" />
+              <linearGradient id="shoeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ef4444" />
+                <stop offset="100%" stop-color="#b91c1c" />
+              </linearGradient>
+              <filter id="boyShadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000" flood-opacity="0.18" />
               </filter>
             </defs>
 
-            <g filter="url(#goblinShadow)">
-              <!-- Body / Waistcoat -->
-              <g class="goblin-body-group" id="goblinBody">
-                <path d="M75 160 Q120 145 165 160 L180 270 L60 270 Z" fill="url(#goblinVest)" />
-                <!-- Collar and Tie -->
-                <polygon points="120,165 105,190 120,235 135,190" fill="#fbbf24" opacity="0.9" />
-                <polygon points="105,160 120,175 135,160 125,150 115,150" fill="#f8fafc" />
-                <!-- Gold Pocket Watch Chain -->
-                <path d="M100 215 Q120 235 140 210" fill="none" stroke="url(#goldMetal)" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 3" />
-              </g>
-
-              <!-- Left Arm & Hand (Lower / Resting) -->
-              <g class="goblin-arm goblin-arm-left" id="armLeft">
-                <path class="arm-sleeve" d="M75 168 Q50 200 45 235" fill="none" stroke="#2d080e" stroke-width="18" stroke-linecap="round" />
-                <!-- Long Goblin Fingers -->
-                <g class="goblin-hand" id="handLeft">
-                  <ellipse cx="45" cy="245" rx="14" ry="12" fill="url(#goblinSkin)" />
-                  <path d="M36 242 Q30 252 35 258 M43 245 Q42 258 46 262 M51 245 Q53 258 56 261 M56 242 Q63 248 62 255" fill="none" stroke="#69774f" stroke-width="3" stroke-linecap="round" />
+            <g filter="url(#boyShadow)" id="boyGroup">
+              
+              <!-- LEFT LEG (Back Leg) -->
+              <g class="leg leg-left" id="legLeft">
+                <!-- Thigh & Calf -->
+                <path d="M68 150 L62 205 L60 228" stroke="url(#pantsGrad)" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" />
+                <!-- Left Shoe -->
+                <g class="shoe shoe-left">
+                  <path d="M52 228 L74 228 C78 228 82 232 82 236 L82 242 C82 244 80 246 78 246 L48 246 C46 246 44 244 44 242 L46 234 C46 230 49 228 52 228 Z" fill="url(#shoeGrad)" />
+                  <path d="M44 242 L82 242 L82 246 L44 246 Z" fill="#ffffff" />
                 </g>
               </g>
 
-              <!-- Right Arm & Hand -->
-              <g class="goblin-arm goblin-arm-right" id="armRight">
-                <path class="arm-sleeve" d="M165 168 Q190 200 195 235" fill="none" stroke="#2d080e" stroke-width="18" stroke-linecap="round" />
-                <!-- Quill / Key in Hand -->
-                <path d="M195 220 L215 190" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" />
-                <polygon points="215,190 225,180 220,195" fill="#fef08a" />
-                <!-- Long Goblin Fingers -->
-                <g class="goblin-hand" id="handRight">
-                  <ellipse cx="195" cy="245" rx="14" ry="12" fill="url(#goblinSkin)" />
-                  <path d="M186 242 Q180 252 185 258 M193 245 Q192 258 196 262 M201 245 Q203 258 206 261 M206 242 Q213 248 212 255" fill="none" stroke="#69774f" stroke-width="3" stroke-linecap="round" />
+              <!-- LEFT ARM (Back Arm) -->
+              <g class="arm arm-left" id="armLeft">
+                <path d="M65 95 L50 135 L42 165" stroke="url(#shirtGrad)" stroke-width="12" stroke-linecap="round" />
+                <!-- Hand -->
+                <circle cx="42" cy="168" r="7" fill="url(#skinGrad)" />
+              </g>
+
+              <!-- TORSO & SHIRT -->
+              <g class="torso" id="torso">
+                <!-- Backpack Strap -->
+                <path d="M66 90 Q60 120 70 145" stroke="#f59e0b" stroke-width="4" fill="none" />
+                <path d="M94 90 Q100 120 90 145" stroke="#f59e0b" stroke-width="4" fill="none" />
+                <!-- Shirt Body -->
+                <path d="M62 88 Q80 82 98 88 L104 150 Q80 156 56 150 Z" fill="url(#shirtGrad)" />
+                <!-- Collar -->
+                <path d="M72 86 Q80 94 88 86" stroke="#ffffff" stroke-width="3" fill="none" />
+                <!-- Backpack peaking behind -->
+                <rect x="52" y="96" width="14" height="42" rx="6" fill="#d97706" />
+              </g>
+
+              <!-- RIGHT LEG (Front Leg) -->
+              <g class="leg leg-right" id="legRight">
+                <!-- Thigh & Calf -->
+                <path d="M88 150 L96 205 L102 228" stroke="url(#pantsGrad)" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" />
+                <!-- Right Shoe -->
+                <g class="shoe shoe-right">
+                  <path d="M94 228 L116 228 C120 228 124 232 124 236 L124 242 C124 244 122 246 120 246 L90 246 C88 246 86 244 86 242 L88 234 C88 230 91 228 94 228 Z" fill="url(#shoeGrad)" />
+                  <path d="M86 242 L124 242 L124 246 L86 246 Z" fill="#ffffff" />
                 </g>
               </g>
 
-              <!-- HEAD & FACE GROUP (Can tilt / peek) -->
-              <g class="goblin-head-group" id="goblinHead">
-                <!-- Large Pointed Left Ear -->
-                <g class="ear-left">
-                  <path d="M75 105 C40 100 0 70 5 45 C25 60 55 80 80 95 Z" fill="url(#goblinSkin)" />
-                  <path d="M68 98 C45 92 18 68 18 52 C32 62 55 76 72 90 Z" fill="url(#earInner)" opacity="0.75" />
-                </g>
+              <!-- RIGHT ARM (Front Arm) -->
+              <g class="arm arm-right" id="armRight">
+                <path d="M95 95 L110 135 L118 165" stroke="url(#shirtGrad)" stroke-width="12" stroke-linecap="round" />
+                <!-- Hand -->
+                <circle cx="118" cy="168" r="7" fill="url(#skinGrad)" />
+              </g>
 
-                <!-- Large Pointed Right Ear -->
-                <g class="ear-right">
-                  <path d="M165 105 C200 100 240 70 235 45 C215 60 185 80 160 95 Z" fill="url(#goblinSkin)" />
-                  <path d="M172 98 C195 92 222 68 222 52 C208 62 185 76 168 90 Z" fill="url(#earInner)" opacity="0.75" />
-                </g>
+              <!-- HEAD & FACE -->
+              <g class="head" id="boyHead">
+                <!-- Neck -->
+                <rect x="74" y="74" width="12" height="16" rx="4" fill="url(#skinGrad)" />
+                
+                <!-- Face Shape -->
+                <ellipse cx="80" cy="52" rx="22" ry="24" fill="url(#skinGrad)" />
 
-                <!-- Head Shape (Bald crown, pronounced temples) -->
-                <path d="M75 110 C70 60 90 35 120 35 C150 35 170 60 165 110 C165 145 145 165 120 165 C95 165 75 145 75 110 Z" fill="url(#goblinSkin)" />
+                <!-- Left Ear -->
+                <ellipse cx="58" cy="54" rx="5" ry="7" fill="url(#skinGrad)" />
+                <!-- Right Ear -->
+                <ellipse cx="102" cy="54" rx="5" ry="7" fill="url(#skinGrad)" />
 
-                <!-- Brow Ridge & Wrinkles -->
-                <path d="M92 78 Q105 72 118 78 M122 78 Q135 72 148 78" fill="none" stroke="#5a6842" stroke-width="2.5" stroke-linecap="round" />
-                <path d="M95 72 Q120 66 145 72" fill="none" stroke="#5a6842" stroke-width="1.8" stroke-linecap="round" />
+                <!-- Hair (Messy Cool Anime/Cartoon Style) -->
+                <path d="M56 46 C52 24 70 12 84 14 C100 12 110 24 106 46 C102 34 94 30 88 32 C82 34 78 30 74 34 C68 32 60 38 56 46 Z" fill="url(#hairGrad)" />
+                <path d="M58 40 Q68 32 75 42" fill="url(#hairGrad)" />
+                <path d="M74 34 Q82 26 90 38" fill="url(#hairGrad)" />
+                <path d="M88 32 Q96 28 104 42" fill="url(#hairGrad)" />
 
-                <!-- Bushy Eyebrows -->
-                <path class="eyebrow-left" id="eyebrowLeft" d="M88 85 Q103 80 115 88" fill="none" stroke="#374151" stroke-width="4.5" stroke-linecap="round" />
-                <path class="eyebrow-right" id="eyebrowRight" d="M152 85 Q137 80 125 88" fill="none" stroke="#374151" stroke-width="4.5" stroke-linecap="round" />
-
-                <!-- EYES & PUPILS (Interactive tracking) -->
-                <g id="goblinEyes">
+                <!-- Big Expressive Eyes -->
+                <g class="eyes" id="boyEyes">
                   <!-- Eye Whites -->
-                  <ellipse cx="104" cy="98" rx="11" ry="9" fill="#fef9c3" />
-                  <ellipse cx="136" cy="98" rx="11" ry="9" fill="#fef9c3" />
-                  <!-- Iris & Pupil Left -->
-                  <g id="pupilLeft" class="pupil">
-                    <circle cx="104" cy="98" r="5.5" fill="#451a03" />
-                    <circle cx="104" cy="98" r="3" fill="#000000" />
-                    <circle cx="102" cy="96" r="1.5" fill="#ffffff" />
+                  <ellipse cx="73" cy="52" rx="5.5" ry="7" fill="#ffffff" />
+                  <ellipse cx="89" cy="52" rx="5.5" ry="7" fill="#ffffff" />
+                  <!-- Pupils -->
+                  <g id="boyPupilLeft">
+                    <circle cx="74" cy="52" r="3.5" fill="#1e293b" />
+                    <circle cx="73" cy="50" r="1.2" fill="#ffffff" />
                   </g>
-                  <!-- Iris & Pupil Right -->
-                  <g id="pupilRight" class="pupil">
-                    <circle cx="136" cy="98" r="5.5" fill="#451a03" />
-                    <circle cx="136" cy="98" r="3" fill="#000000" />
-                    <circle cx="134" cy="96" r="1.5" fill="#ffffff" />
+                  <g id="boyPupilRight">
+                    <circle cx="90" cy="52" r="3.5" fill="#1e293b" />
+                    <circle cx="89" cy="50" r="1.2" fill="#ffffff" />
                   </g>
-                  <!-- Eyelids for Winking / Blinking -->
-                  <path id="eyelidLeft" class="eyelid" d="M93 98 Q104 88 115 98 Q104 88 93 98" fill="url(#goblinSkin)" opacity="0" />
-                  <path id="eyelidRight" class="eyelid" d="M125 98 Q136 88 147 98 Q136 88 125 98" fill="url(#goblinSkin)" opacity="0" />
+                  <!-- Eyebrows -->
+                  <path d="M68 44 Q74 41 78 43" stroke="#3d2314" stroke-width="2.2" fill="none" stroke-linecap="round" />
+                  <path d="M84 43 Q88 41 94 44" stroke="#3d2314" stroke-width="2.2" fill="none" stroke-linecap="round" />
                 </g>
 
-                <!-- Brass Wire Spectacles -->
-                <g class="spectacles" id="spectacles">
-                  <circle cx="104" cy="98" r="13" fill="rgba(255,255,255,0.15)" stroke="url(#goldMetal)" stroke-width="2.5" />
-                  <circle cx="136" cy="98" r="13" fill="rgba(255,255,255,0.15)" stroke="url(#goldMetal)" stroke-width="2.5" />
-                  <line x1="117" y1="98" x2="123" y2="98" stroke="url(#goldMetal)" stroke-width="2.5" />
-                  <!-- Spectacle Temple Bars to ears -->
-                  <path d="M91 97 L75 99 M149 97 L165 99" stroke="url(#goldMetal)" stroke-width="1.8" />
-                  <!-- Glass Glint -->
-                  <path d="M96 92 L102 88 M128 92 L134 88" stroke="#ffffff" stroke-width="1.5" opacity="0.7" stroke-linecap="round" />
-                </g>
+                <!-- Cheerful Nose & Smile -->
+                <circle cx="81" cy="57" r="1.8" fill="#e0a370" />
+                <path d="M75 63 Q81 69 87 63" stroke="#b45309" stroke-width="2" fill="none" stroke-linecap="round" />
 
-                <!-- Crooked Goblin Nose -->
-                <path d="M117 94 Q112 116 109 124 C109 129 131 129 131 124 Q128 116 123 94 Z" fill="url(#goblinSkin)" />
-                <path d="M115 125 Q120 128 125 125" fill="none" stroke="#5a6842" stroke-width="2" stroke-linecap="round" />
-
-                <!-- Goblin Mouth (Grin, neutral, or grimace) -->
-                <g id="goblinMouth">
-                  <path id="mouthLine" d="M102 142 Q120 148 138 142" fill="none" stroke="#3b4429" stroke-width="3" stroke-linecap="round" />
-                  <!-- Sharp little goblin tooth -->
-                  <polygon points="126,144 129,150 132,144" fill="#fef08a" id="goblinTooth" />
-                </g>
+                <!-- Rosy Cheeks -->
+                <circle cx="68" cy="58" r="4" fill="#f87171" opacity="0.35" />
+                <circle cx="94" cy="58" r="4" fill="#f87171" opacity="0.35" />
               </g>
 
-              <!-- ======================================================= -->
-              <!-- COVER-EYES HANDS (Hidden by default, activated on password) -->
-              <!-- ======================================================= -->
-              <g class="hands-cover-eyes" id="handsCoverEyes">
-                <!-- Left Hand Covering Eye -->
-                <g class="hand-covering-left" id="handCoverLeft">
-                  <ellipse cx="98" cy="98" rx="20" ry="18" fill="url(#goblinSkin)" stroke="#5a6842" stroke-width="2" />
-                  <!-- Articulated Fingers (can spread to peek!) -->
-                  <path class="finger finger-1" d="M82 92 Q70 85 86 80" stroke="#5a6842" stroke-width="4" stroke-linecap="round" />
-                  <path class="finger finger-2" d="M86 100 Q72 98 88 92" stroke="#5a6842" stroke-width="4" stroke-linecap="round" />
-                  <path class="finger finger-3" d="M90 108 Q76 112 92 104" stroke="#5a6842" stroke-width="4" stroke-linecap="round" />
-                  <path class="finger finger-4" d="M96 114 Q84 122 98 112" stroke="#5a6842" stroke-width="4" stroke-linecap="round" />
-                </g>
-                <!-- Right Hand Covering Eye -->
-                <g class="hand-covering-right" id="handCoverRight">
-                  <ellipse cx="142" cy="98" rx="20" ry="18" fill="url(#goblinSkin)" stroke="#5a6842" stroke-width="2" />
-                  <!-- Articulated Fingers -->
-                  <path class="finger finger-1" d="M158 92 Q170 85 154 80" stroke="#5a6842" stroke-width="4" stroke-linecap="round" />
-                  <path class="finger finger-2" d="M154 100 Q168 98 152 92" stroke="#5a6842" stroke-width="4" stroke-linecap="round" />
-                  <path class="finger finger-3" d="M150 108 Q164 112 148 104" stroke="#5a6842" stroke-width="4" stroke-linecap="round" />
-                  <path class="finger finger-4" d="M144 114 Q156 122 142 112" stroke="#5a6842" stroke-width="4" stroke-linecap="round" />
-                </g>
+              <!-- COVER EYES HANDS (Activated on Password) -->
+              <g class="boy-cover-eyes" id="boyCoverEyes">
+                <ellipse cx="73" cy="52" rx="9" ry="8" fill="url(#skinGrad)" stroke="#d97706" stroke-width="1.5" />
+                <ellipse cx="89" cy="52" rx="9" ry="8" fill="url(#skinGrad)" stroke="#d97706" stroke-width="1.5" />
+                <!-- Fingers -->
+                <path class="boy-finger finger-left" d="M66 48 L68 56 M71 46 L73 56 M76 46 L77 56 M80 48 L80 56" stroke="#b45309" stroke-width="1.8" stroke-linecap="round" />
+                <path class="boy-finger finger-right" d="M82 48 L82 56 M86 46 L85 56 M90 46 L89 56 M95 48 L93 56" stroke="#b45309" stroke-width="1.8" stroke-linecap="round" />
               </g>
 
             </g>
@@ -220,94 +176,57 @@
       </div>
 
       <!-- ============================================================== -->
-      <!-- THE VAULT LOGIN CARD (Z-INDEX 2 - In Front of Character)      -->
+      <!-- THE WHITE LOGIN CARD (Z-INDEX 2 - Centered in Foreground)      -->
       <!-- ============================================================== -->
-      <section class="vault-card" aria-labelledby="vaultCardHeading">
-        <!-- Ambient Card Glare / Metallic Trim -->
-        <div class="card-metallic-sheen" aria-hidden="true"></div>
-        <div class="card-runic-border" aria-hidden="true"></div>
+      <section class="login-card" id="loginCard">
+        <h1 class="card-title">Log In</h1>
 
-        <!-- Header: Crest & Title -->
-        <div class="card-header">
-          <div class="card-crest-wrapper">
-            <img src="/images/bank-logo-dragon.png?v=2" alt="Gringotts Wizarding Bank" class="card-crest-img">
-          </div>
-          <h1 id="vaultCardHeading" class="card-title">Vault Sanctum</h1>
-          <p class="card-subtitle">Diagon Alley &bull; High Security Access</p>
-        </div>
+        <!-- Feedback Alert Box -->
+        <div id="loginAlert" class="alert-box" style="display:none;" role="alert"></div>
 
-        <!-- Role Switcher Tabs (Customer vs Goblin Overseer) -->
-        <div class="role-tabs" role="tablist" aria-label="Authentication Sanctuary">
-          <button type="button" class="role-tab active" id="tabCustomer" role="tab" aria-selected="true" aria-controls="vaultLoginForm" onclick="switchLoginRole('customer')">
-            <span class="tab-icon">&#x1F3F0;</span>
-            <span class="tab-label">Customer Vault</span>
-          </button>
-          <button type="button" class="role-tab" id="tabRm" role="tab" aria-selected="false" aria-controls="vaultLoginForm" onclick="switchLoginRole('rm')">
-            <span class="tab-icon">&#x1F5DD;</span>
-            <span class="tab-label">Goblin Overseer</span>
-          </button>
-        </div>
-
-        <!-- Status Alert Box -->
-        <div id="loginAlert" class="vault-alert" style="display:none;" role="alert"></div>
-
-        <!-- Login Form (Fully Accessible Semantic Form) -->
-        <form class="vault-form" id="vaultLoginForm" novalidate onsubmit="handleVaultLogin(event)">
+        <form id="loginForm" class="login-form" onsubmit="handleLoginSubmit(event)" novalidate>
           
-          <!-- Username / Identifier Field -->
-          <div class="form-group" id="groupUsername">
-            <label for="loginUsername" id="labelUsername">Vault ID / Ministry Registry (CRN)</label>
-            <div class="input-wrapper">
-              <span class="input-prefix-icon" aria-hidden="true">&#x1F4DC;</span>
-              <input 
-                type="text" 
-                id="loginUsername" 
-                name="username" 
-                class="vault-input" 
-                required 
-                autocomplete="username" 
-                placeholder="e.g. CRN-77492 or bogrod"
-                spellcheck="false"
-              />
-            </div>
-            <span class="field-hint" id="usernameHint">Enter your customer CRN or goblin staff username</span>
+          <!-- Username Input Field -->
+          <div class="input-group">
+            <label for="usernameInput" class="input-label">Username</label>
+            <input 
+              type="text" 
+              id="usernameInput" 
+              name="username" 
+              class="form-input" 
+              placeholder="Username" 
+              required 
+              autocomplete="username"
+            />
           </div>
 
-          <!-- Password / Secret Cipher Field -->
-          <div class="form-group" id="groupPassword">
-            <div class="field-header">
-              <label for="loginPassword" id="labelPassword">Secret Vault Cipher</label>
-              <a href="#forgot" class="forgot-link" onclick="handleForgotCipher(event)">Forgot Cipher?</a>
-            </div>
-            <div class="input-wrapper">
-              <span class="input-prefix-icon" aria-hidden="true">&#x1F511;</span>
+          <!-- Password Input Field -->
+          <div class="input-group">
+            <label for="passwordInput" class="input-label">Password</label>
+            <div class="password-field">
               <input 
                 type="password" 
-                id="loginPassword" 
+                id="passwordInput" 
                 name="password" 
-                class="vault-input" 
+                class="form-input" 
+                placeholder="Password" 
                 required 
-                autocomplete="current-password" 
-                placeholder="Inscribe secret cipher..."
-                spellcheck="false"
+                autocomplete="current-password"
               />
-              <!-- Eye Toggle Button (Aria accessible) -->
               <button 
                 type="button" 
-                class="toggle-cipher-btn" 
-                id="toggleCipherBtn" 
-                aria-label="Show secret cipher" 
-                aria-pressed="false"
-                onclick="toggleCipherVisibility()"
-                title="Toggle cipher visibility"
+                class="eye-btn" 
+                id="eyeToggleBtn" 
+                aria-label="Toggle password visibility" 
+                onclick="togglePasswordVisibility()"
               >
-                <!-- Eye Open SVG -->
-                <svg class="eye-icon eye-open" id="eyeOpenIcon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <!-- Eye Open Icon -->
+                <svg id="iconEyeOpen" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
-                <!-- Eye Closed SVG -->
-                <svg class="eye-icon eye-closed" id="eyeClosedIcon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="display:none;">
+                <!-- Eye Closed Icon -->
+                <svg id="iconEyeClosed" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
                   <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
                   <line x1="1" y1="1" x2="23" y2="23"></line>
                 </svg>
@@ -315,53 +234,66 @@
             </div>
           </div>
 
-          <!-- Remember Me Checkbox -->
-          <div class="checkbox-group">
-            <label class="custom-checkbox">
-              <input type="checkbox" id="rememberMe" name="rememberMe" checked>
-              <span class="checkbox-box" aria-hidden="true"></span>
-              <span class="checkbox-label">Remember this enchanted seal on this device</span>
-            </label>
+          <!-- Forgot Password Link -->
+          <div class="form-links">
+            <a href="#forgot" class="forgot-password" onclick="alert('Password reset link sent to registered email!')">Forgot password?</a>
           </div>
 
-          <!-- Submit Button -->
-          <button type="submit" class="btn-unlock" id="btnUnlock">
-            <span class="btn-glow" aria-hidden="true"></span>
-            <span class="btn-text" id="btnUnlockText">Unlock Vault Sanctum &rarr;</span>
+          <!-- Primary Log In Button -->
+          <button type="submit" class="btn-login" id="btnLogin">
+            Log In
           </button>
 
-          <!-- 1-Click Demo Credentials Quick Fill -->
-          <div class="demo-pills-bar">
-            <span class="demo-pills-label">Quick Demo Fill:</span>
-            <button type="button" class="demo-pill" onclick="quickFill('bogrod', 'GringottsBank@324', 'rm')">
-              &#x1F9DF; Bogrod (RM)
-            </button>
-            <button type="button" class="demo-pill" onclick="quickFill('phanee', 'GringottsBank@324', 'rm')">
-              &#x1F4BC; Phanee (RM)
-            </button>
-            <button type="button" class="demo-pill" onclick="quickFill('CRN-77492', 'GringottsBank@324', 'customer')">
-              &#x1FA99; Customer Vault
-            </button>
-          </div>
-
-          <!-- Alternative: Ministry Passkey & Links -->
-          <div class="card-footer-routes">
-            <a href="/" class="sub-link">&#x2728; Corporate Sacred Covenant (Onboarding)</a>
-            <span class="dot-sep">&bull;</span>
-            <a href="/site" class="sub-link">Grand Hall &rarr;</a>
+          <!-- Quick Test Credentials -->
+          <div class="quick-credentials">
+            <span>Quick fill demo:</span>
+            <button type="button" class="chip-btn" onclick="fillCreds('alex', 'secret123')">Alex</button>
+            <button type="button" class="chip-btn" onclick="fillCreds('bogrod', 'GringottsBank@324')">Bogrod</button>
           </div>
 
         </form>
       </section>
 
-    </div><!-- /.stage-container -->
-  </main>
+    </div><!-- /.card-scene -->
 
-  <!-- Footer Notice -->
-  <footer class="vault-page-footer">
-    <p>&copy; 1474&ndash;2026 Gringotts Wizarding Bank &bull; Consecrated under the Wizengamot Banking Charter &bull; Diagon Alley</p>
-  </footer>
+    <!-- ============================================================== -->
+    <!-- CODE SNIPPET OVERLAY DOCK (As shown in the video/screenshot)   -->
+    <!-- ============================================================== -->
+    <aside class="code-dock" id="codeDock">
+      <div class="dock-header">
+        <div class="window-dots">
+          <span class="dot dot-red"></span>
+          <span class="dot dot-yellow"></span>
+          <span class="dot dot-green"></span>
+        </div>
+        <div class="dock-tabs">
+          <button class="tab-btn active" id="tabHtml" onclick="switchCodeTab('html')">index.html</button>
+          <button class="tab-btn" id="tabCss" onclick="switchCodeTab('css')">style.css</button>
+        </div>
+        <span class="dock-title">Video Snippet Inspection</span>
+      </div>
+      
+      <div class="dock-body">
+        <!-- HTML Snippet (From Prompt) -->
+        <pre class="code-content" id="codeHtml"><code><span class="tok-tag">&lt;nav</span> <span class="tok-attr">class=</span><span class="tok-str">"navbar"</span><span class="tok-tag">&gt;</span>
+  <span class="tok-tag">&lt;ul</span> <span class="tok-attr">class=</span><span class="tok-str">"nav-items"</span><span class="tok-tag">&gt;</span>
+    <span class="tok-tag">&lt;li</span> <span class="tok-attr">class=</span><span class="tok-str">"nav-item"</span><span class="tok-tag">&gt;&lt;a</span> <span class="tok-attr">href=</span><span class="tok-str">"#"</span><span class="tok-tag">&gt;</span>Home<span class="tok-tag">&lt;/a&gt;&lt;/li&gt;</span>
+    <span class="tok-tag">&lt;li</span> <span class="tok-attr">class=</span><span class="tok-str">"nav-item"</span><span class="tok-tag">&gt;&lt;a</span> <span class="tok-attr">href=</span><span class="tok-str">"#"</span><span class="tok-tag">&gt;</span>About<span class="tok-tag">&lt;/a&gt;&lt;/li&gt;</span>
+  <span class="tok-tag">&lt;/ul&gt;</span>
+<span class="tok-tag">&lt;/nav&gt;</span></code></pre>
 
-  <script src="/login/login.js?v=20260917_01"></script>
+        <!-- CSS Snippet (From Prompt) -->
+        <pre class="code-content" id="codeCss" style="display:none;"><code><span class="tok-selector">.login-card</span> {
+  <span class="tok-prop">position</span>: <span class="tok-val">absolute</span>;
+  <span class="tok-prop">top</span>: <span class="tok-val">50%</span>;
+  <span class="tok-prop">left</span>: <span class="tok-val">50%</span>;
+  <span class="tok-prop">transform</span>: <span class="tok-val">translate(-50%, -50%)</span>;
+}</code></pre>
+      </div>
+    </aside>
+
+  </div><!-- /.login-wrapper -->
+
+  <script src="/login/login.js?v=20260917_02"></script>
 </body>
 </html>
