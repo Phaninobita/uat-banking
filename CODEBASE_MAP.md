@@ -8,7 +8,7 @@
 
 | Portal / Route | Express Route Mount | Primary HTML File | Supporting Styles & Scripts | Purpose & Key Features |
 | :--- | :--- | :--- | :--- | :--- |
-| **Marketing Website & Grand Hall** | `/site`, `/landing`, `/home` | [`web/public/site/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/site/index.html) *(copies: [`website/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/website/index.html), [`docs/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/docs/index.html))* | Living Vault: liquid-metal cursor, breathing organism background, starling murmuration numbers, depth-of-field focus pull, global gaze tracking, Web Audio synthesizer | Concept: 'Living Vault' organism. Hero: *"The Safest Vault on Earth"*, murmuration dragon crest, living EKG telemetry, liquid specie matrix. |
+| **Marketing Website & Grand Hall** | `/site`, `/landing`, `/home` | [`web/public/site/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/site/index.html) *(copies: [`website/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/website/index.html), [`docs/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/docs/index.html))* | Classic Gringotts Diagon Alley Grand Hall: dust particle canvas, vault tiers (Standard to Dragon Reserve), multi-currency wizarding ledger, galleon calculator, owl feedback modal | Theme: Grand Wizarding Bank. Hero: *"The Safest Vault on Earth"*, vault tiers, golden interactive calculator, owl post modal. |
 | **Customer Vault Portal** | `/customer` | [`web/public/customer/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/customer/index.html) | Self-contained styles & client logic | Customer Treasury Dashboard: multi-currency accounts (Galleons, Sickles, Knuts, USD, EUR, GBP), live FX, transaction feeds, biometric login. |
 | **Goblin RM Overseer Portal** | `/rm` | [`web/public/rm/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/rm/index.html) | [`web/public/rm/rm.css`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/rm/rm.css), [`web/public/rm/rm.js`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/rm/rm.js) | Relationship Manager suite: onboarding pipeline kanban, application review/approval, customer invitation dispatch, audit logs. |
 | **Sacred Covenant Induction** | `/` (root / fallback) | [`web/public/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/index.html) | [`web/public/css/style.css`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/css/style.css), [`web/public/js/app.js`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/js/app.js), [`web/public/js/api.js`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/js/api.js) | Multi-step corporate induction wizard, KYC document upload, blood-binding oath signature, verification steps. |
@@ -97,14 +97,13 @@ All endpoints are mounted through the unified Gateway on port `3000`:
 ## 🎨 Theme & Branding Memory
 
 - **Hero Title**: `"The Safest Vault on Earth"`
-  - Styled with Cinzel ancient monumental serif typography with liquid-chrome and amber specular sheen.
-  - Accompanied by the signature Living Murmuration Dragon Crest (800 nodes scattering on hover and locking into vault gear on click).
-  - Data metrics rendered as living starling murmuration particles.
-- **Tone & Concept**: "Living Vault" — an organic sentient banking organism made of liquid metal and light.
+  - Styled with Cinzel ancient monumental serif typography with golden and cyan glowing accents.
+  - Accompanied by the Gringotts dragon emblem, ancient runic security seals, and interactive dust motes floating on canvas (`#dust`).
+- **Tone & Concept**: Grand Gringotts Wizarding Bank (Est. 1474 · Diagon Alley) — ancient trust meets goblin-grade ledger security.
 - **Color Palettes**:
-  - **Obsidian Black**: `--obsidian: #030305`, `--obsidian-deep: #010103`
-  - **Liquid Chrome**: `--chrome-specular: #f8fafc`, `--chrome-light: #e2e8f0`, `--chrome-mid: #94a3b8`
-  - **Bio-Luminescent Amber**: `--amber: #f59e0b`, `--amber-glow: rgba(245, 158, 11, 0.45)` (Strictly avoids generic cyan/purple)
+  - **Deep Navy & Vault Black**: `--bg-primary: #050b14`, `--bg-card: #0a1628`
+  - **Electric Cyan & Arcane Blue**: `--accent-cyan: #22d3ee`, `--accent-glow: rgba(34, 211, 238, 0.4)`
+  - **Gringotts Gold**: `--gold: #d4af37`, `--gold-glow: rgba(212, 175, 55, 0.35)`
 - **Logos & Crests**:
   - Primary Dragon Crest: [`web/public/images/bank-logo-dragon.png`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/images/bank-logo-dragon.png)
   - Gold Crest: [`web/public/images/bank-logo-gold.png`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/images/bank-logo-gold.png)
