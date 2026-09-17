@@ -25,6 +25,11 @@ Refer directly to [CODEBASE_MAP.md](file:///c:/DEVELOPMENT/banking-demo/banking-
    - Express Mount: [`web/public/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/index.html) (root `/`).
    - Styles in [`web/public/css/style.css`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/css/style.css), logic in [`web/public/js/app.js`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/js/app.js) and [`web/public/js/api.js`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/js/api.js).
 
+5. **Creative Vault Login Screen**:
+   - Express Mount: [`web/public/login/index.html`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/login/index.html) (accessible via `/login`).
+   - Styles in [`web/public/login/login.css`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/login/login.css), logic in [`web/public/login/login.js`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/public/login/login.js).
+   - Features animated SVG goblin walking/peeking behind the card, covering eyes on password, and peeking through fingers on show cipher.
+
 ### Microservices Mesh (`web/services/`)
 - All requests enter through Gateway on Port 3000 ([`web/gateway/index.js`](file:///c:/DEVELOPMENT/banking-demo/banking-demo/web/gateway/index.js)).
 - Services:

@@ -171,6 +171,11 @@ app.get(["/customer", "/customer/"], (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "customer", "index.html"));
 });
 
+// Route /login specifically to Gringotts Creative Vault Login Screen
+app.get(["/login", "/login/"], (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public", "login", "index.html"));
+});
+
 // Static Web Assets
 app.use(express.static(path.join(__dirname, "..", "public")));
 
